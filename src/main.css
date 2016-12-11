@@ -1,0 +1,17 @@
+.i-plex-movieo-icon {
+	margin-top: -10px;
+	margin-left: 8px;
+	width: 33px;
+	height: 33px;
+	background: url('chrome-extension://__MSG_@@extension_id__/img/plex.svg');
+	background-size: 33px 33px;
+	opacity: .2;
+}
+
+.i-plex-movieo-icon.plex-found {
+	opacity: .7;
+}
+
+.i-plex-movieo-icon:hover {
+	opacity: .9;
+}

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Movieo To Plex Options</title>
+	<style>
+		body: { padding: 10px; }
+	</style>
+</head>
+
+<body>
+	<p>
+		Plex token:
+		<input type="text" id="plex_token"><br>
+		<a href="https://support.plex.tv/hc/en-us/articles/204059436-Finding-your-account-token-X-Plex-Token">Learn how to find your token</a>
+	</p>
+	<p>
+		Plex machine ID:
+		<input type="text" id="plex_machine_id"><br>
+		In Plex Web, click on a random movie. In the URL bar, copy the part between <em>/server/</em> and <em>/details/</em>.
+		<strong>Example:</strong> 992dggg6f248454c1d83de10a56c416570a81c84
+	</p>
+	<p>
+		Plex url root:
+		<input type="text" id="plex_url_root"><br>
+		In Plex Web, open the DevTools (F12). You should see a message about "Testing connection". Copy and paste the URL after that here.
+		<strong>Example:</strong> https://85-123-211-72.qe23e81fd3dcdda73ff82cxxxb446b0ff.plex.direct:32400/
+	</p>
+	<p>
+		Plex library id:
+		<input type="text" id="plex_library_id"><br>
+		In Plex Web, go to the library you want the extension to use. In the URL bar, copy and paste the number after <em>/section/</em>.
+		<strong>Example:</strong> 1
+	</p>
+
+	<div id="status"></div>
+	<button id="save">Save</button>
+
+	<script src="options.js"></script>
+</body>
+</html>
