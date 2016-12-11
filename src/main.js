@@ -29,23 +29,9 @@ chrome.storage.sync.get(null, function(items) {
 	init();
 });
 
-
-function initPlexThingy() {
-	const $icon = renderPlexIcon();
-	const $title = document.getElementById('doc_title');
-	const $date = document.querySelector('meta[itemprop="datePublished"]');
-	if (!$title || !$date) {
-		modifyPlexIcon($icon, 'Could not extract title or year from Movieo');
-		return;
-	}
-	const title = $title.dataset.title.trim();
-	const year = $date.content.slice(0, 4);
-
-	axios.get(plexUrl, {
-		params: {
-			title,
-			year,
-		},
+function doPlexRequest($icon, title, year) {
+	return axios.get(plexUrl, {
+		params: { title, year },
 		headers: {
 			'X-Plex-Token': plexToken,
 			'Accept': 'application/json',
@@ -59,6 +45,31 @@ function initPlexThingy() {
 		} else {
 			modifyPlexIcon($icon, 'Could not find on Plex');
 		}
+		return size;
+	});
+}
+
+
+function initPlexThingy() {
+	const $icon = renderPlexIcon();
+	const $title = document.getElementById('doc_title');
+	const $date = document.querySelector('meta[itemprop="datePublished"]');
+	if (!$title || !$date) {
+		modifyPlexIcon($icon, 'Could not extract title or year from Movieo');
+		return;
+	}
+	const title = $title.dataset.title.trim();
+	const year = parseInt($date.content.slice(0, 4));
+
+	doPlexRequest($icon, title, year)
+	.then((size) => {
+		if (!size) {
+			// This is fucked up, but Plex' definition of a year is year when it was available,
+			// not when it was released (which is Movieo's definition).
+			// For examples, see Bone Tomahawk, The Big Short, The Hateful Eight.
+			return doPlexRequest($icon, title, year + 1);
+		}
+		return null;
 	})
 	.catch((err) => {
 		modifyPlexIcon($icon, 'Request to Plex failed');
