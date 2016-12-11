@@ -24,6 +24,15 @@ chrome.storage.sync.get(null, function(items) {
 	plexUrl = `${items.plexUrlRoot}/library/sections/${items.plexLibraryId}/all`;
 	plexToken = items.plexToken;
 	plexMachineId = items.plexMachineId;
+
+	if (!plexToken || !plexMachineId || !items.plexLibraryId || !items.plexUrlRoot) {
+		const warning = document.createElement('div')
+		warning.classList.add('movieo-to-plex-warning');
+		warning.innerHTML = 'Not all options for the Movieo to Plex extension are filled in.';
+		document.body.appendChild(warning);
+		return;
+	}
+
 	window.addEventListener('popstate', init);
 	window.addEventListener('pushstate-changed', init);
 	init();

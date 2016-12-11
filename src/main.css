@@ -15,3 +15,18 @@
 .i-plex-movieo-icon:hover {
 	opacity: .9;
 }
+
+.movieo-to-plex-warning {
+	display: block;
+	position: absolute;
+	top: 80px;
+	left: 50%;
+	margin-left: -175px;
+	width: 350px;
+	background: #fd6a00;
+	color: #fff;
+	font-size: 20px;
+	padding: 10px;
+	border-radius: 4px;
+	z-index: 1000;
+}
