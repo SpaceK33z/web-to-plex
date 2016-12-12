@@ -22,15 +22,26 @@ function init() {
 	}
 }
 
+let notificationTimeout;
+
 function showNotification(state, text) {
-	const el = document.createElement('div')
+	if (notificationTimeout) {
+		clearTimeout(notificationTimeout);
+		notificationTimeout = null;
+	}
+	const existingEl = document.querySelector('.movieo-to-plex-notification');
+	if (existingEl) {
+		document.body.removeChild(existingEl);
+	}
+
+	const el = document.createElement('div');
 	el.classList.add('movieo-to-plex-notification');
 	if (state === 'warning') {
 		el.classList.add('movieo-to-plex-warning');
 	}
 	el.innerHTML = text;
 	document.body.appendChild(el);
-	setTimeout(() => {
+	notificationTimeout = setTimeout(() => {
 		document.body.removeChild(el);
 	}, 5000);
 }
