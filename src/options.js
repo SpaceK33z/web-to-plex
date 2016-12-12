@@ -4,11 +4,15 @@ function saveOptions() {
 	var plexMachineId = document.getElementById('plex_machine_id').value;
 	var plexUrlRoot = document.getElementById('plex_url_root').value;
 	var plexLibraryId = document.getElementById('plex_library_id').value;
+	var couchpotatoUrlRoot = document.getElementById('couchpotato_url_root').value;
+	var couchpotatoToken = document.getElementById('couchpotato_token').value;
 	chrome.storage.sync.set({
 		plexToken,
 		plexMachineId,
 		plexUrlRoot,
 		plexLibraryId,
+		couchpotatoUrlRoot,
+		couchpotatoToken,
 	}, function() {
 		// Update status to let user know options were saved.
 		var status = document.getElementById('status');
@@ -28,6 +32,8 @@ function restoreOptions() {
 		document.getElementById('plex_machine_id').value = items.plexMachineId || '';
 		document.getElementById('plex_url_root').value = items.plexUrlRoot || '';
 		document.getElementById('plex_library_id').value = items.plexLibraryId || '';
+		document.getElementById('couchpotato_url_root').value = items.couchpotatoUrlRoot || '';
+		document.getElementById('couchpotato_token').value = items.couchpotatoToken || '';
 	});
 }
 document.addEventListener('DOMContentLoaded', restoreOptions);
