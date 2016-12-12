@@ -17,9 +17,22 @@ function isMoviePage() {
 	return !jup.includes('/');
 }
 
+function isMoviePageReady() {
+	return !!document.querySelector('.share-box');
+}
+
 function init() {
 	if(isMoviePage()) {
-		initPlexThingy();
+		if (isMoviePageReady()) {
+			initPlexThingy();
+		} else {
+			// This almost never happens, but sometimes the page is too slow so we need to wait a bit.
+			// I could reproduce this by clicking on a movie in the movie watchlist,
+			// going back in history and then going forward in history.
+			setTimeout(() => {
+				initPlexThingy();
+			}, 1000);
+		}
 	}
 }
 
