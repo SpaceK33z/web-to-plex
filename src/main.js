@@ -160,12 +160,35 @@ function getImdbId() {
 }
 
 function addToCouchpotato(action) {
-	const url = `${couchpotatoUrlRoot}/api/${encodeURIComponent(couchpotatoToken)}/movie.add`;
+	const url = `${couchpotatoUrlRoot}/api/${encodeURIComponent(couchpotatoToken)}`;
+	const addUrl = `${url}/movie.add`;
+	const viewUrl = `${url}/media.get`;
 	const imdbId = getImdbId();
 	if (!imdbId) {
 		console.log('Cancelled adding to CouchPotato since there is no IMDB ID');
 		return;
 	}
+	axios.get(viewUrl, {
+		params: { id: imdbId },
+		headers: {
+		},
+	})
+	.then((res) => {
+		const movieExists = res.data.success;
+		if (!movieExists) {
+			return addToCouchPotatoRequest();
+		}
+		showNotification('info', `Movie is already in CouchPotato (status: ${res.data.media.status})`);
+		return null;
+	})
+	.catch((err) => {
+		showNotification('warning', 'CouchPotato request failed (look in DevTools for more info)');
+		console.error('Error with viewing on CouchPotato:', err);
+	});
+
+}
+
+function addToCouchPotatoRequest(url, imdbId) {
 	axios.get(url, {
 		params: { identifier: imdbId },
 		headers: {
