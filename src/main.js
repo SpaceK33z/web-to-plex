@@ -195,7 +195,7 @@ function addToCouchpotato(action) {
 	.then((res) => {
 		const movieExists = res.data.success;
 		if (!movieExists) {
-			return addToCouchPotatoRequest();
+			return addToCouchPotatoRequest(addUrl, imdbId);
 		}
 		showNotification('info', `Movie is already in CouchPotato (status: ${res.data.media.status})`);
 		return null;
@@ -213,7 +213,11 @@ function addToCouchPotatoRequest(url, imdbId) {
 		auth: couchpotatoBasicAuth,
 	})
 	.then((res) => {
-		showNotification('info', 'Added movie on CouchPotato.');
+		if (res.data.success) {
+			showNotification('info', 'Added movie on CouchPotato.');
+		} else {
+			showNotification('warning', 'Could not add to CouchPotato.');
+		}
 	})
 	.catch((err) => {
 		showNotification('warning', 'Could not add to CouchPotato (look in DevTools for more info)');
