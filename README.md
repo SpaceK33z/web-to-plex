@@ -4,4 +4,4 @@ This Chrome extension adds a Plex button on Movieo movie pages, letting you imme
 
 **Download on [Chrome Webstore](https://chrome.google.com/webstore/detail/movieo-to-plex/kmcinnefmnkfnmnmijfmbiaflncfifcn).**
 
-![Example](image.png)
+<img src="image.png" width="640">
