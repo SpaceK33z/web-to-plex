@@ -6,6 +6,8 @@ function saveOptions() {
 	var plexLibraryId = document.getElementById('plex_library_id').value;
 	var couchpotatoUrlRoot = document.getElementById('couchpotato_url_root').value;
 	var couchpotatoToken = document.getElementById('couchpotato_token').value;
+	var couchpotatoBasicAuthUsername = document.getElementById('couchpotato_basic_auth_username').value;
+	var couchpotatoBasicAuthPassword = document.getElementById('couchpotato_basic_auth_password').value;
 	chrome.storage.sync.set({
 		plexToken,
 		plexMachineId,
@@ -13,6 +15,8 @@ function saveOptions() {
 		plexLibraryId,
 		couchpotatoUrlRoot,
 		couchpotatoToken,
+		couchpotatoBasicAuthUsername,
+		couchpotatoBasicAuthPassword,
 	}, function() {
 		// Update status to let user know options were saved.
 		var status = document.getElementById('status');
@@ -34,6 +38,8 @@ function restoreOptions() {
 		document.getElementById('plex_library_id').value = items.plexLibraryId || '';
 		document.getElementById('couchpotato_url_root').value = items.couchpotatoUrlRoot || '';
 		document.getElementById('couchpotato_token').value = items.couchpotatoToken || '';
+		document.getElementById('couchpotato_basic_auth_username').value = items.couchpotatoBasicAuthUsername || '';
+		document.getElementById('couchpotato_basic_auth_password').value = items.couchpotatoBasicAuthPassword || '';
 	});
 }
 document.addEventListener('DOMContentLoaded', restoreOptions);

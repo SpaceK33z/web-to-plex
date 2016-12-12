@@ -3,6 +3,7 @@ let plexToken = '';
 let plexMachineId;
 let couchpotatoUrlRoot = '';
 let couchpotatoToken = '';
+let couchpotatoBasicAuth = null;
 
 function isMoviePage() {
 	const path = window.location.pathname;
@@ -52,6 +53,12 @@ chrome.storage.sync.get(null, function(items) {
 	plexMachineId = items.plexMachineId;
 	couchpotatoUrlRoot = items.couchpotatoUrlRoot;
 	couchpotatoToken = items.couchpotatoToken;
+	if (items.couchpotatoBasicAuthUsername) {
+		couchpotatoBasicAuth = {
+			username: items.couchpotatoBasicAuthUsername,
+			password: items.couchpotatoBasicAuthPassword,
+		};
+	}
 
 	if (!plexToken || !plexMachineId || !items.plexLibraryId || !items.plexUrlRoot) {
 		showNotification('warning', 'Not all options for the Movieo to Plex extension are filled in.');
@@ -170,8 +177,7 @@ function addToCouchpotato(action) {
 	}
 	axios.get(viewUrl, {
 		params: { id: imdbId },
-		headers: {
-		},
+		auth: couchpotatoBasicAuth,
 	})
 	.then((res) => {
 		const movieExists = res.data.success;
@@ -191,9 +197,7 @@ function addToCouchpotato(action) {
 function addToCouchPotatoRequest(url, imdbId) {
 	axios.get(url, {
 		params: { identifier: imdbId },
-		headers: {
-			Authorization: 'Basic a2Vlczpib25rZXJzdGVpbg==',
-		},
+		auth: couchpotatoBasicAuth,
 	})
 	.then((res) => {
 		showNotification('info', 'Added movie on CouchPotato.');
