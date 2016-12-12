@@ -1,19 +1,28 @@
-.i-plex-movieo-icon {
-	margin-top: -10px;
-	margin-left: 8px;
-	width: 33px;
-	height: 33px;
-	background: url('chrome-extension://__MSG_@@extension_id__/img/plex.svg');
-	background-size: 33px 33px;
-	opacity: .2;
+.mid-top-actions .share-box {
+	padding-left: 20px!important;
 }
 
-.i-plex-movieo-icon.plex-found {
-	opacity: .7;
+.movieo-to-plex-button {
+	margin-right: 8px;
+	color: #566273!important;
 }
 
-.i-plex-movieo-icon:hover {
-	opacity: .9;
+.movieo-to-plex-button--couchpotato {
+	border-color: #f45a26!important;
+	color: #acb4bf!important;
+}
+
+.movieo-to-plex-button--couchpotato:hover {
+	border-color: #f67e56!important;
+}
+
+.movieo-to-plex-button--found {
+	border-color: #ca7c1f!important;
+	color: #acb4bf!important;
+}
+
+.movieo-to-plex-button--found:hover {
+	border-color: #f8c022!important;
 }
 
 .movieo-to-plex-notification {

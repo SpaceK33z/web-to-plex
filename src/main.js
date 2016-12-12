@@ -53,7 +53,7 @@ function showNotification(state, text) {
 	if (state === 'warning') {
 		el.classList.add('movieo-to-plex-warning');
 	}
-	el.innerHTML = text;
+	el.textContent = text;
 	document.body.appendChild(el);
 	notificationTimeout = setTimeout(() => {
 		document.body.removeChild(el);
@@ -83,7 +83,7 @@ chrome.storage.sync.get(null, function(items) {
 	init();
 });
 
-function doPlexRequest($icon, title, year) {
+function doPlexRequest($button, title, year) {
 	return axios.get(plexUrl, {
 		params: { title, year },
 		headers: {
@@ -103,63 +103,74 @@ function doPlexRequest($icon, title, year) {
 
 
 function initPlexThingy() {
-	const $icon = renderPlexIcon();
+	const $button = renderPlexButton();
 	const $title = document.getElementById('doc_title');
 	const $date = document.querySelector('meta[itemprop="datePublished"]');
 	if (!$title || !$date) {
-		modifyPlexIcon($icon, 'error', 'Could not extract title or year from Movieo');
+		modifyPlexButton($button, 'error', 'Could not extract title or year from Movieo');
 		return;
 	}
 	const title = $title.dataset.title.trim();
 	const year = parseInt($date.content.slice(0, 4));
 
-	doPlexRequest($icon, title, year)
+	doPlexRequest($button, title, year)
 	.then(({ size, key }) => {
 		if (!size) {
 			// This is fucked up, but Plex' definition of a year is year when it was available,
 			// not when it was released (which is Movieo's definition).
 			// For examples, see Bone Tomahawk, The Big Short, The Hateful Eight.
-			return doPlexRequest($icon, title, year + 1);
+			return doPlexRequest($button, title, year + 1);
 		}
 		return { size, key };
 	})
 	.then(({ size, key }) => {
 		if (size) {
-			modifyPlexIcon($icon, 'found', 'Found on Plex', key);
+			modifyPlexButton($button, 'found', 'Found on Plex', key);
 		} else {
 			const action = couchpotatoUrlRoot ? 'couchpotato' : 'error';
 			const title = couchpotatoUrlRoot ? 'Could not find, add on Couchpotato?' : 'Could not find on Plex';
-			modifyPlexIcon($icon, action, title);
+			modifyPlexButton($button, action, title);
 		}
 	})
 	.catch((err) => {
-		modifyPlexIcon($icon, 'error', 'Request to Plex failed');
+		modifyPlexButton($button, 'error', 'Request to Plex failed');
 		console.error('Request to Plex failed', err);
 	});
 }
 
-function renderPlexIcon() {
-	const $share = document.querySelector('.share-box')
-	if (!$share) {
-		console.log('Could not add Plex icon to .share-box');
+function renderPlexButton() {
+	// The button text in the "Comments" button takes too much place, so we hide it.
+	// It's very clear that it's about comments even without the text.
+	const $commentText = document.querySelector('.mid-top-actions .comments-link .txt');
+	if ($commentText) {
+		$commentText.remove();
+	}
+
+	const $actions = document.querySelector('.mid-top-actions');
+	if (!$actions) {
+		console.log('Could not add Plex button.');
 	}
 	const el = document.createElement('a');
-	el.classList.add('i-plex-movieo-icon');
-	$share.appendChild(el);
+	el.classList.add('button', 'comments-link', 'movieo-to-plex-button');
+	$actions.appendChild(el);
 	return el;
 }
 
-function modifyPlexIcon(el, action, title, key) {
+function modifyPlexButton(el, action, title, key) {
 	if (action === 'found') {
 		el.href = `https://app.plex.tv/web/app#!/server/${plexMachineId}/details/${encodeURIComponent(key)}`;
-		el.classList.add('plex-found');
+		el.textContent = 'On Plex';
+		el.classList.add('movieo-to-plex-button--found');
 	}
 	if (action === 'error') {
 		el.removeAttribute('href');
-		el.classList.remove('plex-found');
+		el.textContent = 'Not on Plex';
+		el.classList.remove('movieo-to-plex-button--found');
 	}
 	if (action === 'couchpotato') {
 		el.href = '#';
+		el.textContent = 'Download';
+		el.classList.add('movieo-to-plex-button--couchpotato');
 		el.addEventListener('click', (e) => {
 			e.preventDefault();
 			addToCouchpotato();
