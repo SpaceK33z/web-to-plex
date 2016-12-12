@@ -192,46 +192,47 @@ function getImdbId() {
 
 function addToCouchpotato(action) {
 	const url = `${couchpotatoUrlRoot}/api/${encodeURIComponent(couchpotatoToken)}`;
-	const addUrl = `${url}/movie.add`;
-	const viewUrl = `${url}/media.get`;
 	const imdbId = getImdbId();
 	if (!imdbId) {
 		console.log('Cancelled adding to CouchPotato since there is no IMDB ID');
 		return;
 	}
-	axios.get(viewUrl, {
-		params: { id: imdbId },
-		auth: couchpotatoBasicAuth,
-	})
-	.then((res) => {
-		const movieExists = res.data.success;
-		if (!movieExists) {
-			return addToCouchPotatoRequest(addUrl, imdbId);
+	chrome.runtime.sendMessage({
+		type: 'VIEW_COUCHPOTATO',
+		url: `${url}/media.get`,
+		imdbId,
+		couchpotatoBasicAuth,
+	}, function(res) {
+		const movieExists = res.success;
+		if (res.err) {
+			showNotification('warning', 'CouchPotato request failed (look in DevTools for more info)');
+			console.error('Error with viewing on CouchPotato:', res.err);
+			return;
 		}
-		showNotification('info', `Movie is already in CouchPotato (status: ${res.data.media.status})`);
-		return null;
-	})
-	.catch((err) => {
-		showNotification('warning', 'CouchPotato request failed (look in DevTools for more info)');
-		console.error('Error with viewing on CouchPotato:', err);
+		if (!movieExists) {
+			addToCouchPotatoRequest(url, imdbId);
+			return;
+		}
+		showNotification('info', `Movie is already in CouchPotato (status: ${res.status})`);
 	});
-
 }
 
 function addToCouchPotatoRequest(url, imdbId) {
-	axios.get(url, {
-		params: { identifier: imdbId },
-		auth: couchpotatoBasicAuth,
-	})
-	.then((res) => {
-		if (res.data.success) {
+	chrome.runtime.sendMessage({
+		type: 'ADD_COUCHPOTATO',
+		url: `${url}/movie.add`,
+		imdbId,
+		couchpotatoBasicAuth,
+	}, function(res) {
+		if (res.err) {
+			showNotification('warning', 'Could not add to CouchPotato (look in DevTools for more info)');
+			console.error('Error with adding on CouchPotato:', err);
+			return;
+		}
+		if (res.success) {
 			showNotification('info', 'Added movie on CouchPotato.');
 		} else {
 			showNotification('warning', 'Could not add to CouchPotato.');
 		}
-	})
-	.catch((err) => {
-		showNotification('warning', 'Could not add to CouchPotato (look in DevTools for more info)');
-		console.error('Error with adding on CouchPotato:', err);
 	});
 }

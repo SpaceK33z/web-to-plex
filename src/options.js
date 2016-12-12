@@ -8,6 +8,13 @@ function saveOptions() {
 	var couchpotatoToken = document.getElementById('couchpotato_token').value;
 	var couchpotatoBasicAuthUsername = document.getElementById('couchpotato_basic_auth_username').value;
 	var couchpotatoBasicAuthPassword = document.getElementById('couchpotato_basic_auth_password').value;
+
+	if (couchpotatoUrlRoot) {
+		chrome.permissions.request({
+			origins: [couchpotatoUrlRoot]
+		});
+	}
+
 	chrome.storage.sync.set({
 		plexToken,
 		plexMachineId,

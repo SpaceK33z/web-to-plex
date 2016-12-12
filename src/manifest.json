@@ -15,6 +15,9 @@
 			"css": ["main.css"]
 		}
 	],
+	"background": {
+		"scripts": ["axios.js", "background.js"]
+	},
 	"web_accessible_resources": [
 		"img/*.svg"
 	],
@@ -24,5 +27,9 @@
 	},
 	"permissions": [
 		"storage"
+	],
+	"optional_permissions": [
+		"http://*/",
+		"https://*/"
 	]
 }
