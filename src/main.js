@@ -1,3 +1,4 @@
+const storage = chrome.storage.sync || chrome.storage.local;
 let plexUrl = '';
 let plexToken = '';
 let plexMachineId;
@@ -60,7 +61,7 @@ function showNotification(state, text) {
 	}, 5000);
 }
 
-chrome.storage.sync.get(null, function(items) {
+storage.get(null, function(items) {
 	plexUrl = `${items.plexUrlRoot}/library/sections/${items.plexLibraryId}/all`;
 	plexToken = items.plexToken;
 	plexMachineId = items.plexMachineId;

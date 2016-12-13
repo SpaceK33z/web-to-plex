@@ -1,4 +1,6 @@
-// Saves options to chrome.storage.sync.
+// FireFox doesn't support sync storage.
+const storage = chrome.storage.sync || chrome.storage.local;
+
 function saveOptions() {
 	var plexToken = document.getElementById('plex_token').value;
 	var plexMachineId = document.getElementById('plex_machine_id').value;
@@ -29,7 +31,7 @@ function saveOptions() {
 		});
 	}
 
-	chrome.storage.sync.set({
+	storage.set({
 		plexToken,
 		plexMachineId,
 		plexUrlRoot,
@@ -51,7 +53,7 @@ function saveOptions() {
 // stored in chrome.storage.
 function restoreOptions() {
 	// Use default value color = 'red' and likesColor = true.
-	chrome.storage.sync.get(null, function(items) {
+	storage.get(null, function(items) {
 		document.getElementById('plex_token').value = items.plexToken || '';
 		document.getElementById('plex_machine_id').value = items.plexMachineId || '';
 		document.getElementById('plex_url_root').value = items.plexUrlRoot || '';
