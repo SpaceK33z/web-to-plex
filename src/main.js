@@ -105,6 +105,9 @@ function doPlexRequest($button, title, year) {
 
 function initPlexThingy() {
 	const $button = renderPlexButton();
+	if (!$button) {
+		return;
+	}
 	const $title = document.getElementById('doc_title');
 	const $date = document.querySelector('meta[itemprop="datePublished"]');
 	if (!$title || !$date) {
@@ -150,6 +153,7 @@ function renderPlexButton() {
 	const $actions = document.querySelector('.mid-top-actions');
 	if (!$actions) {
 		console.log('Could not add Plex button.');
+		return;
 	}
 	const el = document.createElement('a');
 	el.classList.add('button', 'comments-link', 'movieo-to-plex-button');
