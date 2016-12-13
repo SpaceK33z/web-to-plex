@@ -10,8 +10,9 @@ function saveOptions() {
 	var couchpotatoBasicAuthPassword = document.getElementById('couchpotato_basic_auth_password').value;
 
 	if (couchpotatoUrlRoot) {
+		// When asking permissions the URL needs to have a trailing slash.
 		chrome.permissions.request({
-			origins: [couchpotatoUrlRoot]
+			origins: [`${couchpotatoUrlRoot}/`]
 		});
 	}
 
