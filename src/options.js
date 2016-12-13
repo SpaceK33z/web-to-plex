@@ -8,7 +8,20 @@ function saveOptions() {
 	var couchpotatoToken = document.getElementById('couchpotato_token').value;
 	var couchpotatoBasicAuthUsername = document.getElementById('couchpotato_basic_auth_username').value;
 	var couchpotatoBasicAuthPassword = document.getElementById('couchpotato_basic_auth_password').value;
+	var status = document.getElementById('status');
 
+	// Validations
+	if (plexUrlRoot && (!plexUrlRoot.startsWith('http') || plexUrlRoot.endsWith('/'))) {
+		status.textContent = 'Plex URL should start with "http" and end without a slash!';
+		return;
+	}
+
+	if (couchpotatoUrlRoot && (!couchpotatoUrlRoot.startsWith('http') || couchpotatoUrlRoot.endsWith('/'))) {
+		status.textContent = 'CouchPotato URL should start with "http" and end without a slash!';
+		return;
+	}
+
+	// Dynamically asking permissions
 	if (couchpotatoUrlRoot) {
 		// When asking permissions the URL needs to have a trailing slash.
 		chrome.permissions.request({
@@ -27,7 +40,6 @@ function saveOptions() {
 		couchpotatoBasicAuthPassword,
 	}, function() {
 		// Update status to let user know options were saved.
-		var status = document.getElementById('status');
 		status.textContent = 'Options saved.';
 		setTimeout(function() {
 			status.textContent = '';
