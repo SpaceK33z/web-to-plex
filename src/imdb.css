@@ -1,0 +1,46 @@
+.imdb-to-plex-button {
+	margin-top: 10px;
+	display: inline-block;
+	background: #727272;
+	color: #fff!important;
+	padding: 5px 10px;
+	border-radius: 1000px;
+	text-decoration: none!important;
+	text-transform: uppercase;
+}
+
+.imdb-to-plex-button--couchpotato {
+	background: #f45a26;
+}
+
+.imdb-to-plex-button--couchpotato:hover {
+	background: #f67e56;
+}
+
+.imdb-to-plex-button--found {
+	background: #e5a00d;
+}
+
+.imdb-to-plex-button--found:hover {
+	background: #f9be03;
+}
+
+.movieo-to-plex-notification {
+	display: block;
+	position: fixed;
+	top: 80px;
+	left: 50%;
+	margin-left: -175px;
+	width: 350px;
+	background: #e5a00d;
+	color: #fff;
+	font-size: 13px;
+	padding: 10px;
+	border-radius: 4px;
+	z-index: 999000;
+	font-family: Verdana, Arial, sans-serif;
+}
+
+.movieo-to-plex-warning {
+	background: #fd6a00;
+}

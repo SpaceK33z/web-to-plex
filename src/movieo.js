@@ -29,30 +29,6 @@ function init() {
 	}
 }
 
-let notificationTimeout;
-
-function showNotification(state, text) {
-	if (notificationTimeout) {
-		clearTimeout(notificationTimeout);
-		notificationTimeout = null;
-	}
-	const existingEl = document.querySelector('.movieo-to-plex-notification');
-	if (existingEl) {
-		document.body.removeChild(existingEl);
-	}
-
-	const el = document.createElement('div');
-	el.classList.add('movieo-to-plex-notification');
-	if (state === 'warning') {
-		el.classList.add('movieo-to-plex-warning');
-	}
-	el.textContent = text;
-	document.body.appendChild(el);
-	notificationTimeout = setTimeout(() => {
-		document.body.removeChild(el);
-	}, 5000);
-}
-
 let config;
 getOptions().then((options) => {
 	config = options;

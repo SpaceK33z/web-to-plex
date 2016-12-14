@@ -13,6 +13,11 @@
 			"matches": ["https://movieo.me/*"],
 			"js": ["history-hack.js", "utils.js", "movieo.js"],
 			"css": ["movieo.css"]
+		},
+		{
+			"matches": ["*://*.imdb.com/title/tt*"],
+			"js": ["utils.js", "imdb.js"],
+			"css": ["imdb.css"]
 		}
 	],
 	"background": {
