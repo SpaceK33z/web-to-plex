@@ -11,8 +11,8 @@
 	"content_scripts": [
 		{
 			"matches": ["https://movieo.me/*"],
-			"js": ["history-hack.js", "main.js"],
-			"css": ["main.css"]
+			"js": ["history-hack.js", "utils.js", "movieo.js"],
+			"css": ["movieo.css"]
 		}
 	],
 	"background": {

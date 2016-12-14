@@ -1,11 +1,3 @@
-const storage = chrome.storage.sync || chrome.storage.local;
-let plexUrl = '';
-let plexToken = '';
-let plexMachineId;
-let couchpotatoUrlRoot = '';
-let couchpotatoToken = '';
-let couchpotatoBasicAuth = null;
-
 function isMoviePage() {
 	const path = window.location.pathname;
 	if (!path.startsWith('/movies/')) {
@@ -61,47 +53,15 @@ function showNotification(state, text) {
 	}, 5000);
 }
 
-storage.get(null, function(items) {
-	plexUrl = `${items.plexUrlRoot}/library/sections/${items.plexLibraryId}/all`;
-	plexToken = items.plexToken;
-	plexMachineId = items.plexMachineId;
-	couchpotatoUrlRoot = items.couchpotatoUrlRoot;
-	couchpotatoToken = items.couchpotatoToken;
-	if (items.couchpotatoBasicAuthUsername) {
-		couchpotatoBasicAuth = {
-			username: items.couchpotatoBasicAuthUsername,
-			password: items.couchpotatoBasicAuthPassword,
-		};
-	}
-
-	if (!plexToken || !plexMachineId || !items.plexLibraryId || !items.plexUrlRoot) {
-		showNotification('warning', 'Not all options for the Movieo to Plex extension are filled in.');
-		return;
-	}
-
+let config;
+getOptions().then((options) => {
+	config = options;
 	window.addEventListener('popstate', init);
 	window.addEventListener('pushstate-changed', init);
 	init();
+}, () => {
+	showNotification('warning', 'Not all options for the Movieo to Plex extension are filled in.');
 });
-
-function doPlexRequest($button, title, year) {
-	return fetch(`${plexUrl}?title=${title}&year=${year}`, {
-		headers: {
-			'X-Plex-Token': plexToken,
-			'Accept': 'application/json',
-		}
-	})
-	.then((res) => res.json())
-	.then((res) => {
-		const size = res.MediaContainer && res.MediaContainer.size;
-		let key = null;
-		if (size) {
-			key = res.MediaContainer.Metadata[0].key;
-		}
-		return { size, key };
-	});
-}
-
 
 function initPlexThingy() {
 	const $button = renderPlexButton();
@@ -117,22 +77,13 @@ function initPlexThingy() {
 	const title = $title.dataset.title.trim();
 	const year = parseInt($date.content.slice(0, 4));
 
-	doPlexRequest($button, title, year)
-	.then(({ size, key }) => {
-		if (!size) {
-			// This is fucked up, but Plex' definition of a year is year when it was available,
-			// not when it was released (which is Movieo's definition).
-			// For examples, see Bone Tomahawk, The Big Short, The Hateful Eight.
-			return doPlexRequest($button, title, year + 1);
-		}
-		return { size, key };
-	})
+	plexRequest({ url: config.plexUrl, token: config.plexToken, title, year })
 	.then(({ size, key }) => {
 		if (size) {
 			modifyPlexButton($button, 'found', 'Found on Plex', key);
 		} else {
-			const action = couchpotatoUrlRoot ? 'couchpotato' : 'error';
-			const title = couchpotatoUrlRoot ? 'Could not find, add on Couchpotato?' : 'Could not find on Plex';
+			const action = config.couchpotatoUrl ? 'couchpotato' : 'error';
+			const title = config.couchpotatoUrl ? 'Could not find, add on Couchpotato?' : 'Could not find on Plex';
 			modifyPlexButton($button, action, title);
 		}
 	})
@@ -163,7 +114,7 @@ function renderPlexButton() {
 
 function modifyPlexButton(el, action, title, key) {
 	if (action === 'found') {
-		el.href = `https://app.plex.tv/web/app#!/server/${plexMachineId}/details/${encodeURIComponent(key)}`;
+		el.href = getPlexMediaUrl(config.plexMachineId, key);
 		el.textContent = 'On Plex';
 		el.classList.add('movieo-to-plex-button--found');
 	}
@@ -196,7 +147,6 @@ function getImdbId() {
 }
 
 function addToCouchpotato(action) {
-	const url = `${couchpotatoUrlRoot}/api/${encodeURIComponent(couchpotatoToken)}`;
 	const imdbId = getImdbId();
 	if (!imdbId) {
 		console.log('Cancelled adding to CouchPotato since there is no IMDB ID');
@@ -204,9 +154,9 @@ function addToCouchpotato(action) {
 	}
 	chrome.runtime.sendMessage({
 		type: 'VIEW_COUCHPOTATO',
-		url: `${url}/media.get`,
+		url: `${config.couchpotatoUrl}/media.get`,
 		imdbId,
-		couchpotatoBasicAuth,
+		basicAuth: config.couchpotatoBasicAuth,
 	}, function(res) {
 		const movieExists = res.success;
 		if (res.err) {
@@ -215,19 +165,19 @@ function addToCouchpotato(action) {
 			return;
 		}
 		if (!movieExists) {
-			addToCouchPotatoRequest(url, imdbId);
+			addToCouchPotatoRequest(imdbId);
 			return;
 		}
 		showNotification('info', `Movie is already in CouchPotato (status: ${res.status})`);
 	});
 }
 
-function addToCouchPotatoRequest(url, imdbId) {
+function addToCouchPotatoRequest(imdbId) {
 	chrome.runtime.sendMessage({
 		type: 'ADD_COUCHPOTATO',
-		url: `${url}/movie.add`,
+		url: `${config.couchpotatoUrl}/movie.add`,
 		imdbId,
-		couchpotatoBasicAuth,
+		basicAuth: config.couchpotatoBasicAuth,
 	}, function(res) {
 		if (res.err) {
 			showNotification('warning', 'Could not add to CouchPotato (look in DevTools for more info)');

@@ -15,7 +15,7 @@ function generateHeaders(auth) {
 function viewCouchpotato(request, sendResponse) {
 	console.log('uhu uhu');
 	fetch(`${request.url}?id=${request.imdbId}`, {
-		headers: generateHeaders(request.couchpotatoBasicAuth),
+		headers: generateHeaders(request.basicAuth),
 	})
 	.then((res) => res.json())
 	.then((res) => {
@@ -29,7 +29,7 @@ function viewCouchpotato(request, sendResponse) {
 
 function addCouchpotato(request, sendResponse) {
 	fetch(`${request.url}?identifier=${request.imdbId}`, {
-		headers: generateHeaders(request.couchpotatoBasicAuth),
+		headers: generateHeaders(request.basicAuth),
 	})
 	.then((res) => res.json())
 	.then((res) => {
