@@ -87,3 +87,48 @@ function showNotification(state, text) {
 		document.body.removeChild(el);
 	}, 5000);
 }
+
+function addToCouchpotato(options, imdbId) {
+	if (!imdbId) {
+		console.log('Cancelled adding to CouchPotato since there is no IMDB ID');
+		return;
+	}
+	chrome.runtime.sendMessage({
+		type: 'VIEW_COUCHPOTATO',
+		url: `${options.couchpotatoUrl}/media.get`,
+		imdbId,
+		basicAuth: options.couchpotatoBasicAuth,
+	}, function(res) {
+		const movieExists = res.success;
+		if (res.err) {
+			showNotification('warning', 'CouchPotato request failed (look in DevTools for more info)');
+			console.error('Error with viewing on CouchPotato:', res.err);
+			return;
+		}
+		if (!movieExists) {
+			addToCouchPotatoRequest(imdbId);
+			return;
+		}
+		showNotification('info', `Movie is already in CouchPotato (status: ${res.status})`);
+	});
+}
+
+function addToCouchPotatoRequest(imdbId) {
+	chrome.runtime.sendMessage({
+		type: 'ADD_COUCHPOTATO',
+		url: `${config.couchpotatoUrl}/movie.add`,
+		imdbId,
+		basicAuth: config.couchpotatoBasicAuth,
+	}, function(res) {
+		if (res.err) {
+			showNotification('warning', 'Could not add to CouchPotato (look in DevTools for more info)');
+			console.error('Error with adding on CouchPotato:', err);
+			return;
+		}
+		if (res.success) {
+			showNotification('info', 'Added movie on CouchPotato.');
+		} else {
+			showNotification('warning', 'Could not add to CouchPotato.');
+		}
+	});
+}
