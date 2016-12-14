@@ -1,31 +1,40 @@
+function generateHeaders(auth) {
+	const hash = btoa(`${auth.username}:${auth.password}`);
+	return {
+		Authorization: `Basic ${hash}`,
+	};
+}
+
 // At this point you might want to think, WHY would you want to do
 // these requests in a background page instead of the content script?
 // This is because Movieo is served over HTTPS, so it won't accept requests to
 // HTTP servers. Unfortunately, many people use CouchPotato over HTTP.
 function viewCouchpotato(request, sendResponse) {
-	axios.get(request.url, {
-		params: { id: request.imdbId },
-		auth: request.couchpotatoBasicAuth,
+	console.log('uhu uhu');
+	fetch(`${request.url}?id=${request.imdbId}`, {
+		headers: generateHeaders(request.couchpotatoBasicAuth),
 	})
+	.then((res) => res.json())
 	.then((res) => {
-		const success = res.data.success;
-		sendResponse({ success, status: success ? res.data.media.status : null });
+		const success = res.success;
+		sendResponse({ success, status: success ? res.media.status : null });
 	})
 	.catch((err) => {
-		sendResponse({ err });
+		sendResponse({ err: String(err) });
 	});
 }
 
 function addCouchpotato(request, sendResponse) {
-	axios.get(request.url, {
-		params: { identifier: request.imdbId },
-		auth: request.couchpotatoBasicAuth,
+	fetch(`${request.url}?identifier=${request.imdbId}`, {
+		headers: generateHeaders(request.couchpotatoBasicAuth),
 	})
+	.then((res) => res.json())
 	.then((res) => {
-		sendResponse({ success: res.data.success });
+		console.log('success add', res);
+		sendResponse({ success: res.success });
 	})
 	.catch((err) => {
-		sendResponse({ err });
+		sendResponse({ err: String(err) });
 	});
 }
 

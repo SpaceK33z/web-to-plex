@@ -11,12 +11,12 @@
 	"content_scripts": [
 		{
 			"matches": ["https://movieo.me/*"],
-			"js": ["axios.js", "history-hack.js", "main.js"],
+			"js": ["history-hack.js", "main.js"],
 			"css": ["main.css"]
 		}
 	],
 	"background": {
-		"scripts": ["axios.js", "background.js"]
+		"scripts": ["background.js"]
 	},
 	"web_accessible_resources": [
 		"img/*.svg"

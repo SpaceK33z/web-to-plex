@@ -85,18 +85,18 @@ storage.get(null, function(items) {
 });
 
 function doPlexRequest($button, title, year) {
-	return axios.get(plexUrl, {
-		params: { title, year },
+	return fetch(`${plexUrl}?title=${title}&year=${year}`, {
 		headers: {
 			'X-Plex-Token': plexToken,
 			'Accept': 'application/json',
 		}
 	})
+	.then((res) => res.json())
 	.then((res) => {
-		const size = res.data.MediaContainer && res.data.MediaContainer.size;
+		const size = res.MediaContainer && res.MediaContainer.size;
 		let key = null;
 		if (size) {
-			key = res.data.MediaContainer.Metadata[0].key;
+			key = res.MediaContainer.Metadata[0].key;
 		}
 		return { size, key };
 	});
