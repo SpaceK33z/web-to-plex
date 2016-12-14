@@ -1,4 +1,7 @@
 function generateHeaders(auth) {
+	if (!auth) {
+		return {};
+	}
 	const hash = btoa(`${auth.username}:${auth.password}`);
 	return {
 		Authorization: `Basic ${hash}`,
