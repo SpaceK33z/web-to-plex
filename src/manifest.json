@@ -1,6 +1,6 @@
 {
 	"name": "Movieo to Plex",
-	"description": "Adds a button in Movieo to open the movie in Plex.",
+	"description": "Adds a button in Movieo and IMDb to open the movie in Plex.",
 	"manifest_version": 2,
 	"version": "1.5",
 	"icons": {
