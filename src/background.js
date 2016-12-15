@@ -3,7 +3,7 @@ function generateHeaders(auth) {
 		return {};
 	}
 	const hash = btoa(`${auth.username}:${auth.password}`);
-	return new {
+	return {
 		Accept: 'application/json',
 		Authorization: `Basic ${hash}`,
 	};
