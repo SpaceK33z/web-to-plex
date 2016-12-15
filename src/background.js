@@ -3,7 +3,8 @@ function generateHeaders(auth) {
 		return {};
 	}
 	const hash = btoa(`${auth.username}:${auth.password}`);
-	return {
+	return new {
+		Accept: 'application/json',
 		Authorization: `Basic ${hash}`,
 	};
 }
@@ -13,7 +14,6 @@ function generateHeaders(auth) {
 // This is because Movieo is served over HTTPS, so it won't accept requests to
 // HTTP servers. Unfortunately, many people use CouchPotato over HTTP.
 function viewCouchpotato(request, sendResponse) {
-	console.log('uhu uhu');
 	fetch(`${request.url}?id=${request.imdbId}`, {
 		headers: generateHeaders(request.basicAuth),
 	})
@@ -33,7 +33,6 @@ function addCouchpotato(request, sendResponse) {
 	})
 	.then((res) => res.json())
 	.then((res) => {
-		console.log('success add', res);
 		sendResponse({ success: res.success });
 	})
 	.catch((err) => {

@@ -24,7 +24,8 @@ function saveOptions() {
 	}
 
 	// Dynamically asking permissions
-	if (couchpotatoUrlRoot) {
+	// TODO: FireFox doesn't have support for chrome.permissions API.
+	if (couchpotatoUrlRoot && chrome.permissions) {
 		// When asking permissions the URL needs to have a trailing slash.
 		chrome.permissions.request({
 			origins: [`${couchpotatoUrlRoot}/`]
