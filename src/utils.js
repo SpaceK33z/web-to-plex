@@ -132,3 +132,46 @@ function addToCouchPotatoRequest(imdbId) {
 		}
 	});
 }
+
+function modifyPlexButton(el, action, title, key) {
+	if (action === 'found') {
+		el.href = getPlexMediaUrl(config.plexMachineId, key);
+		el.textContent = 'On Plex';
+		el.classList.add('movieo-to-plex-button--found');
+	}
+	if (action === 'error') {
+		el.removeAttribute('href');
+		el.textContent = 'Not on Plex';
+		el.classList.remove('movieo-to-plex-button--found');
+	}
+	if (action === 'couchpotato') {
+		el.href = '#';
+		el.textContent = 'Download';
+		el.classList.add('movieo-to-plex-button--couchpotato');
+		el.addEventListener('click', (e) => {
+			e.preventDefault();
+			addToCouchpotato(config, key);
+		});
+	}
+
+	if (title) {
+		el.title = title;
+	}
+}
+
+function handlePlex(config, options) {
+	plexRequest({ url: config.plexUrl, token: config.plexToken, title: options.title, year: options.year })
+	.then(({ size, key }) => {
+		if (size) {
+			modifyPlexButton(options.button, 'found', 'Found on Plex', key);
+		} else {
+			const action = config.couchpotatoUrl ? 'couchpotato' : 'error';
+			const title = config.couchpotatoUrl ? 'Could not find, add on Couchpotato?' : 'Could not find on Plex';
+			modifyPlexButton(options.button, action, title, options.imdbId);
+		}
+	})
+	.catch((err) => {
+		modifyPlexButton(options.button, 'error', 'Request to Plex failed');
+		console.error('Request to Plex failed', err);
+	});
+}

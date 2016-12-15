@@ -52,21 +52,9 @@ function initPlexThingy() {
 	}
 	const title = $title.dataset.title.trim();
 	const year = parseInt($date.content.slice(0, 4));
+	const imdbId = getImdbId();
 
-	plexRequest({ url: config.plexUrl, token: config.plexToken, title, year })
-	.then(({ size, key }) => {
-		if (size) {
-			modifyPlexButton($button, 'found', 'Found on Plex', key);
-		} else {
-			const action = config.couchpotatoUrl ? 'couchpotato' : 'error';
-			const title = config.couchpotatoUrl ? 'Could not find, add on Couchpotato?' : 'Could not find on Plex';
-			modifyPlexButton($button, action, title);
-		}
-	})
-	.catch((err) => {
-		modifyPlexButton($button, 'error', 'Request to Plex failed');
-		console.error('Request to Plex failed', err);
-	});
+	handlePlex(config, { title, year, button: $button, imdbId });
 }
 
 function renderPlexButton() {
@@ -86,32 +74,6 @@ function renderPlexButton() {
 	el.classList.add('button', 'comments-link', 'movieo-to-plex-button');
 	$actions.appendChild(el);
 	return el;
-}
-
-function modifyPlexButton(el, action, title, key) {
-	if (action === 'found') {
-		el.href = getPlexMediaUrl(config.plexMachineId, key);
-		el.textContent = 'On Plex';
-		el.classList.add('movieo-to-plex-button--found');
-	}
-	if (action === 'error') {
-		el.removeAttribute('href');
-		el.textContent = 'Not on Plex';
-		el.classList.remove('movieo-to-plex-button--found');
-	}
-	if (action === 'couchpotato') {
-		el.href = '#';
-		el.textContent = 'Download';
-		el.classList.add('movieo-to-plex-button--couchpotato');
-		el.addEventListener('click', (e) => {
-			e.preventDefault();
-			addToCouchpotato(config, getImdbId());
-		});
-	}
-
-	if (title) {
-		el.title = title;
-	}
 }
 
 function getImdbId() {

@@ -17,35 +17,9 @@ function renderPlexButton() {
 		return;
 	}
 	const el = document.createElement('a');
-	el.classList.add('imdb-to-plex-button');
+	el.classList.add('movieo-to-plex-button');
 	$plotSummary.appendChild(el);
 	return el;
-}
-
-function modifyPlexButton(el, action, title, key) {
-	if (action === 'found') {
-		el.href = getPlexMediaUrl(config.plexMachineId, key);
-		el.textContent = 'On Plex';
-		el.classList.add('imdb-to-plex-button--found');
-	}
-	if (action === 'error') {
-		el.removeAttribute('href');
-		el.textContent = 'Not on Plex';
-		el.classList.remove('imdb-to-plex-button--found');
-	}
-	if (action === 'couchpotato') {
-		el.href = '#';
-		el.textContent = 'Download';
-		el.classList.add('imdb-to-plex-button--couchpotato');
-		el.addEventListener('click', (e) => {
-			e.preventDefault();
-			addToCouchpotato(config, imdbId);
-		});
-	}
-
-	if (title) {
-		el.title = title;
-	}
 }
 
 function initPlexThingy() {
@@ -60,20 +34,7 @@ function initPlexThingy() {
 	// The year element contains `()`, so we need to strip it out.
 	const year = $year.textContent.trim().replace(/\(|\)/g, '');
 
-	plexRequest({ url: config.plexUrl, token: config.plexToken, title, year })
-	.then(({ size, key }) => {
-		if (size) {
-			modifyPlexButton($button, 'found', 'Found on Plex', key);
-		} else {
-			const action = config.couchpotatoUrl ? 'couchpotato' : 'error';
-			const title = config.couchpotatoUrl ? 'Could not find, add on Couchpotato?' : 'Could not find on Plex';
-			modifyPlexButton($button, action, title);
-		}
-	})
-	.catch((err) => {
-		modifyPlexButton($button, 'error', 'Request to Plex failed');
-		console.error('Request to Plex failed', err);
-	});
+	handlePlex(config, { title, year, button: $button, imdbId });
 }
 
 let config;
