@@ -24,9 +24,6 @@
 		"scripts": ["background.js"],
 		"persistent": false
 	},
-	"web_accessible_resources": [
-		"img/*.svg"
-	],
 	"options_ui": {
 		"page": "options.html",
 		"chrome_style": true
