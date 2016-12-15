@@ -32,7 +32,7 @@ function initPlexThingy() {
 	// TODO: Hmm there should be a less risky way...
 	const title = $title.childNodes[0].textContent.trim();
 	// The year element contains `()`, so we need to strip it out.
-	const year = $year.textContent.trim().replace(/\(|\)/g, '');
+	const year = parseInt($year.textContent.trim().replace(/\(|\)/g, ''));
 
 	handlePlex(config, { title, year, button: $button, imdbId });
 }
