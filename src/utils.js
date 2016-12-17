@@ -1,3 +1,10 @@
+function wait(check, then) {
+	if (check()) {
+		then();
+	} else {
+		setTimeout(() => wait(check, then), 50);
+	}
+}
 
 function doPlexRequest(config, options) {
 	// TODO: it is possible that there are multiple movie sections in Plex, so optimally we'd loop through all of them.

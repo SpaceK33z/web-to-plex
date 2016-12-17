@@ -18,6 +18,11 @@
 			"matches": ["*://*.imdb.com/title/tt*"],
 			"js": ["utils.js", "imdb.js"],
 			"css": ["imdb.css"]
+		},
+		{
+			"matches": ["https://trakt.tv/*"],
+			"js": ["history-hack.js", "utils.js", "trakt.js"],
+			"css": ["trakt.css"]
 		}
 	],
 	"background": {
