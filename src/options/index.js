@@ -84,6 +84,7 @@ function saveOptions() {
 	const plexMachineId = server.clientIdentifier;
 	const plexUrlRoot = getBestConnectionUrl(server);
 	let plexSectionsMovie = [];
+	let plexSectionsShow = [];
 
 	const couchpotatoUrlRoot = document.getElementById('couchpotato_url_root').value;
 	const couchpotatoToken = document.getElementById('couchpotato_token').value;
@@ -106,9 +107,12 @@ function saveOptions() {
 
 	getSections(plexUrlRoot, plexToken)
 	.then((sections) => {
-		// Get the relevant movie sections
+		// Get the relevant movie and TV show sections
 		plexSectionsMovie = sections
 			.filter(section => section.type === 'movie' && section.agent !== 'com.plexapp.agents.none')
+			.map(section => section.key);
+		plexSectionsShow = sections
+			.filter(section => section.type === 'show' && section.agent !== 'com.plexapp.agents.none')
 			.map(section => section.key);
 	})
 	.then(() => {
@@ -119,6 +123,7 @@ function saveOptions() {
 			plexMachineId,
 			plexUrlRoot,
 			plexSectionsMovie,
+			plexSectionsShow,
 			couchpotatoUrlRoot,
 			couchpotatoToken,
 			couchpotatoBasicAuthUsername,
