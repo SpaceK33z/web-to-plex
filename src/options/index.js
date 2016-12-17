@@ -33,13 +33,16 @@ function getSections(url, plexToken) {
 }
 
 function getBestConnectionUrl(server) {
-	// First try to find a non-local (remote) connection to the server.
-	let conn = server.Connection.find((connection) => connection.local === '0');
-	if (conn) {
-		return conn.uri;
+	// `server.Connection` can be an array or object.
+	if (Array.isArray(server.Connection)) {
+		let conn = server.Connection.find((connection) => connection.local === '0');
+		if (conn) {
+			return conn.uri;
+		}
+		// If there are only local connections, fine then.
+		return conn[0].uri;
 	}
-	// If there are only local connections, fine then.
-	return conn[0].uri;
+	return server.Connection.uri;
 }
 
 function performTest() {
