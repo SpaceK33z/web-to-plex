@@ -1,4 +1,4 @@
-.movieo-to-plex-button {
+.web-to-plex-button {
 	margin-top: 10px;
 	display: inline-block;
 	background: #727272;
@@ -9,23 +9,23 @@
 	text-transform: uppercase;
 }
 
-.movieo-to-plex-button--couchpotato {
+.web-to-plex-button--couchpotato {
 	background: #f45a26;
 }
 
-.movieo-to-plex-button--couchpotato:hover {
+.web-to-plex-button--couchpotato:hover {
 	background: #f67e56;
 }
 
-.movieo-to-plex-button--found {
+.web-to-plex-button--found {
 	background: #e5a00d;
 }
 
-.movieo-to-plex-button--found:hover {
+.web-to-plex-button--found:hover {
 	background: #f9be03;
 }
 
-.movieo-to-plex-notification {
+.web-to-plex-notification {
 	display: block;
 	position: fixed;
 	top: 80px;
@@ -41,6 +41,6 @@
 	font-family: Verdana, Arial, sans-serif;
 }
 
-.movieo-to-plex-warning {
+.web-to-plex-warning {
 	background: #fd6a00;
 }

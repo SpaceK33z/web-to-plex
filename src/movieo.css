@@ -2,30 +2,30 @@
 	padding-left: 20px!important;
 }
 
-.movieo-to-plex-button {
+.web-to-plex-button {
 	margin-right: 8px;
 	color: #566273!important;
 }
 
-.movieo-to-plex-button--couchpotato {
+.web-to-plex-button--couchpotato {
 	border-color: #f45a26!important;
 	color: #acb4bf!important;
 }
 
-.movieo-to-plex-button--couchpotato:hover {
+.web-to-plex-button--couchpotato:hover {
 	border-color: #f67e56!important;
 }
 
-.movieo-to-plex-button--found {
+.web-to-plex-button--found {
 	border-color: #ca7c1f!important;
 	color: #acb4bf!important;
 }
 
-.movieo-to-plex-button--found:hover {
+.web-to-plex-button--found:hover {
 	border-color: #f8c022!important;
 }
 
-.movieo-to-plex-notification {
+.web-to-plex-notification {
 	display: block;
 	position: fixed;
 	top: 80px;
@@ -40,6 +40,6 @@
 	z-index: 999000;
 }
 
-.movieo-to-plex-warning {
+.web-to-plex-warning {
 	background: #fd6a00;
 }

@@ -71,15 +71,15 @@ function showNotification(state, text) {
 		clearTimeout(notificationTimeout);
 		notificationTimeout = null;
 	}
-	const existingEl = document.querySelector('.movieo-to-plex-notification');
+	const existingEl = document.querySelector('.web-to-plex-notification');
 	if (existingEl) {
 		document.body.removeChild(existingEl);
 	}
 
 	const el = document.createElement('div');
-	el.classList.add('movieo-to-plex-notification');
+	el.classList.add('web-to-plex-notification');
 	if (state === 'warning') {
-		el.classList.add('movieo-to-plex-warning');
+		el.classList.add('web-to-plex-warning');
 	}
 	el.textContent = text;
 	document.body.appendChild(el);
@@ -137,17 +137,17 @@ function modifyPlexButton(el, action, title, key) {
 	if (action === 'found') {
 		el.href = getPlexMediaUrl(config.plexMachineId, key);
 		el.textContent = 'On Plex';
-		el.classList.add('movieo-to-plex-button--found');
+		el.classList.add('web-to-plex-button--found');
 	}
 	if (action === 'error') {
 		el.removeAttribute('href');
 		el.textContent = 'Not on Plex';
-		el.classList.remove('movieo-to-plex-button--found');
+		el.classList.remove('web-to-plex-button--found');
 	}
 	if (action === 'couchpotato') {
 		el.href = '#';
 		el.textContent = 'Download';
-		el.classList.add('movieo-to-plex-button--couchpotato');
+		el.classList.add('web-to-plex-button--couchpotato');
 		el.addEventListener('click', (e) => {
 			e.preventDefault();
 			addToCouchpotato(config, key);

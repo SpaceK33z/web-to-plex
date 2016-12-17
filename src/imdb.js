@@ -17,7 +17,7 @@ function renderPlexButton() {
 		return;
 	}
 	const el = document.createElement('a');
-	el.classList.add('movieo-to-plex-button');
+	el.classList.add('web-to-plex-button');
 	$plotSummary.appendChild(el);
 	return el;
 }
@@ -43,6 +43,6 @@ if (isMovie() && imdbId) {
 		config = options;
 		initPlexThingy();
 	}, () => {
-		showNotification('warning', 'Not all options for the Movieo to Plex extension are filled in.');
+		showNotification('warning', 'Not all options for the Web to Plex extension are filled in.');
 	});
 }

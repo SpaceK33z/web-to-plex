@@ -36,7 +36,7 @@ getOptions().then((options) => {
 	window.addEventListener('pushstate-changed', init);
 	init();
 }, () => {
-	showNotification('warning', 'Not all options for the Movieo to Plex extension are filled in.');
+	showNotification('warning', 'Not all options for the Web to Plex extension are filled in.');
 });
 
 function initPlexThingy() {
@@ -71,7 +71,7 @@ function renderPlexButton() {
 		return;
 	}
 	const el = document.createElement('a');
-	el.classList.add('button', 'comments-link', 'movieo-to-plex-button');
+	el.classList.add('button', 'comments-link', 'web-to-plex-button');
 	$actions.appendChild(el);
 	return el;
 }
