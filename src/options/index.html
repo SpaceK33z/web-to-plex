@@ -14,22 +14,14 @@
 		<a href="https://support.plex.tv/hc/en-us/articles/204059436-Finding-your-account-token-X-Plex-Token">Learn how to find your token</a>
 	</p>
 	<p>
-		Plex machine ID:
-		<input type="text" id="plex_machine_id"><br>
-		In Plex Web, click on a random movie. In the URL bar, copy the part between <em>/server/</em> and <em>/details/</em>.
-		<strong>Example:</strong> 992dggg6f248454c1d83de10a56c416570a81c84
+		<button type="button" id="plex_test">Test</button>
+		<span id="plex_test_status"></span>
 	</p>
 	<p>
-		Plex url root:
-		<input type="text" id="plex_url_root"><br>
-		In Plex Web, open the DevTools (F12). You should see one or two messages about "Testing connection". Use the one with your external IP. Copy and paste the URL after the message here.
-		<strong>Example:</strong> https://85-123-211-72.qe23e81fd3dcdda73ff82cxxxb446b0ff.plex.direct:32400
-	</p>
-	<p>
-		Plex library id:
-		<input type="text" id="plex_library_id"><br>
-		In Plex Web, go to the library you want the extension to use. In the URL bar, copy and paste the number after <em>/section/</em>.
-		<strong>Example:</strong> 1
+		Select server:
+		<select id="plex_servers">
+			<option value="">Click "Test" above</option>
+		</select>
 	</p>
 
 	<hr>
@@ -59,9 +51,11 @@
 		If you password-protected your CouchPotato install, enter the password here.
 	</p>
 
-	<div id="status"></div>
 	<button id="save">Save</button>
+	<span id="status"></span>
 
-	<script src="options.js"></script>
+	<script src="lodash.js"></script>
+	<script src="xml.js"></script>
+	<script src="index.js"></script>
 </body>
 </html>

@@ -1,8 +1,11 @@
 
-function doPlexRequest(options) {
-	return fetch(`${options.url}?title=${options.title}&year=${options.year}`, {
+function doPlexRequest(config, options) {
+	// TODO: it is possible that there are multiple movie sections in Plex, so optimally we'd loop through all of them.
+	const sectionId = config.plexSectionsMovie[0];
+	const url = `${config.plexUrlRoot}/library/sections/${sectionId}/all`;
+	return fetch(`${url}?title=${options.title}&year=${options.year}`, {
 		headers: {
-			'X-Plex-Token': options.token,
+			'X-Plex-Token': config.plexToken,
 			'Accept': 'application/json',
 		}
 	})
@@ -17,8 +20,8 @@ function doPlexRequest(options) {
 	});
 }
 
-function plexRequest(options) {
-	return doPlexRequest(options)
+function plexRequest(config, options) {
+	return doPlexRequest(config, options)
 	.then(({ size, key }) => {
 		if (!size) {
 			// This is fucked up, but Plex' definition of a year is year when it was available,
@@ -27,7 +30,7 @@ function plexRequest(options) {
 			const newOptions = Object.assign({}, options, {
 				year: options.year + 1
 			});
-			return doPlexRequest(newOptions);
+			return doPlexRequest(config, newOptions);
 		}
 		return { size, key };
 	});
@@ -37,10 +40,21 @@ function getOptions() {
 	const storage = chrome.storage.sync || chrome.storage.local;
 	return new Promise(function (resolve, reject) {
 		storage.get(null, function (items) {
+			if (!items.plexToken || !items.plexMachineId || !items.plexUrlRoot) {
+				reject(new Error('Unset options.'));
+				return;
+			}
+
+			// TODO: `plexLibraryId` is a legacy option. This is for backwards compatibility.
+			let plexSectionsMovie = [items.plexLibraryId];
+			if (items.plexSectionsMovie && items.plexSectionsMovie.length > 0) {
+				plexSectionsMovie = items.plexSectionsMovie;
+			}
 			const options = {
-				plexUrl: `${items.plexUrlRoot}/library/sections/${items.plexLibraryId}/all`,
+				plexUrlRoot: items.plexUrlRoot,
 				plexToken: items.plexToken,
 				plexMachineId: items.plexMachineId,
+				plexSectionsMovie,
 			};
 			if (items.couchpotatoBasicAuthUsername) {
 				options.couchpotatoBasicAuth = {
@@ -52,10 +66,6 @@ function getOptions() {
 				options.couchpotatoUrl = `${items.couchpotatoUrlRoot}/api/${encodeURIComponent(items.couchpotatoToken)}`;
 			}
 
-			if (!options.plexToken || !options.plexMachineId || !items.plexLibraryId || !items.plexUrlRoot) {
-				reject(new Error('Unset options.'));
-				return;
-			}
 			resolve(options);
 		});
 	});
@@ -160,7 +170,7 @@ function modifyPlexButton(el, action, title, key) {
 }
 
 function handlePlex(config, options) {
-	plexRequest({ url: config.plexUrl, token: config.plexToken, title: options.title, year: options.year })
+	plexRequest(config, { title: options.title, year: options.year })
 	.then(({ size, key }) => {
 		if (size) {
 			modifyPlexButton(options.button, 'found', 'Found on Plex', key);

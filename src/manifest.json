@@ -25,7 +25,7 @@
 		"persistent": false
 	},
 	"options_ui": {
-		"page": "options.html",
+		"page": "options/index.html",
 		"chrome_style": true
 	},
 	"permissions": [
