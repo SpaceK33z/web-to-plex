@@ -21,3 +21,7 @@ It is somewhat difficult to configure, but everything should be explained well. 
 ## Contributions
 
 All contributions are very welcome. Please make an issue first, so we can discuss it.
+
+## Related
+
+- [IMDb to Movieo](https://github.com/SpaceK33z/imdb-to-movieo)
