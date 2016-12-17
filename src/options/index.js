@@ -83,12 +83,14 @@ function saveOptions() {
 	const server = plexServers.find((ser) => ser.clientIdentifier === selectedServerId);
 
 	// Important detail: we get the token from the selected server, NOT the token the user has entered before.
-	const plexToken = server.accessToken;
-	const plexMachineId = server.clientIdentifier;
-	const plexUrlRoot = getBestConnectionUrl(server);
+	const serverToken = server.accessToken;
+	const serverId = server.clientIdentifier;
+	const serverUrl = getBestConnectionUrl(server);
 	let plexSectionsMovie = [];
 	let plexSectionsShow = [];
 
+	// With a "user token" you can access multiple servers. A "normal" token is just for one server.
+	const plexToken = document.getElementById('plex_token').value;
 	const couchpotatoUrlRoot = document.getElementById('couchpotato_url_root').value;
 	const couchpotatoToken = document.getElementById('couchpotato_token').value;
 	const couchpotatoBasicAuthUsername = document.getElementById('couchpotato_basic_auth_username').value;
@@ -108,7 +110,7 @@ function saveOptions() {
 		});
 	}
 
-	getSections(plexUrlRoot, plexToken)
+	getSections(serverUrl, serverToken)
 	.then((sections) => {
 		// Get the relevant movie and TV show sections
 		plexSectionsMovie = sections
@@ -120,13 +122,16 @@ function saveOptions() {
 	})
 	.then(() => {
 		// `plexLibraryId` is a legacy option, it's no longer necessary after the user has saved again.
-		storage.remove('plexLibraryId');
+		storage.remove(['plexLibraryId', 'plexMachineId', 'plexUrlRoot', 'plexToken']);
 		storage.set({
 			plexToken,
-			plexMachineId,
-			plexUrlRoot,
-			plexSectionsMovie,
-			plexSectionsShow,
+			server: {
+				id: serverId,
+				token: serverToken,
+				url: serverUrl,
+				movieSections: plexSectionsMovie,
+				showSections: plexSectionsShow,
+			},
 			couchpotatoUrlRoot,
 			couchpotatoToken,
 			couchpotatoBasicAuthUsername,
@@ -144,7 +149,6 @@ function saveOptions() {
 // Restores select box and checkbox state using the preferences
 // stored in chrome.storage.
 function restoreOptions() {
-	// Use default value color = 'red' and likesColor = true.
 	storage.get(null, function(items) {
 		document.getElementById('plex_token').value = items.plexToken || '';
 		document.getElementById('couchpotato_url_root').value = items.couchpotatoUrlRoot || '';

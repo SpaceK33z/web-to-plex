@@ -1,11 +1,11 @@
 
 function doPlexRequest(config, options) {
 	// TODO: it is possible that there are multiple movie sections in Plex, so optimally we'd loop through all of them.
-	const sectionId = config.plexSectionsMovie[0];
-	const url = `${config.plexUrlRoot}/library/sections/${sectionId}/all`;
+	const sectionId = config.server.movieSections[0];
+	const url = `${config.server.url}/library/sections/${sectionId}/all`;
 	return fetch(`${url}?title=${options.title}&year=${options.year}`, {
 		headers: {
-			'X-Plex-Token': config.plexToken,
+			'X-Plex-Token': config.server.token,
 			'Accept': 'application/json',
 		}
 	})
@@ -40,21 +40,19 @@ function getOptions() {
 	const storage = chrome.storage.sync || chrome.storage.local;
 	return new Promise(function (resolve, reject) {
 		storage.get(null, function (items) {
-			if (!items.plexToken || !items.plexMachineId || !items.plexUrlRoot) {
+			if (!items.plexToken || !items.server) {
 				reject(new Error('Unset options.'));
 				return;
 			}
 
-			// TODO: `plexLibraryId` is a legacy option. This is for backwards compatibility.
-			let plexSectionsMovie = [items.plexLibraryId];
-			if (items.plexSectionsMovie && items.plexSectionsMovie.length > 0) {
-				plexSectionsMovie = items.plexSectionsMovie;
-			}
+			// TODO: This is all a bit fucked up at the moment because of backwards compatibility.
 			const options = {
-				plexUrlRoot: items.plexUrlRoot,
-				plexToken: items.plexToken,
-				plexMachineId: items.plexMachineId,
-				plexSectionsMovie,
+				server: {
+					id: items.plexMachineId || items.server.id,
+					url: items.plexUrlRoot || items.server.url,
+					token: items.server && items.server.token || items.plexToken,
+					movieSections: items.plexLibraryId || items.server.movieSections,
+				},
 			};
 			if (items.couchpotatoBasicAuthUsername) {
 				options.couchpotatoBasicAuth = {
@@ -145,7 +143,7 @@ function addToCouchPotatoRequest(imdbId) {
 
 function modifyPlexButton(el, action, title, key) {
 	if (action === 'found') {
-		el.href = getPlexMediaUrl(config.plexMachineId, key);
+		el.href = getPlexMediaUrl(config.server.id, key);
 		el.textContent = 'On Plex';
 		el.classList.add('web-to-plex-button--found');
 	}
