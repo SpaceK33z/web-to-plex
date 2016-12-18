@@ -4,7 +4,7 @@ This Chrome extension adds a Plex button on [Movieo](http://movieo.me/), [IMDb](
 
 Optionally you can configure CouchPotato in the options. After that, you can immediately add a movie to CouchPotato, with one click, right from Movieo, IMDb or Trakt.tv.
 
-<img src="image.png" width="640">
+![Examples](image.png)
 
 ## Install
 
