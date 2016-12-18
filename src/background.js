@@ -1,3 +1,4 @@
+/* global chrome */
 function generateHeaders(auth) {
 	if (!auth) {
 		return {};
@@ -17,7 +18,7 @@ function viewCouchpotato(request, sendResponse) {
 	fetch(`${request.url}?id=${request.imdbId}`, {
 		headers: generateHeaders(request.basicAuth),
 	})
-	.then((res) => res.json())
+	.then(res => res.json())
 	.then((res) => {
 		const success = res.success;
 		sendResponse({ success, status: success ? res.media.status : null });
@@ -31,7 +32,7 @@ function addCouchpotato(request, sendResponse) {
 	fetch(`${request.url}?identifier=${request.imdbId}`, {
 		headers: generateHeaders(request.basicAuth),
 	})
-	.then((res) => res.json())
+	.then(res => res.json())
 	.then((res) => {
 		sendResponse({ success: res.success });
 	})
@@ -40,14 +41,16 @@ function addCouchpotato(request, sendResponse) {
 	});
 }
 
-chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-	if (request.type == 'VIEW_COUCHPOTATO') {
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+	if (request.type === 'VIEW_COUCHPOTATO') {
 		viewCouchpotato(request, sendResponse);
 		return true;
 	}
 
-	if (request.type == 'ADD_COUCHPOTATO') {
+	if (request.type === 'ADD_COUCHPOTATO') {
 		addCouchpotato(request, sendResponse);
 		return true;
 	}
+
+	return false;
 });

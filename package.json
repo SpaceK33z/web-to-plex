@@ -1,0 +1,14 @@
+{
+  "name": "web-to-plex",
+  "private": true,
+  "scripts": {
+    "lint": "eslint src",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Kees Kluskens <kees@webduck.nl>",
+  "license": "ISC",
+  "devDependencies": {
+    "eslint": "^3.12.2",
+    "eslint-config-codeyellow": "^2.0.0"
+  }
+}

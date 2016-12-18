@@ -1,18 +1,21 @@
+/* global _ */
+/* eslint-disable no-unused-vars */
+
 // flattens an object (recursively!), similarly to Array#flatten
 // e.g. flatten({ a: { b: { c: "hello!" } } }); // => "hello!"
 function _flatten(object) {
-	var check = _.isPlainObject(object) && _.size(object) === 1;
+	const check = _.isPlainObject(object) && _.size(object) === 1;
 	return check ? _flatten(_.values(object)[0]) : object;
 }
 
 function _parse(xml) {
-	var data = {};
+	const data = {};
 
-	var isText = xml.nodeType === 3,
-			isElement = xml.nodeType === 1,
-			body = xml.textContent && xml.textContent.trim(),
-			hasChildren = xml.children && xml.children.length,
-			hasAttributes = xml.attributes && xml.attributes.length;
+	const isText = xml.nodeType === 3;
+	const isElement = xml.nodeType === 1;
+	const body = xml.textContent && xml.textContent.trim();
+	const hasChildren = xml.children && xml.children.length;
+	const hasAttributes = xml.attributes && xml.attributes.length;
 
 	// if it's text just return it
 	if (isText) { return xml.nodeValue.trim(); }
@@ -25,16 +28,16 @@ function _parse(xml) {
 
 	// if it's an element with attributes, add them to data.attributes
 	if (isElement && hasAttributes) {
-		data.attributes = _.reduce(xml.attributes, function(obj, name, id) {
-			var attr = xml.attributes.item(id);
+		data.attributes = _.reduce(xml.attributes, (obj, name, id) => {
+			const attr = xml.attributes.item(id);
 			obj[attr.name] = attr.value;
 			return obj;
 		}, {});
 	}
 
 	// recursively call #parse over children, adding results to data
-	_.each(xml.children, function(child) {
-		var name = child.nodeName;
+	_.each(xml.children, (child) => {
+		const name = child.nodeName;
 
 		// if we've not come across a child with this nodeType, add it as an object
 		// and return here
@@ -52,7 +55,7 @@ function _parse(xml) {
 	});
 
 	// if we can, let's fold some attributes into the body
-	_.each(data.attributes, function(value, key) {
+	_.each(data.attributes, (value, key) => {
 		if (data[key] != null) { return; }
 		data[key] = value;
 		delete data.attributes[key];
@@ -66,6 +69,6 @@ function _parse(xml) {
 }
 
 function parseXml(string) {
-	const xml = new DOMParser().parseFromString(string, "text/xml");
+	const xml = new DOMParser().parseFromString(string, 'text/xml');
 	return _parse(xml);
 }

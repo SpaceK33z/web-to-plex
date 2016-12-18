@@ -1,3 +1,4 @@
+/* global wait, modifyPlexButton, showNotification, getOptions, handlePlex */
 function isMoviePage() {
 	const path = window.location.pathname;
 	if (!path.startsWith('/movies/')) {
@@ -25,7 +26,7 @@ function getImdbId() {
 }
 
 function init() {
-	if(isMoviePage() || isShowPage()) {
+	if (isMoviePage() || isShowPage()) {
 		wait(() => document.querySelector('#info-wrapper ul.external'), () => {
 			initPlexThingy(isMoviePage() ? 'movie' : 'show');
 		});
@@ -36,11 +37,11 @@ function renderPlexButton() {
 	const $actions = document.querySelector('ul.external li:first-child');
 	if (!$actions) {
 		console.log('Could not add Plex button.');
-		return;
+		return null;
 	}
-	let $existingEl = $actions.querySelector('.web-to-plex-button');
+	const $existingEl = $actions.querySelector('.web-to-plex-button');
 	if ($existingEl) {
-		return;
+		return null;
 	}
 	const el = document.createElement('a');
 	el.classList.add('web-to-plex-button');

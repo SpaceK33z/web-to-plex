@@ -1,3 +1,4 @@
+/* global handlePlex, getOptions, showNotification, modifyPlexButton */
 function isMovie() {
 	const tag = document.querySelector('meta[property="og:type"]');
 	return tag && tag.content === 'video.movie';
@@ -19,7 +20,7 @@ function renderPlexButton() {
 	const $plotSummary = document.querySelector('.plot_summary');
 	if (!$plotSummary) {
 		console.log('Could not add Plex button.');
-		return;
+		return null;
 	}
 	const el = document.createElement('a');
 	el.classList.add('web-to-plex-button');
@@ -27,8 +28,8 @@ function renderPlexButton() {
 	return el;
 }
 
-function initPlexMovie(type) {
-	$button = renderPlexButton();
+function initPlexMovie() {
+	const $button = renderPlexButton();
 	if (!$button) {
 		return;
 	}
@@ -42,8 +43,8 @@ function initPlexMovie(type) {
 	handlePlex(config, { type: 'movie', title, year, button: $button, imdbId });
 }
 
-function initPlexShow(type) {
-	$button = renderPlexButton();
+function initPlexShow() {
+	const $button = renderPlexButton();
 	if (!$button) {
 		return;
 	}
@@ -66,11 +67,9 @@ if ((isMovie() || isShow()) && imdbId) {
 		config = options;
 		if (isMovie()) {
 			initPlexMovie();
-		} else {
-			// TODO: Legacy configs may not have TV show sections set.
-			if (config.server.showSections) {
-				initPlexShow();
-			}
+		// TODO: Legacy configs may not have TV show sections set.
+		} else if (config.server.showSections) {
+			initPlexShow();
 		}
 	}, () => {
 		showNotification('warning', 'Not all options for the Web to Plex extension are filled in.');

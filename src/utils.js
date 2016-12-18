@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* global config */
 function wait(check, then) {
 	if (check()) {
 		then();
@@ -18,10 +20,10 @@ function doPlexRequest(config, options) {
 	return fetch(`${url}?title=${options.title}&year=${options.year}`, {
 		headers: {
 			'X-Plex-Token': config.server.token,
-			'Accept': 'application/json',
-		}
+			Accept: 'application/json',
+		},
 	})
-	.then((res) => res.json())
+	.then(res => res.json())
 	.then((res) => {
 		const size = res.MediaContainer && res.MediaContainer.size;
 		let key = null;
@@ -42,7 +44,7 @@ function plexRequest(config, options) {
 			// not when it was released (which is Movieo's definition).
 			// For examples, see Bone Tomahawk, The Big Short, The Hateful Eight.
 			const newOptions = Object.assign({}, options, {
-				year: options.year + 1
+				year: options.year + 1,
 			});
 			return doPlexRequest(config, newOptions);
 		}
@@ -52,8 +54,8 @@ function plexRequest(config, options) {
 
 function getOptions() {
 	const storage = chrome.storage.sync || chrome.storage.local;
-	return new Promise(function (resolve, reject) {
-		storage.get(null, function (items) {
+	return new Promise((resolve, reject) => {
+		storage.get(null, (items) => {
 			if (!items.plexToken || !items.server) {
 				reject(new Error('Unset options.'));
 				return;
@@ -121,7 +123,7 @@ function addToCouchpotato(options, imdbId) {
 		url: `${options.couchpotatoUrl}/media.get`,
 		imdbId,
 		basicAuth: options.couchpotatoBasicAuth,
-	}, function(res) {
+	}, (res) => {
 		const movieExists = res.success;
 		if (res.err) {
 			showNotification('warning', 'CouchPotato request failed (look in DevTools for more info)');
@@ -142,10 +144,10 @@ function addToCouchPotatoRequest(imdbId) {
 		url: `${config.couchpotatoUrl}/movie.add`,
 		imdbId,
 		basicAuth: config.couchpotatoBasicAuth,
-	}, function(res) {
+	}, (res) => {
 		if (res.err) {
 			showNotification('warning', 'Could not add to CouchPotato (look in DevTools for more info)');
-			console.error('Error with adding on CouchPotato:', err);
+			console.error('Error with adding on CouchPotato:', res.err);
 			return;
 		}
 		if (res.success) {

@@ -1,3 +1,4 @@
+/* global parseXml */
 // FireFox doesn't support sync storage.
 const storage = chrome.storage.sync || chrome.storage.local;
 
@@ -9,16 +10,16 @@ function getServers(plexToken) {
 	return fetch('https://plex.tv/api/resources?includeHttps=1', {
 		headers: {
 			'X-Plex-Token': plexToken,
-		}
+		},
 	})
 	.then(res => res.text())
 	.then((res) => {
 		const data = parseXml(res);
 		if (data === 'Invalid authentication token.') {
-			return;
+			return null;
 		}
-		return data.Device.filter((device) => device.provides === 'server')
-	})
+		return data.Device.filter(device => device.provides === 'server');
+	});
 }
 
 function getSections(url, plexToken) {
@@ -26,7 +27,7 @@ function getSections(url, plexToken) {
 		headers: {
 			'X-Plex-Token': plexToken,
 			Accept: 'application/json',
-		}
+		},
 	})
 	.then(res => res.json())
 	.then(res => res.MediaContainer.Directory);
@@ -35,7 +36,7 @@ function getSections(url, plexToken) {
 function getBestConnectionUrl(server) {
 	// `server.Connection` can be an array or object.
 	if (Array.isArray(server.Connection)) {
-		let conn = server.Connection.find((connection) => connection.local === '0');
+		const conn = server.Connection.find(connection => connection.local === '0');
 		if (conn) {
 			return conn.uri;
 		}
@@ -80,7 +81,7 @@ function saveOptions() {
 		return;
 	}
 
-	const server = plexServers.find((ser) => ser.clientIdentifier === selectedServerId);
+	const server = plexServers.find(ser => ser.clientIdentifier === selectedServerId);
 
 	// Important detail: we get the token from the selected server, NOT the token the user has entered before.
 	const serverToken = server.accessToken;
@@ -106,7 +107,7 @@ function saveOptions() {
 	if (couchpotatoUrlRoot && chrome.permissions) {
 		// When asking permissions the URL needs to have a trailing slash.
 		chrome.permissions.request({
-			origins: [`${couchpotatoUrlRoot}/`]
+			origins: [`${couchpotatoUrlRoot}/`],
 		});
 	}
 
@@ -136,10 +137,10 @@ function saveOptions() {
 			couchpotatoToken,
 			couchpotatoBasicAuthUsername,
 			couchpotatoBasicAuthPassword,
-		}, function() {
+		}, () => {
 			// Update status to let user know options were saved.
 			status.textContent = 'Options saved.';
-			setTimeout(function() {
+			setTimeout(() => {
 				status.textContent = '';
 			}, 750);
 		});
@@ -149,7 +150,7 @@ function saveOptions() {
 // Restores select box and checkbox state using the preferences
 // stored in chrome.storage.
 function restoreOptions() {
-	storage.get(null, function(items) {
+	storage.get(null, (items) => {
 		document.getElementById('plex_token').value = items.plexToken || '';
 		document.getElementById('couchpotato_url_root').value = items.couchpotatoUrlRoot || '';
 		document.getElementById('couchpotato_token').value = items.couchpotatoToken || '';
