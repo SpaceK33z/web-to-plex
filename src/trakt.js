@@ -7,7 +7,12 @@ function isMoviePage() {
 	return true;
 }
 
-function isMoviePageReady() {
+function isShowPage() {
+	const path = window.location.pathname;
+	if (!path.startsWith('/shows/')) {
+		return false;
+	}
+	// TODO: e.g. /movies/trending is not really a movie page...
 	return true;
 }
 
@@ -20,9 +25,9 @@ function getImdbId() {
 }
 
 function init() {
-	if(isMoviePage()) {
+	if(isMoviePage() || isShowPage()) {
 		wait(() => document.querySelector('#info-wrapper ul.external'), () => {
-			initPlexThingy();
+			initPlexThingy(isMoviePage() ? 'movie' : 'show');
 		});
 	}
 }
@@ -43,7 +48,7 @@ function renderPlexButton() {
 	return el;
 }
 
-function initPlexThingy() {
+function initPlexThingy(type) {
 	const $button = renderPlexButton();
 	if (!$button) {
 		return;
@@ -58,7 +63,7 @@ function initPlexThingy() {
 	const year = parseInt($year.textContent.trim());
 	const imdbId = getImdbId();
 
-	handlePlex(config, { title, year, button: $button, imdbId });
+	handlePlex(config, { type, title, year, button: $button, imdbId });
 }
 
 let config;
