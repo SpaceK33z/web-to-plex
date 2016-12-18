@@ -125,16 +125,16 @@ function showNotification(state, text, timeout) {
 	}, timeout || 5000);
 }
 
-function addToCouchpotato(options, imdbId) {
+function addToCouchpotato(imdbId) {
 	if (!imdbId) {
 		console.log('Cancelled adding to CouchPotato since there is no IMDB ID');
 		return;
 	}
 	chrome.runtime.sendMessage({
 		type: 'VIEW_COUCHPOTATO',
-		url: `${options.couchpotatoUrl}/media.get`,
+		url: `${config.couchpotatoUrl}/media.get`,
 		imdbId,
-		basicAuth: options.couchpotatoBasicAuth,
+		basicAuth: config.couchpotatoBasicAuth,
 	}, (res) => {
 		const movieExists = res.success;
 		if (res.err) {
