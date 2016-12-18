@@ -8,7 +8,7 @@ function wait(check, then) {
 	}
 }
 
-function doPlexRequest(config, options) {
+function doPlexRequest(options) {
 	// TODO: it is possible that there are multiple movie sections in Plex, so optimally we'd loop through all of them.
 	let sectionId;
 	if (options.type === 'show') {
@@ -36,8 +36,8 @@ function doPlexRequest(config, options) {
 	});
 }
 
-function plexRequest(config, options) {
-	return doPlexRequest(config, options)
+function plexRequest(options) {
+	return doPlexRequest(options)
 	.then(({ size, key }) => {
 		if (!size) {
 			// This is fucked up, but Plex' definition of a year is year when it was available,
@@ -46,7 +46,7 @@ function plexRequest(config, options) {
 			const newOptions = Object.assign({}, options, {
 				year: options.year + 1,
 			});
-			return doPlexRequest(config, newOptions);
+			return doPlexRequest(newOptions);
 		}
 		return { size, key };
 	});
@@ -56,20 +56,15 @@ function getOptions() {
 	const storage = chrome.storage.sync || chrome.storage.local;
 	return new Promise((resolve, reject) => {
 		storage.get(null, (items) => {
-			if (!items.plexToken || !items.server) {
+			if (!items.plexToken || !items.servers) {
 				reject(new Error('Unset options.'));
 				return;
 			}
 
-			// TODO: This is all a bit fucked up at the moment because of backwards compatibility.
+			// For now we support only one Plex server, but the options already
+			// allow multiple for easy migration in the future.
 			const options = {
-				server: {
-					id: items.plexMachineId || items.server.id,
-					url: items.plexUrlRoot || items.server.url,
-					token: items.server && items.server.token || items.plexToken,
-					movieSections: items.plexLibraryId || items.server.movieSections,
-					showSections: items.server && items.server.showSections,
-				},
+				server: items.servers[0],
 			};
 			if (items.couchpotatoBasicAuthUsername) {
 				options.couchpotatoBasicAuth = {
@@ -86,12 +81,26 @@ function getOptions() {
 	});
 }
 
+let config;
+function parseOptions() {
+	return getOptions().then((options) => {
+		config = options;
+	}, (err) => {
+		showNotification(
+			'warning',
+			'Not all options for the Web to Plex extension are filled in. We recently simplified the options, so you might need to hit Save again in the Options page. Sorry!',
+			15000
+		);
+		throw err;
+	});
+}
+
 function getPlexMediaUrl(plexMachineId, key) {
 	return `https://app.plex.tv/web/app#!/server/${plexMachineId}/details/${encodeURIComponent(key)}`;
 }
 
 let notificationTimeout;
-function showNotification(state, text) {
+function showNotification(state, text, timeout) {
 	if (notificationTimeout) {
 		clearTimeout(notificationTimeout);
 		notificationTimeout = null;
@@ -110,7 +119,7 @@ function showNotification(state, text) {
 	document.body.appendChild(el);
 	notificationTimeout = setTimeout(() => {
 		document.body.removeChild(el);
-	}, 5000);
+	}, timeout || 5000);
 }
 
 function addToCouchpotato(options, imdbId) {
@@ -175,7 +184,7 @@ function modifyPlexButton(el, action, title, key) {
 		el.classList.add('web-to-plex-button--couchpotato');
 		el.addEventListener('click', (e) => {
 			e.preventDefault();
-			addToCouchpotato(config, key);
+			addToCouchpotato(key);
 		});
 	}
 
@@ -184,8 +193,8 @@ function modifyPlexButton(el, action, title, key) {
 	}
 }
 
-function handlePlex(config, options) {
-	plexRequest(config, options)
+function handlePlex(options) {
+	plexRequest(options)
 	.then(({ size, key }) => {
 		if (size) {
 			modifyPlexButton(options.button, 'found', 'Found on Plex', key);

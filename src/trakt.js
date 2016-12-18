@@ -1,4 +1,4 @@
-/* global wait, modifyPlexButton, showNotification, getOptions, handlePlex */
+/* global wait, modifyPlexButton, showNotification, parseOptions, handlePlex */
 function isMoviePage() {
 	const path = window.location.pathname;
 	if (!path.startsWith('/movies/')) {
@@ -13,7 +13,7 @@ function isShowPage() {
 	if (!path.startsWith('/shows/')) {
 		return false;
 	}
-	// TODO: e.g. /movies/trending is not really a movie page...
+	// TODO: e.g. /shows/trending is not really a show page...
 	return true;
 }
 
@@ -64,16 +64,12 @@ function initPlexThingy(type) {
 	const year = parseInt($year.textContent.trim());
 	const imdbId = getImdbId();
 
-	handlePlex(config, { type, title, year, button: $button, imdbId });
+	handlePlex({ type, title, year, button: $button, imdbId });
 }
 
-let config;
-getOptions().then((options) => {
-	config = options;
+parseOptions().then(() => {
 	window.addEventListener('popstate', init);
 	window.addEventListener('pushstate-changed', init);
 	init();
-}, () => {
-	showNotification('warning', 'Not all options for the Movieo to Plex extension are filled in.');
 });
 

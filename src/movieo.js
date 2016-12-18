@@ -1,4 +1,4 @@
-/* global getOptions, showNotification, modifyPlexButton, handlePlex */
+/* global parseOptions, showNotification, modifyPlexButton, handlePlex */
 function isMoviePage() {
 	const path = window.location.pathname;
 	if (!path.startsWith('/movies/')) {
@@ -30,14 +30,10 @@ function init() {
 	}
 }
 
-let config;
-getOptions().then((options) => {
-	config = options;
+parseOptions().then(() => {
 	window.addEventListener('popstate', init);
 	window.addEventListener('pushstate-changed', init);
 	init();
-}, () => {
-	showNotification('warning', 'Not all options for the Web to Plex extension are filled in.');
 });
 
 function initPlexThingy() {
@@ -55,7 +51,7 @@ function initPlexThingy() {
 	const year = parseInt($date.content.slice(0, 4));
 	const imdbId = getImdbId();
 
-	handlePlex(config, { title, year, button: $button, imdbId });
+	handlePlex({ title, year, button: $button, imdbId });
 }
 
 function renderPlexButton() {

@@ -1,4 +1,4 @@
-/* global handlePlex, getOptions, showNotification, modifyPlexButton */
+/* global config, handlePlex, parseOptions, showNotification, modifyPlexButton */
 function isMovie() {
 	const tag = document.querySelector('meta[property="og:type"]');
 	return tag && tag.content === 'video.movie';
@@ -40,7 +40,7 @@ function initPlexMovie() {
 	// The year element contains `()`, so we need to strip it out.
 	const year = parseInt($year.textContent.trim().replace(/\(|\)/g, ''));
 
-	handlePlex(config, { type: 'movie', title, year, button: $button, imdbId });
+	handlePlex({ type: 'movie', title, year, button: $button, imdbId });
 }
 
 function initPlexShow() {
@@ -58,20 +58,16 @@ function initPlexShow() {
 	const title = $title.textContent.trim();
 	const year = parseInt(dateMatch[1]);
 
-	handlePlex(config, { type: 'show', title, year, button: $button, imdbId });
+	handlePlex({ type: 'show', title, year, button: $button, imdbId });
 }
 
-let config;
 if ((isMovie() || isShow()) && imdbId) {
-	getOptions().then((options) => {
-		config = options;
+	parseOptions().then(() => {
 		if (isMovie()) {
 			initPlexMovie();
 		// TODO: Legacy configs may not have TV show sections set.
 		} else if (config.server.showSections) {
 			initPlexShow();
 		}
-	}, () => {
-		showNotification('warning', 'Not all options for the Web to Plex extension are filled in.');
 	});
 }

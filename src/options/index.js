@@ -126,13 +126,13 @@ function saveOptions() {
 		storage.remove(['plexLibraryId', 'plexMachineId', 'plexUrlRoot', 'plexToken']);
 		storage.set({
 			plexToken,
-			server: {
+			servers: [{
 				id: serverId,
 				token: serverToken,
 				url: serverUrl,
 				movieSections: plexSectionsMovie,
 				showSections: plexSectionsShow,
-			},
+			}],
 			couchpotatoUrlRoot,
 			couchpotatoToken,
 			couchpotatoBasicAuthUsername,
