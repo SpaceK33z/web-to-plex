@@ -122,8 +122,8 @@ function saveOptions() {
 			.map(section => section.key);
 	})
 	.then(() => {
-		// `plexLibraryId` is a legacy option, it's no longer necessary after the user has saved again.
-		storage.remove(['plexLibraryId', 'plexMachineId', 'plexUrlRoot', 'plexToken']);
+		// These are legacy options, they are no longer necessary after the user has saved again.
+		storage.remove(['plexLibraryId', 'plexMachineId', 'plexUrlRoot']);
 		storage.set({
 			plexToken,
 			servers: [{

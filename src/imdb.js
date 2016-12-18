@@ -65,8 +65,7 @@ if ((isMovie() || isShow()) && imdbId) {
 	parseOptions().then(() => {
 		if (isMovie()) {
 			initPlexMovie();
-		// TODO: Legacy configs may not have TV show sections set.
-		} else if (config.server.showSections) {
+		} else {
 			initPlexShow();
 		}
 	});
