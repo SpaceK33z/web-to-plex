@@ -16,7 +16,7 @@ A FireFox port is [in progress](https://github.com/SpaceK33z/web-to-plex/issues/
 
 Before using the extension, you need to configure it in the Options page (go to `chrome://extensions` and click on Options next to the extension).
 
-It is somewhat difficult to configure, but everything should be explained well. Please don't hesitate to [submit an issue](https://github.com/SpaceK33z/web-to-plex/issues/new) if the configuration is unclear.
+If you have issues with configuring, please don't hesitate to [submit an issue](https://github.com/SpaceK33z/web-to-plex/issues/new).
 
 ## Contributions
 
