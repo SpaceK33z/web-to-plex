@@ -9,37 +9,40 @@ function wait(check, then) {
 }
 
 function doPlexRequest(options) {
-	// TODO: it is possible that there are multiple movie sections in Plex, so optimally we'd loop through all of them.
-	let sectionId;
-	if (options.type === 'show') {
-		sectionId = config.server.showSections[0];
-	} else {
-		sectionId = config.server.movieSections[0];
-	}
-	const url = `${config.server.url}/library/sections/${sectionId}/all`;
-	return fetch(`${url}?title=${options.title}&year=${options.year}`, {
-		headers: {
-			'X-Plex-Token': config.server.token,
-			Accept: 'application/json',
-		},
-	})
-	.then(res => res.json())
-	.then((res) => {
-		const size = res.MediaContainer && res.MediaContainer.size;
+	const sectionIds = options.type === 'show' ? config.server.showSections : config.server.movieSections;
+	const headers = {
+		'X-Plex-Token': config.server.token,
+		Accept: 'application/json',
+	};
+	const requests = sectionIds.map((sectionId) => {
+		const url = `${config.server.url}/library/sections/${sectionId}/all`;
+		return fetch(`${url}?title=${options.title}&year=${options.year}`, {
+			headers,
+		})
+		.then(res => res.json());
+	});
+
+	// Wait for all requests to finish and then see if one contains the movie/show we're searching for.
+	return Promise.all(requests)
+	.then((responses) => {
+		const res = responses.find(response =>
+			response.MediaContainer && response.MediaContainer.size
+		);
 		let key = null;
-		if (size) {
+		const found = !!res;
+		if (res) {
 			// With TV shows, the API returns a pathname with `/children` after it.
 			// We don't need that part.
 			key = res.MediaContainer.Metadata[0].key.replace('/children', '');
 		}
-		return { size, key };
+		return { found, key };
 	});
 }
 
 function plexRequest(options) {
 	return doPlexRequest(options)
-	.then(({ size, key }) => {
-		if (!size) {
+	.then(({ found, key }) => {
+		if (!found) {
 			// This is fucked up, but Plex' definition of a year is year when it was available,
 			// not when it was released (which is Movieo's definition).
 			// For examples, see Bone Tomahawk, The Big Short, The Hateful Eight.
@@ -48,7 +51,7 @@ function plexRequest(options) {
 			});
 			return doPlexRequest(newOptions);
 		}
-		return { size, key };
+		return { found, key };
 	});
 }
 
@@ -195,8 +198,8 @@ function modifyPlexButton(el, action, title, key) {
 
 function handlePlex(options) {
 	plexRequest(options)
-	.then(({ size, key }) => {
-		if (size) {
+	.then(({ found, key }) => {
+		if (found) {
 			modifyPlexButton(options.button, 'found', 'Found on Plex', key);
 		} else {
 			const showCouchpotato = config.couchpotatoUrl && options.type !== 'show';
