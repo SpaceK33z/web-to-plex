@@ -8,7 +8,12 @@ function wait(check, then) {
 
 function doPlexRequest(config, options) {
 	// TODO: it is possible that there are multiple movie sections in Plex, so optimally we'd loop through all of them.
-	const sectionId = config.server.movieSections[0];
+	let sectionId;
+	if (options.type === 'show') {
+		sectionId = config.server.showSections[0];
+	} else {
+		sectionId = config.server.movieSections[0];
+	}
 	const url = `${config.server.url}/library/sections/${sectionId}/all`;
 	return fetch(`${url}?title=${options.title}&year=${options.year}`, {
 		headers: {
@@ -21,7 +26,9 @@ function doPlexRequest(config, options) {
 		const size = res.MediaContainer && res.MediaContainer.size;
 		let key = null;
 		if (size) {
-			key = res.MediaContainer.Metadata[0].key;
+			// With TV shows, the API returns a pathname with `/children` after it.
+			// We don't need that part.
+			key = res.MediaContainer.Metadata[0].key.replace('/children', '');
 		}
 		return { size, key };
 	});
@@ -59,6 +66,7 @@ function getOptions() {
 					url: items.plexUrlRoot || items.server.url,
 					token: items.server && items.server.token || items.plexToken,
 					movieSections: items.plexLibraryId || items.server.movieSections,
+					showSections: items.server && items.server.showSections,
 				},
 			};
 			if (items.couchpotatoBasicAuthUsername) {
@@ -175,13 +183,14 @@ function modifyPlexButton(el, action, title, key) {
 }
 
 function handlePlex(config, options) {
-	plexRequest(config, { title: options.title, year: options.year })
+	plexRequest(config, options)
 	.then(({ size, key }) => {
 		if (size) {
 			modifyPlexButton(options.button, 'found', 'Found on Plex', key);
 		} else {
-			const action = config.couchpotatoUrl ? 'couchpotato' : 'error';
-			const title = config.couchpotatoUrl ? 'Could not find, add on Couchpotato?' : 'Could not find on Plex';
+			const showCouchpotato = config.couchpotatoUrl && options.type !== 'show';
+			const action = showCouchpotato ? 'couchpotato' : 'error';
+			const title = showCouchpotato ? 'Could not find, add on Couchpotato?' : 'Could not find on Plex';
 			modifyPlexButton(options.button, action, title, options.imdbId);
 		}
 	})
