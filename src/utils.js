@@ -162,9 +162,9 @@ function modifyPlexButton(el, action, title, key) {
 		el.textContent = 'On Plex';
 		el.classList.add('web-to-plex-button--found');
 	}
-	if (action === 'error') {
+	if (action === 'notfound' || action === 'error') {
 		el.removeAttribute('href');
-		el.textContent = 'Not on Plex';
+		el.textContent = action === 'notfound' ? 'Not on Plex' : 'Plex error';
 		el.classList.remove('web-to-plex-button--found');
 	}
 	if (action === 'couchpotato') {
@@ -189,13 +189,13 @@ function handlePlex(config, options) {
 			modifyPlexButton(options.button, 'found', 'Found on Plex', key);
 		} else {
 			const showCouchpotato = config.couchpotatoUrl && options.type !== 'show';
-			const action = showCouchpotato ? 'couchpotato' : 'error';
+			const action = showCouchpotato ? 'couchpotato' : 'notfound';
 			const title = showCouchpotato ? 'Could not find, add on Couchpotato?' : 'Could not find on Plex';
 			modifyPlexButton(options.button, action, title, options.imdbId);
 		}
 	})
 	.catch((err) => {
-		modifyPlexButton(options.button, 'error', 'Request to Plex failed');
+		modifyPlexButton(options.button, 'error', 'Request to your Plex Media Server failed.');
 		console.error('Request to Plex failed', err);
 	});
 }
