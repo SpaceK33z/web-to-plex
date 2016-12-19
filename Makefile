@@ -16,4 +16,5 @@ release-chrome: FORCE
 
 release-firefox: FORCE firefox
 	rm -f pkg-firefox.zip
+	find build/firefox -name '.DS_Store' -type f -delete
 	cd build/firefox; zip -r ../../pkg-firefox.zip **
