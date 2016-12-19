@@ -16,7 +16,7 @@ function doPlexRequest(options) {
 	};
 	const requests = sectionIds.map((sectionId) => {
 		const url = `${config.server.url}/library/sections/${sectionId}/all`;
-		return fetch(`${url}?title=${options.title}&year=${options.year}`, {
+		return fetch(`${url}?title=${encodeURIComponent(options.title)}&year=${options.year}`, {
 			headers,
 		})
 		.then(res => res.json());
