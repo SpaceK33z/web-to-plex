@@ -1,6 +1,6 @@
 # Web to Plex
 
-This Chrome extension adds a Plex button on [Movieo](http://movieo.me/), [IMDb](http://imdb.com/) and [Trakt.tv](https://trakt.tv/) pages, letting you immediately open the movie or TV show on Plex Web if it is available.
+This browser extension adds a Plex button on [Movieo](http://movieo.me/), [IMDb](http://imdb.com/) and [Trakt.tv](https://trakt.tv/) pages, letting you immediately open the movie or TV show on Plex Web if it is available.
 
 Optionally you can configure CouchPotato in the options. After that, you can immediately add a movie to CouchPotato, with one click, right from Movieo, IMDb or Trakt.tv.
 
@@ -10,7 +10,7 @@ Optionally you can configure CouchPotato in the options. After that, you can imm
 
 **Download on [Chrome Webstore](https://chrome.google.com/webstore/detail/movieo-to-plex/kmcinnefmnkfnmnmijfmbiaflncfifcn).**
 
-A FireFox port is [in progress](https://github.com/SpaceK33z/web-to-plex/issues/5).
+**Download on [FireFox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/web-to-plex/).**
 
 ## Usage
 
