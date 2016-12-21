@@ -8,7 +8,7 @@ function wait(check, then) {
 	}
 }
 
-function doPlexRequest(options) {
+function _getPlexMediaRequest(options) {
 	const sectionIds = options.type === 'show' ? config.server.showSections : config.server.movieSections;
 	const headers = {
 		'X-Plex-Token': config.server.token,
@@ -22,7 +22,7 @@ function doPlexRequest(options) {
 		.then(res => res.json());
 	});
 
-	// Wait for all requests to finish and then see if one contains the movie/show we're searching for.
+	// Wait for all requests to finish and then see if one contains the media we're searching for.
 	return Promise.all(requests)
 	.then((responses) => {
 		const res = responses.find(response =>
@@ -39,8 +39,8 @@ function doPlexRequest(options) {
 	});
 }
 
-function plexRequest(options) {
-	return doPlexRequest(options)
+function getPlexMediaRequest(options) {
+	return _getPlexMediaRequest(options)
 	.then(({ found, key }) => {
 		if (!found) {
 			// This is fucked up, but Plex' definition of a year is year when it was available,
@@ -49,13 +49,13 @@ function plexRequest(options) {
 			const newOptions = Object.assign({}, options, {
 				year: options.year + 1,
 			});
-			return doPlexRequest(newOptions);
+			return _getPlexMediaRequest(newOptions);
 		}
 		return { found, key };
 	});
 }
 
-function getOptions() {
+function _getOptions() {
 	const storage = chrome.storage.sync || chrome.storage.local;
 	return new Promise((resolve, reject) => {
 		storage.get(null, (items) => {
@@ -86,7 +86,7 @@ function getOptions() {
 
 let config;
 function parseOptions() {
-	return getOptions().then((options) => {
+	return _getOptions().then((options) => {
 		config = options;
 	}, (err) => {
 		showNotification(
@@ -125,7 +125,7 @@ function showNotification(state, text, timeout) {
 	}, timeout || 5000);
 }
 
-function addToCouchpotato(imdbId) {
+function _maybeAddToCouchpotato(imdbId) {
 	if (!imdbId) {
 		console.log('Cancelled adding to CouchPotato since there is no IMDB ID');
 		return;
@@ -143,14 +143,14 @@ function addToCouchpotato(imdbId) {
 			return;
 		}
 		if (!movieExists) {
-			addToCouchPotatoRequest(imdbId);
+			_addToCouchPotatoRequest(imdbId);
 			return;
 		}
 		showNotification('info', `Movie is already in CouchPotato (status: ${res.status})`);
 	});
 }
 
-function addToCouchPotatoRequest(imdbId) {
+function _addToCouchPotatoRequest(imdbId) {
 	chrome.runtime.sendMessage({
 		type: 'ADD_COUCHPOTATO',
 		url: `${config.couchpotatoUrl}/movie.add`,
@@ -187,7 +187,7 @@ function modifyPlexButton(el, action, title, key) {
 		el.classList.add('web-to-plex-button--couchpotato');
 		el.addEventListener('click', (e) => {
 			e.preventDefault();
-			addToCouchpotato(key);
+			_maybeAddToCouchpotato(key);
 		});
 	}
 
@@ -196,8 +196,8 @@ function modifyPlexButton(el, action, title, key) {
 	}
 }
 
-function handlePlex(options) {
-	plexRequest(options)
+function findPlexMedia(options) {
+	getPlexMediaRequest(options)
 	.then(({ found, key }) => {
 		if (found) {
 			modifyPlexButton(options.button, 'found', 'Found on Plex', key);

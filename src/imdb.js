@@ -1,4 +1,4 @@
-/* global config, handlePlex, parseOptions, showNotification, modifyPlexButton */
+/* global config, findPlexMedia, parseOptions, showNotification, modifyPlexButton */
 function isMovie() {
 	const tag = document.querySelector('meta[property="og:type"]');
 	return tag && tag.content === 'video.movie';
@@ -40,7 +40,7 @@ function initPlexMovie() {
 	// The year element contains `()`, so we need to strip it out.
 	const year = parseInt($year.textContent.trim().replace(/\(|\)/g, ''));
 
-	handlePlex({ type: 'movie', title, year, button: $button, imdbId });
+	findPlexMedia({ type: 'movie', title, year, button: $button, imdbId });
 }
 
 function initPlexShow() {
@@ -58,7 +58,7 @@ function initPlexShow() {
 	const title = $title.textContent.trim();
 	const year = parseInt(dateMatch[1]);
 
-	handlePlex({ type: 'show', title, year, button: $button, imdbId });
+	findPlexMedia({ type: 'show', title, year, button: $button, imdbId });
 }
 
 if ((isMovie() || isShow()) && imdbId) {

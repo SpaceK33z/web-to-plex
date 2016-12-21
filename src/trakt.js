@@ -1,4 +1,4 @@
-/* global wait, modifyPlexButton, showNotification, parseOptions, handlePlex */
+/* global wait, modifyPlexButton, showNotification, parseOptions, findPlexMedia */
 function isMoviePage() {
 	const path = window.location.pathname;
 	if (!path.startsWith('/movies/')) {
@@ -64,7 +64,7 @@ function initPlexThingy(type) {
 	const year = parseInt($year.textContent.trim());
 	const imdbId = getImdbId();
 
-	handlePlex({ type, title, year, button: $button, imdbId });
+	findPlexMedia({ type, title, year, button: $button, imdbId });
 }
 
 parseOptions().then(() => {
