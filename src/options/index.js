@@ -22,17 +22,6 @@ function getServers(plexToken) {
 	});
 }
 
-function getSections(url, plexToken) {
-	return fetch(`${url}/library/sections`, {
-		headers: {
-			'X-Plex-Token': plexToken,
-			Accept: 'application/json',
-		},
-	})
-	.then(res => res.json())
-	.then(res => res.MediaContainer.Directory);
-}
-
 function getBestConnectionUrl(server) {
 	// `server.Connection` can be an array or object.
 	if (Array.isArray(server.Connection)) {
@@ -87,8 +76,6 @@ function saveOptions() {
 	const serverToken = server.accessToken;
 	const serverId = server.clientIdentifier;
 	const serverUrl = getBestConnectionUrl(server);
-	let plexSectionsMovie = [];
-	let plexSectionsShow = [];
 
 	// With a "user token" you can access multiple servers. A "normal" token is just for one server.
 	const plexToken = document.getElementById('plex_token').value;
@@ -111,39 +98,25 @@ function saveOptions() {
 		});
 	}
 
-	getSections(serverUrl, serverToken)
-	.then((sections) => {
-		// Get the relevant movie and TV show sections
-		plexSectionsMovie = sections
-			.filter(section => section.type === 'movie' && section.agent !== 'com.plexapp.agents.none')
-			.map(section => section.key);
-		plexSectionsShow = sections
-			.filter(section => section.type === 'show' && section.agent !== 'com.plexapp.agents.none')
-			.map(section => section.key);
-	})
-	.then(() => {
-		// These are legacy options, they are no longer necessary after the user has saved again.
-		storage.remove(['plexLibraryId', 'plexMachineId', 'plexUrlRoot']);
-		storage.set({
-			plexToken,
-			servers: [{
-				id: serverId,
-				token: serverToken,
-				url: serverUrl,
-				movieSections: plexSectionsMovie,
-				showSections: plexSectionsShow,
-			}],
-			couchpotatoUrlRoot,
-			couchpotatoToken,
-			couchpotatoBasicAuthUsername,
-			couchpotatoBasicAuthPassword,
-		}, () => {
-			// Update status to let user know options were saved.
-			status.textContent = 'Options saved.';
-			setTimeout(() => {
-				status.textContent = '';
-			}, 750);
-		});
+	// These are legacy options, they are no longer necessary after the user has saved again.
+	storage.remove(['plexLibraryId', 'plexMachineId', 'plexUrlRoot']);
+	storage.set({
+		plexToken,
+		servers: [{
+			id: serverId,
+			token: serverToken,
+			url: serverUrl,
+		}],
+		couchpotatoUrlRoot,
+		couchpotatoToken,
+		couchpotatoBasicAuthUsername,
+		couchpotatoBasicAuthPassword,
+	}, () => {
+		// Update status to let user know options were saved.
+		status.textContent = 'Options saved.';
+		setTimeout(() => {
+			status.textContent = '';
+		}, 750);
 	});
 }
 

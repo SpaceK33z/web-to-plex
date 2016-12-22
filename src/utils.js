@@ -8,50 +8,39 @@ function wait(check, then) {
 	}
 }
 
-function _getPlexMediaRequest(options) {
-	const sectionIds = options.type === 'show' ? config.server.showSections : config.server.movieSections;
+function getPlexMediaRequest(options) {
+	const type = options.type || 'movie';
+
 	const headers = {
 		'X-Plex-Token': config.server.token,
 		Accept: 'application/json',
 	};
-	const requests = sectionIds.map((sectionId) => {
-		const url = `${config.server.url}/library/sections/${sectionId}/all`;
-		return fetch(`${url}?title=${encodeURIComponent(options.title)}&year=${options.year}`, {
-			headers,
-		})
-		.then(res => res.json());
-	});
+	const url = `${config.server.url}/hubs/search`;
 
-	// Wait for all requests to finish and then see if one contains the media we're searching for.
-	return Promise.all(requests)
-	.then((responses) => {
-		const res = responses.find(response =>
-			response.MediaContainer && response.MediaContainer.size
-		);
+	return fetch(`${url}?query=title:${encodeURIComponent(options.title)}`, {
+		headers,
+	})
+	.then(res => res.json())
+	.then((data) => {
+		const hub = data.MediaContainer.Hub.find(myHub => myHub.type === type);
+		if (!hub || !hub.Metadata) {
+			return { found: false };
+		}
+
+		// This is fucked up, but Plex' definition of a year is year when it was available,
+		// not when it was released (which is Movieo's definition).
+		// For examples, see Bone Tomahawk, The Big Short, The Hateful Eight.
+		// So we'll first try to find the movie with the given year, and then + 1 it.
+		let media = hub.Metadata.find(meta => meta.year === options.year);
+		if (!media) {
+			media = hub.Metadata.find(meta => meta.year === options.year + 1);
+		}
 		let key = null;
-		const found = !!res;
-		if (res) {
-			// With TV shows, the API returns a pathname with `/children` after it.
-			// We don't need that part.
-			key = res.MediaContainer.Metadata[0].key.replace('/children', '');
+		if (media) {
+			key = media.key.replace('/children', '');
 		}
-		return { found, key };
-	});
-}
 
-function getPlexMediaRequest(options) {
-	return _getPlexMediaRequest(options)
-	.then(({ found, key }) => {
-		if (!found) {
-			// This is fucked up, but Plex' definition of a year is year when it was available,
-			// not when it was released (which is Movieo's definition).
-			// For examples, see Bone Tomahawk, The Big Short, The Hateful Eight.
-			const newOptions = Object.assign({}, options, {
-				year: options.year + 1,
-			});
-			return _getPlexMediaRequest(newOptions);
-		}
-		return { found, key };
+		return { found: !!media, key };
 	});
 }
 
