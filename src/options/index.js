@@ -98,9 +98,17 @@ function saveOptions() {
 		});
 	}
 
+	function showOptionsSaved() {
+		// Update status to let user know options were saved.
+		status.textContent = 'Options saved.';
+		setTimeout(() => {
+			status.textContent = '';
+		}, 750);
+	}
+
 	// These are legacy options, they are no longer necessary after the user has saved again.
 	storage.remove(['plexLibraryId', 'plexMachineId', 'plexUrlRoot']);
-	storage.set({
+	const data = {
 		plexToken,
 		servers: [{
 			id: serverId,
@@ -111,19 +119,20 @@ function saveOptions() {
 		couchpotatoToken,
 		couchpotatoBasicAuthUsername,
 		couchpotatoBasicAuthPassword,
-	}, () => {
-		// Update status to let user know options were saved.
-		status.textContent = 'Options saved.';
-		setTimeout(() => {
-			status.textContent = '';
-		}, 750);
+	};
+	storage.set(data, () => {
+		if (chrome.runtime.lastError) {
+			chrome.storage.local.set(data, showOptionsSaved);
+		} else {
+			showOptionsSaved();
+		}
 	});
 }
 
 // Restores select box and checkbox state using the preferences
 // stored in chrome.storage.
 function restoreOptions() {
-	storage.get(null, (items) => {
+	function setOptions(items) {
 		document.getElementById('plex_token').value = items.plexToken || '';
 		document.getElementById('couchpotato_url_root').value = items.couchpotatoUrlRoot || '';
 		document.getElementById('couchpotato_token').value = items.couchpotatoToken || '';
@@ -132,6 +141,15 @@ function restoreOptions() {
 
 		if (items.plexToken) {
 			performTest();
+		}
+	}
+	storage.get(null, (items) => {
+		// Sigh... This is a workaround for Firefox; newer versions do have support for the `chrome.storage.sync` API,
+		// but it will throw an error if you haven't enabled that. ARGHHHHHHHHH.
+		if (chrome.runtime.lastError) {
+			chrome.storage.local.get(null, setOptions);
+		} else {
+			setOptions(items);
 		}
 	});
 }
