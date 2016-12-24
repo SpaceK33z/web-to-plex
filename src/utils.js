@@ -46,8 +46,9 @@ function getPlexMediaRequest(options) {
 
 function _getOptions() {
 	const storage = chrome.storage.sync || chrome.storage.local;
+
 	return new Promise((resolve, reject) => {
-		storage.get(null, (items) => {
+		function handleOptions(items) {
 			if (!items.plexToken || !items.servers) {
 				reject(new Error('Unset options.'));
 				return;
@@ -69,6 +70,13 @@ function _getOptions() {
 			}
 
 			resolve(options);
+		}
+		storage.get(null, (items) => {
+			if (chrome.runtime.lastError) {
+				chrome.storage.local.get(null, handleOptions);
+			} else {
+				handleOptions(items);
+			}
 		});
 	});
 }
