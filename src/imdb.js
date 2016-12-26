@@ -9,27 +9,37 @@ function isShow() {
 	return tag && tag.content === 'video.tv_show';
 }
 
+function isList() {
+	return window.location.pathname.startsWith('/list/');
+}
+
 function getImdbId() {
 	const tag = document.querySelector('meta[property="pageId"]');
 	return tag && tag.content;
 }
 
+function cleanYear(year) {
+	// The year can contain `()`, so we need to strip it out.
+	return parseInt(year.trim().replace(/\(|\)/g, ''));
+}
+
 const imdbId = getImdbId();
 
-function renderPlexButton() {
-	const $plotSummary = document.querySelector('.plot_summary');
-	if (!$plotSummary) {
+function renderPlexButton($parent) {
+	if (!$parent) {
 		console.log('Could not add Plex button.');
 		return null;
 	}
 	const el = document.createElement('a');
 	el.classList.add('web-to-plex-button');
-	$plotSummary.appendChild(el);
+	el.style.display = 'none';
+	$parent.appendChild(el);
 	return el;
 }
 
 function initPlexMovie() {
-	const $button = renderPlexButton();
+	const $parent = document.querySelector('.plot_summary');
+	const $button = renderPlexButton($parent);
 	if (!$button) {
 		return;
 	}
@@ -37,14 +47,14 @@ function initPlexMovie() {
 	const $year = document.querySelector('.title_wrapper #titleYear');
 	// TODO: Hmm there should be a less risky way...
 	const title = $title.childNodes[0].textContent.trim();
-	// The year element contains `()`, so we need to strip it out.
-	const year = parseInt($year.textContent.trim().replace(/\(|\)/g, ''));
+	const year = cleanYear($year.textContent);
 
 	findPlexMedia({ type: 'movie', title, year, button: $button, imdbId });
 }
 
 function initPlexShow() {
-	const $button = renderPlexButton();
+	const $parent = document.querySelector('.plot_summary');
+	const $button = renderPlexButton($parent);
 	if (!$button) {
 		return;
 	}
@@ -61,12 +71,41 @@ function initPlexShow() {
 	findPlexMedia({ type: 'show', title, year, button: $button, imdbId });
 }
 
-if ((isMovie() || isShow()) && imdbId) {
+function addInListItem(el) {
+	const $parent = el.querySelector('.button_strip');
+	const $button = renderPlexButton($parent);
+	if (!$button) {
+		return;
+	}
+	const $imdbId = el.querySelector('.wlb_lite');
+	const $title = el.querySelector('.info b a');
+	const $date = el.querySelector('.info .year_type');
+	if (!$imdbId || !$title || !$date) {
+		modifyPlexButton($button, 'error', 'Could not extract title or year');
+		return;
+	}
+	const type = $date.textContent.includes('TV Series') ? 'show' : 'movie';
+	const title = $title.textContent.trim();
+	const year = cleanYear($date.textContent);
+	const myImdbId = $imdbId.dataset.tconst;
+
+	findPlexMedia({ type, title, year, button: $button, imdbId: myImdbId });
+}
+
+function initList() {
+	const $listItem = document.querySelectorAll('#main .list_item');
+
+	$listItem.forEach(addInListItem);
+}
+
+if ((isMovie() || isShow()) && imdbId || isList()) {
 	parseOptions().then(() => {
 		if (isMovie()) {
 			initPlexMovie();
-		} else {
+		} else if (isShow()) {
 			initPlexShow();
+		} else {
+			initList();
 		}
 	});
 }

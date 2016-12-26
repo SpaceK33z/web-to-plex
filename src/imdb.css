@@ -25,6 +25,12 @@
 	background: #f9be03;
 }
 
+.list_item .web-to-plex-button {
+	font-size: 10px;
+	padding: 4px 6px;
+	margin-top: 0;
+}
+
 .web-to-plex-notification {
 	display: block;
 	position: fixed;

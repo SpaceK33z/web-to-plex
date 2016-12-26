@@ -168,6 +168,7 @@ function _addToCouchPotatoRequest(imdbId) {
 }
 
 function modifyPlexButton(el, action, title, key) {
+	el.style.removeProperty('display');
 	if (action === 'found') {
 		el.href = getPlexMediaUrl(config.server.id, key);
 		el.textContent = 'On Plex';
