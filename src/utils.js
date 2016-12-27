@@ -17,7 +17,9 @@ function getPlexMediaRequest(options) {
 	};
 	const url = `${config.server.url}/hubs/search`;
 
-	return fetch(`${url}?query=title:${encodeURIComponent(options.title)}`, {
+	// i.e. Letterboxd can contain special white-space characters. Plex doesn't like this.
+	const title = encodeURIComponent(options.title.replace(/\s/g, ' '));
+	return fetch(`${url}?query=title:${title}`, {
 		headers,
 	})
 	.then(res => res.json())
