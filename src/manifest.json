@@ -23,6 +23,16 @@
 			"matches": ["https://trakt.tv/*"],
 			"js": ["history-hack.js", "utils.js", "trakt.js"],
 			"css": ["trakt.css"]
+		},
+		{
+			"matches": ["https://letterboxd.com/film/*"],
+			"js": ["utils.js", "letterboxd.js"],
+			"css": ["trakt.css"]
+		},
+		{
+			"matches": ["https://www.google.co.uk/*"],
+			"js": ["utils.js", "google.js"],
+			"css": ["trakt.css"]
 		}
 	],
 	"background": {
