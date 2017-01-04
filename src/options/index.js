@@ -89,6 +89,11 @@ function saveOptions() {
 		return;
 	}
 
+	if (!serverUrl) {
+		status.textContent = 'Could not get Plex connection URL.';
+		return;
+	}
+
 	// Dynamically asking permissions
 	// TODO: FireFox doesn't have support for chrome.permissions API.
 	if (couchpotatoUrlRoot && chrome.permissions) {
@@ -106,6 +111,8 @@ function saveOptions() {
 		}, 750);
 	}
 
+	status.textContent = 'Saving…';
+
 	// These are legacy options, they are no longer necessary after the user has saved again.
 	storage.remove(['plexLibraryId', 'plexMachineId', 'plexUrlRoot']);
 	const data = {
@@ -122,6 +129,7 @@ function saveOptions() {
 	};
 	storage.set(data, () => {
 		if (chrome.runtime.lastError) {
+			console.log('Error with saving', chrome.runtime.lastError.message);
 			chrome.storage.local.set(data, showOptionsSaved);
 		} else {
 			showOptionsSaved();
