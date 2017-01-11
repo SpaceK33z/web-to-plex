@@ -90,7 +90,7 @@ function parseOptions() {
 	}, (err) => {
 		showNotification(
 			'warning',
-			'Not all options for the Web to Plex extension are filled in. We recently simplified the options, so you might need to hit Save again in the Options page. Sorry!',
+			'Not all options for the Web to Plex extension are filled in.',
 			15000
 		);
 		throw err;
