@@ -14,6 +14,8 @@ Optionally you can configure CouchPotato in the options. After that, you can imm
 
 ## Usage
 
+Make sure you have at least **Plex Media Server v1.3.3** or higher.
+
 Before using the extension, you need to configure it in the Options page (go to `chrome://extensions` and click on Options next to the extension).
 
 If you have issues with configuring, please don't hesitate to [submit an issue](https://github.com/SpaceK33z/web-to-plex/issues/new).
