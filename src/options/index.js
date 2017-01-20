@@ -72,10 +72,21 @@ function saveOptions() {
 
 	const server = plexServers.find(ser => ser.clientIdentifier === selectedServerId);
 
+	if (!server) {
+		// This _should_ never happen, but can be useful for debugging.
+		status.textContent = 'Could not find Plex server by identifier.';
+		return;
+	}
+
 	// Important detail: we get the token from the selected server, NOT the token the user has entered before.
 	const serverToken = server.accessToken;
 	const serverId = server.clientIdentifier;
 	const serverUrl = getBestConnectionUrl(server);
+
+	if (!serverUrl) {
+		status.textContent = 'Could not find Plex server URL.';
+		return;
+	}
 
 	// With a "user token" you can access multiple servers. A "normal" token is just for one server.
 	const plexToken = document.getElementById('plex_token').value;
