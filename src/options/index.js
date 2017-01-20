@@ -30,7 +30,7 @@ function getBestConnectionUrl(server) {
 			return conn.uri;
 		}
 		// If there are only local connections, fine then.
-		return conn[0].uri;
+		return server.Connection[0].uri;
 	}
 	return server.Connection.uri;
 }
