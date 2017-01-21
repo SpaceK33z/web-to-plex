@@ -6,8 +6,8 @@ release: FORCE commit-version release-chrome release-firefox
 commit-version: FORCE
 	test $(version)
 	sed -i '/"version"/c\ \ \ "version": "$(version)",' src/manifest.json src/manifest_firefox.json
-	git commit -am "Release version $(version)"
-	git tag "$(version)"
+	git commit -am "$(version)"
+	git tag "v$(version)"
 
 firefox: FORCE
 	rm -rf build/firefox
