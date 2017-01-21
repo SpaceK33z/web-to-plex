@@ -1,7 +1,13 @@
 # Empty rule to force other rules to be updated.
 FORCE:
 
-release: FORCE release-chrome release-firefox
+release: FORCE commit-version release-chrome release-firefox
+
+commit-version: FORCE
+	test $(version)
+	sed -i '/"version"/c\ \ \ "version": "$(version)",' src/manifest.json src/manifest_firefox.json
+	git commit -am "Release version $(version)"
+	git tag "$(version)"
 
 firefox: FORCE
 	rm -rf build/firefox
