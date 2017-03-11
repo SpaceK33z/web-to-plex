@@ -98,7 +98,7 @@ function parseOptions() {
 }
 
 function getPlexMediaUrl(plexMachineId, key) {
-	return `https://app.plex.tv/web/app#!/server/${plexMachineId}/details/${encodeURIComponent(key)}`;
+	return `https://app.plex.tv/web/app#!/server/${plexMachineId}/details?key=${encodeURIComponent(key)}`;
 }
 
 let notificationTimeout;
