@@ -203,22 +203,22 @@ function findPlexMedia(options) {
 		if (found) {
 			modifyPlexButton(options.button, 'found', 'Found on Plex', key);
 		} else {
-      options.field = 'original_title';
-      getPlexMediaRequest(options)
+			options.field = 'original_title';
+			getPlexMediaRequest(options)
 			.then(({ found, key }) => {
-        if (found) {
-          modifyPlexButton(options.button, 'found', 'Found on Plex', key);
-        } else {
-          const showCouchpotato = config.couchpotatoUrl && options.type !== 'show';
-          const action = showCouchpotato ? 'couchpotato' : 'notfound';
-          const title = showCouchpotato ? 'Could not find, add on Couchpotato?' : 'Could not find on Plex';
-          modifyPlexButton(options.button, action, title, options.imdbId);
-        }
-      })
-      .catch((err) => {
-        modifyPlexButton(options.button, 'error', 'Request to your Plex Media Server failed.');
-        console.error('Request to Plex failed', err);
-      });
+				if (found) {
+					modifyPlexButton(options.button, 'found', 'Found on Plex', key);
+				} else {
+					const showCouchpotato = config.couchpotatoUrl && options.type !== 'show';
+					const action = showCouchpotato ? 'couchpotato' : 'notfound';
+					const title = showCouchpotato ? 'Could not find, add on Couchpotato?' : 'Could not find on Plex';
+					modifyPlexButton(options.button, action, title, options.imdbId);
+				}
+			})
+			.catch((err) => {
+				modifyPlexButton(options.button, 'error', 'Request to your Plex Media Server failed.');
+				console.error('Request to Plex failed', err);
+			});
 		}
 	})
 	.catch((err) => {
