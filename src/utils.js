@@ -16,10 +16,11 @@ function getPlexMediaRequest(options) {
 		Accept: 'application/json',
 	};
 	const url = `${config.server.url}/hubs/search`;
+	const field = options.field || 'title';
 
 	// i.e. Letterboxd can contain special white-space characters. Plex doesn't like this.
 	const title = encodeURIComponent(options.title.replace(/\s/g, ' '));
-	return fetch(`${url}?query=title:${title}`, {
+	return fetch(`${url}?query=${field}:${title}`, {
 		headers,
 	})
 	.then(res => res.json())
@@ -202,10 +203,22 @@ function findPlexMedia(options) {
 		if (found) {
 			modifyPlexButton(options.button, 'found', 'Found on Plex', key);
 		} else {
-			const showCouchpotato = config.couchpotatoUrl && options.type !== 'show';
-			const action = showCouchpotato ? 'couchpotato' : 'notfound';
-			const title = showCouchpotato ? 'Could not find, add on Couchpotato?' : 'Could not find on Plex';
-			modifyPlexButton(options.button, action, title, options.imdbId);
+      options.field = 'original_title';
+      getPlexMediaRequest(options)
+			.then(({ found, key }) => {
+        if (found) {
+          modifyPlexButton(options.button, 'found', 'Found on Plex', key);
+        } else {
+          const showCouchpotato = config.couchpotatoUrl && options.type !== 'show';
+          const action = showCouchpotato ? 'couchpotato' : 'notfound';
+          const title = showCouchpotato ? 'Could not find, add on Couchpotato?' : 'Could not find on Plex';
+          modifyPlexButton(options.button, action, title, options.imdbId);
+        }
+      })
+      .catch((err) => {
+        modifyPlexButton(options.button, 'error', 'Request to your Plex Media Server failed.');
+        console.error('Request to Plex failed', err);
+      });
 		}
 	})
 	.catch((err) => {
