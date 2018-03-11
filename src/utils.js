@@ -20,7 +20,8 @@ function getPlexMediaRequest(options) {
 
 	// i.e. Letterboxd can contain special white-space characters. Plex doesn't like this.
 	const title = encodeURIComponent(options.title.replace(/\s/g, ' '));
-	return fetch(`${url}?query=${field}:${title}`, {
+	const finalUrl = `${url}?query=${field}:${title}`;
+	return fetch(finalUrl, {
 		headers,
 	})
 		.then(res => res.json())
@@ -140,7 +141,7 @@ function _maybeAddToCouchpotato(imdbId) {
 	chrome.runtime.sendMessage(
 		{
 			type: 'VIEW_COUCHPOTATO',
-			url: `${config.couchpotatoUrl}/media.get`,
+			url: config.couchPotatoUrl + '/media.get',
 			imdbId,
 			basicAuth: config.couchpotatoBasicAuth,
 		},
@@ -226,28 +227,19 @@ function findPlexMedia(options) {
 				modifyPlexButton(options.button, 'found', 'Found on Plex', key);
 			} else {
 				options.field = 'original_title';
-				getPlexMediaRequest(options)
-					.then(({ found, key }) => {
-						if (found) {
-							modifyPlexButton(options.button, 'found', 'Found on Plex', key);
-						} else {
-							const showCouchpotato =
-								config.couchpotatoUrl && options.type !== 'show';
-							const action = showCouchpotato ? 'couchpotato' : 'notfound';
-							const title = showCouchpotato
-								? 'Could not find, add on Couchpotato?'
-								: 'Could not find on Plex';
-							modifyPlexButton(options.button, action, title, options.imdbId);
-						}
-					})
-					.catch(err => {
-						modifyPlexButton(
-							options.button,
-							'error',
-							'Request to your Plex Media Server failed.'
-						);
-						console.error('Request to Plex failed', err);
-					});
+				return getPlexMediaRequest(options).then(({ found, key }) => {
+					if (found) {
+						modifyPlexButton(options.button, 'found', 'Found on Plex', key);
+					} else {
+						const showCouchpotato =
+							config.couchpotatoUrl && options.type !== 'show';
+						const action = showCouchpotato ? 'couchpotato' : 'notfound';
+						const title = showCouchpotato
+							? 'Could not find, add on Couchpotato?'
+							: 'Could not find on Plex';
+						modifyPlexButton(options.button, action, title, options.imdbId);
+					}
+				});
 			}
 		})
 		.catch(err => {

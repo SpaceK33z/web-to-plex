@@ -34,7 +34,8 @@
 		"chrome_style": true
 	},
 	"permissions": [
-		"storage"
+		"storage",
+		"https://*.plex.direct/*"
 	],
 	"optional_permissions": [
 		"http://*/",
