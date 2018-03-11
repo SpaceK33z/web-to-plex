@@ -6,6 +6,14 @@ const $selectServer = document.getElementById('plex_servers');
 const $saveButton = document.getElementById('save');
 let plexServers = [];
 
+const optionNames = [
+	'plexToken',
+	'couchpotatoUrlRoot',
+	'couchpotatoToken',
+	'couchpotatoBasicAuthUsername',
+	'couchpotatoBasicAuthPassword',
+];
+
 function getServers(plexToken) {
 	return fetch('https://plex.tv/api/resources?includeHttps=1', {
 		headers: {
@@ -91,20 +99,18 @@ function saveOptions() {
 	}
 
 	// With a "user token" you can access multiple servers. A "normal" token is just for one server.
-	const plexToken = document.getElementById('plex_token').value;
-	const couchpotatoUrlRoot = document.getElementById('couchpotato_url_root')
-		.value;
-	const couchpotatoToken = document.getElementById('couchpotato_token').value;
-	const couchpotatoBasicAuthUsername = document.getElementById(
-		'couchpotato_basic_auth_username'
-	).value;
-	const couchpotatoBasicAuthPassword = document.getElementById(
-		'couchpotato_basic_auth_password'
-	).value;
+	const values = {};
+	optionNames.forEach(optionName => {
+		values[optionName] = document.querySelector(
+			`[data-option="${optionName}"]`
+		).value;
+	});
+	console.log('optionValues', values);
 
 	if (
-		couchpotatoUrlRoot &&
-		(!couchpotatoUrlRoot.startsWith('http') || couchpotatoUrlRoot.endsWith('/'))
+		values.couchpotatoUrlRoot &&
+		(!values.couchpotatoUrlRoot.startsWith('http') ||
+			values.couchpotatoUrlRoot.endsWith('/'))
 	) {
 		status.textContent =
 			'CouchPotato URL should start with "http" and end without a slash!';
@@ -118,10 +124,10 @@ function saveOptions() {
 
 	// Dynamically asking permissions
 	// TODO: FireFox doesn't have support for chrome.permissions API.
-	if (couchpotatoUrlRoot && chrome.permissions) {
+	if (values.couchpotatoUrlRoot && chrome.permissions) {
 		// When asking permissions the URL needs to have a trailing slash.
 		chrome.permissions.request({
-			origins: [`${couchpotatoUrlRoot}/`],
+			origins: [`${values.couchpotatoUrlRoot}/`],
 		});
 	}
 
@@ -138,7 +144,7 @@ function saveOptions() {
 	// These are legacy options, they are no longer necessary after the user has saved again.
 	storage.remove(['plexLibraryId', 'plexMachineId', 'plexUrlRoot']);
 	const data = {
-		plexToken,
+		...values,
 		servers: [
 			{
 				id: serverId,
@@ -146,10 +152,6 @@ function saveOptions() {
 				url: serverUrl,
 			},
 		],
-		couchpotatoUrlRoot,
-		couchpotatoToken,
-		couchpotatoBasicAuthUsername,
-		couchpotatoBasicAuthPassword,
 	};
 	storage.set(data, () => {
 		if (chrome.runtime.lastError) {
@@ -165,15 +167,10 @@ function saveOptions() {
 // stored in chrome.storage.
 function restoreOptions() {
 	function setOptions(items) {
-		document.getElementById('plex_token').value = items.plexToken || '';
-		document.getElementById('couchpotato_url_root').value =
-			items.couchpotatoUrlRoot || '';
-		document.getElementById('couchpotato_token').value =
-			items.couchpotatoToken || '';
-		document.getElementById('couchpotato_basic_auth_username').value =
-			items.couchpotatoBasicAuthUsername || '';
-		document.getElementById('couchpotato_basic_auth_password').value =
-			items.couchpotatoBasicAuthPassword || '';
+		optionNames.forEach(optionName => {
+			document.querySelector(`[data-option="${optionName}"]`).value =
+				items[optionName] || '';
+		});
 
 		if (items.plexToken) {
 			performTest();

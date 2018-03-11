@@ -3,7 +3,7 @@
 <head>
 	<title>Web To Plex Options</title>
 	<style>
-		body: {
+		body {
 			padding: .8rem;
 		}
 
@@ -13,13 +13,22 @@
 			line-height: 1.8em;
 			color: #333;
 		}
+
+		details {
+			margin-bottom: .8rem;
+		}
+
+		summary:hover {
+			color: #f45a26;
+			cursor: pointer;
+		}
 	</style>
 </head>
 
 <body>
 	<p>
 		Plex token:
-		<input type="text" id="plex_token"><br>
+		<input type="text" id="plex_token" data-option="plexToken"><br>
 		<a href="https://support.plex.tv/hc/en-us/articles/204059436-Finding-your-account-token-X-Plex-Token">Learn how to find your token</a>
 	</p>
 	<p>
@@ -35,30 +44,34 @@
 
 	<hr>
 
-	<p>
-		CouchPotato URL <em>(optional)</em>:
-		<input type="text" id="couchpotato_url_root"><br>
-		<strong>Example:</strong> https://example.com/couchpotato or http://192.168.1.100:5050 (no trailing slash!)
-	</p>
+	<details>
+		<summary>CouchPotato settings</summary>
 
-	<p>
-		CouchPotato API key <em>(optional)</em>:
-		<input type="text" id="couchpotato_token"><br>
-		In CouchPotato, go to Settings, click on "Show advanced" and copy paste the value next to "Api Key".
-		<strong>Example:</strong> aa756d33242f6g8ffbca2b3963586f21
-	</p>
+		<p>
+			CouchPotato URL <em>(optional)</em>:
+			<input type="text" data-option="couchpotatoUrlRoot"><br>
+			<strong>Example:</strong> https://example.com/couchpotato or http://192.168.1.100:5050 (no trailing slash!)
+		</p>
 
-	<p>
-		CouchPotato basic auth username <em>(optional)</em>:
-		<input type="text" id="couchpotato_basic_auth_username"><br>
-		If you password-protected your CouchPotato install, enter the username here.
-	</p>
+		<p>
+			CouchPotato API key <em>(optional)</em>:
+			<input type="text" data-option="couchpotatoToken"><br>
+			In CouchPotato, go to Settings, click on "Show advanced" and copy paste the value next to "Api Key".
+			<strong>Example:</strong> aa756d33242f6g8ffbca2b3963586f21
+		</p>
 
-	<p>
-		CouchPotato basic auth password <em>(optional)</em>:
-		<input type="text" id="couchpotato_basic_auth_password"><br>
-		If you password-protected your CouchPotato install, enter the password here.
-	</p>
+		<p>
+			CouchPotato basic auth username <em>(optional)</em>:
+			<input type="text" data-option="couchpotatoBasicAuthUsername"><br>
+			If you password-protected your CouchPotato install, enter the username here.
+		</p>
+
+		<p>
+			CouchPotato basic auth password <em>(optional)</em>:
+			<input type="text" data-option="couchpotatoBasicAuthPassword"><br>
+			If you password-protected your CouchPotato install, enter the password here.
+		</p>
+	</details>
 
 	<button id="save">Save</button>
 	<span id="status"></span>
