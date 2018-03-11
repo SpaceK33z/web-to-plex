@@ -12,6 +12,11 @@ const optionNames = [
 	'couchpotatoToken',
 	'couchpotatoBasicAuthUsername',
 	'couchpotatoBasicAuthPassword',
+	'radarrUrlRoot',
+	'radarrToken',
+	'radarrBasicAuthUsername',
+	'radarrBasicAuthPassword',
+	'radarrStoragePath',
 ];
 
 function getServers(plexToken) {
@@ -105,15 +110,24 @@ function saveOptions() {
 			`[data-option="${optionName}"]`
 		).value;
 	});
-	console.log('optionValues', values);
+	function testRootUrl(url) {
+		return url && (!url.startsWith('http') || url.endsWith('/'));
+	}
 
-	if (
-		values.couchpotatoUrlRoot &&
-		(!values.couchpotatoUrlRoot.startsWith('http') ||
-			values.couchpotatoUrlRoot.endsWith('/'))
-	) {
+	if (testRootUrl(values.couchpotatoUrlRoot)) {
 		status.textContent =
 			'CouchPotato URL should start with "http" and end without a slash!';
+		return;
+	}
+
+	if (testRootUrl(values.radarrUrlRoot)) {
+		status.textContent =
+			'Radarr URL should start with "http" and end without a slash!';
+		return;
+	}
+
+	if (values.radarrStoragePath && !values.radarrStoragePath.endsWith('/')) {
+		status.textContent = 'Radarr storage path should end with a slash!';
 		return;
 	}
 
@@ -122,14 +136,19 @@ function saveOptions() {
 		return;
 	}
 
-	// Dynamically asking permissions
-	// TODO: FireFox doesn't have support for chrome.permissions API.
-	if (values.couchpotatoUrlRoot && chrome.permissions) {
-		// When asking permissions the URL needs to have a trailing slash.
-		chrome.permissions.request({
-			origins: [`${values.couchpotatoUrlRoot}/`],
-		});
+	function requestUrlPermissions(url) {
+		// TODO: FireFox doesn't have support for chrome.permissions API.
+		if (url && chrome.permissions) {
+			// When asking permissions the URL needs to have a trailing slash.
+			chrome.permissions.request({
+				origins: [`${values.couchpotatoUrlRoot}/`],
+			});
+		}
 	}
+
+	// Dynamically asking permissions
+	requestUrlPermissions(values.couchpotatoUrlRoot);
+	requestUrlPermissions(values.radarrUrlRoot);
 
 	function showOptionsSaved() {
 		// Update status to let user know options were saved.

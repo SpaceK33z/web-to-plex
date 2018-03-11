@@ -7,12 +7,12 @@
 	color: #566273!important;
 }
 
-.web-to-plex-button--couchpotato {
+.web-to-plex-button--downloader {
 	border-color: #f45a26!important;
 	color: #acb4bf!important;
 }
 
-.web-to-plex-button--couchpotato:hover {
+.web-to-plex-button--downloader:hover {
 	border-color: #f67e56!important;
 }
 

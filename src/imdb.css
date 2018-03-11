@@ -9,11 +9,11 @@
 	text-transform: uppercase;
 }
 
-.web-to-plex-button--couchpotato {
+.web-to-plex-button--downloader {
 	background: #f45a26;
 }
 
-.web-to-plex-button--couchpotato:hover {
+.web-to-plex-button--downloader:hover {
 	background: #f67e56;
 }
 

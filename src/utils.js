@@ -69,10 +69,24 @@ function _getOptions() {
 					password: items.couchpotatoBasicAuthPassword,
 				};
 			}
+			// TODO: stupid copy/pasta
+			if (items.radarrBasicAuthUsername) {
+				options.radarrBasicAuth = {
+					username: items.radarrBasicAuthUsername,
+					password: items.radarrBasicAuthPassword,
+				};
+			}
 			if (items.couchpotatoUrlRoot && items.couchpotatoToken) {
 				options.couchpotatoUrl = `${
 					items.couchpotatoUrlRoot
 				}/api/${encodeURIComponent(items.couchpotatoToken)}`;
+			}
+			if (items.radarrUrlRoot && items.radarrToken) {
+				options.radarrUrl = items.radarrUrlRoot;
+				options.radarrToken = items.radarrToken;
+			}
+			if (items.radarrStoragePath) {
+				options.radarrStoragePath = items.radarrStoragePath;
 			}
 
 			resolve(options);
@@ -193,10 +207,34 @@ function _addToCouchPotatoRequest(imdbId) {
 	);
 }
 
-function modifyPlexButton(el, action, title, key) {
+function _addToRadarrRequest(options) {
+	chrome.runtime.sendMessage(
+		{
+			type: 'ADD_RADARR',
+			url: `${config.radarrUrl}/api/movie`,
+			itemOptions: { ...options, button: undefined },
+			radarrToken: config.radarrToken,
+			radarrStoragePath: config.radarrStoragePath,
+			basicAuth: config.radarrBasicAuth,
+		},
+		res => {
+			if (res && res.err) {
+				showNotification('warning', 'Could not add to Radarr.' + res.err);
+				console.error('Error with adding on Radarr:', res.err);
+				return;
+			} else if (res && res.success) {
+				showNotification('info', 'Added movie on Radarr.');
+			} else {
+				showNotification('warning', 'Could not add to Radarr. Unknown Error');
+			}
+		}
+	);
+}
+
+function modifyPlexButton(el, action, title, options) {
 	el.style.removeProperty('display');
 	if (action === 'found') {
-		el.href = getPlexMediaUrl(config.server.id, key);
+		el.href = getPlexMediaUrl(config.server.id, options.key);
 		el.textContent = 'On Plex';
 		el.classList.add('web-to-plex-button--found');
 	}
@@ -205,13 +243,17 @@ function modifyPlexButton(el, action, title, key) {
 		el.textContent = action === 'notfound' ? 'Not on Plex' : 'Plex error';
 		el.classList.remove('web-to-plex-button--found');
 	}
-	if (action === 'couchpotato') {
+	if (action === 'downloader') {
 		el.href = '#';
 		el.textContent = 'Download';
-		el.classList.add('web-to-plex-button--couchpotato');
+		el.classList.add('web-to-plex-button--downloader');
 		el.addEventListener('click', e => {
 			e.preventDefault();
-			_maybeAddToCouchpotato(key);
+			if (config.radarrUrl) {
+				_addToRadarrRequest(options);
+			} else {
+				_maybeAddToCouchpotato(options);
+			}
 		});
 	}
 
@@ -224,20 +266,21 @@ function findPlexMedia(options) {
 	getPlexMediaRequest(options)
 		.then(({ found, key }) => {
 			if (found) {
-				modifyPlexButton(options.button, 'found', 'Found on Plex', key);
+				modifyPlexButton(options.button, 'found', 'Found on Plex', { key });
 			} else {
 				options.field = 'original_title';
 				return getPlexMediaRequest(options).then(({ found, key }) => {
 					if (found) {
 						modifyPlexButton(options.button, 'found', 'Found on Plex', key);
 					} else {
-						const showCouchpotato =
-							config.couchpotatoUrl && options.type !== 'show';
-						const action = showCouchpotato ? 'couchpotato' : 'notfound';
-						const title = showCouchpotato
-							? 'Could not find, add on Couchpotato?'
+						const showDownloader =
+							(config.couchpotatoUrl || config.radarrUrl) &&
+							options.type !== 'show';
+						const action = showDownloader ? 'downloader' : 'notfound';
+						const title = showDownloader
+							? 'Could not find, want to download?'
 							: 'Could not find on Plex';
-						modifyPlexButton(options.button, action, title, options.imdbId);
+						modifyPlexButton(options.button, action, title, options);
 					}
 				});
 			}

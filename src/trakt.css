@@ -1,10 +1,10 @@
-.web-to-plex-button--couchpotato {
+.web-to-plex-button--downloader {
 	border-color: #f45a26!important;
 	background: #f45a26!important;
 	color: #fff!important;
 }
 
-.web-to-plex-button--couchpotato:hover {
+.web-to-plex-button--downloader:hover {
 	background: #f67e56!important;
 }
 
