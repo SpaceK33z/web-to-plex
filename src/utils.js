@@ -23,28 +23,28 @@ function getPlexMediaRequest(options) {
 	return fetch(`${url}?query=${field}:${title}`, {
 		headers,
 	})
-	.then(res => res.json())
-	.then((data) => {
-		const hub = data.MediaContainer.Hub.find(myHub => myHub.type === type);
-		if (!hub || !hub.Metadata) {
-			return { found: false };
-		}
+		.then(res => res.json())
+		.then(data => {
+			const hub = data.MediaContainer.Hub.find(myHub => myHub.type === type);
+			if (!hub || !hub.Metadata) {
+				return { found: false };
+			}
 
-		// This is fucked up, but Plex' definition of a year is year when it was available,
-		// not when it was released (which is Movieo's definition).
-		// For examples, see Bone Tomahawk, The Big Short, The Hateful Eight.
-		// So we'll first try to find the movie with the given year, and then + 1 it.
-		let media = hub.Metadata.find(meta => meta.year === options.year);
-		if (!media) {
-			media = hub.Metadata.find(meta => meta.year === options.year + 1);
-		}
-		let key = null;
-		if (media) {
-			key = media.key.replace('/children', '');
-		}
+			// This is fucked up, but Plex' definition of a year is year when it was available,
+			// not when it was released (which is Movieo's definition).
+			// For examples, see Bone Tomahawk, The Big Short, The Hateful Eight.
+			// So we'll first try to find the movie with the given year, and then + 1 it.
+			let media = hub.Metadata.find(meta => meta.year === options.year);
+			if (!media) {
+				media = hub.Metadata.find(meta => meta.year === options.year + 1);
+			}
+			let key = null;
+			if (media) {
+				key = media.key.replace('/children', '');
+			}
 
-		return { found: !!media, key };
-	});
+			return { found: !!media, key };
+		});
 }
 
 function _getOptions() {
@@ -69,12 +69,14 @@ function _getOptions() {
 				};
 			}
 			if (items.couchpotatoUrlRoot && items.couchpotatoToken) {
-				options.couchpotatoUrl = `${items.couchpotatoUrlRoot}/api/${encodeURIComponent(items.couchpotatoToken)}`;
+				options.couchpotatoUrl = `${
+					items.couchpotatoUrlRoot
+				}/api/${encodeURIComponent(items.couchpotatoToken)}`;
 			}
 
 			resolve(options);
 		}
-		storage.get(null, (items) => {
+		storage.get(null, items => {
 			if (chrome.runtime.lastError) {
 				chrome.storage.local.get(null, handleOptions);
 			} else {
@@ -86,20 +88,25 @@ function _getOptions() {
 
 let config;
 function parseOptions() {
-	return _getOptions().then((options) => {
-		config = options;
-	}, (err) => {
-		showNotification(
-			'warning',
-			'Not all options for the Web to Plex extension are filled in.',
-			15000
-		);
-		throw err;
-	});
+	return _getOptions().then(
+		options => {
+			config = options;
+		},
+		err => {
+			showNotification(
+				'warning',
+				'Not all options for the Web to Plex extension are filled in.',
+				15000
+			);
+			throw err;
+		}
+	);
 }
 
 function getPlexMediaUrl(plexMachineId, key) {
-	return `https://app.plex.tv/web/app#!/server/${plexMachineId}/details?key=${encodeURIComponent(key)}`;
+	return `https://app.plex.tv/web/app#!/server/${plexMachineId}/details?key=${encodeURIComponent(
+		key
+	)}`;
 }
 
 let notificationTimeout;
@@ -130,44 +137,59 @@ function _maybeAddToCouchpotato(imdbId) {
 		console.log('Cancelled adding to CouchPotato since there is no IMDB ID');
 		return;
 	}
-	chrome.runtime.sendMessage({
-		type: 'VIEW_COUCHPOTATO',
-		url: `${config.couchpotatoUrl}/media.get`,
-		imdbId,
-		basicAuth: config.couchpotatoBasicAuth,
-	}, (res) => {
-		const movieExists = res.success;
-		if (res.err) {
-			showNotification('warning', 'CouchPotato request failed (look in DevTools for more info)');
-			console.error('Error with viewing on CouchPotato:', res.err);
-			return;
+	chrome.runtime.sendMessage(
+		{
+			type: 'VIEW_COUCHPOTATO',
+			url: `${config.couchpotatoUrl}/media.get`,
+			imdbId,
+			basicAuth: config.couchpotatoBasicAuth,
+		},
+		res => {
+			const movieExists = res.success;
+			if (res.err) {
+				showNotification(
+					'warning',
+					'CouchPotato request failed (look in DevTools for more info)'
+				);
+				console.error('Error with viewing on CouchPotato:', res.err);
+				return;
+			}
+			if (!movieExists) {
+				_addToCouchPotatoRequest(imdbId);
+				return;
+			}
+			showNotification(
+				'info',
+				`Movie is already in CouchPotato (status: ${res.status})`
+			);
 		}
-		if (!movieExists) {
-			_addToCouchPotatoRequest(imdbId);
-			return;
-		}
-		showNotification('info', `Movie is already in CouchPotato (status: ${res.status})`);
-	});
+	);
 }
 
 function _addToCouchPotatoRequest(imdbId) {
-	chrome.runtime.sendMessage({
-		type: 'ADD_COUCHPOTATO',
-		url: `${config.couchpotatoUrl}/movie.add`,
-		imdbId,
-		basicAuth: config.couchpotatoBasicAuth,
-	}, (res) => {
-		if (res.err) {
-			showNotification('warning', 'Could not add to CouchPotato (look in DevTools for more info)');
-			console.error('Error with adding on CouchPotato:', res.err);
-			return;
+	chrome.runtime.sendMessage(
+		{
+			type: 'ADD_COUCHPOTATO',
+			url: `${config.couchpotatoUrl}/movie.add`,
+			imdbId,
+			basicAuth: config.couchpotatoBasicAuth,
+		},
+		res => {
+			if (res.err) {
+				showNotification(
+					'warning',
+					'Could not add to CouchPotato (look in DevTools for more info)'
+				);
+				console.error('Error with adding on CouchPotato:', res.err);
+				return;
+			}
+			if (res.success) {
+				showNotification('info', 'Added movie on CouchPotato.');
+			} else {
+				showNotification('warning', 'Could not add to CouchPotato.');
+			}
 		}
-		if (res.success) {
-			showNotification('info', 'Added movie on CouchPotato.');
-		} else {
-			showNotification('warning', 'Could not add to CouchPotato.');
-		}
-	});
+	);
 }
 
 function modifyPlexButton(el, action, title, key) {
@@ -186,7 +208,7 @@ function modifyPlexButton(el, action, title, key) {
 		el.href = '#';
 		el.textContent = 'Download';
 		el.classList.add('web-to-plex-button--couchpotato');
-		el.addEventListener('click', (e) => {
+		el.addEventListener('click', e => {
 			e.preventDefault();
 			_maybeAddToCouchpotato(key);
 		});
@@ -199,30 +221,41 @@ function modifyPlexButton(el, action, title, key) {
 
 function findPlexMedia(options) {
 	getPlexMediaRequest(options)
-	.then(({ found, key }) => {
-		if (found) {
-			modifyPlexButton(options.button, 'found', 'Found on Plex', key);
-		} else {
-			options.field = 'original_title';
-			getPlexMediaRequest(options)
-			.then(({ found, key }) => {
-				if (found) {
-					modifyPlexButton(options.button, 'found', 'Found on Plex', key);
-				} else {
-					const showCouchpotato = config.couchpotatoUrl && options.type !== 'show';
-					const action = showCouchpotato ? 'couchpotato' : 'notfound';
-					const title = showCouchpotato ? 'Could not find, add on Couchpotato?' : 'Could not find on Plex';
-					modifyPlexButton(options.button, action, title, options.imdbId);
-				}
-			})
-			.catch((err) => {
-				modifyPlexButton(options.button, 'error', 'Request to your Plex Media Server failed.');
-				console.error('Request to Plex failed', err);
-			});
-		}
-	})
-	.catch((err) => {
-		modifyPlexButton(options.button, 'error', 'Request to your Plex Media Server failed.');
-		console.error('Request to Plex failed', err);
-	});
+		.then(({ found, key }) => {
+			if (found) {
+				modifyPlexButton(options.button, 'found', 'Found on Plex', key);
+			} else {
+				options.field = 'original_title';
+				getPlexMediaRequest(options)
+					.then(({ found, key }) => {
+						if (found) {
+							modifyPlexButton(options.button, 'found', 'Found on Plex', key);
+						} else {
+							const showCouchpotato =
+								config.couchpotatoUrl && options.type !== 'show';
+							const action = showCouchpotato ? 'couchpotato' : 'notfound';
+							const title = showCouchpotato
+								? 'Could not find, add on Couchpotato?'
+								: 'Could not find on Plex';
+							modifyPlexButton(options.button, action, title, options.imdbId);
+						}
+					})
+					.catch(err => {
+						modifyPlexButton(
+							options.button,
+							'error',
+							'Request to your Plex Media Server failed.'
+						);
+						console.error('Request to Plex failed', err);
+					});
+			}
+		})
+		.catch(err => {
+			modifyPlexButton(
+				options.button,
+				'error',
+				'Request to your Plex Media Server failed.'
+			);
+			console.error('Request to Plex failed', err);
+		});
 }

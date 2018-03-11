@@ -1,4 +1,4 @@
-/* global config, findPlexMedia, parseOptions, showNotification, modifyPlexButton */
+/* global findPlexMedia, parseOptions, modifyPlexButton */
 function isMovie() {
 	const tag = document.querySelector('meta[property="og:type"]');
 	return tag && tag.content === 'video.movie';
@@ -98,7 +98,7 @@ function initList() {
 	$listItem.forEach(addInListItem);
 }
 
-if ((isMovie() || isShow()) && imdbId || isList()) {
+if (((isMovie() || isShow()) && imdbId) || isList()) {
 	parseOptions().then(() => {
 		if (isMovie()) {
 			initPlexMovie();

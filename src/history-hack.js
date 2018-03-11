@@ -1,12 +1,13 @@
 const _script = document.createElement('script');
-_script.text = `(${
-function () {
+_script.text = `(${function() {
 	// injected DOM script is not a content script anymore,
 	// it can modify objects and functions of the page
-	const _pushState = history.pushState;
-	history.pushState = function (state, title, url) {
+	const _pushState = window.history.pushState;
+	window.history.pushState = function(state, title, url) {
 		_pushState.call(this, state, title, url);
-		window.dispatchEvent(new CustomEvent('pushstate-changed', { detail: state }));
+		window.dispatchEvent(
+			new CustomEvent('pushstate-changed', { detail: state })
+		);
 	};
 	// repeat the above for replaceState too
 }})();`;

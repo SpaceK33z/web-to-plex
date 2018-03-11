@@ -12,14 +12,14 @@ function getServers(plexToken) {
 			'X-Plex-Token': plexToken,
 		},
 	})
-	.then(res => res.text())
-	.then((res) => {
-		const data = parseXml(res);
-		if (data === 'Invalid authentication token.') {
-			return null;
-		}
-		return data.Device.filter(device => device.provides === 'server');
-	});
+		.then(res => res.text())
+		.then(res => {
+			const data = parseXml(res);
+			if (data === 'Invalid authentication token.') {
+				return null;
+			}
+			return data.Device.filter(device => device.provides === 'server');
+		});
 }
 
 function getBestConnectionUrl(server) {
@@ -42,8 +42,7 @@ function performTest() {
 	$testStatus.textContent = '';
 	$saveButton.disabled = true;
 
-	getServers(plexToken)
-	.then((servers) => {
+	getServers(plexToken).then(servers => {
 		plexServers = servers || [];
 		if (!servers) {
 			$testStatus.textContent = 'Invalid token.';
@@ -52,7 +51,7 @@ function performTest() {
 
 		$saveButton.disabled = false;
 
-		servers.forEach((server) => {
+		servers.forEach(server => {
 			const $opt = document.createElement('option');
 			const source = server.sourceTitle;
 			$opt.value = server.clientIdentifier;
@@ -64,13 +63,16 @@ function performTest() {
 
 function saveOptions() {
 	const status = document.getElementById('status');
-	const selectedServerId = $selectServer.options[$selectServer.selectedIndex].value;
+	const selectedServerId =
+		$selectServer.options[$selectServer.selectedIndex].value;
 	if (!selectedServerId) {
 		status.textContent = 'Select a server first!';
 		return;
 	}
 
-	const server = plexServers.find(ser => ser.clientIdentifier === selectedServerId);
+	const server = plexServers.find(
+		ser => ser.clientIdentifier === selectedServerId
+	);
 
 	if (!server) {
 		// This _should_ never happen, but can be useful for debugging.
@@ -90,13 +92,22 @@ function saveOptions() {
 
 	// With a "user token" you can access multiple servers. A "normal" token is just for one server.
 	const plexToken = document.getElementById('plex_token').value;
-	const couchpotatoUrlRoot = document.getElementById('couchpotato_url_root').value;
+	const couchpotatoUrlRoot = document.getElementById('couchpotato_url_root')
+		.value;
 	const couchpotatoToken = document.getElementById('couchpotato_token').value;
-	const couchpotatoBasicAuthUsername = document.getElementById('couchpotato_basic_auth_username').value;
-	const couchpotatoBasicAuthPassword = document.getElementById('couchpotato_basic_auth_password').value;
+	const couchpotatoBasicAuthUsername = document.getElementById(
+		'couchpotato_basic_auth_username'
+	).value;
+	const couchpotatoBasicAuthPassword = document.getElementById(
+		'couchpotato_basic_auth_password'
+	).value;
 
-	if (couchpotatoUrlRoot && (!couchpotatoUrlRoot.startsWith('http') || couchpotatoUrlRoot.endsWith('/'))) {
-		status.textContent = 'CouchPotato URL should start with "http" and end without a slash!';
+	if (
+		couchpotatoUrlRoot &&
+		(!couchpotatoUrlRoot.startsWith('http') || couchpotatoUrlRoot.endsWith('/'))
+	) {
+		status.textContent =
+			'CouchPotato URL should start with "http" and end without a slash!';
 		return;
 	}
 
@@ -128,11 +139,13 @@ function saveOptions() {
 	storage.remove(['plexLibraryId', 'plexMachineId', 'plexUrlRoot']);
 	const data = {
 		plexToken,
-		servers: [{
-			id: serverId,
-			token: serverToken,
-			url: serverUrl,
-		}],
+		servers: [
+			{
+				id: serverId,
+				token: serverToken,
+				url: serverUrl,
+			},
+		],
 		couchpotatoUrlRoot,
 		couchpotatoToken,
 		couchpotatoBasicAuthUsername,
@@ -153,16 +166,20 @@ function saveOptions() {
 function restoreOptions() {
 	function setOptions(items) {
 		document.getElementById('plex_token').value = items.plexToken || '';
-		document.getElementById('couchpotato_url_root').value = items.couchpotatoUrlRoot || '';
-		document.getElementById('couchpotato_token').value = items.couchpotatoToken || '';
-		document.getElementById('couchpotato_basic_auth_username').value = items.couchpotatoBasicAuthUsername || '';
-		document.getElementById('couchpotato_basic_auth_password').value = items.couchpotatoBasicAuthPassword || '';
+		document.getElementById('couchpotato_url_root').value =
+			items.couchpotatoUrlRoot || '';
+		document.getElementById('couchpotato_token').value =
+			items.couchpotatoToken || '';
+		document.getElementById('couchpotato_basic_auth_username').value =
+			items.couchpotatoBasicAuthUsername || '';
+		document.getElementById('couchpotato_basic_auth_password').value =
+			items.couchpotatoBasicAuthPassword || '';
 
 		if (items.plexToken) {
 			performTest();
 		}
 	}
-	storage.get(null, (items) => {
+	storage.get(null, items => {
 		// Sigh... This is a workaround for Firefox; newer versions do have support for the `chrome.storage.sync` API,
 		// but it will throw an error if you haven't enabled that. ARGHHHHHHHHH.
 		if (chrome.runtime.lastError) {

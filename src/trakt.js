@@ -1,4 +1,4 @@
-/* global wait, modifyPlexButton, showNotification, parseOptions, findPlexMedia */
+/* global wait, modifyPlexButton, parseOptions, findPlexMedia */
 function isMoviePage() {
 	const path = window.location.pathname;
 	if (!path.startsWith('/movies/')) {
@@ -18,7 +18,9 @@ function isShowPage() {
 }
 
 function getImdbId() {
-	const $link = document.querySelector('ul.external [href^="http://www.imdb.com/title/tt"]');
+	const $link = document.querySelector(
+		'ul.external [href^="http://www.imdb.com/title/tt"]'
+	);
 	if ($link) {
 		return $link.href.replace('http://www.imdb.com/title/', '');
 	}
@@ -27,9 +29,12 @@ function getImdbId() {
 
 function init() {
 	if (isMoviePage() || isShowPage()) {
-		wait(() => document.querySelector('#info-wrapper ul.external'), () => {
-			initPlexThingy(isMoviePage() ? 'movie' : 'show');
-		});
+		wait(
+			() => document.querySelector('#info-wrapper ul.external'),
+			() => {
+				initPlexThingy(isMoviePage() ? 'movie' : 'show');
+			}
+		);
 	}
 }
 
@@ -72,4 +77,3 @@ parseOptions().then(() => {
 	window.addEventListener('pushstate-changed', init);
 	init();
 });
-

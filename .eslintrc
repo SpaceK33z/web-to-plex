@@ -1,12 +1,10 @@
 {
-	"extends": "codeyellow",
+	"extends": "@volst",
 	"root": true,
 	"rules": {
-		"indent": ["error", "tab"],
-		"no-tabs": 0,
 		"no-use-before-define": 0
 	},
 	"globals": {
 		"chrome": true
-	},
+	}
 }

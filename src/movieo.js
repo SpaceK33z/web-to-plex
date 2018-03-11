@@ -1,4 +1,4 @@
-/* global parseOptions, showNotification, modifyPlexButton, findPlexMedia */
+/* global parseOptions, modifyPlexButton, findPlexMedia */
 function isMoviePage() {
 	const path = window.location.pathname;
 	if (!path.startsWith('/movies/')) {
@@ -44,7 +44,11 @@ function initPlexThingy() {
 	const $title = document.getElementById('doc_title');
 	const $date = document.querySelector('meta[itemprop="datePublished"]');
 	if (!$title || !$date) {
-		modifyPlexButton($button, 'error', 'Could not extract title or year from Movieo');
+		modifyPlexButton(
+			$button,
+			'error',
+			'Could not extract title or year from Movieo'
+		);
 		return;
 	}
 	const title = $title.dataset.title.trim();
@@ -57,7 +61,9 @@ function initPlexThingy() {
 function renderPlexButton() {
 	// The button text in the "Comments" button takes too much place, so we hide it.
 	// It's very clear that it's about comments even without the text.
-	const $commentText = document.querySelector('.mid-top-actions .comments-link .txt');
+	const $commentText = document.querySelector(
+		'.mid-top-actions .comments-link .txt'
+	);
 	if ($commentText) {
 		$commentText.remove();
 	}
@@ -74,7 +80,9 @@ function renderPlexButton() {
 }
 
 function getImdbId() {
-	const $link = document.querySelector('.tt-parent[href^="http://www.imdb.com/title/tt"]');
+	const $link = document.querySelector(
+		'.tt-parent[href^="http://www.imdb.com/title/tt"]'
+	);
 	if ($link) {
 		return $link.href.replace('http://www.imdb.com/title/', '');
 	}
