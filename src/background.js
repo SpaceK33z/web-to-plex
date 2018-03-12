@@ -48,33 +48,37 @@ function addRadarr(request, sendResponse) {
 		'Content-Type': 'application/json',
 		'X-Api-Key': request.radarrToken,
 	};
-	const body = JSON.stringify({
-		title: request.itemOptions.title,
-		year: request.itemOptions.year,
-		profileId: '6',
-		monitored: true,
-		minimumAvailability: 'preDB',
-		tmdbId: request.itemOptions.tmdbId,
-		titleSlug: request.itemOptions.title,
-		qualityProfileId: 0,
-		rootFolderPath: request.radarrStoragePath,
-		addOptions: {
-			searchForMovie: true,
-		},
-		images: [
-			{
-				coverType: 'poster',
-				url: 'http://image.tmdb.org/t/p/original',
-			},
-		],
-	});
-	console.log('generated URL', request.url, headers);
-	console.log('body', body);
-	fetch(request.url, {
+	const lookupQuery = encodeURIComponent(`imdb:${request.itemOptions.imdb}`);
+	fetch(`${request.url}/lookup?term=${lookupQuery}`, {
 		method: 'post',
 		headers,
-		body,
 	})
+		.then(res => res.json())
+		.then(data => {
+			if (!Array.isArray(data) || data.length < 1) {
+				throw new Error('Movie was not found.');
+			}
+			const body = {
+				...data[0],
+				monitored: true,
+				minimumAvailability: 'preDB',
+				qualityProfileId: 0, // TODO
+				rootFolderPath: request.radarrStoragePath,
+				addOptions: {
+					searchForMovie: true,
+				},
+			};
+			console.log('generated URL', request.url, headers);
+			console.log('body', body);
+			return body;
+		})
+		.then(body => {
+			return fetch(request.url, {
+				method: 'post',
+				headers,
+				body: JSON.stringify(body),
+			});
+		})
 		.then(res => res.json())
 		.then(res => {
 			if (res && res[0] && res[0].errorMessage) {
