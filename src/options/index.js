@@ -52,7 +52,7 @@ function getBestConnectionUrl(server) {
 	return server.Connection.uri;
 }
 
-function performPlexTest() {
+function performPlexTest(oldServerId) {
 	const plexToken = document.getElementById('plex_token').value;
 	const $testStatus = document.getElementById('plex_test_status');
 	$selectServer.innerHTML = '';
@@ -75,6 +75,9 @@ function performPlexTest() {
 			$opt.textContent = `${server.name} ${source ? `(${source})` : ''}`;
 			$selectServer.appendChild($opt);
 		});
+		if (oldServerId) {
+			$selectServer.value = oldServerId;
+		}
 	});
 }
 
@@ -247,7 +250,8 @@ function restoreOptions() {
 		});
 
 		if (items.plexToken) {
-			performPlexTest();
+			const serverId = items.servers ? items.servers[0].id : null;
+			performPlexTest(serverId);
 		}
 		if (items.radarrUrlRoot) {
 			performRadarrTest(items.radarrQualityProfileId);
