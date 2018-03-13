@@ -217,8 +217,6 @@ function saveOptions() {
 
 	status.textContent = 'Saving…';
 
-	// These are legacy options, they are no longer necessary after the user has saved again.
-	storage.remove(['plexLibraryId', 'plexMachineId', 'plexUrlRoot']);
 	const data = {
 		...values,
 		servers: [
