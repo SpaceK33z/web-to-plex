@@ -73,6 +73,10 @@ function renderPlexButton() {
 		console.log('Could not add Plex button.');
 		return null;
 	}
+	const $existingEl = document.querySelector('a.web-to-plex-button');
+	if ($existingEl) {
+		$existingEl.remove();
+	}
 	const el = document.createElement('a');
 	el.classList.add('button', 'comments-link', 'web-to-plex-button');
 	$actions.appendChild(el);
