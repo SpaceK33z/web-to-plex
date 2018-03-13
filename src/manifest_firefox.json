@@ -8,6 +8,12 @@
 		"48": "img/48.png",
 		"128": "img/128.png"
 	},
+	"applications": {
+		"gecko": {
+		  "id": "{05243336-ce19-46df-95af-680070c96134}",
+		  "strict_min_version": "57.0"
+		}
+	},
 	"content_scripts": [
 		{
 			"matches": ["https://movieo.me/*"],
