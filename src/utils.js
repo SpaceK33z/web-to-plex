@@ -85,9 +85,8 @@ function _getOptions() {
 				options.radarrUrl = items.radarrUrlRoot;
 				options.radarrToken = items.radarrToken;
 			}
-			if (items.radarrStoragePath) {
-				options.radarrStoragePath = items.radarrStoragePath;
-			}
+			options.radarrStoragePath = items.radarrStoragePath;
+			options.radarrQualityProfileId = items.radarrQualityProfileId;
 
 			resolve(options);
 		}
@@ -147,16 +146,20 @@ function showNotification(state, text, timeout) {
 	}, timeout || 5000);
 }
 
-function _maybeAddToCouchpotato(imdbId) {
-	if (!imdbId) {
-		console.log('Cancelled adding to CouchPotato since there is no IMDB ID');
+function _maybeAddToCouchpotato(options) {
+	// TODO: this does not work anymore!
+	if (!options.imdbId) {
+		showNotification(
+			'warning',
+			'Cancelled adding to CouchPotato since there is no IMDB ID.'
+		);
 		return;
 	}
 	chrome.runtime.sendMessage(
 		{
 			type: 'VIEW_COUCHPOTATO',
 			url: config.couchPotatoUrl + '/media.get',
-			imdbId,
+			imdbId: options.imdbId,
 			basicAuth: config.couchpotatoBasicAuth,
 		},
 		res => {
@@ -170,7 +173,7 @@ function _maybeAddToCouchpotato(imdbId) {
 				return;
 			}
 			if (!movieExists) {
-				_addToCouchPotatoRequest(imdbId);
+				_addToCouchPotatoRequest(options);
 				return;
 			}
 			showNotification(
@@ -181,12 +184,12 @@ function _maybeAddToCouchpotato(imdbId) {
 	);
 }
 
-function _addToCouchPotatoRequest(imdbId) {
+function _addToCouchPotatoRequest(options) {
 	chrome.runtime.sendMessage(
 		{
 			type: 'ADD_COUCHPOTATO',
 			url: `${config.couchpotatoUrl}/movie.add`,
-			imdbId,
+			imdbId: options.imdbId,
 			basicAuth: config.couchpotatoBasicAuth,
 		},
 		res => {
@@ -208,13 +211,21 @@ function _addToCouchPotatoRequest(imdbId) {
 }
 
 function _addToRadarrRequest(options) {
+	if (!options.imdbId) {
+		showNotification(
+			'warning',
+			'Cancelled adding to Radarr since there is no IMDB ID.'
+		);
+		return;
+	}
 	chrome.runtime.sendMessage(
 		{
 			type: 'ADD_RADARR',
 			url: `${config.radarrUrl}/api/movie`,
-			itemOptions: { ...options, button: undefined },
+			imdbId: options.imdbId,
 			radarrToken: config.radarrToken,
 			radarrStoragePath: config.radarrStoragePath,
+			radarrQualityProfileId: config.radarrQualityProfileId,
 			basicAuth: config.radarrBasicAuth,
 		},
 		res => {

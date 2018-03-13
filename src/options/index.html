@@ -16,6 +16,11 @@
 
 		details {
 			margin-bottom: .8rem;
+			margin-left: 1.2rem;
+		}
+
+		summary {
+			margin-left: -1.2rem;
 		}
 
 		summary:hover {
@@ -107,9 +112,22 @@
 			<input type="text" data-option="radarrBasicAuthPassword"><br>
 			If you password-protected your Radarr install, enter the password here.
 		</p>
+
+		<p>
+			<button type="button" id="radarr_test">Test Radarr</button>
+			<span id="radarr_test_status"></span>
+		</p>
+		<p>
+			Select quality profile:
+			<select data-option="radarrQualityProfileId">
+				<option value="">Click "Test" above</option>
+			</select>
+		</p>
 	</details>
 
-	<button id="save">Save</button>
+	<p>
+		<button id="save">Save</button>
+	</p>
 	<span id="status"></span>
 
 	<script src="lodash.min.js"></script>

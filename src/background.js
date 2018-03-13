@@ -48,11 +48,9 @@ function addRadarr(request, sendResponse) {
 		'Content-Type': 'application/json',
 		'X-Api-Key': request.radarrToken,
 	};
-	const lookupQuery = encodeURIComponent(`imdb:${request.itemOptions.imdb}`);
-	fetch(`${request.url}/lookup?term=${lookupQuery}`, {
-		method: 'post',
-		headers,
-	})
+	const lookupQuery = encodeURIComponent(`imdb:${request.imdbId}`);
+
+	fetch(`${request.url}/lookup?term=${lookupQuery}`, { headers })
 		.then(res => res.json())
 		.then(data => {
 			if (!Array.isArray(data) || data.length < 1) {
@@ -62,7 +60,7 @@ function addRadarr(request, sendResponse) {
 				...data[0],
 				monitored: true,
 				minimumAvailability: 'preDB',
-				qualityProfileId: 0, // TODO
+				qualityProfileId: request.radarrQualityProfileId,
 				rootFolderPath: request.radarrStoragePath,
 				addOptions: {
 					searchForMovie: true,

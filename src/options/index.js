@@ -3,6 +3,9 @@
 const storage = chrome.storage.sync || chrome.storage.local;
 
 const $selectServer = document.getElementById('plex_servers');
+const $selectRadarrQualityProfile = document.querySelector(
+	`[data-option="radarrQualityProfileId"]`
+);
 const $saveButton = document.getElementById('save');
 let plexServers = [];
 
@@ -17,6 +20,7 @@ const optionNames = [
 	'radarrBasicAuthUsername',
 	'radarrBasicAuthPassword',
 	'radarrStoragePath',
+	'radarrQualityProfileId',
 ];
 
 function getServers(plexToken) {
@@ -48,7 +52,7 @@ function getBestConnectionUrl(server) {
 	return server.Connection.uri;
 }
 
-function performTest() {
+function performPlexTest() {
 	const plexToken = document.getElementById('plex_token').value;
 	const $testStatus = document.getElementById('plex_test_status');
 	$selectServer.innerHTML = '';
@@ -71,6 +75,58 @@ function performTest() {
 			$opt.textContent = `${server.name} ${source ? `(${source})` : ''}`;
 			$selectServer.appendChild($opt);
 		});
+	});
+}
+
+function getOptionValues() {
+	const values = {};
+	optionNames.forEach(optionName => {
+		values[optionName] = document.querySelector(
+			`[data-option="${optionName}"]`
+		).value;
+	});
+	return values;
+}
+
+function getRadarrProfiles(values) {
+	const headers = {
+		Accept: 'application/json',
+		'Content-Type': 'application/json',
+		'X-Api-Key': values.radarrToken,
+	};
+	if (values.radarrBasicAuthUsername) {
+		const hash = btoa(
+			`${values.radarrBasicAuthUsername}:${values.radarrBasicAuthPassword}`
+		);
+		headers.Authorization = `Basic ${hash}`;
+	}
+	return fetch(`${values.radarrUrlRoot}/api/profile`, { headers })
+		.then(res => res.json())
+		.catch(err => {
+			console.log('Radarr failed to connect with error:', err);
+			return [];
+		});
+}
+
+function performRadarrTest(oldQualityProfileId) {
+	const values = getOptionValues();
+	const $testStatus = document.getElementById('radarr_test_status');
+	$selectRadarrQualityProfile.innerHTML = '';
+	$testStatus.textContent = '';
+
+	getRadarrProfiles(values).then(profiles => {
+		$testStatus.textContent =
+			profiles.length > 0 ? 'It works!' : 'Could not connect.';
+		profiles.forEach(profile => {
+			const $opt = document.createElement('option');
+			$opt.value = profile.id;
+			$opt.textContent = profile.name;
+			$selectRadarrQualityProfile.appendChild($opt);
+		});
+		// Because the <select> was reset, the original value is lost.
+		if (oldQualityProfileId) {
+			$selectRadarrQualityProfile.value = oldQualityProfileId;
+		}
 	});
 }
 
@@ -104,12 +160,7 @@ function saveOptions() {
 	}
 
 	// With a "user token" you can access multiple servers. A "normal" token is just for one server.
-	const values = {};
-	optionNames.forEach(optionName => {
-		values[optionName] = document.querySelector(
-			`[data-option="${optionName}"]`
-		).value;
-	});
+	const values = getOptionValues();
 	function testRootUrl(url) {
 		return url && (!url.startsWith('http') || url.endsWith('/'));
 	}
@@ -123,6 +174,12 @@ function saveOptions() {
 	if (testRootUrl(values.radarrUrlRoot)) {
 		status.textContent =
 			'Radarr URL should start with "http" and end without a slash!';
+		return;
+	}
+
+	if (values.radarrUrlRoot && !values.radarrQualityProfileId) {
+		status.textContent =
+			'Make sure you have selected a Radarr quality profile.';
 		return;
 	}
 
@@ -141,7 +198,7 @@ function saveOptions() {
 		if (url && chrome.permissions) {
 			// When asking permissions the URL needs to have a trailing slash.
 			chrome.permissions.request({
-				origins: [`${values.couchpotatoUrlRoot}/`],
+				origins: [`${url}/`],
 			});
 		}
 	}
@@ -192,7 +249,10 @@ function restoreOptions() {
 		});
 
 		if (items.plexToken) {
-			performTest();
+			performPlexTest();
+		}
+		if (items.radarrUrlRoot) {
+			performRadarrTest(items.radarrQualityProfileId);
 		}
 	}
 	storage.get(null, items => {
@@ -207,4 +267,7 @@ function restoreOptions() {
 }
 document.addEventListener('DOMContentLoaded', restoreOptions);
 $saveButton.addEventListener('click', saveOptions);
-document.getElementById('plex_test').addEventListener('click', performTest);
+document.getElementById('plex_test').addEventListener('click', performPlexTest);
+document
+	.getElementById('radarr_test')
+	.addEventListener('click', () => performRadarrTest());
