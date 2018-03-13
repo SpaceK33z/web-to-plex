@@ -100,6 +100,10 @@ function _getOptions() {
 	});
 }
 
+function openOptionsPage() {
+	chrome.runtime.sendMessage({ type: 'OPEN_OPTIONS' });
+}
+
 let config;
 function parseOptions() {
 	return _getOptions().then(
@@ -110,7 +114,8 @@ function parseOptions() {
 			showNotification(
 				'warning',
 				'Not all options for the Web to Plex extension are filled in.',
-				15000
+				15000,
+				openOptionsPage
 			);
 			throw err;
 		}
@@ -124,7 +129,7 @@ function getPlexMediaUrl(plexMachineId, key) {
 }
 
 let notificationTimeout;
-function showNotification(state, text, timeout) {
+function showNotification(state, text, timeout, callback) {
 	if (notificationTimeout) {
 		clearTimeout(notificationTimeout);
 		notificationTimeout = null;
@@ -136,14 +141,19 @@ function showNotification(state, text, timeout) {
 
 	const el = document.createElement('div');
 	el.classList.add('web-to-plex-notification');
+	function close() {
+		document.body.removeChild(el);
+	}
+	el.onclick = () => {
+		close();
+		callback && callback();
+	};
 	if (state === 'warning') {
 		el.classList.add('web-to-plex-warning');
 	}
 	el.textContent = text;
 	document.body.appendChild(el);
-	notificationTimeout = setTimeout(() => {
-		document.body.removeChild(el);
-	}, timeout || 5000);
+	notificationTimeout = setTimeout(close, timeout || 5000);
 }
 
 function _maybeAddToCouchpotato(options) {

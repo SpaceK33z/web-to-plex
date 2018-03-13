@@ -19,6 +19,7 @@
 }
 
 .web-to-plex-notification {
+	cursor: pointer;
 	display: block;
 	position: fixed;
 	top: 80px;
