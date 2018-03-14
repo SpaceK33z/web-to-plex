@@ -168,7 +168,7 @@ function _maybeAddToCouchpotato(options) {
 	chrome.runtime.sendMessage(
 		{
 			type: 'VIEW_COUCHPOTATO',
-			url: config.couchPotatoUrl + '/media.get',
+			url: config.couchpotatoUrl + '/media.get',
 			imdbId: options.imdbId,
 			basicAuth: config.couchpotatoBasicAuth,
 		},
