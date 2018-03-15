@@ -188,7 +188,7 @@ function saveOptions() {
 		return;
 	}
 
-	if (values.radarrStoragePath && !values.radarrStoragePath.endsWith('/')) {
+	if (values.radarrStoragePath && !/\/|\\$/.test(values.radarrStoragePath)) {
 		status.textContent = 'Radarr storage path should end with a slash!';
 		return;
 	}
