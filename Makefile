@@ -32,4 +32,4 @@ build-firefox: FORCE firefox
 release-firefox: FORCE build-firefox lint
 
 publish: FORCE
-	./node_modules/.bin/webstore upload --source pkg-chrome.zip --extension-id=$(EXTENSION_ID) --client-id=$(CLIENT_ID) --client-secret=$(CLIENT_SECRET) --refresh-token=$(REFRESH_TOKEN)
+	./node_modules/.bin/webstore upload --source pkg-chrome.zip --extension-id=$(EXTENSION_ID) --client-id=$(CLIENT_ID) --client-secret=$(CLIENT_SECRET) --refresh-token=$(REFRESH_TOKEN) --auto-publish
