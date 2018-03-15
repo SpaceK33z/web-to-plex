@@ -158,6 +158,7 @@ function saveOptions() {
 	const serverToken = server.accessToken;
 	const serverId = server.clientIdentifier;
 	const serverUrl = getBestConnectionUrl(server);
+	console.log('Chosen Plex Server URL:', serverUrl);
 
 	if (!serverUrl) {
 		status.textContent = 'Could not find Plex server URL.';
