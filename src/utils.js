@@ -31,7 +31,7 @@ function getPlexMediaRequest(options) {
 				return { found: false };
 			}
 
-			// This is fucked up, but Plex' definition of a year is year when it was available,
+			// This is messed up, but Plex' definition of a year is year when it was available,
 			// not when it was released (which is Movieo's definition).
 			// For examples, see Bone Tomahawk, The Big Short, The Hateful Eight.
 			// So we'll first try to find the movie with the given year, and then + 1 it.

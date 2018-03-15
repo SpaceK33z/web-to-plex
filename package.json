@@ -9,6 +9,9 @@
   "license": "ISC",
   "devDependencies": {
     "@volst/eslint-config": "2.1.0",
+    "addons-linter": "^0.39.1",
+    "chrome-webstore-upload-cli": "^1.1.1",
     "eslint": "^4.18.2"
-  }
+  },
+  "dependencies": {}
 }
