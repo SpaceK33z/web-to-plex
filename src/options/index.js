@@ -146,6 +146,8 @@ function saveOptions() {
 		ser => ser.clientIdentifier === selectedServerId
 	);
 
+	console.log('Currently selected server information', JSON.stringify(server));
+
 	if (!server) {
 		// This _should_ never happen, but can be useful for debugging.
 		status.textContent = 'Could not find Plex server by identifier.';
