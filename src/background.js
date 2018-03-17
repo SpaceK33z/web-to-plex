@@ -92,26 +92,67 @@ function addRadarr(request, sendResponse) {
 		});
 }
 
+function searchPlex(request, sendResponse) {
+	const { options, serverConfig } = request;
+	const headers = {
+		'X-Plex-Token': serverConfig.token,
+		Accept: 'application/json',
+	};
+	const type = options.type || 'movie';
+	const url = `${serverConfig.url}/hubs/search`;
+	const field = options.field || 'title';
+
+	// i.e. Letterboxd can contain special white-space characters. Plex doesn't like this.
+	const title = encodeURIComponent(options.title.replace(/\s/g, ' '));
+	const finalUrl = `${url}?query=${field}:${title}`;
+	return fetch(finalUrl, {
+		headers,
+	})
+		.then(res => res.json())
+		.then(data => {
+			const hub = data.MediaContainer.Hub.find(myHub => myHub.type === type);
+			if (!hub || !hub.Metadata) {
+				return sendResponse({ found: false });
+			}
+
+			// This is messed up, but Plex' definition of a year is year when it was available,
+			// not when it was released (which is Movieo's definition).
+			// For examples, see Bone Tomahawk, The Big Short, The Hateful Eight.
+			// So we'll first try to find the movie with the given year, and then + 1 it.
+			let media = hub.Metadata.find(meta => meta.year === options.year);
+			if (!media) {
+				media = hub.Metadata.find(meta => meta.year === options.year + 1);
+			}
+			let key = null;
+			if (media) {
+				key = media.key.replace('/children', '');
+			}
+
+			return sendResponse({ found: !!media, key });
+		})
+		.catch(err => {
+			sendResponse({ err: String(err) });
+		});
+}
+
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-	if (request.type === 'VIEW_COUCHPOTATO') {
-		viewCouchpotato(request, sendResponse);
-		return true;
+	switch (request.type) {
+		case 'SEARCH_PLEX':
+			searchPlex(request, sendResponse);
+			return true;
+		case 'VIEW_COUCHPOTATO':
+			viewCouchpotato(request, sendResponse);
+			return true;
+		case 'ADD_COUCHPOTATO':
+			addCouchpotato(request, sendResponse);
+			return true;
+		case 'ADD_RADARR':
+			addRadarr(request, sendResponse);
+			return true;
+		case 'OPEN_OPTIONS':
+			chrome.runtime.openOptionsPage();
+			return true;
+		default:
+			return false;
 	}
-
-	if (request.type === 'ADD_COUCHPOTATO') {
-		addCouchpotato(request, sendResponse);
-		return true;
-	}
-
-	if (request.type === 'ADD_RADARR') {
-		addRadarr(request, sendResponse);
-		return true;
-	}
-
-	if (request.type === 'OPEN_OPTIONS') {
-		chrome.runtime.openOptionsPage();
-		return true;
-	}
-
-	return false;
 });
