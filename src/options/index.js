@@ -274,7 +274,7 @@ document.addEventListener('DOMContentLoaded', restoreOptions);
 $saveButton.addEventListener('click', saveOptions);
 document
 	.getElementById('plex_test')
-	.addEventListener('click', () => performPlexTest);
+	.addEventListener('click', () => performPlexTest());
 document
 	.getElementById('radarr_test')
 	.addEventListener('click', () => performRadarrTest());
