@@ -58,7 +58,5 @@ function getImdbId() {
 }
 
 parseOptions().then(() => {
-	window.addEventListener('popstate', init);
-	window.addEventListener('pushstate-changed', init);
 	init();
 });
