@@ -1,10 +1,17 @@
 # Web to Plex
 
-This browser extension adds a Plex button on [Movieo](http://movieo.me/), [IMDb](http://imdb.com/) and [Trakt.tv](https://trakt.tv/) pages, letting you immediately open the movie or TV show on Plex Web if it is available.
+This browser extension adds a Plex button on movie pages like IMDb, letting you immediately open the movie or TV show on Plex Web if it is available.
 
-Optionally you can configure CouchPotato or Radarr in the options. After that, you can immediately add a movie to CouchPotato/Radarr, with one click, right from Movieo, IMDb or Trakt.tv.
+Optionally you can configure CouchPotato or Radarr in the options. After that, you can immediately add a movie to CouchPotato/Radarr, with one click, right from your favorite movie page.
 
 ![Examples](image.png)
+
+**Supported movie pages:**
+
+ - [Movieo](http://movieo.me/)
+ - [IMDb](http://imdb.com/)
+ - [Trakt.tv](https://trakt.tv/)
+ - [Letterboxd](https://letterboxd.com/)
 
 ## Install
 
