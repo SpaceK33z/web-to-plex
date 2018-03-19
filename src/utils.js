@@ -38,7 +38,7 @@ function _getOptions() {
 
 			// For now we support only one Plex server, but the options already
 			// allow multiple for easy migration in the future.
-			const server = items.server[0];
+			const server = items.servers[0];
 			const options = {
 				server: {
 					...server,

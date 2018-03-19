@@ -127,6 +127,30 @@ function _searchPlex(connection, headers, options) {
 		});
 }
 
+// Unfortunately the native Promise.race does not work as you would suspect.
+// If one promise (Plex request) fails, we still want the other requests to continue racing.
+// See https://www.jcore.com/2016/12/18/promise-me-you-wont-use-promise-race/ for explanation
+function promiseRace(promises) {
+	if (promises.length < 1) {
+		return Promise.reject('Cannot start a race without promises!');
+	}
+
+	// There is no way to know which promise is rejected.
+	// So we map it to a new promise to return the index when it fails
+	let indexPromises = promises.map((p, index) =>
+		p.catch(() => {
+			throw index;
+		})
+	);
+
+	return Promise.race(indexPromises).catch(index => {
+		// The promise has rejected, remove it from the list of promises and just continue the race.
+		let p = promises.splice(index, 1)[0];
+		p.catch(e => console.log(`Plex request ${index} failed:`, e));
+		return promiseRace(promises);
+	});
+}
+
 async function searchPlex(request, sendResponse) {
 	const { options, serverConfig } = request;
 	const headers = {
@@ -141,7 +165,7 @@ async function searchPlex(request, sendResponse) {
 	try {
 		// See what connection url finishes the request first and pick that one.
 		// TODO: optimally, as soon as the first request is finished, all other requests would be cancelled using AbortController.
-		const result = await Promise.race(requests);
+		const result = await promiseRace(requests);
 		sendResponse(result);
 	} catch (err) {
 		sendResponse({ err: String(err) });
