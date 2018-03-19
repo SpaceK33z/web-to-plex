@@ -38,8 +38,13 @@ function _getOptions() {
 
 			// For now we support only one Plex server, but the options already
 			// allow multiple for easy migration in the future.
+			const server = items.server[0];
 			const options = {
-				server: items.servers[0],
+				server: {
+					...server,
+					// Compatibility for users who have not updated their settings yet.
+					connections: server.connections || { uri: server.url },
+				},
 			};
 			if (items.couchpotatoBasicAuthUsername) {
 				options.couchpotatoBasicAuth = {

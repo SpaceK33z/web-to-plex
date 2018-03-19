@@ -92,14 +92,9 @@ function addRadarr(request, sendResponse) {
 		});
 }
 
-function searchPlex(request, sendResponse) {
-	const { options, serverConfig } = request;
-	const headers = {
-		'X-Plex-Token': serverConfig.token,
-		Accept: 'application/json',
-	};
+function _searchPlex(connection, headers, options) {
 	const type = options.type || 'movie';
-	const url = `${serverConfig.url}/hubs/search`;
+	const url = `${connection.uri}/hubs/search`;
 	const field = options.field || 'title';
 
 	// i.e. Letterboxd can contain special white-space characters. Plex doesn't like this.
@@ -112,7 +107,7 @@ function searchPlex(request, sendResponse) {
 		.then(data => {
 			const hub = data.MediaContainer.Hub.find(myHub => myHub.type === type);
 			if (!hub || !hub.Metadata) {
-				return sendResponse({ found: false });
+				return { found: false };
 			}
 
 			// This is messed up, but Plex' definition of a year is year when it was available,
@@ -128,11 +123,29 @@ function searchPlex(request, sendResponse) {
 				key = media.key.replace('/children', '');
 			}
 
-			return sendResponse({ found: !!media, key });
-		})
-		.catch(err => {
-			sendResponse({ err: String(err) });
+			return { found: !!media, key };
 		});
+}
+
+async function searchPlex(request, sendResponse) {
+	const { options, serverConfig } = request;
+	const headers = {
+		'X-Plex-Token': serverConfig.token,
+		Accept: 'application/json',
+	};
+
+	// Try all Plex connection urls.
+	const requests = serverConfig.connections.map(conn =>
+		_searchPlex(conn, headers, options)
+	);
+	try {
+		// See what connection url finishes the request first and pick that one.
+		// TODO: optimally, as soon as the first request is finished, all other requests would be cancelled using AbortController.
+		const result = await Promise.race(requests);
+		sendResponse(result);
+	} catch (err) {
+		sendResponse({ err: String(err) });
+	}
 }
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {

@@ -39,17 +39,18 @@ function getServers(plexToken) {
 		});
 }
 
-function getBestConnectionUrl(server) {
+function getPlexConnections(server) {
 	// `server.Connection` can be an array or object.
+	let connections = [];
 	if (Array.isArray(server.Connection)) {
-		const conn = server.Connection.find(connection => connection.local === '0');
-		if (conn) {
-			return conn.uri;
-		}
-		// If there are only local connections, fine then.
-		return server.Connection[0].uri;
+		connections = server.Connection;
+	} else {
+		connections = [server.Connection];
 	}
-	return server.Connection.uri;
+	return connections.map(conn => ({
+		uri: conn.uri,
+		local: conn.local === '1',
+	}));
 }
 
 function performPlexTest(oldServerId) {
@@ -157,11 +158,14 @@ function saveOptions() {
 	// Important detail: we get the token from the selected server, NOT the token the user has entered before.
 	const serverToken = server.accessToken;
 	const serverId = server.clientIdentifier;
-	const serverUrl = getBestConnectionUrl(server);
-	console.log('Chosen Plex Server URL:', serverUrl);
+	const serverConnections = getPlexConnections(server);
+	console.log(
+		'Found Plex Server connections:',
+		JSON.stringify(serverConnections)
+	);
 
-	if (!serverUrl) {
-		status.textContent = 'Could not find Plex server URL.';
+	if (serverConnections.length < 1) {
+		status.textContent = 'Could not find a Plex server URL.';
 		return;
 	}
 
@@ -191,11 +195,6 @@ function saveOptions() {
 
 	if (values.radarrStoragePath && !/\/|\\$/.test(values.radarrStoragePath)) {
 		status.textContent = 'Radarr storage path should end with a slash!';
-		return;
-	}
-
-	if (!serverUrl) {
-		status.textContent = 'Could not get Plex connection URL.';
 		return;
 	}
 
@@ -229,7 +228,7 @@ function saveOptions() {
 			{
 				id: serverId,
 				token: serverToken,
-				url: serverUrl,
+				connections: serverConnections,
 			},
 		],
 	};
