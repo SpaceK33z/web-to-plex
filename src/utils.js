@@ -43,7 +43,7 @@ function _getOptions() {
 				server: {
 					...server,
 					// Compatibility for users who have not updated their settings yet.
-					connections: server.connections || { uri: server.url },
+					connections: server.connections || [{ uri: server.url }],
 				},
 			};
 			if (items.couchpotatoBasicAuthUsername) {
