@@ -110,13 +110,23 @@ function _searchPlex(connection, headers, options) {
 				return { found: false };
 			}
 
+			// We only want to search in Plex libraries with the type "Movie", i.e. not the type "Other Videos".
+			// Weirdly enough Plex doesn't seem to have an easy way to filter those libraries so we invent our own hack.
+			const actualMovies = hub.Metadata.filter(
+				meta =>
+					meta.Country ||
+					meta.Directory ||
+					meta.Genre ||
+					meta.Role ||
+					meta.Writer
+			);
 			// This is messed up, but Plex' definition of a year is year when it was available,
 			// not when it was released (which is Movieo's definition).
 			// For examples, see Bone Tomahawk, The Big Short, The Hateful Eight.
 			// So we'll first try to find the movie with the given year, and then + 1 it.
-			let media = hub.Metadata.find(meta => meta.year === options.year);
+			let media = actualMovies.find(meta => meta.year === options.year);
 			if (!media) {
-				media = hub.Metadata.find(meta => meta.year === options.year + 1);
+				media = actualMovies.find(meta => meta.year === options.year + 1);
 			}
 			let key = null;
 			if (media) {
