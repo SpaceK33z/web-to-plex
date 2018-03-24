@@ -30,7 +30,16 @@ function getImdbId() {
 function init() {
 	if (isMoviePage() || isShowPage()) {
 		wait(
-			() => document.querySelector('#info-wrapper ul.external'),
+			() => {
+				// Tricky hack; Trakt uses TurboLinks and the body content is not replaced immediately when navigating to another URL.
+				// So we wait on the loading div to stop being displayed.
+				const loadDiv = document.querySelector('#loading-bg');
+				const hasWrapper = document.querySelector('#info-wrapper ul.external');
+				if (loadDiv) {
+					return loadDiv.style.display !== 'block' && hasWrapper;
+				}
+				return hasWrapper;
+			},
 			() => {
 				initPlexThingy(isMoviePage() ? 'movie' : 'show');
 			}
