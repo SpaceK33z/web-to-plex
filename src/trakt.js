@@ -68,13 +68,13 @@ function initPlexThingy(type) {
 	if (!$button) {
 		return;
 	}
-	const $title = document.querySelector('.btn-checkin');
-	const $year = document.querySelector('.summary .mobile-title .year');
+	const $title = document.querySelector('.summary .mobile-title');
+	const $year = document.querySelector('.summary .mobile-title .year'); // <-- THIS DOES NOT EXIST FOR TV SHOWS
 	if (!$title || !$year) {
 		modifyPlexButton($button, 'error', 'Could not extract title or year');
 		return;
 	}
-	const title = $title.dataset.topTitle;
+	const title = $title.firstChild.childNodes[0].textContent.trim();
 	const year = parseInt($year.textContent.trim());
 	const imdbId = getImdbId();
 
