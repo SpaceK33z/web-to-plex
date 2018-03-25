@@ -50,7 +50,7 @@ function init() {
 function renderPlexButton() {
 	const $actions = document.querySelector('ul.external li:first-child');
 	if (!$actions) {
-		console.log('Could not add Plex button.');
+		console.log('[WTP] Could not add Plex button.');
 		return null;
 	}
 	const $existingEl = $actions.querySelector('a.web-to-plex-button');

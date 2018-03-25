@@ -66,8 +66,6 @@ function addRadarr(request, sendResponse) {
 					searchForMovie: true,
 				},
 			};
-			console.log('generated URL', request.url, headers);
-			console.log('body', body);
 			return body;
 		})
 		.then(body => {
@@ -156,7 +154,7 @@ function promiseRace(promises) {
 	return Promise.race(indexPromises).catch(index => {
 		// The promise has rejected, remove it from the list of promises and just continue the race.
 		let p = promises.splice(index, 1)[0];
-		p.catch(e => console.log(`Plex request ${index} failed:`, e));
+		p.catch(e => console.log(`[WTP] Plex request ${index} failed:`, e));
 		return promiseRace(promises);
 	});
 }

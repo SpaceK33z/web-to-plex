@@ -107,7 +107,7 @@ function getRadarrProfiles(values) {
 	return fetch(`${values.radarrUrlRoot}/api/profile`, { headers })
 		.then(res => res.json())
 		.catch(err => {
-			console.log('Radarr failed to connect with error:', err);
+			console.log('[WTP] Radarr failed to connect with error:', err);
 			return [];
 		});
 }
@@ -147,7 +147,10 @@ function saveOptions() {
 		ser => ser.clientIdentifier === selectedServerId
 	);
 
-	console.log('Currently selected server information', JSON.stringify(server));
+	console.log(
+		'[WTP] Currently selected server information',
+		JSON.stringify(server)
+	);
 
 	if (!server) {
 		// This _should_ never happen, but can be useful for debugging.
@@ -160,7 +163,7 @@ function saveOptions() {
 	const serverId = server.clientIdentifier;
 	const serverConnections = getPlexConnections(server);
 	console.log(
-		'Found Plex Server connections:',
+		'[WTP] Found Plex Server connections:',
 		JSON.stringify(serverConnections)
 	);
 
@@ -234,7 +237,7 @@ function saveOptions() {
 	};
 	storage.set(data, () => {
 		if (chrome.runtime.lastError) {
-			console.log('Error with saving', chrome.runtime.lastError.message);
+			console.log('[WTP] Error with saving', chrome.runtime.lastError.message);
 			chrome.storage.local.set(data, showOptionsSaved);
 		} else {
 			showOptionsSaved();

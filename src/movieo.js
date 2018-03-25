@@ -70,7 +70,7 @@ function renderPlexButton() {
 
 	const $actions = document.querySelector('.mid-top-actions');
 	if (!$actions) {
-		console.log('Could not add Plex button.');
+		console.log('[WTP] Could not add Plex button.');
 		return null;
 	}
 	const $existingEl = document.querySelector('a.web-to-plex-button');

@@ -34,7 +34,7 @@ function initPlexThingy() {
 function renderPlexButton() {
 	const $actions = document.querySelector('.js-watch-panel .services');
 	if (!$actions) {
-		console.log('Could not add Plex button.');
+		console.log('[WTP] Could not add Plex button.');
 		return null;
 	}
 	const parentEl = document.createElement('p');
