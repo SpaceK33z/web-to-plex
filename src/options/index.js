@@ -8,6 +8,8 @@ const $selectRadarrQualityProfile = document.querySelector(
 );
 const $saveButton = document.getElementById('save');
 let plexServers = [];
+let plexClientId = null;
+const manifest = chrome.runtime.getManifest();
 
 const optionNames = [
 	'plexToken',
@@ -53,9 +55,41 @@ function getPlexConnections(server) {
 	}));
 }
 
+function tryPlexLogin(username, password) {
+	const hash = btoa(`${username}:${password}`);
+	return fetch('https://plex.tv/users/sign_in.json', {
+		method: 'post',
+		headers: {
+			'X-Plex-Product': 'Web To Plex Extension',
+			'X-Plex-Version': manifest.version,
+			'X-Plex-Client-Identifier': plexClientId,
+			Authorization: `Basic ${hash}`,
+		},
+	}).then(res => res.json());
+}
+
+function performPlexLogin() {
+	const plexUsername = document.getElementById('plex_username').value;
+	const plexPassword = document.getElementById('plex_password').value;
+	const $testStatus = document.getElementById('plex_login_status');
+	$selectServer.innerHTML = '';
+	$testStatus.textContent = '';
+	$saveButton.disabled = true;
+
+	tryPlexLogin(plexUsername, plexPassword).then(res => {
+		if (res.error) {
+			$testStatus.textContent = 'Invalid username or password.';
+		}
+		if (res.user) {
+			document.getElementById('plex_token').value = res.user.authToken;
+			return performPlexTest();
+		}
+	});
+}
+
 function performPlexTest(oldServerId) {
 	const plexToken = document.getElementById('plex_token').value;
-	const $testStatus = document.getElementById('plex_test_status');
+	const $testStatus = document.getElementById('plex_login_status');
 	$selectServer.innerHTML = '';
 	$testStatus.textContent = '';
 	$saveButton.disabled = true;
@@ -63,11 +97,12 @@ function performPlexTest(oldServerId) {
 	getServers(plexToken).then(servers => {
 		plexServers = servers || [];
 		if (!servers) {
-			$testStatus.textContent = 'Invalid token.';
+			$testStatus.textContent = 'Invalid token, try to login again.';
 			return;
 		}
 
 		$saveButton.disabled = false;
+		$testStatus.textContent = 'Successful login.';
 
 		servers.forEach(server => {
 			const $opt = document.createElement('option');
@@ -261,6 +296,14 @@ function restoreOptions() {
 		if (items.radarrUrlRoot) {
 			performRadarrTest(items.radarrQualityProfileId);
 		}
+		if (!items.plexClientId) {
+			plexClientId = window.crypto
+				.getRandomValues(new Uint32Array(5))
+				.join('-');
+			storage.set({ plexClientId });
+		} else {
+			plexClientId = items.plexClientId;
+		}
 	}
 	storage.get(null, items => {
 		// Sigh... This is a workaround for Firefox; newer versions do have support for the `chrome.storage.sync` API,
@@ -275,8 +318,8 @@ function restoreOptions() {
 document.addEventListener('DOMContentLoaded', restoreOptions);
 $saveButton.addEventListener('click', saveOptions);
 document
-	.getElementById('plex_test')
-	.addEventListener('click', () => performPlexTest());
+	.getElementById('plex_login')
+	.addEventListener('click', () => performPlexLogin());
 document
 	.getElementById('radarr_test')
 	.addEventListener('click', () => performRadarrTest());
