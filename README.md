@@ -17,6 +17,7 @@ Optionally you can configure Sonarr or Radarr in the options. After that, you ca
 ## Install
 
 **Download the [CRX](nbpfmcneicloaakilglkfcpaenbenmce.crx).**
+
 **Download the [ZIP](nbpfmcneicloaakilglkfcpaenbenmce.zip)**
 
 ## Usage
