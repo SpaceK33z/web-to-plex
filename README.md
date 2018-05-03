@@ -2,7 +2,7 @@
 
 This browser extension adds a Plex button on movie pages like IMDb, letting you immediately open the movie or TV show on Plex Web if it is available.
 
-Optionally you can configure CouchPotato or Radarr in the options. After that, you can immediately add a movie to CouchPotato/Radarr, with one click, right from your favorite movie page.
+Optionally you can configure Sonarr or Radarr in the options. After that, you can immediately add a tv show or movie to Sonarr/Radarr, with one click, right from your favorite media page.
 
 ![Examples](image.png)
 
@@ -12,12 +12,12 @@ Optionally you can configure CouchPotato or Radarr in the options. After that, y
  - [IMDb](http://imdb.com/)
  - [Trakt.tv](https://trakt.tv/)
  - [Letterboxd](https://letterboxd.com/)
+ - [Flenix](https://flenix.co/)
 
 ## Install
 
-**Download on [Chrome Webstore](https://chrome.google.com/webstore/detail/movieo-to-plex/kmcinnefmnkfnmnmijfmbiaflncfifcn).**
-
-**Download on [FireFox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/web-to-plex/).**
+**Download the [CRX](nbpfmcneicloaakilglkfcpaenbenmce.crx).**
+**Download the [ZIP](nbpfmcneicloaakilglkfcpaenbenmce.zip)**
 
 ## Usage
 
@@ -25,7 +25,7 @@ Make sure you have at least **Plex Media Server v1.4.3** or higher.
 
 Before using the extension, you need to configure it in the Options page (go to `chrome://extensions` and click on Options next to the extension).
 
-If you have issues with configuring, please don't hesitate to [submit an issue](https://github.com/SpaceK33z/web-to-plex/issues/new).
+If you have issues with configuring, please don't hesitate to [submit an issue](https://github.com/Ephellon/web-to-plex/issues/new).
 
 ## Contributions
 
@@ -33,4 +33,5 @@ All contributions are very welcome. Please make an issue first, so we can discus
 
 ## Related
 
-- [IMDb to Movieo](https://github.com/SpaceK33z/imdb-to-movieo)
+- [Web to Plex (original)](https://github.com/SpaceK33z/web-to-plex)
+- [IMDb to Movieo by SpaceK33z](https://github.com/SpaceK33z/imdb-to-movieo)
