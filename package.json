@@ -5,7 +5,7 @@
     "lint": "eslint src",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "Kees Kluskens <kees@webduck.nl>",
+  "author": "Kees Kluskens <kees@webduck.nl>, Ephellon Dantzler <minkcbos@gmail.com>",
   "license": "ISC",
   "devDependencies": {
     "@volst/eslint-config": "2.1.0",
