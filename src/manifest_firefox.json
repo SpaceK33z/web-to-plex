@@ -1,8 +1,8 @@
 {
-	"name": "Web to Plex",
+	"name": "Web to Plex+",
 	"description": "Adds a button on various movie & TV show sites to open it in Plex.",
 	"manifest_version": 2,
-   "version": "3.3",
+   "version": "0.1",
 	"icons": {
 		"16": "img/16.png",
 		"48": "img/48.png",
@@ -29,6 +29,11 @@
 			"matches": ["https://trakt.tv/*"],
 			"js": ["history-hack.js", "utils.js", "trakt.js"],
 			"css": ["trakt.css"]
+		},
+		{
+			"matches": ["https://flenix.co/movies/*"],
+			"js": ["utils.js", "flenix.js"],
+			"css": ["flenix.css"]
 		}
 	],
 	"background": {

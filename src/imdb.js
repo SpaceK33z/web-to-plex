@@ -27,7 +27,7 @@ const imdbId = getImdbId();
 
 function renderPlexButton($parent) {
 	if (!$parent) {
-		console.log('[WTP] Could not add Plex button.');
+		console.log('Could not add Plex button.');
 		return null;
 	}
 	const $existingEl = document.querySelector('a.web-to-plex-button');

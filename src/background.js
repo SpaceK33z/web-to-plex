@@ -6,8 +6,8 @@ function generateHeaders(auth) {
 	}
 	const hash = btoa(`${auth.username}:${auth.password}`);
 	return {
-		...headers,
 		Authorization: `Basic ${hash}`,
+		...headers
 	};
 }
 
@@ -15,32 +15,32 @@ function generateHeaders(auth) {
 // these requests in a background page instead of the content script?
 // This is because Movieo is served over HTTPS, so it won't accept requests to
 // HTTP servers. Unfortunately, many people use CouchPotato over HTTP.
-function viewCouchpotato(request, sendResponse) {
-	fetch(`${request.url}?id=${request.imdbId}`, {
-		headers: generateHeaders(request.basicAuth),
-	})
-		.then(res => res.json())
-		.then(res => {
-			const success = res.success;
-			sendResponse({ success, status: success ? res.media.status : null });
-		})
-		.catch(err => {
-			sendResponse({ err: String(err) });
-		});
-}
-
-function addCouchpotato(request, sendResponse) {
-	fetch(`${request.url}?identifier=${request.imdbId}`, {
-		headers: generateHeaders(request.basicAuth),
-	})
-		.then(res => res.json())
-		.then(res => {
-			sendResponse({ success: res.success });
-		})
-		.catch(err => {
-			sendResponse({ err: String(err) });
-		});
-}
+//function viewCouchpotato(request, sendResponse) {
+//	fetch(`${request.url}?id=${request.imdbId}`, {
+//		headers: generateHeaders(request.basicAuth),
+//	})
+//		.then(res => res.json())
+//		.then(res => {
+//			const success = res.success;
+//			sendResponse({ success, status: success ? res.media.status : null });
+//		})
+//		.catch(err => {
+//			sendResponse({ err: String(err) });
+//		});
+//}
+//
+//function addCouchpotato(request, sendResponse) {
+//	fetch(`${request.url}?identifier=${request.imdbId}`, {
+//		headers: generateHeaders(request.basicAuth),
+//	})
+//		.then(res => res.json())
+//		.then(res => {
+//			sendResponse({ success: res.success });
+//		})
+//		.catch(err => {
+//			sendResponse({ err: String(err) });
+//		});
+//}
 
 function addRadarr(request, sendResponse) {
 	const headers = {
@@ -54,7 +54,7 @@ function addRadarr(request, sendResponse) {
 		.then(res => res.json())
 		.then(data => {
 			if (!Array.isArray(data) || data.length < 1) {
-				throw new Error('Movie was not found.');
+				throw new Error('Movie not found');
 			}
 			const body = {
 				...data[0],
@@ -66,6 +66,58 @@ function addRadarr(request, sendResponse) {
 					searchForMovie: true,
 				},
 			};
+			console.log('generated URL', request.url, headers);
+			console.log('body', body);
+			return body;
+		})
+		.then(body => {
+			return fetch(request.url, {
+				method: 'post',
+				headers,
+				body: JSON.stringify(body),
+			});
+		})
+		.then(res => res.json())
+		.then(res => {
+			if (res && res[0] && res[0].errorMessage) {
+				sendResponse({ err: res[0].errorMessage });
+			} else if (res && res.path) {
+				sendResponse({ success: 'Added to ' + res.path });
+			} else {
+				sendResponse({ err: 'unknown error' });
+			}
+		})
+		.catch(err => {
+			sendResponse({ err: String(err) });
+		});
+}
+
+function addSonarr(request, sendResponse) {
+	const headers = {
+		...generateHeaders(request.basicAuth),
+		'Content-Type': 'application/json',
+		'X-Api-Key': request.sonarrToken,
+	};
+	const lookupQuery = encodeURIComponent(`imdb:${request.imdbId}`);
+
+	fetch(`${request.url}/lookup?term=${lookupQuery}`, { headers })
+		.then(res => res.json())
+		.then(data => {
+			if (!Array.isArray(data) || data.length < 1) {
+				throw new Error('TV Show not found');
+			}
+			const body = {
+				...data[0],
+				monitored: true,
+				minimumAvailability: 'preDB',
+				qualityProfileId: request.sonarrQualityProfileId,
+				rootFolderPath: request.sonarrStoragePath,
+				addOptions: {
+					searchForSeries: true,
+				},
+			};
+			console.log('generated URL', request.url, headers);
+			console.log('body', body);
 			return body;
 		})
 		.then(body => {
@@ -154,7 +206,7 @@ function promiseRace(promises) {
 	return Promise.race(indexPromises).catch(index => {
 		// The promise has rejected, remove it from the list of promises and just continue the race.
 		let p = promises.splice(index, 1)[0];
-		p.catch(e => console.log(`[WTP] Plex request ${index} failed:`, e));
+		p.catch(e => console.log(`Plex request ${index} failed:`, e));
 		return promiseRace(promises);
 	});
 }
@@ -185,14 +237,17 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 		case 'SEARCH_PLEX':
 			searchPlex(request, sendResponse);
 			return true;
-		case 'VIEW_COUCHPOTATO':
-			viewCouchpotato(request, sendResponse);
-			return true;
-		case 'ADD_COUCHPOTATO':
-			addCouchpotato(request, sendResponse);
-			return true;
+//		case 'VIEW_COUCHPOTATO':
+//			viewCouchpotato(request, sendResponse);
+//			return true;
+//		case 'ADD_COUCHPOTATO':
+//			addCouchpotato(request, sendResponse);
+//			return true;
 		case 'ADD_RADARR':
 			addRadarr(request, sendResponse);
+			return true;
+		case 'ADD_SONARR':
+			addSonarr(request, sendResponse);
 			return true;
 		case 'OPEN_OPTIONS':
 			chrome.runtime.openOptionsPage();

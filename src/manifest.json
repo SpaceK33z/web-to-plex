@@ -1,8 +1,10 @@
 {
-	"name": "Web to Plex",
+"update_url": "https://clients2.google.com/service/update2/crx",
+
+	"name": "Web to Plex+",
 	"description": "Adds a button on various movie & TV show sites to open it in Plex.",
 	"manifest_version": 2,
-   "version": "3.3",
+   "version": "0.1",
 	"icons": {
 		"16": "img/16.png",
 		"48": "img/48.png",
@@ -28,6 +30,11 @@
 			"matches": ["https://letterboxd.com/film/*"],
 			"js": ["utils.js", "letterboxd.js"],
 			"css": ["letterboxd.css"]
+		},
+		{
+			"matches": ["https://flenix.co/movies/*"],
+			"js": ["utils.js", "flenix.js"],
+			"css": ["flenix.css"]
 		}
 	],
 	"background": {

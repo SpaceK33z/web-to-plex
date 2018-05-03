@@ -41,34 +41,33 @@ function initPlexThingy() {
 	if (!$button) {
 		return;
 	}
-	const $title = document.getElementById('doc_title');
-	const $date = document.querySelector('meta[itemprop="datePublished"]');
+	const $title = document.querySelector('#dle-content .about > h1');
+	const $date = document.querySelector('.features > .reset:nth-child(2) a');
 	if (!$title || !$date) {
 		modifyPlexButton(
 			$button,
 			'error',
-			'Could not extract title or year from Movieo'
+			'Could not extract title or year from Flenix'
 		);
 		return;
 	}
-	const title = $title.dataset.title.trim();
-	const year = parseInt($date.content.slice(0, 4));
-	const imdbId = getImdbId();
+	const title = $title.innerText.trim();
+	const year = parseInt($date.innerText);
+	const imdbId = getImdbId(title, year);
 
 	findPlexMedia({ title, year, button: $button, imdbId });
 }
 
 function renderPlexButton() {
-	// The button text in the "Comments" button takes too much place, so we hide it.
-	// It's very clear that it's about comments even without the text.
-	const $commentText = document.querySelector(
-		'.mid-top-actions .comments-link .txt'
+	// The "download" button, which doesn't actually work
+	const $downloadButton = document.querySelector(
+		'#dle-content .about > .buttons > a[target="_blank"]'
 	);
-	if ($commentText) {
-		$commentText.remove();
+	if ($downloadButton) {
+		$downloadButton.remove();
 	}
 
-	const $actions = document.querySelector('.mid-top-actions');
+	const $actions = document.querySelector('.about > .buttons');
 	if (!$actions) {
 		console.log('Could not add Plex button.');
 		return null;
@@ -78,17 +77,40 @@ function renderPlexButton() {
 		$existingEl.remove();
 	}
 	const el = document.createElement('a');
-	el.classList.add('button', 'comments-link', 'web-to-plex-button');
+	el.classList.add('roundButton', 'web-to-plex-button');
 	$actions.appendChild(el);
 	return el;
 }
 
-function getImdbId() {
-	const $link = document.querySelector(
-		'.tt-parent[href^="http://www.imdb.com/title/tt"]'
-	);
-	if ($link) {
-		return $link.href.replace('http://www.imdb.com/title/', '');
-	}
-	return null;
+async function getImdbId(_title, _year) {
+    let title = null,
+        year = null;
+
+	if(!_title || !_year){
+        const $title = document.querySelector('#dle-content .about > h1');
+        const $date = document.querySelector('.features > .reset:nth-child(2) a');
+        if(!$title || !$date) {
+            return null;
+        }
+        title = $title.innerText.trim();
+        year = parseInt($date.innerText);
+    } else {
+      title = _title;
+      year = _year;
+    }
+  
+    let json = {};
+
+    await fetch(`https://www.theimdbapi.org/api/find/movie?title=${ title }&year=${ year }`)
+        .then(function(response) {
+            return response.json();
+        })
+        .catch(function(error) {
+            throw error;
+        })
+        .then(function(data) {
+            return json = data[0];
+        });
+
+    return json.imdb_id || null;
 }

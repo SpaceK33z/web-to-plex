@@ -32,7 +32,7 @@ function _getOptions() {
 	return new Promise((resolve, reject) => {
 		function handleOptions(items) {
 			if (!items.plexToken || !items.servers) {
-				reject(new Error('Unset options.'));
+				reject(new Error('Options are undefined'));
 				return;
 			}
 
@@ -46,12 +46,12 @@ function _getOptions() {
 					connections: server.connections || [{ uri: server.url }],
 				},
 			};
-			if (items.couchpotatoBasicAuthUsername) {
-				options.couchpotatoBasicAuth = {
-					username: items.couchpotatoBasicAuthUsername,
-					password: items.couchpotatoBasicAuthPassword,
-				};
-			}
+//			if (items.couchpotatoBasicAuthUsername) {
+//				options.couchpotatoBasicAuth = {
+//					username: items.couchpotatoBasicAuthUsername,
+//					password: items.couchpotatoBasicAuthPassword,
+//				};
+//			}
 			// TODO: stupid copy/pasta
 			if (items.radarrBasicAuthUsername) {
 				options.radarrBasicAuth = {
@@ -59,17 +59,29 @@ function _getOptions() {
 					password: items.radarrBasicAuthPassword,
 				};
 			}
-			if (items.couchpotatoUrlRoot && items.couchpotatoToken) {
-				options.couchpotatoUrl = `${
-					items.couchpotatoUrlRoot
-				}/api/${encodeURIComponent(items.couchpotatoToken)}`;
+			if (items.sonarrBasicAuthUsername) {
+				options.sonarrBasicAuth = {
+					username: items.sonarrBasicAuthUsername,
+					password: items.sonarrBasicAuthPassword,
+				};
 			}
+//			if (items.couchpotatoUrlRoot && items.couchpotatoToken) {
+//				options.couchpotatoUrl = `${
+//					items.couchpotatoUrlRoot
+//				}/api/${encodeURIComponent(items.couchpotatoToken)}`;
+//			}
 			if (items.radarrUrlRoot && items.radarrToken) {
 				options.radarrUrl = items.radarrUrlRoot;
 				options.radarrToken = items.radarrToken;
 			}
+			if (items.sonarrUrlRoot && items.sonarrToken) {
+				options.sonarrUrl = items.sonarrUrlRoot;
+				options.sonarrToken = items.sonarrToken;
+			}
 			options.radarrStoragePath = items.radarrStoragePath;
 			options.radarrQualityProfileId = items.radarrQualityProfileId;
+			options.sonarrStoragePath = items.sonarrStoragePath;
+			options.sonarrQualityProfileId = items.sonarrQualityProfileId;
 
 			resolve(options);
 		}
@@ -96,7 +108,7 @@ function parseOptions() {
 		err => {
 			showNotification(
 				'warning',
-				'Not all options for the Web to Plex extension are filled in.',
+				'Fill in missing Web to Plex+ options',
 				15000,
 				openOptionsPage
 			);
@@ -139,75 +151,75 @@ function showNotification(state, text, timeout, callback) {
 	notificationTimeout = setTimeout(close, timeout || 5000);
 }
 
-function _maybeAddToCouchpotato(options) {
-	// TODO: this does not work anymore!
-	if (!options.imdbId) {
-		showNotification(
-			'warning',
-			'Cancelled adding to CouchPotato since there is no IMDB ID.'
-		);
-		return;
-	}
-	chrome.runtime.sendMessage(
-		{
-			type: 'VIEW_COUCHPOTATO',
-			url: config.couchpotatoUrl + '/media.get',
-			imdbId: options.imdbId,
-			basicAuth: config.couchpotatoBasicAuth,
-		},
-		res => {
-			const movieExists = res.success;
-			if (res.err) {
-				showNotification(
-					'warning',
-					'CouchPotato request failed (look in DevTools for more info)'
-				);
-				console.error('Error with viewing on CouchPotato:', res.err);
-				return;
-			}
-			if (!movieExists) {
-				_addToCouchPotatoRequest(options);
-				return;
-			}
-			showNotification(
-				'info',
-				`Movie is already in CouchPotato (status: ${res.status})`
-			);
-		}
-	);
-}
+//function _maybeAddToCouchpotato(options) {
+//	// TODO: this does not work anymore!
+//	if (!options.imdbId) {
+//		showNotification(
+//			'warning',
+//			'Cancelled adding to CouchPotato since there is no IMDB ID.'
+//		);
+//		return;
+//	}
+//	chrome.runtime.sendMessage(
+//		{
+//			type: 'VIEW_COUCHPOTATO',
+//			url: config.couchpotatoUrl + '/media.get',
+//			imdbId: options.imdbId,
+//			basicAuth: config.couchpotatoBasicAuth,
+//		},
+//		res => {
+//			const movieExists = res.success;
+//			if (res.err) {
+//				showNotification(
+//					'warning',
+//					'CouchPotato request failed (look in DevTools for more info)'
+//				);
+//				console.error('Error with viewing on CouchPotato:', res.err);
+//				return;
+//			}
+//			if (!movieExists) {
+//				_addToCouchPotatoRequest(options);
+//				return;
+//			}
+//			showNotification(
+//				'info',
+//				`Movie is already in CouchPotato (status: ${res.status})`
+//			);
+//		}
+//	);
+//}
 
-function _addToCouchPotatoRequest(options) {
-	chrome.runtime.sendMessage(
-		{
-			type: 'ADD_COUCHPOTATO',
-			url: `${config.couchpotatoUrl}/movie.add`,
-			imdbId: options.imdbId,
-			basicAuth: config.couchpotatoBasicAuth,
-		},
-		res => {
-			if (res.err) {
-				showNotification(
-					'warning',
-					'Could not add to CouchPotato (look in DevTools for more info)'
-				);
-				console.error('Error with adding on CouchPotato:', res.err);
-				return;
-			}
-			if (res.success) {
-				showNotification('info', 'Added movie on CouchPotato.');
-			} else {
-				showNotification('warning', 'Could not add to CouchPotato.');
-			}
-		}
-	);
-}
+//function _addToCouchPotatoRequest(options) {
+//	chrome.runtime.sendMessage(
+//		{
+//			type: 'ADD_COUCHPOTATO',
+//			url: `${config.couchpotatoUrl}/movie.add`,
+//			imdbId: options.imdbId,
+//			basicAuth: config.couchpotatoBasicAuth,
+//		},
+//		res => {
+//			if (res.err) {
+//				showNotification(
+//					'warning',
+//					'Could not add to CouchPotato (look in DevTools for more info)'
+//				);
+//				console.error('Error with adding on CouchPotato:', res.err);
+//				return;
+//			}
+//			if (res.success) {
+//				showNotification('info', 'Added movie on CouchPotato.');
+//			} else {
+//				showNotification('warning', 'Could not add to CouchPotato.');
+//			}
+//		}
+//	);
+//}
 
 function _addToRadarrRequest(options) {
 	if (!options.imdbId) {
 		showNotification(
 			'warning',
-			'Cancelled adding to Radarr since there is no IMDB ID.'
+			'Stopped adding to Radarr: No IMDB ID'
 		);
 		return;
 	}
@@ -223,13 +235,45 @@ function _addToRadarrRequest(options) {
 		},
 		res => {
 			if (res && res.err) {
-				showNotification('warning', 'Could not add to Radarr.' + res.err);
-				console.error('Error with adding on Radarr:', res.err);
+				showNotification('warning', 'Could not add to Radarr' + res.err);
+				console.error('Error adding to Radarr:', res.err);
 				return;
 			} else if (res && res.success) {
-				showNotification('info', 'Added movie on Radarr.');
+				showNotification('info', 'Added movie to Radarr');
 			} else {
-				showNotification('warning', 'Could not add to Radarr. Unknown Error');
+				showNotification('warning', 'Could not add to Radarr: Unknown Error');
+			}
+		}
+	);
+}
+
+function _addToSonarrRequest(options) {
+	if (!options.imdbId) {
+		showNotification(
+			'warning',
+			'Stopped adding to Sonarr: No IMDB ID'
+		);
+		return;
+	}
+	chrome.runtime.sendMessage(
+		{
+			type: 'ADD_SONARR',
+			url: `${config.sonarrUrl}/api/series`,
+			imdbId: options.imdbId,
+			sonarrToken: config.sonarrToken,
+			sonarrStoragePath: config.sonarrStoragePath,
+			sonarrQualityProfileId: config.sonarrQualityProfileId,
+			basicAuth: config.sonarrBasicAuth,
+		},
+		res => {
+			if (res && res.err) {
+				showNotification('warning', 'Could not add to Sonarr' + res.err);
+				console.error('Error adding to Sonarr:', res.err);
+				return;
+			} else if (res && res.success) {
+				showNotification('info', 'Added movie to Sonarr');
+			} else {
+				showNotification('warning', 'Could not add to Sonarr: Unknown Error');
 			}
 		}
 	);
@@ -255,9 +299,12 @@ function modifyPlexButton(el, action, title, options) {
 			e.preventDefault();
 			if (config.radarrUrl) {
 				_addToRadarrRequest(options);
-			} else {
-				_maybeAddToCouchpotato(options);
+			} else if (config.sonarrUrl) {
+				_addToSonarrRequest(options);
 			}
+//          else {
+//				_maybeAddToCouchpotato(options);
+//			}
 		});
 	}
 
@@ -278,12 +325,12 @@ function findPlexMedia(options) {
 						modifyPlexButton(options.button, 'found', 'Found on Plex', key);
 					} else {
 						const showDownloader =
-							(config.couchpotatoUrl || config.radarrUrl) &&
+							(config.radarrUrl /* || config.couchpotatoUrl */ || config.sonarrUrl) &&
 							options.type !== 'show';
 						const action = showDownloader ? 'downloader' : 'notfound';
 						const title = showDownloader
-							? 'Could not find, want to download?'
-							: 'Could not find on Plex';
+							? 'Not on Plex, download available'
+							: 'Not on Plex, download unavailable';
 						modifyPlexButton(options.button, action, title, options);
 					}
 				});
@@ -293,7 +340,7 @@ function findPlexMedia(options) {
 			modifyPlexButton(
 				options.button,
 				'error',
-				'Request to your Plex Media Server failed.'
+				'Request to Plex Media Server failed'
 			);
 			console.error('Request to Plex failed', err);
 		});

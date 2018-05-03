@@ -6,23 +6,30 @@ const $selectServer = document.getElementById('plex_servers');
 const $selectRadarrQualityProfile = document.querySelector(
 	`[data-option="radarrQualityProfileId"]`
 );
+const $selectSonarrQualityProfile = document.querySelector(
+	`[data-option="sonarrQualityProfileId"]`
+);
 const $saveButton = document.getElementById('save');
 let plexServers = [];
-let plexClientId = null;
-const manifest = chrome.runtime.getManifest();
 
 const optionNames = [
 	'plexToken',
-	'couchpotatoUrlRoot',
-	'couchpotatoToken',
-	'couchpotatoBasicAuthUsername',
-	'couchpotatoBasicAuthPassword',
+//	'couchpotatoUrlRoot',
+//	'couchpotatoToken',
+//	'couchpotatoBasicAuthUsername',
+//	'couchpotatoBasicAuthPassword',
 	'radarrUrlRoot',
 	'radarrToken',
 	'radarrBasicAuthUsername',
 	'radarrBasicAuthPassword',
 	'radarrStoragePath',
 	'radarrQualityProfileId',
+	'sonarrUrlRoot',
+	'sonarrToken',
+	'sonarrBasicAuthUsername',
+	'sonarrBasicAuthPassword',
+	'sonarrStoragePath',
+	'sonarrQualityProfileId'
 ];
 
 function getServers(plexToken) {
@@ -55,41 +62,9 @@ function getPlexConnections(server) {
 	}));
 }
 
-function tryPlexLogin(username, password) {
-	const hash = btoa(`${username}:${password}`);
-	return fetch('https://plex.tv/users/sign_in.json', {
-		method: 'post',
-		headers: {
-			'X-Plex-Product': 'Web To Plex Extension',
-			'X-Plex-Version': manifest.version,
-			'X-Plex-Client-Identifier': plexClientId,
-			Authorization: `Basic ${hash}`,
-		},
-	}).then(res => res.json());
-}
-
-function performPlexLogin() {
-	const plexUsername = document.getElementById('plex_username').value;
-	const plexPassword = document.getElementById('plex_password').value;
-	const $testStatus = document.getElementById('plex_login_status');
-	$selectServer.innerHTML = '';
-	$testStatus.textContent = '';
-	$saveButton.disabled = true;
-
-	tryPlexLogin(plexUsername, plexPassword).then(res => {
-		if (res.error) {
-			$testStatus.textContent = 'Invalid username or password.';
-		}
-		if (res.user) {
-			document.getElementById('plex_token').value = res.user.authToken;
-			return performPlexTest();
-		}
-	});
-}
-
 function performPlexTest(oldServerId) {
 	const plexToken = document.getElementById('plex_token').value;
-	const $testStatus = document.getElementById('plex_login_status');
+	const $testStatus = document.getElementById('plex_test_status');
 	$selectServer.innerHTML = '';
 	$testStatus.textContent = '';
 	$saveButton.disabled = true;
@@ -97,12 +72,11 @@ function performPlexTest(oldServerId) {
 	getServers(plexToken).then(servers => {
 		plexServers = servers || [];
 		if (!servers) {
-			$testStatus.textContent = 'Invalid token, try to login again.';
+			$testStatus.textContent = 'Invalid token.';
 			return;
 		}
 
 		$saveButton.disabled = false;
-		$testStatus.textContent = 'Successful login.';
 
 		servers.forEach(server => {
 			const $opt = document.createElement('option');
@@ -142,7 +116,7 @@ function getRadarrProfiles(values) {
 	return fetch(`${values.radarrUrlRoot}/api/profile`, { headers })
 		.then(res => res.json())
 		.catch(err => {
-			console.log('[WTP] Radarr failed to connect with error:', err);
+			console.log('Radarr failed to connect with error:', err);
 			return [];
 		});
 }
@@ -169,6 +143,48 @@ function performRadarrTest(oldQualityProfileId) {
 	});
 }
 
+function getSonarrProfiles(values) {
+	const headers = {
+		Accept: 'application/json',
+		'Content-Type': 'application/json',
+		'X-Api-Key': values.sonarrToken,
+	};
+	if (values.sonarrBasicAuthUsername) {
+		const hash = btoa(
+			`${values.sonarrBasicAuthUsername}:${values.sonarrBasicAuthPassword}`
+		);
+		headers.Authorization = `Basic ${hash}`;
+	}
+	return fetch(`${values.sonarrUrlRoot}/api/profile`, { headers })
+		.then(res => res.json())
+		.catch(err => {
+			console.log('Sonarr failed to connect with error:', err);
+			return [];
+		});
+}
+
+function performSonarrTest(oldQualityProfileId) {
+	const values = getOptionValues();
+	const $testStatus = document.getElementById('sonarr_test_status');
+	$selectSonarrQualityProfile.innerHTML = '';
+	$testStatus.textContent = '';
+
+	getSonarrProfiles(values).then(profiles => {
+		$testStatus.textContent =
+			profiles.length > 0 ? 'It works!' : 'Could not connect.';
+		profiles.forEach(profile => {
+			const $opt = document.createElement('option');
+			$opt.value = profile.id;
+			$opt.textContent = profile.name;
+			$selectSonarrQualityProfile.appendChild($opt);
+		});
+		// Because the <select> was reset, the original value is lost.
+		if (oldQualityProfileId) {
+			$selectSonarrQualityProfile.value = oldQualityProfileId;
+		}
+	});
+}
+
 function saveOptions() {
 	const status = document.getElementById('status');
 	const selectedServerId =
@@ -182,10 +198,7 @@ function saveOptions() {
 		ser => ser.clientIdentifier === selectedServerId
 	);
 
-	console.log(
-		'[WTP] Currently selected server information',
-		JSON.stringify(server)
-	);
+	console.log('Currently selected server information', JSON.stringify(server));
 
 	if (!server) {
 		// This _should_ never happen, but can be useful for debugging.
@@ -198,7 +211,7 @@ function saveOptions() {
 	const serverId = server.clientIdentifier;
 	const serverConnections = getPlexConnections(server);
 	console.log(
-		'[WTP] Found Plex Server connections:',
+		'Found Plex Server connections:',
 		JSON.stringify(serverConnections)
 	);
 
@@ -213,11 +226,11 @@ function saveOptions() {
 		return url && (!url.startsWith('http') || url.endsWith('/'));
 	}
 
-	if (testRootUrl(values.couchpotatoUrlRoot)) {
-		status.textContent =
-			'CouchPotato URL should start with "http" and end without a slash!';
-		return;
-	}
+//	if (testRootUrl(values.couchpotatoUrlRoot)) {
+//		status.textContent =
+//			'CouchPotato URL should start with "http" and end without a slash!';
+//		return;
+//	}
 
 	if (testRootUrl(values.radarrUrlRoot)) {
 		status.textContent =
@@ -236,6 +249,23 @@ function saveOptions() {
 		return;
 	}
 
+	if (testRootUrl(values.sonarrUrlRoot)) {
+		status.textContent =
+			'Sonarr URL should start with "http" and end without a slash!';
+		return;
+	}
+
+	if (values.sonarrUrlRoot && !values.sonarrQualityProfileId) {
+		status.textContent =
+			'Make sure you have selected a Sonarr quality profile.';
+		return;
+	}
+
+	if (values.sonarrStoragePath && !/\/|\\$/.test(values.sonarrStoragePath)) {
+		status.textContent = 'Sonarr storage path should end with a slash!';
+		return;
+	}
+
 	function requestUrlPermissions(url) {
 		// TODO: FireFox doesn't have support for chrome.permissions API.
 		if (url && chrome.permissions) {
@@ -247,8 +277,9 @@ function saveOptions() {
 	}
 
 	// Dynamically asking permissions
-	requestUrlPermissions(values.couchpotatoUrlRoot);
+//	requestUrlPermissions(values.couchpotatoUrlRoot);
 	requestUrlPermissions(values.radarrUrlRoot);
+	requestUrlPermissions(values.sonarrUrlRoot);
 
 	function showOptionsSaved() {
 		// Update status to let user know options were saved.
@@ -272,7 +303,7 @@ function saveOptions() {
 	};
 	storage.set(data, () => {
 		if (chrome.runtime.lastError) {
-			console.log('[WTP] Error with saving', chrome.runtime.lastError.message);
+			console.log('Error with saving', chrome.runtime.lastError.message);
 			chrome.storage.local.set(data, showOptionsSaved);
 		} else {
 			showOptionsSaved();
@@ -296,13 +327,8 @@ function restoreOptions() {
 		if (items.radarrUrlRoot) {
 			performRadarrTest(items.radarrQualityProfileId);
 		}
-		if (!items.plexClientId) {
-			plexClientId = window.crypto
-				.getRandomValues(new Uint32Array(5))
-				.join('-');
-			storage.set({ plexClientId });
-		} else {
-			plexClientId = items.plexClientId;
+		if (items.sonarrUrlRoot) {
+			performSonarrTest(items.sonarrQualityProfileId);
 		}
 	}
 	storage.get(null, items => {
@@ -318,8 +344,11 @@ function restoreOptions() {
 document.addEventListener('DOMContentLoaded', restoreOptions);
 $saveButton.addEventListener('click', saveOptions);
 document
-	.getElementById('plex_login')
-	.addEventListener('click', () => performPlexLogin());
+	.getElementById('plex_test')
+	.addEventListener('click', () => performPlexTest());
 document
 	.getElementById('radarr_test')
 	.addEventListener('click', () => performRadarrTest());
+document
+	.getElementById('sonarr_test')
+	.addEventListener('click', () => performSonarrTest());

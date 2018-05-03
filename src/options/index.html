@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Web To Plex Options</title>
+	<title>Web To Plex+ Options</title>
 	<style>
 		body {
 			padding: 0 .8rem;
@@ -36,32 +36,25 @@
 </head>
 
 <body>
-	<p>The Plex username and password are never stored; it is only used to generate a token.</p>
-	<p>
-	  Plex username:
-	  <input type="text" id="plex_username">
-	</p>
-	<p>
-	  Plex password:
-	  <input type="password" id="plex_password"><br>
-	</p>
-	<p>
-		<button type="button" id="plex_login">Login</button>
-		<span id="plex_login_status"></span>
-	</p>
 	<p>
 		Plex token:
-		<input type="text" id="plex_token" data-option="plexToken" disabled><br>
+		<input type="text" id="plex_token" data-option="plexToken"><br>
+		<a href="https://support.plex.tv/hc/en-us/articles/204059436-Finding-your-account-token-X-Plex-Token">Learn how to find your token</a>
+	</p>
+	<p>
+		<button type="button" id="plex_test">Test</button>
+		<span id="plex_test_status"></span>
 	</p>
 	<p>
 		Select server:
 		<select id="plex_servers">
-			<option value="">Click "Login" above</option>
+			<option value="">Click "Test" above</option>
 		</select>
 	</p>
 
 	<hr>
 
+<!--
 	<details>
 		<summary>CouchPotato settings</summary>
 
@@ -90,6 +83,7 @@
 			If you password-protected your CouchPotato install, enter the password here.
 		</p>
 	</details>
+-->
 
 	<details>
 		<summary>Radarr settings</summary>
@@ -133,6 +127,53 @@
 		<p>
 			Select quality profile:
 			<select data-option="radarrQualityProfileId">
+				<option value="">Click "Test" above</option>
+			</select>
+		</p>
+	</details>
+  
+    <details>
+		<summary>Sonarr settings</summary>
+
+		<p>
+			Sonarr URL:
+			<input type="text" data-option="sonarrUrlRoot"><br>
+			<strong>Example:</strong> https://example.com/sonarr or http://192.168.1.100:8989 (no trailing slash!)
+		</p>
+
+		<p>
+			Sonarr API key:
+			<input type="text" data-option="sonarrToken"><br>
+			In Sonarr, go to Settings, click on tab General, click on "Show advanced" and copy paste the value next to "API Key".
+			<strong>Example:</strong> aa756d33242f6g8ffbca2b3963586f21
+		</p>
+
+		<p>
+			Sonarr storage path:
+			<input type="text" data-option="sonarrStoragePath"><br>
+			The path where you want to store movies.
+			<strong>Example:</strong> /storage/Movies/
+		</p>
+
+		<p>
+			Sonarr basic auth username <em>(optional)</em>:
+			<input type="text" data-option="sonarrBasicAuthUsername"><br>
+			If you password-protected your Sonarr install, enter the username here.
+		</p>
+
+		<p>
+			Sonarr basic auth password <em>(optional)</em>:
+			<input type="text" data-option="sonarrBasicAuthPassword"><br>
+			If you password-protected your Sonarr install, enter the password here.
+		</p>
+
+		<p>
+			<button type="button" id="sonarr_test">Test Sonarr</button>
+			<span id="sonarr_test_status"></span>
+		</p>
+		<p>
+			Select quality profile:
+			<select data-option="sonarrQualityProfileId">
 				<option value="">Click "Test" above</option>
 			</select>
 		</p>
