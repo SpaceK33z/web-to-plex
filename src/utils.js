@@ -292,31 +292,43 @@ function modifyPlexButton(el, action, title, options) {
 		el.classList.remove('web-to-plex-button--found');
 	}
     if(options.locale === 'flenix' && options.remote) {
-        el.href = '#';
-		el.textContent = 'Download (file)';
+		el.href = '#';
+		el.textContent = 'Download File (0/0)';
 		el.classList.add('web-to-plex-button--downloader');
 
-        const $data = document.querySelector('#videoplayer ~ script').innerText;
+		const $data = document.querySelector('#videoplayer ~ script').innerText;
 
-        let data = $data
-            .replace(/[^]*\{(hash.+?)\}[^]+/, '$1')
-            .replace(/\s+/g, '')
-            .replace(/(?:^|,)(\w+)\:/g, '&$1=')
-            .replace(/^&|["']/g, '');
+		let data = $data
+			.replace(/[^]*\{(hash.+?)\}[^]+/, '$1')
+			.replace(/\s+/g, '')
+			.replace(/(?:^|,)(\w+)\:/g, '&$1=')
+			.replace(/^&|["']/g, '');
 
-        let xhr = new XMLHttpRequest();
-        xhr.open('POST', options.remote);
-        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-        xhr.onload = function() {
-            if(xhr.status !== 200) {
-                return modifyPlexButton(el, action, title, {...options, locale: null, remote: null})
-            }
+		let xhr = new XMLHttpRequest();
+		xhr.open('POST', options.remote);
+		xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+		xhr.onload = function() {
+			if(xhr.status !== 200) {
+				return modifyPlexButton(el, action, title, {...options, locale: null, remote: null})
+			}
 
-          el.download = `${options.title} (${options.year})`;
-          el.href = xhr.responseText.split(',http').slice(0, 1);
+		  el.hrefs = xhr.responseText.split(',http').join('<!---->http').split('<!---->');
+		  el.download = `${options.title} (${options.year})`;
+		  el.href = el.hrefs.slice(0, el.index = 1);
+		  el.textContent = el.textContent.replace(/\d+\/\d+/, `${el.index}/${el.hrefs.length}`);
+		  el.hrefs = el.hrefs.join('<!---->');
         }
 
         xhr.send(data);
+
+        el.addEventListener('click', e => {
+        	e.preventDefault();
+            let el = e.target, hs = el.hrefs.split('<!---->');
+			if(hs.length == 1 || el.index == hs.length)
+                el.index = 0;
+            el.href = hs.slice(el.index, 1);
+		    el.textContent = el.textContent.replace(/\d+\/\d+/, `${++el.index}/${hs.length}`);
+        });
     } else if (action === 'downloader') {
 		el.href = '#';
 		el.textContent = 'Download';
