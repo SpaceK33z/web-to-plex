@@ -12,7 +12,7 @@ function isMoviePage() {
 }
 
 function isMoviePageReady() {
-	return !!document.querySelector('.share-box');
+	return !!document.querySelector('iframe[title="Disqus"]');
 }
 
 function init() {
@@ -55,7 +55,7 @@ function initPlexThingy() {
 	const year = parseInt($date.innerText);
 	const imdbId = getImdbId(title, year);
 
-	findPlexMedia({ title, year, button: $button, imdbId });
+	findPlexMedia({ title, year, button: $button, imdbId, remote: '/engine/ajax/get.php', locale: 'flenix' });
 }
 
 function renderPlexButton() {

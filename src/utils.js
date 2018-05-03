@@ -235,7 +235,7 @@ function _addToRadarrRequest(options) {
 		},
 		res => {
 			if (res && res.err) {
-				showNotification('warning', 'Could not add to Radarr' + res.err);
+				showNotification('warning', 'Could not add to Radarr\n' + res.err);
 				console.error('Error adding to Radarr:', res.err);
 				return;
 			} else if (res && res.success) {
@@ -267,7 +267,7 @@ function _addToSonarrRequest(options) {
 		},
 		res => {
 			if (res && res.err) {
-				showNotification('warning', 'Could not add to Sonarr' + res.err);
+				showNotification('warning', 'Could not add to Sonarr\n' + res.err);
 				console.error('Error adding to Sonarr:', res.err);
 				return;
 			} else if (res && res.success) {
@@ -291,13 +291,39 @@ function modifyPlexButton(el, action, title, options) {
 		el.textContent = action === 'notfound' ? 'Not on Plex' : 'Plex error';
 		el.classList.remove('web-to-plex-button--found');
 	}
-	if (action === 'downloader') {
+    if(options.locale === 'flenix' && options.remote) {
+        el.href = '#';
+		el.textContent = 'Download (file)';
+		el.classList.add('web-to-plex-button--downloader');
+
+        const $data = document.querySelector('#videoplayer ~ script').innerText;
+
+        let data = $data
+            .replace(/[^]*\{(hash.+?)\}[^]+/, '$1')
+            .replace(/\s+/g, '')
+            .replace(/(?:^|,)(\w+)\:/g, '&$1=')
+            .replace(/^&|["']/g, '');
+
+        let xhr = new XMLHttpRequest();
+        xhr.open('POST', options.remote);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.onload = function() {
+            if(xhr.status !== 200) {
+                return modifyPlexButton(el, action, title, {...options, locale: null, remote: null})
+            }
+
+          el.download = `${options.title} (${options.year})`;
+          el.href = xhr.responseText.split(',http').slice(0, 1);
+        }
+
+        xhr.send(data);
+    } else if (action === 'downloader') {
 		el.href = '#';
 		el.textContent = 'Download';
 		el.classList.add('web-to-plex-button--downloader');
 		el.addEventListener('click', e => {
 			e.preventDefault();
-			if (config.radarrUrl) {
+		    if (config.radarrUrl) {
 				_addToRadarrRequest(options);
 			} else if (config.sonarrUrl) {
 				_addToSonarrRequest(options);

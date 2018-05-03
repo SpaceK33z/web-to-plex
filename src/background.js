@@ -84,7 +84,7 @@ function addRadarr(request, sendResponse) {
 			} else if (res && res.path) {
 				sendResponse({ success: 'Added to ' + res.path });
 			} else {
-				sendResponse({ err: 'unknown error' });
+				sendResponse({ err: 'Unknown error' });
 			}
 		})
 		.catch(err => {
@@ -134,7 +134,7 @@ function addSonarr(request, sendResponse) {
 			} else if (res && res.path) {
 				sendResponse({ success: 'Added to ' + res.path });
 			} else {
-				sendResponse({ err: 'unknown error' });
+				sendResponse({ err: 'Unknown error' });
 			}
 		})
 		.catch(err => {
