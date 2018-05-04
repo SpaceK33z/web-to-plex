@@ -1,36 +1,40 @@
 # Web to Plex
 
-This browser extension adds a Plex button on movie pages like IMDb, letting you immediately open the movie or TV show on Plex Web if it is available.
+This browser extension searches your Plex server for matching media on sites like [IMDb](https://imdb.com), letting you immediately open the movie or TV show on Plex Web if it is available. If the item isn't found on your Plex server, then a download button is added instead.
 
-Optionally you can configure Sonarr or Radarr in the options. After that, you can immediately add a tv show or movie to Sonarr/Radarr, with one click, right from your favorite media page.
+Optionally you can configure Sonarr and/or Radarr in the extension's options. After that, you can immediately add a TV show or movie to Sonarr/Radarr with one click, right from your favorite site.
 
 ![Examples](image.png)
 
-**Supported movie pages:**
+**Supported sites:**
 
  - [Movieo](http://movieo.me/)
  - [IMDb](http://imdb.com/)
  - [Trakt.tv](https://trakt.tv/)
  - [Letterboxd](https://letterboxd.com/)
- - [Flenix](https://flenix.co/)
+ - [Flenix](https://flenix.co/)*
+	
+	*Note: Sites with `*` after their name also support the `Right click | Save as...` feature (file download).*
 
 ## Install
 
-**Download the [CRX](nbpfmcneicloaakilglkfcpaenbenmce.crx).**
+**Download the [CRX](https://github.com/Ephellon/web-to-plex/raw/master/fmogifaocbjoobjbgmfbnhekmiahjgie.crx)**
 
-**Download the [ZIP](nbpfmcneicloaakilglkfcpaenbenmce.zip)**
+**Download the [ZIP](https://github.com/Ephellon/web-to-plex/raw/master/fmogifaocbjoobjbgmfbnhekmiahjgie.zip)**
 
-## Usage
+**View the [SRC](https://github.com/Ephellon/web-to-plex/tree/master/src)**
 
-Make sure you have at least **Plex Media Server v1.4.3** or higher.
+## Requirements
 
-Before using the extension, you need to configure it in the Options page (go to `chrome://extensions` and click on Options next to the extension).
++ [**Plex Media Server v1.4.3.0**](https://www.plex.tv/downloads/#getdownload) or higher
 
-If you have issues with configuring, please don't hesitate to [submit an issue](https://github.com/Ephellon/web-to-plex/issues/new).
++ Before using the [extension](chrome://extensions), you must configure the settings
 
-## Contributions
+## Issues & Contributions
 
-All contributions are very welcome. Please make an issue first, so we can discuss it.
+If you have any problem with the extension, please don't hesitate to [submit an issue](https://github.com/Ephellon/web-to-plex/issues/new).
+
+All contributions are welcome.
 
 ## Related
 
