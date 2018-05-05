@@ -1,10 +1,10 @@
-# Web to Plex ![Icon](src/img/16.png)
+# Web to Plex+ ![Icon](src/img/48.png)
 
 ![Logo](src/img/256.png)
 
-This browser extension searches your Plex server for matching media on sites like [IMDb](https://imdb.com), letting you immediately open the movie or TV show on Plex Web if it is available. If the item isn't found on your Plex server, then a download button is added instead.
+This browser extension searches your [Plex Media Server (PMS)](https://www.plex.tv/downloads/) for matching media on sites like [IMDb](https://imdb.com), letting you immediately open the movie or TV show in Plex Web if it is available. If the item isn't found on your PMS, then a download button is added instead.
 
-Optionally you can configure Sonarr and/or Radarr in the extension's options. After that, you can immediately add a TV show or movie to Sonarr/Radarr with one click, right from your favorite site.
+Optionally, you can configure [Sonarr (TV Shows)](https://sonarr.tv/) and/or [Radarr (Movies)](https://radarr.video/) in the extension's options. After that, you can immediately add a TV show or movie to Sonarr/Radarr with one click, right from your favorite site.
 
 ![Examples](example.png)
 
@@ -18,7 +18,17 @@ Optionally you can configure Sonarr and/or Radarr in the extension's options. Af
 	
 	*Note: Sites with `*` after their name also support the `Right click | Save as...` feature (file download).*
 
-## Install
+**In Progress sites (adding support):**
+
+- [TV Maze](http://www.tvmaze.com/)
+- [The TVDb](https://www.thetvdb.com/)
+- [The MovieDb](https://www.themoviedb.org/)
+
+**En Progress sites (may add support):**
+
+- [VRV](https://vrv.co/)
+
+## Installing WP+
 
 **Download the [CRX](https://github.com/Ephellon/web-to-plex/raw/master/fmogifaocbjoobjbgmfbnhekmiahjgie.crx)**
 
