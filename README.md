@@ -6,7 +6,7 @@ This browser extension searches your Plex server for matching media on sites lik
 
 Optionally you can configure Sonarr and/or Radarr in the extension's options. After that, you can immediately add a TV show or movie to Sonarr/Radarr with one click, right from your favorite site.
 
-![Examples](image.png)
+![Examples](example.png)
 
 **Supported sites:**
 

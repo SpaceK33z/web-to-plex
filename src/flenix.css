@@ -1,10 +1,13 @@
 .web-to-plex-button {
+	color: #fff!important;
+}
+
+.web-to-plex-button.roundButton {
     font-weight: normal;
 	margin-top: -26px;
     margin-left: 10px;
 	display: inline-block;
 	background: #727272;
-	color: #fff!important;
 	padding: 5px 10px;
 	border-radius: 1000px;
 	text-decoration: none!important;
@@ -14,7 +17,7 @@
 	color: #acb4bf!important;
 }
 
-.web-to-plex-button--downloader:hover {
+.web-to-plex-wrapper:hover, .web-to-plex-button--downloader:hover {
 	background-color: #f67e56!important;
     color: #ffffff!important;
 }

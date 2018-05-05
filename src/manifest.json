@@ -4,7 +4,7 @@
 	"name": "Web to Plex+",
 	"description": "Adds a button on various movie & TV show sites to open it in Plex.",
 	"manifest_version": 2,
-    "version": "0.2",
+    "version": "0.2.1.2",
 	"icons": {
 		"16": "img/16.png",
 		"48": "img/48.png",

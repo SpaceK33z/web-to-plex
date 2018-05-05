@@ -1,14 +1,7 @@
 /* global parseOptions, modifyPlexButton, findPlexMedia */
 function isMoviePage() {
-	const path = window.location.pathname;
-	if (!path.startsWith('/movies/')) {
-		return false;
-	}
-	// An example movie page: /movies/juno-hpsgt (can also have trailing slash!)
-	// Example non-movie page: /movies/watchlist/gbdx
-	// So if there is one slash extra (trailing slash not included), it's not a movie page.
-	const jup = path.replace('/movies/', '').slice(0, -1);
-	return !jup.includes('/');
+	// An example movie page: /movies/3030-the-1517-to-paris.html
+	return window.location.pathname.startsWith('/movies/');
 }
 
 function isMoviePageReady() {
@@ -16,18 +9,12 @@ function isMoviePageReady() {
 }
 
 function init() {
-	if (isMoviePage()) {
-		if (isMoviePageReady()) {
+	if (isMoviePage())
+		if (isMoviePageReady())
 			initPlexThingy();
-		} else {
+		else
 			// This almost never happens, but sometimes the page is too slow so we need to wait a bit.
-			// I could reproduce this by clicking on a movie in the movie watchlist,
-			// going back in history and then going forward in history.
-			setTimeout(() => {
-				initPlexThingy();
-			}, 1000);
-		}
-	}
+			setTimeout(init, 1000);
 }
 
 parseOptions().then(() => {
@@ -37,61 +24,75 @@ parseOptions().then(() => {
 });
 
 function initPlexThingy() {
-	const $button = renderPlexButton();
-	if (!$button) {
+	let $button = renderPlexButton();
+	if (!$button)
 		return;
-	}
-	const $title = document.querySelector('#dle-content .about > h1');
-	const $date = document.querySelector('.features > .reset:nth-child(2) a');
-	if (!$title || !$date) {
-		modifyPlexButton(
+
+	let $title = document.querySelector('#dle-content .about > h1'),
+        $date = document.querySelector('.features > .reset:nth-child(2) a');
+
+	if (!$title || !$date)
+		return modifyPlexButton(
 			$button,
 			'error',
 			'Could not extract title or year from Flenix'
-		);
-		return;
-	}
-	const title = $title.innerText.trim();
-	const year = parseInt($date.innerText);
-	const imdbId = getImdbId(title, year);
+		),
+          null;
 
-	findPlexMedia({ title, year, button: $button, imdbId, remote: '/engine/ajax/get.php', locale: 'flenix' });
+	let title = $title.innerText.trim(),
+	    year = parseInt($date.innerText),
+	    IMDbID = IMDbID(title, year);
+
+	findPlexMedia({ title, year, button: $button, IMDbID, remote: '/engine/ajax/get.php', locale: 'flenix' });
 }
 
 function renderPlexButton() {
-	// The "download" button, which doesn't actually work
-	const $downloadButton = document.querySelector(
-		'#dle-content .about > .buttons > a[target="_blank"]'
-	);
-	if ($downloadButton) {
-		$downloadButton.remove();
-	}
+	// The "download" buttons
+	let $downloadButtons = document.querySelectorAll(
+		'#dle-content .about > .buttons > a[target="_blank"],\
+         #dle-content > .header_tabs > ul > li:last-child,\
+         .movieTabs > ul > li:last-child'
+	),
+        $actions = document.querySelectorAll(
+            '#dle-content .about > .buttons,\
+             #dle-content > .header_tabs > ul,\
+             .movieTabs > ul'
+    );
 
-	const $actions = document.querySelector('.about > .buttons');
-	if (!$actions) {
-		console.log('Could not add Plex button.');
-		return null;
-	}
-	const $existingEl = document.querySelector('a.web-to-plex-button');
-	if ($existingEl) {
-		$existingEl.remove();
-	}
-	const el = document.createElement('a');
-	el.classList.add('roundButton', 'web-to-plex-button');
-	$actions.appendChild(el);
-	return el;
+	if (!$actions)
+		return;
+
+	let $existingButton = document.querySelectorAll('a.web-to-plex-button');
+	if ($existingButton)
+		$existingButton.forEach(e => e.remove());
+
+    let els = [];
+	$actions.forEach((e, i) => {
+        let pa = document.createElement('li'),
+            el = document.createElement('a'),
+            li = /^[ou]l$/i.test(e.tagName);
+
+        pa.classList.add('web-to-plex-wrapper');
+        el.textContent = 'Web to Plex+';
+	    el.classList.add((li? 'flatButton': 'roundButton'), 'web-to-plex-button');
+        e.appendChild(li? (pa.appendChild(el), pa): el);
+        return els.push(el);
+    });
+
+	return els;
 }
 
-async function getImdbId(_title, _year) {
+async function IMDbID(_title, _year) {
     let title = null,
         year = null;
 
 	if(!_title || !_year){
-        const $title = document.querySelector('#dle-content .about > h1');
-        const $date = document.querySelector('.features > .reset:nth-child(2) a');
-        if(!$title || !$date) {
-            return null;
-        }
+        let $title = document.querySelector('#dle-content .about > h1'),
+            $date = document.querySelector('.features > .reset:nth-child(2) a');
+
+        if(!$title || !$date)
+            return;
+
         title = $title.innerText.trim();
         year = parseInt($date.innerText);
     } else {
@@ -102,15 +103,15 @@ async function getImdbId(_title, _year) {
     let json = {};
 
     await fetch(`https://www.theimdbapi.org/api/find/movie?title=${ title }&year=${ year }`)
-        .then(function(response) {
+        .then(response => {
             return response.json();
         })
-        .catch(function(error) {
+        .catch(error => {
             throw error;
         })
-        .then(function(data) {
+        .then(data => {
             return json = data[0];
         });
 
-    return json.imdb_id || null;
+    return json.imdb_id;
 }

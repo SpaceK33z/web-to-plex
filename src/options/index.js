@@ -1,36 +1,35 @@
 /* global parseXml */
 // FireFox doesn't support sync storage.
-const storage = chrome.storage.sync || chrome.storage.local;
+const storage = (chrome.storage.sync || chrome.storage.local),
+      __servers__ = document.getElementById('plex_servers'),
+      __radarr_qualityProfile__ = document.querySelector(
+          `[data-option="radarrQualityProfileId"]`
+      ),
+      __sonarr_qualityProfile__ = document.querySelector(
+          `[data-option="sonarrQualityProfileId"]`
+      ),
+      __save__ = document.getElementById('save'),
+      __options__ = [
+          'plexToken',
+//        'couchpotatoUrlRoot',
+//        'couchpotatoToken',
+//        'couchpotatoBasicAuthUsername',
+//        'couchpotatoBasicAuthPassword',
+          'radarrUrlRoot',
+          'radarrToken',
+          'radarrBasicAuthUsername',
+          'radarrBasicAuthPassword',
+          'radarrStoragePath',
+          'radarrQualityProfileId',
+          'sonarrUrlRoot',
+          'sonarrToken',
+          'sonarrBasicAuthUsername',
+          'sonarrBasicAuthPassword',
+          'sonarrStoragePath',
+          'sonarrQualityProfileId'
+      ];
 
-const $selectServer = document.getElementById('plex_servers');
-const $selectRadarrQualityProfile = document.querySelector(
-	`[data-option="radarrQualityProfileId"]`
-);
-const $selectSonarrQualityProfile = document.querySelector(
-	`[data-option="sonarrQualityProfileId"]`
-);
-const $saveButton = document.getElementById('save');
-let plexServers = [];
-
-const optionNames = [
-	'plexToken',
-//	'couchpotatoUrlRoot',
-//	'couchpotatoToken',
-//	'couchpotatoBasicAuthUsername',
-//	'couchpotatoBasicAuthPassword',
-	'radarrUrlRoot',
-	'radarrToken',
-	'radarrBasicAuthUsername',
-	'radarrBasicAuthPassword',
-	'radarrStoragePath',
-	'radarrQualityProfileId',
-	'sonarrUrlRoot',
-	'sonarrToken',
-	'sonarrBasicAuthUsername',
-	'sonarrBasicAuthPassword',
-	'sonarrStoragePath',
-	'sonarrQualityProfileId'
-];
+var PlexServers = [];
 
 function getServers(plexToken) {
 	return fetch('https://plex.tv/api/resources?includeHttps=1', {
@@ -38,269 +37,255 @@ function getServers(plexToken) {
 			'X-Plex-Token': plexToken,
 		},
 	})
-		.then(res => res.text())
-		.then(res => {
-			const data = parseXml(res);
-			if (data === 'Invalid authentication token.') {
-				return null;
-			}
-			return data.Device.filter(device => device.provides === 'server');
-		});
+    .then(response => response.text())
+    .then(xml => {
+        let data = parseXml(xml);
+        if (data === 'Invalid authentication token.')
+            return null;
+
+        return data.Device.filter(device => device.provides === 'server');
+    });
 }
 
 function getPlexConnections(server) {
 	// `server.Connection` can be an array or object.
+
 	let connections = [];
-	if (Array.isArray(server.Connection)) {
+	if (server.Connection instanceof Array)
 		connections = server.Connection;
-	} else {
+ 	else
 		connections = [server.Connection];
-	}
-	return connections.map(conn => ({
-		uri: conn.uri,
-		local: conn.local === '1',
+
+	return connections.map(connection => ({
+		uri: connection.uri,
+		local: connection.local === '1',
 	}));
 }
 
-function performPlexTest(oldServerId) {
-	const plexToken = document.getElementById('plex_token').value;
-	const $testStatus = document.getElementById('plex_test_status');
-	$selectServer.innerHTML = '';
-	$testStatus.textContent = '';
-	$saveButton.disabled = true;
+function performPlexTest(ServerID) {
+	let plexToken = document.getElementById('plex_token').value,
+        teststatus = document.getElementById('plex_test_status');
+
+	__save__.disabled = true;
+	__servers__.innerHTML = '';
+	teststatus.textContent = '';
 
 	getServers(plexToken).then(servers => {
-		plexServers = servers || [];
-		if (!servers) {
-			$testStatus.textContent = 'Invalid token.';
-			return;
-		}
+		PlexServers = servers || [];
 
-		$saveButton.disabled = false;
+		if (!servers)
+			return teststatus.textContent = 'Plex: invalid token';
+
+		__save__.disabled = false;
 
 		servers.forEach(server => {
-			const $opt = document.createElement('option');
-			const source = server.sourceTitle;
-			$opt.value = server.clientIdentifier;
-			$opt.textContent = `${server.name} ${source ? `(${source})` : ''}`;
-			$selectServer.appendChild($opt);
+			let $option = document.createElement('option'),
+                source = server.sourceTitle;
+
+			$option.value = server.clientIdentifier;
+			$option.textContent = `${ server.name } ${ source ? `(${ source })` : '' }`;
+			__servers__.appendChild($option);
 		});
-		if (oldServerId) {
-			$selectServer.value = oldServerId;
-		}
+
+		if (ServerID)
+			__servers__.value = ServerID;
 	});
 }
 
 function getOptionValues() {
-	const values = {};
-	optionNames.forEach(optionName => {
-		values[optionName] = document.querySelector(
-			`[data-option="${optionName}"]`
+	let options = {};
+
+	__options__.forEach(option => {
+		options[option] = document.querySelector(
+			`[data-option="${ option }"]`
 		).value;
 	});
-	return values;
+
+	return options;
 }
 
-function getRadarrProfiles(values) {
-	const headers = {
-		Accept: 'application/json',
+function getRadarrProfiles(options) {
+	let headers = {
+		'Accept': 'application/json',
 		'Content-Type': 'application/json',
-		'X-Api-Key': values.radarrToken,
+		'X-Api-Key': options.radarrToken,
 	};
-	if (values.radarrBasicAuthUsername) {
-		const hash = btoa(
-			`${values.radarrBasicAuthUsername}:${values.radarrBasicAuthPassword}`
-		);
-		headers.Authorization = `Basic ${hash}`;
-	}
-	return fetch(`${values.radarrUrlRoot}/api/profile`, { headers })
-		.then(res => res.json())
-		.catch(err => {
-			console.log('Radarr failed to connect with error:', err);
-			return [];
+
+	if (options.radarrBasicAuthUsername)
+		headers.Authorization = `Basic ${ btoa(`${ options.radarrBasicAuthUsername }:${ options.radarrBasicAuthPassword }`) }`;
+
+	return fetch(`${ options.radarrUrlRoot }/api/profile`, { headers })
+		.then(response => response.json())
+		.catch(error => {
+			return console.error('Radarr failed to connect with error:', error),
+              [];
 		});
 }
 
-function performRadarrTest(oldQualityProfileId) {
-	const values = getOptionValues();
-	const $testStatus = document.getElementById('radarr_test_status');
-	$selectRadarrQualityProfile.innerHTML = '';
-	$testStatus.textContent = '';
+function performRadarrTest(QualityProfileID) {
+	let options = getOptionValues(),
+        teststatus = document.getElementById('radarr_test_status');
 
-	getRadarrProfiles(values).then(profiles => {
-		$testStatus.textContent =
-			profiles.length > 0 ? 'It works!' : 'Could not connect.';
+	__radarr_qualityProfile__.innerHTML = '';
+	teststatus.textContent = '';
+
+	getRadarrProfiles(options).then(profiles => {
+		teststatus.textContent = !~profiles.length ? 'Failed.' : 'Success!';
 		profiles.forEach(profile => {
-			const $opt = document.createElement('option');
-			$opt.value = profile.id;
-			$opt.textContent = profile.name;
-			$selectRadarrQualityProfile.appendChild($opt);
+			let option = document.createElement('option');
+			option.value = profile.id;
+			option.textContent = profile.name;
+			__radarr_qualityProfile__.appendChild(option);
 		});
+
 		// Because the <select> was reset, the original value is lost.
-		if (oldQualityProfileId) {
-			$selectRadarrQualityProfile.value = oldQualityProfileId;
-		}
+		if (QualityProfileID)
+			__radarr_qualityProfile__.value = QualityProfileID;
 	});
 }
 
-function getSonarrProfiles(values) {
-	const headers = {
-		Accept: 'application/json',
+function getSonarrProfiles(options) {
+	let headers = {
+		'Accept': 'application/json',
 		'Content-Type': 'application/json',
-		'X-Api-Key': values.sonarrToken,
+		'X-Api-Key': options.sonarrToken,
 	};
-	if (values.sonarrBasicAuthUsername) {
-		const hash = btoa(
-			`${values.sonarrBasicAuthUsername}:${values.sonarrBasicAuthPassword}`
-		);
-		headers.Authorization = `Basic ${hash}`;
-	}
-	return fetch(`${values.sonarrUrlRoot}/api/profile`, { headers })
-		.then(res => res.json())
-		.catch(err => {
-			console.log('Sonarr failed to connect with error:', err);
-			return [];
+
+	if (options.sonarrBasicAuthUsername)
+		headers.Authorization = `Basic ${ btoa(`${ options.sonarrBasicAuthUsername }:${ options.sonarrBasicAuthPassword }`) }`;
+
+	return fetch(`${ options.sonarrUrlRoot }/api/profile`, { headers })
+		.then(response => response.json())
+		.catch(error => {
+			return console.error('Sonarr failed to connect with error:', error),
+              [];
 		});
 }
 
-function performSonarrTest(oldQualityProfileId) {
-	const values = getOptionValues();
-	const $testStatus = document.getElementById('sonarr_test_status');
-	$selectSonarrQualityProfile.innerHTML = '';
-	$testStatus.textContent = '';
+function performSonarrTest(QualityProfileID) {
+	let options = getOptionValues(),
+        teststatus = document.getElementById('sonarr_test_status');
 
-	getSonarrProfiles(values).then(profiles => {
-		$testStatus.textContent =
-			profiles.length > 0 ? 'It works!' : 'Could not connect.';
+	__sonarr_qualityProfile__.innerHTML = '';
+	teststatus.textContent = '';
+
+	getSonarrProfiles(options).then(profiles => {
+		teststatus.textContent = !~profiles.length ? 'Failed.' : 'Success!';
 		profiles.forEach(profile => {
-			const $opt = document.createElement('option');
-			$opt.value = profile.id;
-			$opt.textContent = profile.name;
-			$selectSonarrQualityProfile.appendChild($opt);
+			let option = document.createElement('option');
+			option.value = profile.id;
+			option.textContent = profile.name;
+			__sonarr_qualityProfile__.appendChild(option);
 		});
+
 		// Because the <select> was reset, the original value is lost.
-		if (oldQualityProfileId) {
-			$selectSonarrQualityProfile.value = oldQualityProfileId;
-		}
+		if (QualityProfileID)
+			__sonarr_qualityProfile__.value = QualityProfileID;
 	});
 }
 
 function saveOptions() {
-	const status = document.getElementById('status');
-	const selectedServerId =
-		$selectServer.options[$selectServer.selectedIndex].value;
-	if (!selectedServerId) {
-		status.textContent = 'Select a server first!';
-		return;
-	}
+	let status = document.getElementById('status'),
+        ServerID = __servers__.options[__servers__.selectedIndex].value;
 
-	const server = plexServers.find(
-		ser => ser.clientIdentifier === selectedServerId
-	);
+	if (!ServerID)
+		return status.textContent = 'Select a server!',
+            null;
 
-	console.log('Currently selected server information', JSON.stringify(server));
+	let server = PlexServers.find(ID => ID.clientIdentifier === ServerID);
 
-	if (!server) {
-		// This _should_ never happen, but can be useful for debugging.
-		status.textContent = 'Could not find Plex server by identifier.';
-		return;
-	}
+	console.log('Selected server information:', JSON.stringify(server));
+
+    // This should never happen, but can be useful for debugging.
+	if (!server)
+		return status.textContent = `Could not find Plex server ${ ServerID }`,
+            null;
 
 	// Important detail: we get the token from the selected server, NOT the token the user has entered before.
-	const serverToken = server.accessToken;
-	const serverId = server.clientIdentifier;
-	const serverConnections = getPlexConnections(server);
+	let serverToken = server.accessToken,
+        ClientID = server.clientIdentifier,
+        serverConnections = getPlexConnections(server);
+
 	console.log(
 		'Found Plex Server connections:',
 		JSON.stringify(serverConnections)
 	);
 
-	if (serverConnections.length < 1) {
-		status.textContent = 'Could not find a Plex server URL.';
-		return;
-	}
+	if (!~serverConnections.length)
+		return status.textContent = 'Could not locate Plex server URL',
+            null;
 
 	// With a "user token" you can access multiple servers. A "normal" token is just for one server.
-	const values = getOptionValues();
-	function testRootUrl(url) {
-		return url && (!url.startsWith('http') || url.endsWith('/'));
-	}
+	let options = getOptionValues(),
+        drl = null,
+        // Instead of having the user be so wordy, complete the URL ourselves here
+        url = (
+            (drl = options.radarrUrlRoot)?
+                drl:
+            (drl = options.sonarrUrlRoot)?
+                drl:
+            null
+        ),
+        pth = (
+            (drl = options.radarrStoragePath)?
+                drl:
+            (drl = options.sonarrStoragePath)?
+                drl:
+            null
+        );
 
-//	if (testRootUrl(values.couchpotatoUrlRoot)) {
-//		status.textContent =
-//			'CouchPotato URL should start with "http" and end without a slash!';
-//		return;
-//	}
+    if (url === null)
+      return status.textContent = 'Please enter a valid URL',
+          null;
+    if (pth === null)
+      return status.textContent = 'Please enter a valid storage path',
+          null;
+	if (!options.radarrQualityProfileId)
+		return status.textContent = 'Select a Radarr quality profile',
+            null;
+    if (!options.sonarrQualityProfileId)
+		return status.textContent = 'Sonarr a Sonarr quality profile',
+            null;
 
-	if (testRootUrl(values.radarrUrlRoot)) {
-		status.textContent =
-			'Radarr URL should start with "http" and end without a slash!';
-		return;
-	}
+    url = url
+        .replace(/(?!^https?:)/, 'http://')
+        .replace(/\/+$/, '');
 
-	if (values.radarrUrlRoot && !values.radarrQualityProfileId) {
-		status.textContent =
-			'Make sure you have selected a Radarr quality profile.';
-		return;
-	}
-
-	if (values.radarrStoragePath && !/\/|\\$/.test(values.radarrStoragePath)) {
-		status.textContent = 'Radarr storage path should end with a slash!';
-		return;
-	}
-
-	if (testRootUrl(values.sonarrUrlRoot)) {
-		status.textContent =
-			'Sonarr URL should start with "http" and end without a slash!';
-		return;
-	}
-
-	if (values.sonarrUrlRoot && !values.sonarrQualityProfileId) {
-		status.textContent =
-			'Make sure you have selected a Sonarr quality profile.';
-		return;
-	}
-
-	if (values.sonarrStoragePath && !/\/|\\$/.test(values.sonarrStoragePath)) {
-		status.textContent = 'Sonarr storage path should end with a slash!';
-		return;
-	}
+    pth = pth
+        .replace(/([^\\\/])$/, ($0, $1, $$, $_) => ($1 + (/\\/.test($_)? '\\': '/')));
 
 	function requestUrlPermissions(url) {
 		// TODO: FireFox doesn't have support for chrome.permissions API.
-		if (url && chrome.permissions) {
+		if (chrome.permissions)
 			// When asking permissions the URL needs to have a trailing slash.
 			chrome.permissions.request({
-				origins: [`${url}/`],
+				origins: [`${ url }/`],
 			});
-		}
 	}
 
 	// Dynamically asking permissions
-//	requestUrlPermissions(values.couchpotatoUrlRoot);
-	requestUrlPermissions(values.radarrUrlRoot);
-	requestUrlPermissions(values.sonarrUrlRoot);
+//	requestUrlPermissions(options.couchpotatoUrlRoot);
+	requestUrlPermissions(options.radarrUrlRoot);
+	requestUrlPermissions(options.sonarrUrlRoot);
 
 	function showOptionsSaved() {
 		// Update status to let user know options were saved.
-		status.textContent = 'Options saved.';
-		setTimeout(() => {
-			status.textContent = '';
-		}, 750);
+		status.textContent = 'Saved';
+		setTimeout((() => status.textContent = ''), 750);
 	}
+	status.textContent = 'Saving...';
 
-	status.textContent = 'Saving…';
-
-	const data = {
-		...values,
+	let data = {
+		...options,
 		servers: [
 			{
-				id: serverId,
+				id: ClientID,
 				token: serverToken,
 				connections: serverConnections,
 			},
 		],
 	};
+
 	storage.set(data, () => {
 		if (chrome.runtime.lastError) {
 			console.log('Error with saving', chrome.runtime.lastError.message);
@@ -312,43 +297,40 @@ function saveOptions() {
 }
 
 // Restores select box and checkbox state using the preferences
-// stored in chrome.storage.
+// stored in chrome.storage.*
 function restoreOptions() {
 	function setOptions(items) {
-		optionNames.forEach(optionName => {
-			document.querySelector(`[data-option="${optionName}"]`).value =
-				items[optionName] || '';
+		__options__.forEach(option => {
+			document.querySelector(`[data-option="${ option }"]`).value = items[option] || '';
 		});
 
-		if (items.plexToken) {
-			const serverId = items.servers ? items.servers[0].id : null;
-			performPlexTest(serverId);
-		}
-		if (items.radarrUrlRoot) {
+		if (items.plexToken)
+			performPlexTest(items.servers ? items.servers[0].id : null);
+		if (items.radarrUrlRoot)
 			performRadarrTest(items.radarrQualityProfileId);
-		}
-		if (items.sonarrUrlRoot) {
+		if (items.sonarrUrlRoot)
 			performSonarrTest(items.sonarrQualityProfileId);
-		}
 	}
+
 	storage.get(null, items => {
-		// Sigh... This is a workaround for Firefox; newer versions do have support for the `chrome.storage.sync` API,
-		// but it will throw an error if you haven't enabled that. ARGHHHHHHHHH.
-		if (chrome.runtime.lastError) {
+		// Sigh... This is a workaround for Firefox; newer versions have support for the `chrome.storage.sync` API,
+		// BUT, it will throw an error if you haven't enabled it...
+		if (chrome.runtime.lastError)
 			chrome.storage.local.get(null, setOptions);
-		} else {
+        else
 			setOptions(items);
-		}
 	});
 }
+
 document.addEventListener('DOMContentLoaded', restoreOptions);
-$saveButton.addEventListener('click', saveOptions);
+__save__.addEventListener('click', saveOptions);
+
 document
 	.getElementById('plex_test')
-	.addEventListener('click', () => performPlexTest());
+	.addEventListener('click', performPlexTest);
 document
 	.getElementById('radarr_test')
-	.addEventListener('click', () => performRadarrTest());
+	.addEventListener('click', performRadarrTest);
 document
 	.getElementById('sonarr_test')
-	.addEventListener('click', () => performSonarrTest());
+	.addEventListener('click', performSonarrTest);

@@ -170,12 +170,11 @@ function showNotification(state, text, timeout, callback) {
 //		res => {
 //			const movieExists = res.success;
 //			if (res.err) {
-//				showNotification(
+//				return showNotification(
 //					'warning',
 //					'CouchPotato request failed (look in DevTools for more info)'
-//				);
+//				),
 //				console.error('Error with viewing on CouchPotato:', res.err);
-//				return;
 //			}
 //			if (!movieExists) {
 //				_addToCouchPotatoRequest(options);
@@ -199,12 +198,11 @@ function showNotification(state, text, timeout, callback) {
 //		},
 //		res => {
 //			if (res.err) {
-//				showNotification(
+//				return showNotification(
 //					'warning',
 //					'Could not add to CouchPotato (look in DevTools for more info)'
-//				);
+//				),
 //				console.error('Error with adding on CouchPotato:', res.err);
-//				return;
 //			}
 //			if (res.success) {
 //				showNotification('info', 'Added movie on CouchPotato.');
@@ -235,9 +233,8 @@ function _addToRadarrRequest(options) {
 		},
 		res => {
 			if (res && res.err) {
-				showNotification('warning', 'Could not add to Radarr\n' + res.err);
+				return showNotification('warning', 'Could not add to Radarr\n' + res.err),
 				console.error('Error adding to Radarr:', res.err);
-				return;
 			} else if (res && res.success) {
 				showNotification('info', 'Added movie to Radarr');
 			} else {
@@ -249,11 +246,10 @@ function _addToRadarrRequest(options) {
 
 function _addToSonarrRequest(options) {
 	if (!options.imdbId) {
-		showNotification(
+		return showNotification(
 			'warning',
 			'Stopped adding to Sonarr: No IMDB ID'
 		);
-		return;
 	}
 	chrome.runtime.sendMessage(
 		{
@@ -267,9 +263,7 @@ function _addToSonarrRequest(options) {
 		},
 		res => {
 			if (res && res.err) {
-				showNotification('warning', 'Could not add to Sonarr\n' + res.err);
-				console.error('Error adding to Sonarr:', res.err);
-				return;
+				return showNotification('warning', 'Could not add to Sonarr\n' + res.err);
 			} else if (res && res.success) {
 				showNotification('info', 'Added movie to Sonarr');
 			} else {
@@ -279,76 +273,81 @@ function _addToSonarrRequest(options) {
 	);
 }
 
-function modifyPlexButton(el, action, title, options) {
-	el.style.removeProperty('display');
+function modifyPlexButton(els, action, title, options) {
+    if(els.constructor === Array)
+        return els.forEach(e => modifyPlexButton(e, action, title, options));
+
+    const el = els;
 	if (action === 'found') {
 		el.href = getPlexMediaUrl(config.server.id, options.key);
 		el.textContent = 'On Plex';
 		el.classList.add('web-to-plex-button--found');
-	}
-	if (action === 'notfound' || action === 'error') {
+	} else if (action === 'notfound' || action === 'error') {
 		el.removeAttribute('href');
-		el.textContent = action === 'notfound' ? 'Not on Plex' : 'Plex error';
+		el.textContent = action === 'notfound' ? 'Not on Plex' : 'Web to Plex+';
+        el.title = 'The Movie/TV Show was not found';
 		el.classList.remove('web-to-plex-button--found');
-	}
-    if(options.locale === 'flenix' && options.remote) {
-		el.href = '#';
-		el.textContent = 'Download File (0/0)';
-		el.classList.add('web-to-plex-button--downloader');
+	} else if (action === 'downloader') {
+        if(options.locale === 'flenix' && options.remote) {
+            el.href = '#';
+            el.textContent = 'Save File #0/0';
+            el.classList.add('web-to-plex-button--downloader');
 
-		const $data = document.querySelector('#videoplayer ~ script').innerText;
+            const $data = document.querySelector('#videoplayer ~ script').innerText;
 
-		let data = $data
-			.replace(/[^]*\{(hash.+?)\}[^]+/, '$1')
-			.replace(/\s+/g, '')
-			.replace(/(?:^|,)(\w+)\:/g, '&$1=')
-			.replace(/^&|["']/g, '');
+            let data = $data
+                .replace(/[^]*\{(hash.+?)\}[^]+/, '$1')
+                .replace(/\s+/g, '')
+                .replace(/(?:^|,)(\w+)\:/g, '&$1=')
+                .replace(/^&|["']/g, '');
 
-		let xhr = new XMLHttpRequest();
-		xhr.open('POST', options.remote);
-		xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-		xhr.onload = function() {
-			if(xhr.status !== 200) {
-				return modifyPlexButton(el, action, title, {...options, locale: null, remote: null})
-			}
+            let xhr = new XMLHttpRequest();
+            xhr.open('POST', options.remote);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.onload = function() {
+                if(xhr.status !== 200) {
+                    return modifyPlexButton(el, action, title, {...options, locale: null, remote: null})
+                }
 
-		  el.hrefs = xhr.responseText.split(',http').join('<!---->http').split('<!---->');
-		  el.download = `${options.title} (${options.year})`;
-		  el.href = el.hrefs.slice(0, el.index = 1);
-		  el.textContent = el.textContent.replace(/\d+\/\d+/, `${el.index}/${el.hrefs.length}`);
-		  el.hrefs = el.hrefs.join('<!---->');
+              el.hrefs = xhr.responseText.split(',http').join('<!---->http').split('<!---->');
+              el.download = `${options.title} (${options.year})`;
+              el.href = el.hrefs.slice(0, el.index = 1);
+              el.textContent = el.textContent.replace(/\d+\/\d+/, `${el.index}/${el.hrefs.length}`);
+              el.hrefs = el.hrefs.join('<!---->');
+            }
+
+            xhr.send(data);
+
+            el.addEventListener('click', e => {
+                e.preventDefault();
+                let el = e.target, hs = el.hrefs.split('<!---->');
+                if(hs.length == 1 || el.index == hs.length)
+                    el.index = 0;
+                el.href = hs.slice(el.index, 1);
+                el.textContent = el.textContent.replace(/\d+\/\d+/, `${++el.index}/${hs.length}`);
+            });
+        } else {
+            el.href = '#';
+            el.textContent = 'Download';
+            el.classList.add('web-to-plex-button--downloader');
+            el.addEventListener('click', e => {
+                e.preventDefault();
+                if (config.radarrUrl) {
+                    _addToRadarrRequest(options);
+                } else if (config.sonarrUrl) {
+                    _addToSonarrRequest(options);
+                }
+    //          else {
+    //				_maybeAddToCouchpotato(options);
+    //			}
+            });
         }
 
-        xhr.send(data);
+        if (title)
+            el.title = title;
 
-        el.addEventListener('click', e => {
-        	e.preventDefault();
-            let el = e.target, hs = el.hrefs.split('<!---->');
-			if(hs.length == 1 || el.index == hs.length)
-                el.index = 0;
-            el.href = hs.slice(el.index, 1);
-		    el.textContent = el.textContent.replace(/\d+\/\d+/, `${++el.index}/${hs.length}`);
-        });
-    } else if (action === 'downloader') {
-		el.href = '#';
-		el.textContent = 'Download';
-		el.classList.add('web-to-plex-button--downloader');
-		el.addEventListener('click', e => {
-			e.preventDefault();
-		    if (config.radarrUrl) {
-				_addToRadarrRequest(options);
-			} else if (config.sonarrUrl) {
-				_addToSonarrRequest(options);
-			}
-//          else {
-//				_maybeAddToCouchpotato(options);
-//			}
-		});
-	}
-
-	if (title) {
-		el.title = title;
-	}
+        el.style.removeProperty('display');
+    }
 }
 
 function findPlexMedia(options) {
@@ -358,28 +357,29 @@ function findPlexMedia(options) {
 				modifyPlexButton(options.button, 'found', 'Found on Plex', { key });
 			} else {
 				options.field = 'original_title';
-				return getPlexMediaRequest(options).then(({ found, key }) => {
-					if (found) {
-						modifyPlexButton(options.button, 'found', 'Found on Plex', key);
-					} else {
-						const showDownloader =
-							(config.radarrUrl /* || config.couchpotatoUrl */ || config.sonarrUrl) &&
-							options.type !== 'show';
-						const action = showDownloader ? 'downloader' : 'notfound';
-						const title = showDownloader
-							? 'Not on Plex, download available'
-							: 'Not on Plex, download unavailable';
-						modifyPlexButton(options.button, action, title, options);
-					}
+				return getPlexMediaRequest(options)
+                    .then(({ found, key }) => {
+                        if (found) {
+                            modifyPlexButton(options.button, 'found', 'Found on Plex', key);
+                        } else {
+                            const available =
+                                (config.radarrUrl /* || config.couchpotatoUrl */ || config.sonarrUrl) &&
+                                options.type !== 'show';
+                            const action = available ? 'downloader' : 'notfound';
+                            const title = available
+                                ? 'Not on Plex (available)'
+                                : 'Not on Plex (not available)';
+                            modifyPlexButton(options.button, action, title, options);
+                        }
 				});
 			}
 		})
 		.catch(err => {
-			modifyPlexButton(
+			return modifyPlexButton(
 				options.button,
 				'error',
 				'Request to Plex Media Server failed'
-			);
+			),
 			console.error('Request to Plex failed', err);
 		});
 }

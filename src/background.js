@@ -1,12 +1,11 @@
 /* global chrome */
 function generateHeaders(auth) {
-	const headers = { Accept: 'application/json' };
-	if (!auth) {
+	let headers = { Accept: 'application/json' };
+	if (!auth)
 		return headers;
-	}
-	const hash = btoa(`${auth.username}:${auth.password}`);
+
 	return {
-		Authorization: `Basic ${hash}`,
+		Authorization: `Basic ${ btoa(`${ auth.username }:${ auth.password }`) }`,
 		...headers
 	};
 }
@@ -21,7 +20,7 @@ function generateHeaders(auth) {
 //	})
 //		.then(res => res.json())
 //		.then(res => {
-//			const success = res.success;
+//			let success = res.success;
 //			sendResponse({ success, status: success ? res.media.status : null });
 //		})
 //		.catch(err => {
@@ -43,20 +42,20 @@ function generateHeaders(auth) {
 //}
 
 function addRadarr(request, sendResponse) {
-	const headers = {
-		...generateHeaders(request.basicAuth),
+	let headers = {
 		'Content-Type': 'application/json',
 		'X-Api-Key': request.radarrToken,
-	};
-	const lookupQuery = encodeURIComponent(`imdb:${request.imdbId}`);
+		...generateHeaders(request.basicAuth)
+	},
+        query = encodeURIComponent(`imdb:${ request.imdbId }`);
 
-	fetch(`${request.url}/lookup?term=${lookupQuery}`, { headers })
-		.then(res => res.json())
+	fetch(`${ request.url }/lookup?term=${ query }`, { headers })
+		.then(respaonse => respaonse.json())
 		.then(data => {
-			if (!Array.isArray(data) || data.length < 1) {
+			if (!Array.isArray(data) || data.length < 1)
 				throw new Error('Movie not found');
-			}
-			const body = {
+
+			let body = {
 				...data[0],
 				monitored: true,
 				minimumAvailability: 'preDB',
@@ -66,8 +65,12 @@ function addRadarr(request, sendResponse) {
 					searchForMovie: true,
 				},
 			};
-			console.log('generated URL', request.url, headers);
-			console.log('body', body);
+
+            console.group('Generated URL');
+                console.log('Generated URL', request.url, headers);
+                console.log('Body', body);
+            console.groupEnd();
+
 			return body;
 		})
 		.then(body => {
@@ -77,15 +80,14 @@ function addRadarr(request, sendResponse) {
 				body: JSON.stringify(body),
 			});
 		})
-		.then(res => res.json())
-		.then(res => {
-			if (res && res[0] && res[0].errorMessage) {
-				sendResponse({ err: res[0].errorMessage });
-			} else if (res && res.path) {
-				sendResponse({ success: 'Added to ' + res.path });
-			} else {
+		.then(response => response.json())
+		.then(data => {
+			if (data && data[0] && data[0].errorMessage)
+				sendResponse({ err: data[0].errorMessage });
+		    else if (data && data.path)
+				sendResponse({ success: 'Added to ' + data.path });
+		    else
 				sendResponse({ err: 'Unknown error' });
-			}
 		})
 		.catch(err => {
 			sendResponse({ err: String(err) });
@@ -93,31 +95,35 @@ function addRadarr(request, sendResponse) {
 }
 
 function addSonarr(request, sendResponse) {
-	const headers = {
-		...generateHeaders(request.basicAuth),
+	let headers = {
 		'Content-Type': 'application/json',
 		'X-Api-Key': request.sonarrToken,
-	};
-	const lookupQuery = encodeURIComponent(`imdb:${request.imdbId}`);
+		...generateHeaders(request.basicAuth)
+	},
+        query = encodeURIComponent(`imdb:${ request.imdbId }`);
 
-	fetch(`${request.url}/lookup?term=${lookupQuery}`, { headers })
-		.then(res => res.json())
+	fetch(`${ request.url }/lookup?term=${ query }`, { headers })
+		.then(respaonse => respaonse.json())
 		.then(data => {
-			if (!Array.isArray(data) || data.length < 1) {
-				throw new Error('TV Show not found');
-			}
-			const body = {
+			if (!Array.isArray(data) || data.length < 1)
+				throw new Error('Movie not found');
+
+			let body = {
 				...data[0],
 				monitored: true,
 				minimumAvailability: 'preDB',
 				qualityProfileId: request.sonarrQualityProfileId,
 				rootFolderPath: request.sonarrStoragePath,
 				addOptions: {
-					searchForSeries: true,
+					searchForMovie: true,
 				},
 			};
-			console.log('generated URL', request.url, headers);
-			console.log('body', body);
+
+            console.group('Generated URL');
+                console.log('Generated URL', request.url, headers);
+                console.log('Body', body);
+            console.groupEnd();
+
 			return body;
 		})
 		.then(body => {
@@ -127,15 +133,14 @@ function addSonarr(request, sendResponse) {
 				body: JSON.stringify(body),
 			});
 		})
-		.then(res => res.json())
-		.then(res => {
-			if (res && res[0] && res[0].errorMessage) {
-				sendResponse({ err: res[0].errorMessage });
-			} else if (res && res.path) {
-				sendResponse({ success: 'Added to ' + res.path });
-			} else {
+		.then(response => response.json())
+		.then(data => {
+			if (data && data[0] && data[0].errorMessage)
+				sendResponse({ err: data[0].errorMessage });
+		    else if (data && data.path)
+				sendResponse({ success: 'Added to ' + data.path });
+		    else
 				sendResponse({ err: 'Unknown error' });
-			}
 		})
 		.catch(err => {
 			sendResponse({ err: String(err) });
@@ -143,92 +148,91 @@ function addSonarr(request, sendResponse) {
 }
 
 function _searchPlex(connection, headers, options) {
-	const type = options.type || 'movie';
-	const url = `${connection.uri}/hubs/search`;
-	const field = options.field || 'title';
+	let type = options.type || 'movie',
+        url = `${ connection.uri }/hubs/search`,
+        field = options.field || 'title';
 
-	// i.e. Letterboxd can contain special white-space characters. Plex doesn't like this.
-	const title = encodeURIComponent(options.title.replace(/\s/g, ' '));
-	const finalUrl = `${url}?query=${field}:${title}`;
+	// Letterboxd can contain special white-space characters. Plex doesn't like this.
+	let title = encodeURIComponent(options.title.replace(/\s/g, ' ')),
+        finalUrl = `${url}?query=${field}:${title}`;
+
 	return fetch(finalUrl, {
 		headers,
 	})
-		.then(res => res.json())
-		.then(data => {
-			const hub = data.MediaContainer.Hub.find(myHub => myHub.type === type);
-			if (!hub || !hub.Metadata) {
-				return { found: false };
-			}
+    .then(response => response.json())
+    .then(data => {
+        let hub = data.MediaContainer.Hub.find(hub => hub.type === type);
+        if (!hub || !hub.Metadata)
+            return { found: false };
 
-			// We only want to search in Plex libraries with the type "Movie", i.e. not the type "Other Videos".
-			// Weirdly enough Plex doesn't seem to have an easy way to filter those libraries so we invent our own hack.
-			const actualMovies = hub.Metadata.filter(
-				meta =>
-					meta.Country ||
-					meta.Directory ||
-					meta.Genre ||
-					meta.Role ||
-					meta.Writer
-			);
-			// This is messed up, but Plex' definition of a year is year when it was available,
-			// not when it was released (which is Movieo's definition).
-			// For examples, see Bone Tomahawk, The Big Short, The Hateful Eight.
-			// So we'll first try to find the movie with the given year, and then + 1 it.
-			let media = actualMovies.find(meta => meta.year === options.year);
-			if (!media) {
-				media = actualMovies.find(meta => meta.year === options.year + 1);
-			}
-			let key = null;
-			if (media) {
-				key = media.key.replace('/children', '');
-			}
+        // We only want to search in Plex libraries with the type "Movie", i.e. not the type "Other Videos".
+        // Weirdly enough Plex doesn't seem to have an easy way to filter those libraries so we invent our own hack.
+        let movies = hub.Metadata.filter(
+            meta =>
+                meta.Country ||
+                meta.Directory ||
+                meta.Genre ||
+                meta.Role ||
+                meta.Writer
+        );
 
-			return { found: !!media, key };
-		});
+        // This is messed up, but Plex's definition of a year is year when it was available,
+        // not when it was released (which is Movieo's definition).
+        // For examples, see Bone Tomahawk, The Big Short, The Hateful Eight.
+        // So we'll first try to find the movie with the given year, and then + 1 it.
+        let media = movies.find(meta => meta.year === options.year),
+            key = null;
+        if (!media)
+            media = movies.find(meta => meta.year === options.year + 1);
+        else
+            key = media.key.replace('/children', '');
+
+        return { found: !!media, key };
+    });
 }
 
 // Unfortunately the native Promise.race does not work as you would suspect.
 // If one promise (Plex request) fails, we still want the other requests to continue racing.
-// See https://www.jcore.com/2016/12/18/promise-me-you-wont-use-promise-race/ for explanation
+// See https://www.jcore.com/2016/12/18/promise-me-you-wont-use-promise-race/ for an explanation
 function promiseRace(promises) {
-	if (promises.length < 1) {
+	if (!~promises.length)
 		return Promise.reject('Cannot start a race without promises!');
-	}
 
 	// There is no way to know which promise is rejected.
 	// So we map it to a new promise to return the index when it fails
-	let indexPromises = promises.map((p, index) =>
-		p.catch(() => {
+	let Promises = promises.map((promise, index) =>
+		promise.catch(() => {
 			throw index;
 		})
 	);
 
-	return Promise.race(indexPromises).catch(index => {
+	return Promise.race(Promises).catch(index => {
 		// The promise has rejected, remove it from the list of promises and just continue the race.
-		let p = promises.splice(index, 1)[0];
-		p.catch(e => console.log(`Plex request ${index} failed:`, e));
+		let promise = promises.splice(index, 1)[0];
+		promise.catch(error => console.log(`Plex request #${ index } failed:`, error));
 		return promiseRace(promises);
 	});
 }
 
 async function searchPlex(request, sendResponse) {
-	const { options, serverConfig } = request;
-	const headers = {
-		'X-Plex-Token': serverConfig.token,
-		Accept: 'application/json',
-	};
+	let { options, serverConfig } = request,
+        headers = {
+            'X-Plex-Token': serverConfig.token,
+            Accept: 'application/json',
+        };
 
-	// Try all Plex connection urls.
-	const requests = serverConfig.connections.map(conn =>
-		_searchPlex(conn, headers, options)
+	// Try all Plex connection URLs
+	let requests = serverConfig.connections.map(connection =>
+		_searchPlex(connection, headers, options)
 	);
+
 	try {
-		// See what connection url finishes the request first and pick that one.
+		// See what connection URL finishes the request first and pick that one.
 		// TODO: optimally, as soon as the first request is finished, all other requests would be cancelled using AbortController.
-		const result = await promiseRace(requests);
+		let result = await promiseRace(requests);
 		sendResponse(result);
-	} catch (err) {
-		sendResponse({ err: String(err) });
+	} catch (error) {
+		sendResponse({ err: String(error) });
 	}
 }
 
@@ -252,7 +256,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 		case 'OPEN_OPTIONS':
 			chrome.runtime.openOptionsPage();
 			return true;
-		default:
-			return false;
+		default: break;
 	}
 });

@@ -1,73 +1,63 @@
 /* global wait, modifyPlexButton, parseOptions, findPlexMedia */
 function isMoviePage() {
-	const path = window.location.pathname;
-	if (!path.startsWith('/movies/')) {
-		return false;
-	}
-	// TODO: e.g. /movies/trending is not really a movie page...
-	return true;
+	return window.location.pathname.startsWith('/movies/');
 }
 
 function isShowPage() {
-	const path = window.location.pathname;
-	if (!path.startsWith('/shows/')) {
+	let path = window.location.pathname;
+	if (!path.startsWith('/shows/'))
 		return false;
-	}
+
 	// TODO: e.g. /shows/trending is not really a show page...
-	return true;
+	return !/\btrending$/.test(path);
 }
 
 function getImdbId() {
-	const $link = document.querySelector(
+	let $link = document.querySelector(
 		'ul.external [href^="http://www.imdb.com/title/tt"]'
 	);
-	if ($link) {
+	if ($link)
 		return $link.href.replace('http://www.imdb.com/title/', '');
-	}
-	return null;
 }
 
 function init() {
 	if (isMoviePage() || isShowPage()) {
 		wait(
 			() => document.querySelector('#info-wrapper ul.external'),
-			() => {
-				initPlexThingy(isMoviePage() ? 'movie' : 'show');
-			}
+			() => initPlexThingy(isMoviePage() ? 'movie' : 'show')
 		);
 	}
 }
 
 function renderPlexButton() {
-	const $actions = document.querySelector('ul.external li:first-child');
-	if (!$actions) {
-		console.log('Could not add Plex button.');
-		return null;
-	}
-	const $existingEl = $actions.querySelector('a.web-to-plex-button');
-	if ($existingEl) {
-		return null;
-	}
-	const el = document.createElement('a');
+	let $actions = document.querySelector('ul.external li:first-child');
+	if (!$actions)
+		return;
+
+	let existingButton = $actions.querySelector('a.web-to-plex-button');
+	if (existingButton)
+		return;
+
+	let el = document.createElement('a');
+    el.textContent = 'Web to Plex+';
 	el.classList.add('web-to-plex-button');
 	$actions.insertBefore(el, $actions.childNodes[0]);
 	return el;
 }
 
 function initPlexThingy(type) {
-	const $button = renderPlexButton();
-	if (!$button) {
+	let $button = renderPlexButton();
+	if (!$button)
 		return;
-	}
-	const $title = document.querySelector('.btn-checkin');
-	const $year = document.querySelector('.summary .mobile-title .year');
-	if (!$title || !$year) {
-		modifyPlexButton($button, 'error', 'Could not extract title or year');
-		return;
-	}
-	const title = $title.dataset.topTitle;
-	const year = parseInt($year.textContent.trim());
-	const imdbId = getImdbId();
+
+	let $title = document.querySelector('.btn-checkin'),
+        $year = document.querySelector('.summary .mobile-title .year');
+	if (!$title || !$year)
+		return modifyPlexButton($button, 'error', 'Could not extract title or year');
+
+	let title = $title.dataset.topTitle,
+        year = parseInt($year.textContent.trim()),
+        imdbId = getImdbId();
 
 	findPlexMedia({ type, title, year, button: $button, imdbId });
 }
