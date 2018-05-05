@@ -1,4 +1,6 @@
-# Web to Plex
+# Web to Plex ![Icon](source/img/48.png)
+
+![Logo](source/img/256.png)
 
 This browser extension searches your Plex server for matching media on sites like [IMDb](https://imdb.com), letting you immediately open the movie or TV show on Plex Web if it is available. If the item isn't found on your Plex server, then a download button is added instead.
 
