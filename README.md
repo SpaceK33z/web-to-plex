@@ -30,11 +30,11 @@ Optionally, you can configure [Sonarr (TV Shows)](https://sonarr.tv/) and/or [Ra
 
 ## Installing WP+
 
-**Download the [CRX](https://github.com/Ephellon/web-to-plex/raw/master/fmogifaocbjoobjbgmfbnhekmiahjgie.crx)**
+- **Download the [CRX](https://github.com/Ephellon/web-to-plex/raw/master/fmogifaocbjoobjbgmfbnhekmiahjgie.crx)**
 
-**Download the [ZIP](https://github.com/Ephellon/web-to-plex/raw/master/fmogifaocbjoobjbgmfbnhekmiahjgie.zip)**
+- **Download the [ZIP](https://github.com/Ephellon/web-to-plex/raw/master/fmogifaocbjoobjbgmfbnhekmiahjgie.zip)**
 
-**View the [SRC](https://github.com/Ephellon/web-to-plex/tree/master/src)**
+- **Compile the [SRC](https://github.com/Ephellon/web-to-plex/tree/master/src)**
 
 ## Requirements
 
