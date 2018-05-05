@@ -277,16 +277,18 @@ function modifyPlexButton(els, action, title, options) {
     if(els.constructor === Array)
         return els.forEach(e => modifyPlexButton(e, action, title, options));
 
-    const el = els;
+    let pa = null, el = els;
 	if (action === 'found') {
 		el.href = getPlexMediaUrl(config.server.id, options.key);
 		el.textContent = 'On Plex';
 		el.classList.add('web-to-plex-button--found');
+        el.parentElement.classList.replace('web-to-plex-wrapper', 'web-to-plex-wrapper--found');
 	} else if (action === 'notfound' || action === 'error') {
 		el.removeAttribute('href');
 		el.textContent = action === 'notfound' ? 'Not on Plex' : 'Web to Plex+';
         el.title = 'The Movie/TV Show was not found';
 		el.classList.remove('web-to-plex-button--found');
+        el.parentElement.classList.replace('web-to-plex-wrapper--found', 'web-to-plex-wrapper');
 	} else if (action === 'downloader') {
         if(options.locale === 'flenix' && options.remote) {
             el.href = '#';
@@ -305,9 +307,8 @@ function modifyPlexButton(els, action, title, options) {
             xhr.open('POST', options.remote);
             xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
             xhr.onload = function() {
-                if(xhr.status !== 200) {
-                    return modifyPlexButton(el, action, title, {...options, locale: null, remote: null})
-                }
+                if(xhr.status !== 200)
+                    return modifyPlexButton(el, action, title, {...options, locale: null, remote: null});
 
               el.hrefs = xhr.responseText.split(',http').join('<!---->http').split('<!---->');
               el.download = `${options.title} (${options.year})`;
@@ -321,8 +322,10 @@ function modifyPlexButton(els, action, title, options) {
             el.addEventListener('click', e => {
                 e.preventDefault();
                 let el = e.target, hs = el.hrefs.split('<!---->');
+
                 if(hs.length == 1 || el.index == hs.length)
                     el.index = 0;
+
                 el.href = hs.slice(el.index, 1);
                 el.textContent = el.textContent.replace(/\d+\/\d+/, `${++el.index}/${hs.length}`);
             });
@@ -332,14 +335,12 @@ function modifyPlexButton(els, action, title, options) {
             el.classList.add('web-to-plex-button--downloader');
             el.addEventListener('click', e => {
                 e.preventDefault();
-                if (config.radarrUrl) {
+                if (config.radarrUrl)
                     _addToRadarrRequest(options);
-                } else if (config.sonarrUrl) {
+                else if (config.sonarrUrl)
                     _addToSonarrRequest(options);
-                }
-    //          else {
+    //          else
     //				_maybeAddToCouchpotato(options);
-    //			}
             });
         }
 

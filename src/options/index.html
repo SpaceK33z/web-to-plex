@@ -3,186 +3,327 @@
 <head>
 	<title>Web To Plex+ Options</title>
 	<style>
+        html, body {
+            height: 100%;
+        }
+
 		body {
-			padding: 0.8rem;
-			width: 580px;
+            background: url(noise.png), url(../img/256.png) no-repeat fixed center, #3f4245 !important;
+			color: #333 !important;
+            font-family: Open Sans Regular, Helvetica Neue, Helvetica, Arial, sans-serif, system;
+            font-size: 18px !important;
+			padding: 1em;
+			width: 90vw;
+            flex-grow: 1;
+            padding: 25px;
+            overflow: hidden auto;
+            position: absolute;
 		}
 
-		p {
-			font-family: system, sans-serif;
-			font-size: 0.8rem;
-			line-height: 1.8em;
-			color: #333;
-		}
+        a {
+            color: #cc7b19 !important;
+            text-decoration: none !important;
+        }
 
-		details {
-			margin-bottom: 0.8rem;
-			margin-left: 1.2rem;
-		}
+        p {
+            margin-bottom: 20px;
+            box-sizing: border-box;
+        }
 
-		summary {
-			margin-left: -1.2rem;
-		}
+        label {
+            color: #eee !important;
+            font-weight: 400 !important;
+            display: inline-block;
+            margin-bottom: 5px;
+        }
 
-		summary:hover {
-			color: #f45a26;
-			cursor: pointer;
-		}
+        input, select {
+            width: 30vw !important;
+            line-height: 1.5em !important;
+            transition: background 0.2s;
+            display: block !important;
+            height: 38px !important;
+            padding: 6px 12px !important;
+            font-size: 16px !important;
+            color: #eee !important;
+            vertical-align: middle;
+            background: rgba(255, 255, 255, 0.25) !important;
+            border: 3px solid rgba(0, 0, 0, 0) !important;
+            border-radius: 3px !important;
+            font-family: inherit;
+            margin: 0;
+        }
 
-		input {
-			width: 250px;
-		}
+        div {
+            color: rgba(255, 255, 255, 0.45) !important;
+            display: block;
+            margin-top: 5px !important;
+            margin-bottom: 10px !important;
+            box-sizing: border-box;
+            font-size: 14px !important;
+            z-index: 18 !important;
+        }
+
+        button {
+            padding: 10px 18px !important;
+            font-size: 16px !important;
+            line-height: 1.33 !important;
+            border-radius: 3px;
+            font-family: inherit;
+            text-transform: uppercase;
+            border: 0;
+            box-shadow: none !important;
+            position: relative;
+            overflow: hidden;
+            color: #fff !important;
+            background: #cc7b19 !important;
+            margin-bottom: 0;
+            font-weight: 400 !important;
+            vertical-align: middle;
+            cursor: pointer !important;
+            white-space: nowrap;
+            user-select: none;
+        }
+
+        select {
+            margin-left: 10px !important;
+            font-size: 16px !important;
+            line-height: inherit;
+            text-transform: none;
+        }
+
+        #status {
+            margin: 0 20px;
+            color: #999 !important;
+            box-sizing: border-box;
+        }
+
+        article {
+            color: #999;
+            background: rgba(0, 0, 0, 0.15) !important;
+            width: 35vw !important;
+            position: relative !important;
+            padding: 15px !important;
+        }
+
+        summary {
+            margin-bottom: 20px !important;
+            padding-left: 0;
+            list-style: none !important;
+            margin-top: 0 !important;
+            color: #999;
+            cursor: pointer;
+        }
+
+        details:last-child > summary {
+            margin-bottom: 0 !important;
+        }
+
+        details[open] > summary {
+            color: #cc7b19 !important;
+        }
+
+        body::-webkit-scrollbar {
+            width: 15px;
+        }
+
+        body::-webkit-scrollbar-thumb {
+            min-height: 50px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid rgba(0, 0, 0, 0);
+            border-radius: 8px;
+            background-clip: padding-box;
+        }
+
+        body::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+        }
 	</style>
 </head>
 
 <body>
 	<p>
-		Plex token:
-		<input type="text" id="plex_token" data-option="plexToken"><br>
-		<a href="https://support.plex.tv/hc/en-us/articles/204059436-Finding-your-account-token-X-Plex-Token">Learn how to find your token</a>
+		<label>Plex Token</label>
+		<input type="text" id="plex_token" data-option="plexToken"/>
+		<div>
+            <a href="https://support.plex.tv/hc/en-us/articles/204059436-Finding-your-account-token-X-Plex-Token" target="_blank">How to find your token.</a>
+        </div>
 	</p>
 	<p>
-		<button type="button" id="plex_test">Test</button>
-		<span id="plex_test_status"></span>
+		<button type="button" id="plex_test" style="background: #cc7b19 !important;">Test</button>
+		<div id="plex_test_status"></div>
 	</p>
 	<p>
-		Select server:
+		<label>Select a server</label>
 		<select id="plex_servers">
-			<option value="">Click "Test" above</option>
+			<option value="">Press "Test" first</option>
 		</select>
 	</p>
 
-	<hr>
+	<br/>
 
+    <article>
 <!--
-	<details>
-		<summary>CouchPotato settings</summary>
+        <details>
+            <summary>CouchPotato Settings</summary>
 
-		<p>
-			CouchPotato URL <em>(optional)</em>:
-			<input type="text" data-option="couchpotatoUrlRoot"><br>
-			<strong>Example:</strong> https://example.com/couchpotato or http://192.168.1.100:5050 (no trailing slash!)
-		</p>
+            <p>
+                <label>CouchPotato URL</label>
+                <input type="text" data-option="couchpotatoUrlRoot"/>
+                <div>
+                    Such as <em>https://example.com/couchpotato</em> or <em>http://192.168.1.100:5050</em>
+                </div>
+            </p>
 
-		<p>
-			CouchPotato API key <em>(optional)</em>:
-			<input type="text" data-option="couchpotatoToken"><br>
-			In CouchPotato, go to Settings, click on "Show advanced" and copy paste the value next to "Api Key".
-			<strong>Example:</strong> aa756d33242f6g8ffbca2b3963586f21
-		</p>
+            <p>
+                <label>CouchPotato API Key</label>
+                <input type="text" data-option="couchpotatoToken"/>
+                <div>
+                    1. Go to CouchPotato | Settings<br/>
+                    2. Copy/Paste the "API Key."<br/>
+                    Such as <em>aa756d33242f6g8ffbca2b3963586f21</em>
+                </div>
+            </p>
 
-		<p>
-			CouchPotato basic auth username <em>(optional)</em>:
-			<input type="text" data-option="couchpotatoBasicAuthUsername"><br>
-			If you password-protected your CouchPotato install, enter the username here.
-		</p>
+            <p>
+                <label>CouchPotato Login: username <em>(optional)</em></label>
+                <input type="text" data-option="couchpotatoBasicAuthUsername"/>
+                <div>Only use this if you setup a CouchPotato password.</div>
+            </p>
 
-		<p>
-			CouchPotato basic auth password <em>(optional)</em>:
-			<input type="text" data-option="couchpotatoBasicAuthPassword"><br>
-			If you password-protected your CouchPotato install, enter the password here.
-		</p>
-	</details>
+            <p>
+                <label>CouchPotato Login: password <em>(optional)</em></label>
+                <input type="text" data-option="couchpotatoBasicAuthPassword"/>
+                <div>Only use this if you setup a CouchPotato password.</div>
+            </p>
+
+
+            <p>
+                <button type="button" id="couchpotato_test" style="background: #cc7b19 !important;">Test CouchPotato Settings</button>
+                <span id="couchpotato_test_status"></span>
+            </p>
+            <p>
+                <label>Quality Profile</label>
+                <select data-option="couchpotatoQualityProfileId">
+                    <option value="">Press "Test CouchPotato Settings" first</option>
+                </select>
+            </p>
+        </details>
 -->
 
-	<details>
-		<summary>Radarr settings</summary>
+        <details>
+            <summary>Radarr Settings</summary>
 
-		<p>
-			Radarr URL:
-			<input type="text" data-option="radarrUrlRoot"><br>
-			<strong>Example:</strong> https://example.com/radarr or http://192.168.1.100:7878 (no trailing slash!)
-		</p>
+            <p>
+                <label>Radarr URL</label>
+                <input type="text" data-option="radarrUrlRoot"/>
+                <div>
+                    Such as <em>https://example.com/radarr</em> or <em>http://192.168.1.100:7878</em>
+                </div>
+            </p>
 
-		<p>
-			Radarr API key:
-			<input type="text" data-option="radarrToken"><br>
-			In Radarr, go to Settings, click on tab General, click on "Show advanced" and copy paste the value next to "API Key".
-			<strong>Example:</strong> aa756d33242f6g8ffbca2b3963586f21
-		</p>
+            <p>
+                <label>Radarr API Key</label>
+                <input type="text" data-option="radarrToken"/>
+                <div>
+                    1. Go to Radarr | Settings | General<br/>
+                    2. Click on "Show advanced," then copy/paste the "API Key."<br/>
+                    Such as <em>aa756d33242f6g8ffbca2b3963586f21</em>
+                </div>
+            </p>
 
-		<p>
-			Radarr storage path:
-			<input type="text" data-option="radarrStoragePath"><br>
-			The path where you want to store movies.
-			<strong>Example:</strong> /storage/Movies/
-		</p>
+            <p>
+                <label>Radarr Storage Path</label>
+                <input type="text" data-option="radarrStoragePath"/>
+                <div>
+                    This should be the same path (verbatim) used in Radarr.<br/>
+                    Such as <em>/storage/Movies/</em>
+                </div>
+            </p>
 
-		<p>
-			Radarr basic auth username <em>(optional)</em>:
-			<input type="text" data-option="radarrBasicAuthUsername"><br>
-			If you password-protected your Radarr install, enter the username here.
-		</p>
+            <p>
+                <label>Radarr Login: username <em>(optional)</em></label>
+                <input type="text" data-option="radarrBasicAuthUsername"/>
+                <div>Only use this if you setup a Radarr password.</div>
+            </p>
 
-		<p>
-			Radarr basic auth password <em>(optional)</em>:
-			<input type="text" data-option="radarrBasicAuthPassword"><br>
-			If you password-protected your Radarr install, enter the password here.
-		</p>
+            <p>
+                <label>Radarr Login: password <em>(optional)</em></label>
+                <input type="text" data-option="radarrBasicAuthPassword"/>
+                <div>Only use this if you setup a Radarr password.</div>
+            </p>
 
-		<p>
-			<button type="button" id="radarr_test">Test Radarr</button>
-			<span id="radarr_test_status"></span>
-		</p>
-		<p>
-			Select quality profile:
-			<select data-option="radarrQualityProfileId">
-				<option value="">Click "Test" above</option>
-			</select>
-		</p>
-	</details>
-  
-    <details>
-		<summary>Sonarr settings</summary>
+            <p>
+                <button type="button" id="radarr_test" style="background: #cc7b19 !important;">Test Radarr Settings</button>
+                <span id="radarr_test_status"></span>
+            </p>
+            <p>
+                <label>Quality Profile</label>
+                <select data-option="radarrQualityProfileId">
+                    <option value="">Press "Test Radarr Settings" first</option>
+                </select>
+            </p>
+        </details>
 
-		<p>
-			Sonarr URL:
-			<input type="text" data-option="sonarrUrlRoot"><br>
-			<strong>Example:</strong> https://example.com/sonarr or http://192.168.1.100:8989 (no trailing slash!)
-		</p>
+        <details>
+            <summary>Sonarr Settings</summary>
 
-		<p>
-			Sonarr API key:
-			<input type="text" data-option="sonarrToken"><br>
-			In Sonarr, go to Settings, click on tab General, click on "Show advanced" and copy paste the value next to "API Key".
-			<strong>Example:</strong> aa756d33242f6g8ffbca2b3963586f21
-		</p>
+            <p>
+                <label>Sonarr URL</label>
+                <input type="text" data-option="sonarrUrlRoot"/>
+                <div>
+                    Such as <em>https://example.com/sonarr</em> or <em>http://192.168.1.100:8989</em>
+                </div>
+            </p>
 
-		<p>
-			Sonarr storage path:
-			<input type="text" data-option="sonarrStoragePath"><br>
-			The path where you want to store movies.
-			<strong>Example:</strong> /storage/Movies/
-		</p>
+            <p>
+                <label>Sonarr API Key</label>
+                <input type="text" data-option="sonarrToken"/>
+                <div>
+                    1. Go to Sonarr | Settings | General<br/>
+                    2. Click on "Show advanced," then copy/paste the "API Key."<br/>
+                    Such as <em>aa756d33242f6g8ffbca2b3963586f21</em>
+                </div>
+            </p>
 
-		<p>
-			Sonarr basic auth username <em>(optional)</em>:
-			<input type="text" data-option="sonarrBasicAuthUsername"><br>
-			If you password-protected your Sonarr install, enter the username here.
-		</p>
+            <p>
+                <label>Sonarr Storage Path</label>
+                <input type="text" data-option="sonarrStoragePath"/>
+                <div>
+                    This should be the same path (verbatim) used in Sonarr.<br/>
+                    Such as <em>/storage/Movies/</em>
+                </div>
+            </p>
 
-		<p>
-			Sonarr basic auth password <em>(optional)</em>:
-			<input type="text" data-option="sonarrBasicAuthPassword"><br>
-			If you password-protected your Sonarr install, enter the password here.
-		</p>
+            <p>
+                <label>Sonarr Login: username <em>(optional)</em></label>
+                <input type="text" data-option="sonarrBasicAuthUsername"/>
+                <div>Only use this if you setup a Sonarr password.</div>
+            </p>
 
-		<p>
-			<button type="button" id="sonarr_test">Test Sonarr</button>
-			<span id="sonarr_test_status"></span>
-		</p>
-		<p>
-			Select quality profile:
-			<select data-option="sonarrQualityProfileId">
-				<option value="">Click "Test" above</option>
-			</select>
-		</p>
-	</details>
+            <p>
+                <label>Sonarr Login: password <em>(optional)</em></label>
+                <input type="text" data-option="sonarrBasicAuthPassword"/>
+                <div>Only use this if you setup a Sonarr password.</div>
+            </p>
+
+            <p>
+                <button type="button" id="sonarr_test" style="background: #cc7b19 !important;">Test Sonarr Settings</button>
+                <span id="sonarr_test_status"></span>
+            </p>
+            <p>
+                <label>Quality Profile</label>
+                <select data-option="sonarrQualityProfileId">
+                    <option value="">Press "Test Sonarr Settings" first</option>
+                </select>
+            </p>
+        </details>
+    </article>
 
 	<p>
-		<button id="save">Save</button>
+		<button id="save" style="background: #cc7b19">Save</button>
+        <span id="status"></span>
 	</p>
-	<span id="status"></span>
 
 	<script src="lodash.min.js"></script>
 	<script src="xml.js"></script>

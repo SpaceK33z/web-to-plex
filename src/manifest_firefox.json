@@ -1,12 +1,14 @@
 {
 	"name": "Web to Plex+",
 	"description": "Adds a button on various movie & TV show sites to open it in Plex.",
+    "homepage_url": "https://github.com/Ephellon/web-to-plex/",
 	"manifest_version": 2,
-    "version": "0.2.0.2",
+    "version": "0.2.0.3",
 	"icons": {
 		"16": "img/16.png",
 		"48": "img/48.png",
-		"128": "img/128.png"
+		"128": "img/128.png",
+        "256": "img/256.png"
 	},
 	"applications": {
 		"gecko": {
@@ -40,11 +42,9 @@
 		"scripts": ["background.js"],
 		"persistent": false
 	},
-	"options_ui": {
-		"page": "options/index.html",
-		"chrome_style": true
-	},
+	"options_page": "options/index.html",
 	"permissions": [
+        "tabs",
 		"storage",
 		"http://*/",
 		"https://*/"
