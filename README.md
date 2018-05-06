@@ -1,3 +1,5 @@
+# Major bug (do not use yet)!
+
 # Web to Plex+ ![Icon](src/img/48.png)
 
 ![Logo](src/img/256.png)
