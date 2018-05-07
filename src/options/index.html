@@ -113,13 +113,6 @@
 		</p>
 
 		<p>
-			Radarr storage path:
-			<input type="text" data-option="radarrStoragePath"><br>
-			The path where you want to store movies.
-			<strong>Example:</strong> /storage/Movies/
-		</p>
-
-		<p>
 			Radarr basic auth username <em>(optional)</em>:
 			<input type="text" data-option="radarrBasicAuthUsername"><br>
 			If you password-protected your Radarr install, enter the username here.
@@ -138,6 +131,12 @@
 		<p>
 			Select quality profile:
 			<select data-option="radarrQualityProfileId">
+				<option value="">Click "Test" above</option>
+			</select>
+		</p>
+		<p>
+			Select storage path:
+			<select data-option="radarrStoragePath">
 				<option value="">Click "Test" above</option>
 			</select>
 		</p>

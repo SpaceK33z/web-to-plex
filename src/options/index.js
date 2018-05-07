@@ -6,6 +6,9 @@ const $selectServer = document.getElementById('plex_servers');
 const $selectRadarrQualityProfile = document.querySelector(
 	`[data-option="radarrQualityProfileId"]`
 );
+const $selectRadarrStoragePath = document.querySelector(
+	`[data-option="radarrStoragePath"]`
+);
 const $saveButton = document.getElementById('save');
 let plexServers = [];
 let plexClientId = null;
@@ -139,7 +142,7 @@ function getOptionValues() {
 	return values;
 }
 
-function getRadarrProfiles(values) {
+function doRadarrRequest(values, entity) {
 	const headers = {
 		Accept: 'application/json',
 		'Content-Type': 'application/json',
@@ -151,7 +154,7 @@ function getRadarrProfiles(values) {
 		);
 		headers.Authorization = `Basic ${hash}`;
 	}
-	return fetch(`${values.radarrUrlRoot}/api/profile`, { headers })
+	return fetch(`${values.radarrUrlRoot}/api/${entity}`, { headers })
 		.then(res => res.json())
 		.catch(err => {
 			console.log('[WTP] Radarr failed to connect with error:', err);
@@ -159,12 +162,20 @@ function getRadarrProfiles(values) {
 		});
 }
 
-function performRadarrTest(oldQualityProfileId) {
+function getRadarrProfiles(values) {
+	return doRadarrRequest(values, 'profile');
+}
+
+function getRadarrStoragePaths(values) {
+	return doRadarrRequest(values, 'rootfolder');
+}
+
+function performRadarrTest(oldQualityProfileId, oldStoragePath) {
 	const values = getOptionValues();
 	const $testStatus = document.getElementById('radarr_test_status');
-	$selectRadarrQualityProfile.innerHTML = '';
 	$testStatus.textContent = '';
 
+	$selectRadarrQualityProfile.innerHTML = '';
 	getRadarrProfiles(values).then(profiles => {
 		$testStatus.textContent =
 			profiles.length > 0 ? 'It works!' : 'Could not connect.';
@@ -177,6 +188,20 @@ function performRadarrTest(oldQualityProfileId) {
 		// Because the <select> was reset, the original value is lost.
 		if (oldQualityProfileId) {
 			$selectRadarrQualityProfile.value = oldQualityProfileId;
+		}
+	});
+
+	$selectRadarrStoragePath.innerHTML = '';
+	getRadarrStoragePaths(values).then(paths => {
+		paths.forEach(path => {
+			const $opt = document.createElement('option');
+			$opt.value = path.path;
+			$opt.textContent = path.path;
+			$selectRadarrStoragePath.appendChild($opt);
+		});
+		// Because the <select> was reset, the original value is lost.
+		if (oldStoragePath) {
+			$selectRadarrStoragePath.value = oldStoragePath;
 		}
 	});
 }
@@ -306,7 +331,7 @@ function restoreOptions() {
 			performPlexTest(serverId);
 		}
 		if (items.radarrUrlRoot) {
-			performRadarrTest(items.radarrQualityProfileId);
+			performRadarrTest(items.radarrQualityProfileId, items.radarrStoragePath);
 		}
 		if (!items.plexClientId) {
 			plexClientId = window.crypto
