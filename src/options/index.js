@@ -25,6 +25,13 @@ const optionNames = [
 	'radarrQualityProfileId',
 ];
 
+function toggleAuthenticated(isAuth) {
+	const $plexUnauthenticated = document.getElementById('plex_unauthenticated');
+	const $plexAuthenticated = document.getElementById('plex_authenticated');
+	$plexUnauthenticated.style.display = isAuth ? 'none' : 'block';
+	$plexAuthenticated.style.display = isAuth ? 'block' : 'none';
+}
+
 function getServers(plexToken) {
 	return fetch('https://plex.tv/api/resources?includeHttps=1', {
 		headers: {
@@ -87,6 +94,11 @@ function performPlexLogin() {
 	});
 }
 
+function performPlexLogout() {
+	toggleAuthenticated(false);
+	document.getElementById('plex_token').value = '';
+}
+
 function performPlexTest(oldServerId) {
 	const plexToken = document.getElementById('plex_token').value;
 	const $testStatus = document.getElementById('plex_login_status');
@@ -102,7 +114,7 @@ function performPlexTest(oldServerId) {
 		}
 
 		$saveButton.disabled = false;
-		$testStatus.textContent = 'Successful login.';
+		toggleAuthenticated(true);
 
 		servers.forEach(server => {
 			const $opt = document.createElement('option');
@@ -320,6 +332,9 @@ $saveButton.addEventListener('click', saveOptions);
 document
 	.getElementById('plex_login')
 	.addEventListener('click', () => performPlexLogin());
+document
+	.getElementById('plex_logout')
+	.addEventListener('click', () => performPlexLogout());
 document
 	.getElementById('radarr_test')
 	.addEventListener('click', () => performRadarrTest());

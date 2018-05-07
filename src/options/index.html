@@ -38,29 +38,34 @@
 <body>
 	<details open="open">
 		<summary>Plex settings</summary>
-		<p>The Plex username and password are never stored; it is only used to generate a token.</p>
-		<p>
-		Plex username:
-		<input type="text" id="plex_username">
-		</p>
-		<p>
-		Plex password:
-		<input type="password" id="plex_password"><br>
-		</p>
-		<p>
-			<button type="button" id="plex_login">Login</button>
-			<span id="plex_login_status"></span>
-		</p>
-		<p>
-			Plex token:
-			<input type="text" id="plex_token" data-option="plexToken" disabled><br>
-		</p>
-		<p>
-			Select server:
-			<select id="plex_servers">
-				<option value="">Click "Login" above</option>
-			</select>
-		</p>
+		<div id="plex_unauthenticated">
+			<p>The Plex username and password are never stored; it is only used to generate a token.</p>
+			<p>
+				Plex username:
+				<input type="text" id="plex_username">
+			</p>
+			<p>
+				Plex password:
+				<input type="password" id="plex_password"><br>
+			</p>
+			<p>
+				<button type="button" id="plex_login">Login</button>
+				<span id="plex_login_status"></span>
+			</p>
+		</div>
+		<div id="plex_authenticated" style="display: none">
+			<p><button type="button" id="plex_logout">Logout</button></p>
+			<p>
+				Plex token:
+				<input type="text" id="plex_token" data-option="plexToken" disabled><br>
+			</p>
+			<p>
+				Select server:
+				<select id="plex_servers">
+					<option value="">Click "Login" above</option>
+				</select>
+			</p>
+		</div>
 	</details>
 	<details>
 		<summary>CouchPotato settings</summary>
