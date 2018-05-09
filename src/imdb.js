@@ -13,17 +13,17 @@ function isList() {
 	return window.location.pathname.startsWith('/list/');
 }
 
-function getImdbId() {
+function getIMDbID() {
 	let tag = document.querySelector('meta[property="pageId"]');
 	return tag && tag.content;
 }
+
+const IMDbID = getIMDbID();
 
 function cleanYear(year) {
 	// The year can contain `()`, so we need to strip it out.
 	return parseInt(year.trim().replace(/^\(|\)$/g, ''));
 }
-
-const IMDbID = getImdbId();
 
 function renderPlexButton($parent) {
 	if (!$parent)
@@ -93,9 +93,9 @@ function addInListItem(el) {
 	let type = ($date.textContent.includes('TV Series') ? 'show' : 'movie'),
         title = $title.textContent.trim(),
         year = cleanYear($date.textContent),
-        myImdbId = $IMDbID.dataset.tlet;
+        IMDbID = $IMDbID.dataset.tconst;
 
-	findPlexMedia({ type, title, year, button: $button, IMDbID: myImdbId });
+	findPlexMedia({ type, title, year, button: $button, IMDbID });
 }
 
 function initList() {

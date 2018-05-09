@@ -12,7 +12,7 @@ function isShowPage() {
 	return !/\btrending$/.test(path);
 }
 
-function getImdbId() {
+function getIMDbID() {
 	let $link = document.querySelector(
 		'ul.external [href^="http://www.imdb.com/title/tt"]'
 	);
@@ -57,9 +57,9 @@ function initPlexThingy(type) {
 
 	let title = $title.dataset.topTitle,
         year = parseInt($year.textContent.trim()),
-        imdbId = getImdbId();
+        IMDbID = getIMDbID();
 
-	findPlexMedia({ type, title, year, button: $button, imdbId });
+	findPlexMedia({ type, title, year, button: $button, IMDbID });
 }
 
 parseOptions().then(() => {

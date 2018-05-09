@@ -52,9 +52,9 @@ function initPlexThingy() {
 
 	let title = $title.dataset.title.trim(),
         year = parseInt($date.content.slice(0, 4)),
-        imdbId = getIMDbID();
+        IMDbID = getIMDbID();
 
-	findPlexMedia({ title, year, button: $button, imdbId });
+	findPlexMedia({ title, year, button: $button, IMDbID });
 }
 
 function renderPlexButton() {
@@ -87,6 +87,4 @@ function getIMDbID() {
 	);
 	if ($link)
 		return $link.href.replace('http://www.imdb.com/title/', '');
-
-	return;
 }

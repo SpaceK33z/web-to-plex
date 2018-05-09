@@ -4,18 +4,16 @@
 // flattens an object (recursively!), similarly to Array#flatten
 // e.g. flatten({ a: { b: { c: "hello!" } } }); // => "hello!"
 function _flatten(object) {
-	const check = _.isPlainObject(object) && _.size(object) === 1;
-	return check ? _flatten(_.values(object)[0]) : object;
+	return (_.isPlainObject(object) && _.size(object) === 1) ? _flatten(_.values(object)[0]) : object;
 }
 
 function _parse(xml) {
-	const data = {};
-
-	const isText = xml.nodeType === 3;
-	const isElement = xml.nodeType === 1;
-	const body = xml.textContent && xml.textContent.trim();
-	const hasChildren = xml.children && xml.children.length;
-	const hasAttributes = xml.attributes && xml.attributes.length;
+	let data = {},
+        isText = xml.nodeType === 3,
+        isElement = xml.nodeType === 1,
+        body = xml.textContent && xml.textContent.trim(),
+        hasChildren = xml.children && xml.children.length,
+        hasAttributes = xml.attributes && xml.attributes.length;
 
 	// if it's text just return it
 	if (isText) {
@@ -84,7 +82,8 @@ function _parse(xml) {
 	return _flatten(data);
 }
 
-function parseXml(string) {
-	const xml = new DOMParser().parseFromString(string, 'text/xml');
+function parseXML(string) {
+	let xml = new DOMParser().parseFromString(string, 'text/xml');
+
 	return _parse(xml);
 }
