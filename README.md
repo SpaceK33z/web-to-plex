@@ -1,10 +1,3 @@
-# Major bug (DO NOT USE)!
-
-### Details
-
-- Either I goofed up and messed up the adding feature
-- OR Google is a whole ass (both cheeks) and not only changed `eval`, but also `JSON`
-
 # Web to Plex+ ![Icon](src/img/48.png)
 
 ![Logo](src/img/256.png)
