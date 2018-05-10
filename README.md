@@ -16,17 +16,19 @@ Optionally, you can configure [Sonarr (TV Shows)](https://sonarr.tv/) and/or [Ra
  - [Letterboxd](https://letterboxd.com/)
  - [Flenix](https://flenix.co/)*
  - [TV Maze](http://www.tvmaze.com/)
+ - [The TVDb](https://www.thetvdb.com/)
+ - [The MovieDb](https://www.themoviedb.org/)
+ - [VRV](https://vrv.co/)
 	
 	*Note: Sites with `*` after their name also support the `Right click | Save as...` feature (file download).*
 
 **In Progress sites (adding support):**
 
-- [The TVDb](https://www.thetvdb.com/)
-- [The MovieDb](https://www.themoviedb.org/)
+- Nothing here...
 
 **En Progress sites (may add support):**
 
-- [VRV](https://vrv.co/)
+- Nothing here...
 
 ## Installing WP+
 
