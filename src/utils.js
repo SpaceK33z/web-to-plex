@@ -101,23 +101,28 @@ function parseOptions() {
         );
 }
 
-async function getIDs({ title, year, type, IMDbID, APIID, meta }) {
+async function getIDs({ title, year, type, IMDbID, TVDbID, APIType, APIID, meta }) {
     let json = {},
         data = {},
         promise,
         api = {
             tvdb: 'bcb95f026f9a01ffa707fcff71900e94',
-        };
+        },
+        apit = APIType || 'movies',
+        apid = APIID || null,
+        id = IMDbID || null;
 
     type = type || '*';
 
     let url =
-        (type === 'imdb' || (type === '*' && !IMDbID && title && year))?
-            `https://api.themoviedb.org/3/search/movie?api_key=${ api.tvdb }&query=${ encodeURI(title) }&year=${ year }`:
-        (type === 'thetvdb' || APIID || (type === '*' && (IMDbID || (title && year))))?
-            (IMDbID)?
-                `https://api.themoviedb.org/3/find/${ IMDbID }?api_key=${ api.tvdb }&external_source=imdb_id`:
-            `https://api.tvmaze.com/${ (APIID)? `shows/${ APIID }`: `search/shows?q=${ encodeURI(title) }`}`:
+        (type === 'imdb' || (type === '*' && !id && title && year) || (apid || APIType))?
+            (apid)?
+                `https://api.themoviedb.org/3/${ apit }/${ apid }?api_key=${ api.tvdb }`:
+            `https://api.themoviedb.org/3/search/${ apit }?api_key=${ api.tvdb }&query=${ encodeURI(title) }&year=${ year }`:
+        (type === 'thetvdb' || apid || (type === '*' && (id || title)))?
+            (id)?
+                `https://api.themoviedb.org/3/find/${ id }?api_key=${ api.tvdb }&external_source=imdb_id`:
+            `https://api.tvmaze.com/${ (apid)? `shows/${ apid }`: `search/shows?q=${ encodeURI(title) }`}`:
         null;
 
     if(url === null) return 0;
@@ -126,11 +131,11 @@ async function getIDs({ title, year, type, IMDbID, APIID, meta }) {
         .then(response => {
             return response.json();
         })
-        .catch(error => {
-            throw error;
-        })
         .then(objects => {
             return json = objects;
+        })
+        .catch(error => {
+            throw error;
         });
 
     if('results' in json) {
@@ -138,7 +143,7 @@ async function getIDs({ title, year, type, IMDbID, APIID, meta }) {
     }
 
     if(json instanceof Array) {
-        let crush = (string) => string.toLowerCase().replace(/\&/g, 'and').replace(/\W+/g, '');
+        let crush = (string = "") => string.toLowerCase().replace(/\&/g, 'and').replace(/\W+/g, '');
 
         // Find an exact match: Title (Year) | #IMDbID
         for(var index = 0, found = false, $data; index < json.length && !found; index++) {
@@ -161,6 +166,10 @@ async function getIDs({ title, year, type, IMDbID, APIID, meta }) {
                     return f? o: f;
                 })($data);
             //api.themoviedb.org/ < remote
+            else if('original_name' in $data)
+                found = (TVDbID === $data.id || ($data.name === title || $data.original_name === title) && year == $data.release_date.slice(0, 4))?
+                    $data:
+                found;
             else
                 found = ($data.title === title && year == $data.release_date.slice(0, 4))?
                     $data:
@@ -188,6 +197,10 @@ async function getIDs({ title, year, type, IMDbID, APIID, meta }) {
                     return f? o: f;
                 })($data);
             //api.themoviedb.org/ < remote
+            else if('original_name' in $data)
+                found = (crush($data.name) == crush(title) || crush($data.original_name) == crush(title))?
+                    $data:
+                found;
             else
                 found = (crush($data.title) == crush(title))?
                     $data:
@@ -197,19 +210,25 @@ async function getIDs({ title, year, type, IMDbID, APIID, meta }) {
         json = found;
     }
 
-    console.log(json);
+    year = year || (json.first_air_date || '').slice(0, 4);
 
     if('show' in json)
-        data = json.show.externals;
+        data = {
+            ...json.show.externals,
+            title,
+            year: year || json.first_aired_date
+        };
     else if('imdb_id' in json)
         data = {
             imdb: IMDbID || json.imdb_id,
-            thetvdb: 0
+            thetvdb: json.id || 0,
+            title, year
         };
     else
         data = {
             imdb: IMDbID || 'tt-',
-            thetvdb: json.id || 0
+            thetvdb: json.id || 0,
+            title, year
         };
 
     type = (type === '*')? null: type;
@@ -384,18 +403,20 @@ function modifyPlexButton(el, action, title, options) {
     }
 
     let pa = null,
-        ty = (options? (options.type === 'show'? 'TV Show': 'Movie'): 'Item');
+        ty = (options? (options.type === 'show'? 'TV Show': 'Movie'): 'Item'),
+        txt = options.txt || 'textContent',
+        hov = options.hov || 'title';
 
     if (action === 'found') {
         el.href = getPlexMediaURL(config.server.id, options.key);
-        el.textContent = 'Watch on Plex';
-        el.title = `Watch "${options.title}" on Plex`;
+        el[txt] = 'Watch on Plex';
+        el[hov] = `Watch "${options.title}" on Plex`;
         el.classList.add('web-to-plex-button--found');
         el.parentElement.classList.replace('web-to-plex-wrapper', 'web-to-plex-wrapper--found');
     } else if (action === 'notfound' || action === 'error') {
         el.removeAttribute('href');
-        el.textContent = action === 'notfound' ? ty + ' not available' : 'Web to Plex+';
-        el.title = `${ty} was not found`;
+        el[txt] = action === 'notfound' ? ty + ' not available' : 'Web to Plex+';
+        el[hov] = `${ty} was not found`;
         el.classList.remove('web-to-plex-button--found');
         el.parentElement.classList.replace('web-to-plex-wrapper--found', 'web-to-plex-wrapper');
     } else if (action === 'downloader') {
@@ -411,7 +432,7 @@ function modifyPlexButton(el, action, title, options) {
                 /* Flenix */
                 case 'flenix':
                     el.href = '#';
-                    el.textContent = 'Save File #0/0';
+                    el[txt] = 'Save #0/0';
                     el.classList.add('web-to-plex-button--downloader');
 
                     let $data = document.querySelector('#videoplayer ~ script').innerText;
@@ -424,38 +445,33 @@ function modifyPlexButton(el, action, title, options) {
 
                     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
                     xhr.callback = function(response) {
-                        let dum = [], tl;
+                        let ar = [], tl;
 
-                        el.hrefs = response.split(',http')
+                        response.split(',http')
                             .join(delimeter + 'http')
                             .split(delimeter)
-                            .forEach(value => (/\.html?$/i.test(value)? null: dum.push(value)));
+                            .forEach(value => (/\.html?$/i.test(value)? null: ar.push(value)));
 
-                        el.hrefs = dum;
+                        el.dataset.hrefs = ar.join(delimeter);
                         el.download = `${options.title} (${options.year})`;
-                        el.href = el.hrefs.slice(0, el.index = 1);
-                        tl = (el.href.replace(/.*(?:\.(\w+))?$/, '$1') || 'mp3').toUpperCase();
-                        el.textContent = el.textContent.replace(/\d+\/.+?$/, `${el.index}/${el.hrefs.length} (${tl})`);
-                        el.hrefs = el.hrefs.join(delimeter);
+                        el.href = tl = ar[el.index = 0];
+                        tl = (tl.replace(/.*(?:\.(\w+))?$/, '$1') || 'mp4').toUpperCase();
+                        el[txt] = el[txt].replace(/\d+\/.+?$/, `${++el.index}/${ar.length} (${tl})`);
                     };
 
                     el.addEventListener('click', e => {
                         e.preventDefault();
                         let el = e.target,
-                            hs = el.hrefs.split(delimeter),
+                            hs = el.dataset.hrefs.split(delimeter),
                             tl;
 
-                        if (hs.length == 1 || el.index == hs.length) {
+                        if (el.index == hs.length) {
                             el.index = 0;
                         }
-                        if (/\.html?$/i.test(hs[el.index])) {
-                            hs.splice(index, 1);
-                            el.click();
-                        }
 
-                        el.href = hs.slice(el.index, 1);
-                        tl = (el.href.replace(/.*(?:\.(\w+))?$/, '$1') || 'mp3').toUpperCase();
-                        el.textContent = el.textContent.replace(/\d+\/.+?$/, `${++el.index}/${hs.length} (${tl})`);
+                        el.href = tl = hs[el.index++];
+                        tl = (tl.replace(/.*(?:\.(\w+))?$/, '$1') || 'mp4').toUpperCase();
+                        el[txt] = el[txt].replace(/\d+\/.+?$/, `${el.index}/${hs.length} (${tl})`);
                     });
                     break;
 
@@ -484,7 +500,7 @@ function modifyPlexButton(el, action, title, options) {
             xhr.send(data);
         } else {
             el.href = '#';
-            el.textContent = 'Get ' + ty;
+            el[txt] = 'Get ' + ty;
             el.classList.add('web-to-plex-button--downloader');
             el.addEventListener('click', e => {
                 e.preventDefault();
@@ -498,7 +514,7 @@ function modifyPlexButton(el, action, title, options) {
             });
         }
 
-        el.title = `Add "${options.title}" to your ${ty}s`;
+        el[hov] = `Add "${options.title}" to your ${ty}s`;
         el.id = `${options.IMDbID || 'tt-'}-${options.TVDbID || 0}`;
         el.style.removeProperty('display');
     }

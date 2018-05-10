@@ -5,7 +5,7 @@
 	"description": "Adds a button on various movie & TV show sites to open it in Plex.",
     "homepage_url": "https://github.com/Ephellon/web-to-plex/",
 	"manifest_version": 2,
-    "version": "0.3.0.0",
+    "version": "0.3.3.0",
 	"icons": {
 		"16": "img/16.png",
 		"48": "img/48.png",
@@ -42,6 +42,21 @@
 			"matches": ["https://*.tvmaze.com/shows/*"],
 			"js": ["utils.js", "tvmaze.js"],
 			"css": ["tvmaze.css"]
+		},
+		{
+			"matches": ["https://*.thetvdb.com/series/*"],
+			"js": ["utils.js", "thetvdb.js"],
+			"css": ["thetvdb.css"]
+		},
+		{
+			"matches": ["https://*.themoviedb.org/movie/*", "https://*.themoviedb.org/tv/*"],
+			"js": ["utils.js", "themoviedb.js"],
+			"css": ["themoviedb.css"]
+		},
+		{
+			"matches": ["https://*.vrv.co/series/*"],
+			"js": ["utils.js", "vrv.js"],
+			"css": ["vrv.css"]
 		}
 	],
 	"background": {
