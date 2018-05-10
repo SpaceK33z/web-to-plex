@@ -34,13 +34,20 @@ function renderPlexButton() {
 		return;
 
 	let parentEl = document.createElement('p'),
-        el = document.createElement('a');
+        el = document.createElement('a'),
+        ch = document.createElement('span');
 
-	parentEl.appendChild(el);
+    ch.classList.add('icon', '-web-to-plex');
+    ch.setAttribute('style', `background: url("${ chrome.extension.getURL('img/16.png') }") no-repeat !important`);
+
     el.textContent = 'Web to Plex+';
     el.title = 'Loading...';
 	el.classList.add('label', 'web-to-plex-button');
+
+    parentEl.appendChild(ch);
+    parentEl.appendChild(el);
 	$actions.appendChild(parentEl);
+
 	return el;
 }
 

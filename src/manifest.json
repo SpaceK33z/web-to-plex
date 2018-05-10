@@ -65,5 +65,6 @@
 	"optional_permissions": [
 		"http://*/",
 		"https://*/"
-	]
+	],
+    "web_accessible_resources": ["img/16.png", "img/48.png"]
 }

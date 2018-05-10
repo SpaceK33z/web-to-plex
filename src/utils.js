@@ -101,25 +101,28 @@ function parseOptions() {
         );
 }
 
-async function getIDs({ title, year, type, IMDbID, APIID }) {
+async function getIDs({ title, year, type, IMDbID, APIID, meta }) {
     let json = {},
         data = {},
-        promise;
+        promise,
+        api = {
+            tvdb: 'bcb95f026f9a01ffa707fcff71900e94',
+        };
 
     type = type || '*';
 
     let url =
         (type === 'imdb' || (type === '*' && !IMDbID && title && year))?
-            `https://www.theimdbapi.org/api/find/movie?title=${ title }&year=${ year }`:
+            `https://api.themoviedb.org/3/search/movie?api_key=${ api.tvdb }&query=${ encodeURI(title) }&year=${ year }`:
         (type === 'thetvdb' || APIID || (type === '*' && (IMDbID || (title && year))))?
             (IMDbID)?
-                `https://api.themoviedb.org/3/find/${IMDbID}?api_key=bcb95f026f9a01ffa707fcff71900e94&external_source=imdb_id`:
-            `https://api.tvmaze.com/${ (APIID)? `shows/${APIID}`: `search/shows?q=${ title }`}`:
+                `https://api.themoviedb.org/3/find/${ IMDbID }?api_key=${ api.tvdb }&external_source=imdb_id`:
+            `https://api.tvmaze.com/${ (APIID)? `shows/${ APIID }`: `search/shows?q=${ encodeURI(title) }`}`:
         null;
 
     if(url === null) return 0;
 
-    await fetch(`${url}`)
+    await(meta? fetch(url/*, meta*/): fetch(url))
         .then(response => {
             return response.json();
         })
@@ -130,11 +133,9 @@ async function getIDs({ title, year, type, IMDbID, APIID }) {
             return json = objects;
         });
 
-    json = ('movie_results' in json)?
-        json.movie_results:
-    ('tv_results' in json)?
-        json.tv_results:
-    json;
+    if('results' in json) {
+        json = json.results;
+    }
 
     if(json instanceof Array) {
         let crush = (string) => string.toLowerCase().replace(/\&/g, 'and').replace(/\W+/g, '');
@@ -148,7 +149,7 @@ async function getIDs({ title, year, type, IMDbID, APIID }) {
                 found = (IMDbID === $data.show.externals.imdb || ($data.show.name === title && year === $data.show.premiered.slice(0, 4)))?
                     $data:
                 found;
-            //api.themoviedb.org/
+            //api.themoviedb.org/ < local
             else if('movie_results' in $data || 'tv_results' in $data)
                 found = (DATA => {
                     for(var i = 0, f = !1, o = DATA.movie_results, l = o.length | 0; i < l; i++)
@@ -159,9 +160,9 @@ async function getIDs({ title, year, type, IMDbID, APIID }) {
 
                     return f? o: f;
                 })($data);
-            //theimdbapi.org/
+            //api.themoviedb.org/ < remote
             else
-                found = (IMDbID === $data.imdb_id || $data.title === title && year === $data.year)?
+                found = ($data.title === title && year == $data.release_date.slice(0, 4))?
                     $data:
                 found;
         }
@@ -175,7 +176,7 @@ async function getIDs({ title, year, type, IMDbID, APIID }) {
                 found = (crush($data.show.name) == crush(title))?
                     $data:
                 found;
-            //api.themoviedb.org/
+            //api.themoviedb.org/ < local
             else if('movie_results' in $data || 'tv_results' in $data)
                 found = (DATA => {
                     for(var i = 0, f = !1, o = DATA.movie_results, l = o.length | 0; i < l; i++)
@@ -186,7 +187,7 @@ async function getIDs({ title, year, type, IMDbID, APIID }) {
 
                     return f? o: f;
                 })($data);
-            //theimdbapi.org/
+            //api.themoviedb.org/ < remote
             else
                 found = (crush($data.title) == crush(title))?
                     $data:
@@ -195,6 +196,8 @@ async function getIDs({ title, year, type, IMDbID, APIID }) {
 
         json = found;
     }
+
+    console.log(json);
 
     if('show' in json)
         data = json.show.externals;
@@ -222,6 +225,8 @@ function showNotification(state, text, timeout, callback) {
         lastNotification = null;
     }
 
+    callback = callback? callback: () => {};
+
     let existingEl = document.querySelector('.web-to-plex-notification');
     if (existingEl) {
         document.body.removeChild(existingEl);
@@ -231,7 +236,7 @@ function showNotification(state, text, timeout, callback) {
     el.classList.add('web-to-plex-notification');
     el.onclick = () => {
         el.remove();
-        callback && callback();
+        callback();
     };
 
     if (state === 'warning') {
@@ -328,10 +333,10 @@ function pushRadarrRequest(options) {
                 return showNotification('warning', 'Could not add to Radarr: ' + response.error),
                     console.error('Error adding to Radarr:', response.error, response.location);
             } else if (response && response.success) {
-                let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').toLowerCase(),
+                let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/\W+/g, '').toLowerCase(),
                     TVDbID = options.TVDbID;
 
-                showNotification('info', 'Added movie to Radarr', 0, () => window.open(`${config.radarrURL}movies/${title}-${TVDbID}`, '_blank'));
+                showNotification('info', 'Added movie to Radarr', 0, () => window.open(`${config.radarrURL}movies/${TVDbID? `${title}-${TVDbID}`: '' }`, '_blank'));
             } else {
                 showNotification('warning', 'Could not add to Radarr: Unknown Error');
             }
@@ -363,7 +368,7 @@ function pushSonarrRequest(options) {
                 return showNotification('warning', 'Could not add to Sonarr: ' + response.error),
                     console.error('Error adding to Sonarr:', response.error, response.location);
             } else if (response && response.success) {
-                let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').toLowerCase();
+                let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/\W+/g, '').toLowerCase();
 
                 showNotification('info', 'Added series to Sonarr', 0, () => window.open(`${config.sonarrURL}series/${title}`, '_blank'));
             } else {
@@ -429,7 +434,7 @@ function modifyPlexButton(el, action, title, options) {
                         el.hrefs = dum;
                         el.download = `${options.title} (${options.year})`;
                         el.href = el.hrefs.slice(0, el.index = 1);
-                        tl = (el.href.replace(/.*(?:\.(\w+))$/, '$1') || 'mp3').toUpperCase();
+                        tl = (el.href.replace(/.*(?:\.(\w+))?$/, '$1') || 'mp3').toUpperCase();
                         el.textContent = el.textContent.replace(/\d+\/.+?$/, `${el.index}/${el.hrefs.length} (${tl})`);
                         el.hrefs = el.hrefs.join(delimeter);
                     };
@@ -449,7 +454,7 @@ function modifyPlexButton(el, action, title, options) {
                         }
 
                         el.href = hs.slice(el.index, 1);
-                        tl = (el.href.replace(/.*(?:\.(\w+))$/, '$1') || 'mp3').toUpperCase();
+                        tl = (el.href.replace(/.*(?:\.(\w+))?$/, '$1') || 'mp3').toUpperCase();
                         el.textContent = el.textContent.replace(/\d+\/.+?$/, `${++el.index}/${hs.length} (${tl})`);
                     });
                     break;
@@ -479,7 +484,7 @@ function modifyPlexButton(el, action, title, options) {
             xhr.send(data);
         } else {
             el.href = '#';
-            el.textContent = 'Download ' + ty;
+            el.textContent = 'Get ' + ty;
             el.classList.add('web-to-plex-button--downloader');
             el.addEventListener('click', e => {
                 e.preventDefault();

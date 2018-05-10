@@ -8,22 +8,23 @@ function isMoviePageReady() {
 	return !!document.querySelector('iframe[title="Disqus"]');
 }
 
-async function init() {
+function init() {
 	if (isMoviePage())
 		if (isMoviePageReady())
-			await initPlexThingy();
+			initPlexThingy();
 		else
 			// This almost never happens, but sometimes the page is too slow so we need to wait a bit.
 			setTimeout(init, 1000);
 }
 
-parseOptions().then(async() => {
+parseOptions().then(() => {
 	window.addEventListener('popstate', init);
 	window.addEventListener('pushstate-changed', init);
-	await init();
+	init();
 });
 
 async function initPlexThingy() {
+
 	let $button = renderPlexButton();
 	if (!$button)
 		return;
@@ -39,9 +40,15 @@ async function initPlexThingy() {
 		),
           null;
 
+    let meta = {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        mode: 'no-cors'
+    };
+
 	let title = $title.innerText.trim(),
 	    year = parseInt($date.innerText),
-	    IMDbID = await getIDs({ title, year, type: 'imdb' });
+	    IMDbID = await getIDs({ title, year, type: 'imdb', meta });
 
 	findPlexMedia({ title, year, button: $button, IMDbID, type: 'movie', remote: '/engine/ajax/get.php', locale: 'flenix' });
 }
@@ -77,6 +84,7 @@ function renderPlexButton() {
         el.title = 'Loading...';
 	    el.classList.add((li? 'flatButton': 'roundButton'), 'web-to-plex-button');
         e.appendChild(li? (pa.appendChild(el), pa): el);
+
         return els.push(el);
     });
 

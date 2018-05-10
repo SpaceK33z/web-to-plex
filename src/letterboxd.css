@@ -5,6 +5,10 @@
 	line-height: 1.66666667;
 }
 
+.web-to-plex-button:hover {
+    color: #f67e56!important;
+}
+
 .web-to-plex-notification {
 	cursor: pointer;
 	display: block;
