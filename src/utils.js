@@ -254,8 +254,9 @@ function showNotification(state, text, timeout, callback) {
     let el = document.createElement('div');
     el.classList.add('web-to-plex-notification');
     el.onclick = () => {
+        clearTimeout(lastNotification);
         el.remove();
-        callback();
+        return callback();
     };
 
     if (state === 'warning') {
@@ -355,7 +356,7 @@ function pushRadarrRequest(options) {
                 let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/\W+/g, '').toLowerCase(),
                     TVDbID = options.TVDbID;
 
-                showNotification('info', 'Added movie to Radarr', 0, () => window.open(`${config.radarrURL}movies/${TVDbID? `${title}-${TVDbID}`: '' }`, '_blank'));
+                showNotification('info', 'Added movie to Radarr', 0, () => window.open(`${config.radarrURL}${TVDbID? `movies/${title}-${TVDbID}`: '' }`, '_blank'));
             } else {
                 showNotification('warning', 'Could not add to Radarr: Unknown Error');
             }
@@ -387,7 +388,7 @@ function pushSonarrRequest(options) {
                 return showNotification('warning', 'Could not add to Sonarr: ' + response.error),
                     console.error('Error adding to Sonarr:', response.error, response.location);
             } else if (response && response.success) {
-                let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/\W+/g, '').toLowerCase();
+                let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').toLowerCase();
 
                 showNotification('info', 'Added series to Sonarr', 0, () => window.open(`${config.sonarrURL}series/${title}`, '_blank'));
             } else {
@@ -403,9 +404,13 @@ function modifyPlexButton(el, action, title, options) {
     }
 
     let pa = null,
-        ty = (options? (options.type === 'show'? 'TV Show': 'Movie'): 'Item'),
-        txt = options.txt || 'textContent',
-        hov = options.hov || 'title';
+        ty = 'Item', txt = 'textContent', hov = 'title';
+
+    if(options) {
+        ty = (options.type === 'show'? 'TV Show': 'Movie');
+        txt = options.txt || txt;
+        hov = options.hov || hov;
+    }
 
     if (action === 'found') {
         el.href = getPlexMediaURL(config.server.id, options.key);
