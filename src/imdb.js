@@ -15,10 +15,10 @@ function isList() {
 
 function getIMDbID() {
 	let tag = document.querySelector('meta[property="pageId"]');
-	return tag && tag.content;
+	return tag ? tag.content : undefined;
 }
 
-const IMDbID = getIMDbID();
+let IMDbID = getIMDbID();
 
 function cleanYear(year) {
 	// The year can contain `()`, so we need to strip it out.
@@ -26,15 +26,16 @@ function cleanYear(year) {
 }
 
 function renderPlexButton($parent) {
-	if (!$parent)
-		return;
+	if (!$parent) return;
 
 	let existingButton = document.querySelector('a.web-to-plex-button');
 	if (existingButton)
 		existingButton.remove();
 
 	let el = document.createElement('a');
+
     el.textContent = 'Web to Plex+';
+    el.title = 'Loading...';
 	el.classList.add('web-to-plex-button');
 	el.style.display = 'none';
 	$parent.appendChild(el);
@@ -57,23 +58,28 @@ function initPlexMovie() {
 	findPlexMedia({ type: 'movie', title, year, button: $button, IMDbID });
 }
 
-function initPlexShow() {
+async function initPlexShow() {
 	let $parent = document.querySelector('.plot_summary'),
         $button = renderPlexButton($parent);
+
 	if (!$button)
 		return;
   
 	let $title = document.querySelector('.title_wrapper h1'),
         date = document.querySelector('title').textContent,
-        dateMatch = date.match(/Series (\d{4})/);
+        dateMatch = date.match(/Series\s+(\d{4})/);
 
 	if (!$title || !dateMatch)
-		return modifyPlexButton($button, 'error', 'Could not extract title or year');
+		return modifyPlexButton($button, 'error', `Could not extract ${ !$title? 'title': 'year' }`);
 
 	let title = $title.textContent.trim(),
-        year = parseInt(dateMatch[1]);
+        year = parseInt(dateMatch[1]),
+        Db = await getIDs({ title, year, IMDbID }),
+        TVDbID = Db.thetvdb;
 
-	findPlexMedia({ type: 'show', title, year, button: $button, IMDbID });
+    IMDbID = IMDbID || Db.imdb;
+
+	findPlexMedia({ type: 'show', title, year, button: $button, IMDbID, TVDbID });
 }
 
 function addInListItem(el) {
@@ -105,11 +111,11 @@ function initList() {
 }
 
 if (((isMovie() || isShow()) && IMDbID) || isList()) {
-	parseOptions().then(() => {
+	parseOptions().then(async() => {
 		if (isMovie())
-			initPlexMovie();
+			await initPlexMovie();
 		else if (isShow())
-			initPlexShow();
+			await initPlexShow();
 		else
 			initList();
 	});

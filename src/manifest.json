@@ -5,7 +5,7 @@
 	"description": "Adds a button on various movie & TV show sites to open it in Plex.",
     "homepage_url": "https://github.com/Ephellon/web-to-plex/",
 	"manifest_version": 2,
-    "version": "0.2.2.0",
+    "version": "0.3.0.0",
 	"icons": {
 		"16": "img/16.png",
 		"48": "img/48.png",
@@ -14,7 +14,7 @@
 	},
 	"content_scripts": [
 		{
-			"matches": ["https://movieo.me/*"],
+			"matches": ["https://*.movieo.me/*"],
 			"js": ["history-hack.js", "utils.js", "movieo.js"],
 			"css": ["movieo.css"]
 		},
@@ -24,19 +24,24 @@
 			"css": ["imdb.css"]
 		},
 		{
-			"matches": ["https://trakt.tv/*"],
+			"matches": ["https://*.trakt.tv/*"],
 			"js": ["history-hack.js", "utils.js", "trakt.js"],
 			"css": ["trakt.css"]
 		},
 		{
-			"matches": ["https://letterboxd.com/film/*"],
+			"matches": ["https://*.letterboxd.com/film/*"],
 			"js": ["utils.js", "letterboxd.js"],
 			"css": ["letterboxd.css"]
 		},
 		{
-			"matches": ["https://flenix.co/movies/*"],
+			"matches": ["https://*.flenix.co/movies/*"],
 			"js": ["utils.js", "flenix.js"],
 			"css": ["flenix.css"]
+		},
+		{
+			"matches": ["https://*.tvmaze.com/shows/*"],
+			"js": ["utils.js", "tvmaze.js"],
+			"css": ["tvmaze.css"]
 		}
 	],
 	"background": {

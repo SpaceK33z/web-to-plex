@@ -25,7 +25,7 @@ function initPlexThingy() {
         year = parseInt($date.textContent.trim()),
         IMDbID = getIMDbID();
 
-	findPlexMedia({ title, year, button: $button, IMDbID });
+	findPlexMedia({ title, year, button: $button, type: 'movie', IMDbID });
 }
 
 function renderPlexButton() {
@@ -38,6 +38,7 @@ function renderPlexButton() {
 
 	parentEl.appendChild(el);
     el.textContent = 'Web to Plex+';
+    el.title = 'Loading...';
 	el.classList.add('label', 'web-to-plex-button');
 	$actions.appendChild(parentEl);
 	return el;

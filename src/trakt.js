@@ -14,10 +14,22 @@ function isShowPage() {
 
 function getIMDbID() {
 	let $link = document.querySelector(
-		'ul.external [href^="http://www.imdb.com/title/tt"]'
+        // HTTPS and HTTP
+		'[href*="imdb.com/title/tt"]'
 	);
+
 	if ($link)
-		return $link.href.replace('http://www.imdb.com/title/', '');
+		return $link.href.replace(/^.*?imdb\.com\/title\/(tt\d+)/, '$1');
+}
+
+function getTVDbID() {
+	let $link = document.querySelector(
+        // HTTPS and HTTP
+		'[href*="thetvdb.com/"]'
+	);
+
+	if ($link)
+		return $link.href.replace(/^.*?thetvdb.com\/.+(?:(?:series)?id=(\d+)).*?$/, '$1');
 }
 
 function init() {
@@ -39,27 +51,40 @@ function renderPlexButton() {
 		return;
 
 	let el = document.createElement('a');
+
     el.textContent = 'Web to Plex+';
+    el.title = 'Loading...';
 	el.classList.add('web-to-plex-button');
 	$actions.insertBefore(el, $actions.childNodes[0]);
+
 	return el;
 }
 
-function initPlexThingy(type) {
+async function initPlexThingy(type) {
 	let $button = renderPlexButton();
+
 	if (!$button)
 		return;
 
-	let $title = document.querySelector('.btn-checkin'),
-        $year = document.querySelector('.summary .mobile-title .year');
+	let $title = document.querySelector('.mobile-title'),
+        $year = document.querySelector('.mobile-title .year');
+
 	if (!$title || !$year)
-		return modifyPlexButton($button, 'error', 'Could not extract title or year');
+		return modifyPlexButton($button, 'error', 'Could not extract ' + (!$title? 'title': 'year'));
 
-	let title = $title.dataset.topTitle,
+	let title = $title.textContent.replace(/(.+)\d{4}.*?$/, '$1').trim(),
         year = parseInt($year.textContent.trim()),
-        IMDbID = getIMDbID();
+        IMDbID = getIMDbID(),
+        TVDbID = getTVDbID();
 
-	findPlexMedia({ type, title, year, button: $button, IMDbID });
+    if(!IMDbID || !TVDbID) {
+        let Db = await getIDs({ title, year, IMDbID });
+
+        IMDbID = IMDbID || Db.imdb;
+        TVDbID = TVDbID || Db.thetvdb;
+    }
+
+	findPlexMedia({ type, title, year, button: $button, IMDbID, TVDbID });
 }
 
 parseOptions().then(() => {

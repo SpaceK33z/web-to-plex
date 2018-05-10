@@ -36,6 +36,8 @@ function addCouchpotato(request, sendResponse) {
 	})
 		.then(response => response.json())
 		.then(response => {
+            console.log('%cAdded to CouchPotato', 'color: #0f0');
+
 			sendResponse({ success: response.success });
 		})
 		.catch(error => {
@@ -64,6 +66,7 @@ function addRadarr(request, sendResponse) {
                 minimumAvailability: 'preDB',
                 qualityProfileId: request.QualityProfileId,
                 rootFolderPath: request.StoragePath,
+                imdbId: request.IMDbID,
                 addOptions: {
                     searchForMovie: true,
                 },
@@ -91,6 +94,8 @@ function addRadarr(request, sendResponse) {
                     location: '+Radarr'
                 });
             } else if (data && data.path) {
+                console.log(`%cAdded to Radarr [${data.path}]`, 'color: #0f0');
+
                 sendResponse({
                     success: 'Added to ' + data.path
                 });
@@ -120,8 +125,8 @@ function addSonarr(request, sendResponse) {
     fetch(`${ request.url }/lookup?term=${ query }`, { headers })
         .then(response => response.json())
         .then(data => {
-            if (!Array.isArray(data) || data.length < 1) {
-                throw new Error('Movie not found');
+            if (!data instanceof Array || !~data.length) {
+                throw new Error('TV Show not found');
             }
 
             let body = {
@@ -130,8 +135,10 @@ function addSonarr(request, sendResponse) {
                 minimumAvailability: 'preDB',
                 qualityProfileId: request.QualityProfileId,
                 rootFolderPath: request.StoragePath,
+                imdbId: request.IMDbID,
+                tvdbId: request.TVDbID,
                 addOptions: {
-                    searchForMovie: true,
+                    searchForMissingEpisodes: true,
                 },
             };
 
@@ -157,6 +164,8 @@ function addSonarr(request, sendResponse) {
                     location: '+Sonarr'
                 });
             } else if (data && data.path) {
+                console.log(`%cAdded to Sonarr [${data.path}]`, 'color: #0f0');
+
                 sendResponse({
                     success: 'Added to ' + data.path
                 });
@@ -256,7 +265,7 @@ async function searchPlex(request, sendResponse) {
     let { options, serverConfig } = request,
     headers = {
         'X-Plex-Token': serverConfig.token,
-        Accept: 'application/json',
+        'Accept': 'application/json',
     };
 
     // Try all Plex connection URLs
@@ -279,6 +288,8 @@ async function searchPlex(request, sendResponse) {
 }
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    console.log('From:', sender);
+
     switch (request.type) {
         case 'SEARCH_PLEX':
             searchPlex(request, sendResponse);
