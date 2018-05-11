@@ -25,7 +25,8 @@
             text-decoration: none !important;
         }
 
-        p {
+        section {
+            display: block !important;
             margin-bottom: 20px;
             box-sizing: border-box;
         }
@@ -167,23 +168,34 @@
 
 <body>
     <h1>Plex Settings</h1>
-	<p>
-		<label>Plex Token</label>
+	<section>
+		<label>Login using your Plex token</label>
 		<input type="text" id="plex_token" data-option="plexToken" placeholder="Enter your Plex token"/>
-		<div>
-            <a href="https://support.plex.tv/hc/en-us/articles/204059436-Finding-your-account-token-X-Plex-Token" target="_blank">How to find your token.</a>
+        <div>
+            How to find your <a href="https://support.plex.tv/hc/en-us/articles/204059436-Finding-your-account-token-X-Plex-Token" title="How to find your token?" target="_blank">Plex Token</a>.
         </div>
-	</p>
-	<p>
+    </section>
+
+    <h3><em>OR</em></h3>
+
+    <section>
+        <label>Login using your Plex credentials</label>
+        <input type="text" id="plex_username" style="border-bottom-left-radius: 0 !important; border-bottom-right-radius: 0 !important;" placeholder="Enter your Plex username"/>
+        <input type="text" id="plex_password" style="border-top-left-radius: 0 !important; border-top-right-radius: 0 !important;" placeholder="Enter your Plex password"/>
+		<div>
+            <em>Your username and password are never sotred, only your <a href="https://support.plex.tv/hc/en-us/articles/204059436-Finding-your-account-token-X-Plex-Token" title="How to find your token?" target="_blank">Plex Token</a>.</em>
+        </div>
+	</section>
+	<section>
 		<button type="button" id="plex_test" style="background: #cc7b19 !important;">Test</button>
 		<div id="plex_test_status"></div>
-	</p>
-	<p>
+	</section>
+	<section>
 		<label>Select a server</label>
 		<select id="plex_servers">
 			<option value="">Press "Test" first</option>
 		</select>
-	</p>
+	</section>
 
 	<h1>Manager Settings</h1>
 
@@ -192,15 +204,15 @@
             <summary>CouchPotato Settings (TV Shows)</summary>
 
             <h2>Connection Settings</h2>
-            <p>
+            <section>
                 <label>CouchPotato URL</label>
                 <input type="text" data-option="couchpotatoURLRoot" placeholder="What's your CouchPotato URL?"/>
                 <div>
                     Such as <em>https://example.com/couchpotato</em> or <em>http://192.168.1.100:5050</em>
                 </div>
-            </p>
+            </section>
 
-            <p>
+            <section>
                 <label>CouchPotato API Key</label>
                 <input type="text" data-option="couchpotatoToken" placeholder="What's your CouchPotato API key?"/>
                 <div>
@@ -208,45 +220,45 @@
                     2. Copy/Paste the "API Key."<br/>
                     Such as <em>aa756d33242f6g8ffbca2b3963586f21</em>
                 </div>
-            </p>
+            </section>
 
             <h3>Login Settings <em>(optional)</em></h3>
-            <p>
+            <section>
                 <label>username</label>
                 <input type="text" data-option="couchpotatoBasicAuthUsername" placeholder="Enter your CouchPotato username"/>
                 <div>Only use this if you setup a CouchPotato username.</div>
-            </p>
-            <p>
+            </section>
+            <section>
                 <label>password</label>
                 <input type="text" data-option="couchpotatoBasicAuthPassword" placeholder="Enter your CouchPotato password"/>
                 <div>Only use this if you setup a CouchPotato password.</div>
-            </p>
+            </section>
 
-            <p>
+            <section>
                 <button type="button" id="couchpotato_test" style="background: #cc7b19 !important;">Test CouchPotato Settings</button>
                 <span id="couchpotato_test_status"></span>
-            </p>
-            <p>
+            </section>
+            <section>
                 <label>Quality Profile</label>
                 <select data-option="couchpotatoQualityProfileId">
                     <option value="">Press "Test CouchPotato Settings" first</option>
                 </select>
-            </p>
+            </section>
         </details>
 
         <details>
             <summary>Radarr Settings (Movies)</summary>
 
             <h2>Connection Settings</h2>
-            <p>
+            <section>
                 <label>Radarr URL</label>
                 <input type="text" data-option="radarrURLRoot" placeholder="What's your Radarr URL?"/>
                 <div>
                     Such as <em>https://example.com/radarr</em> or <em>http://192.168.1.100:7878</em>
                 </div>
-            </p>
+            </section>
 
-            <p>
+            <section>
                 <label>Radarr API Key</label>
                 <input type="text" data-option="radarrToken" placeholder="What's your Radarr API key?"/>
                 <div>
@@ -254,54 +266,54 @@
                     2. Click on "Show advanced," then copy/paste the "API Key."<br/>
                     Such as <em>aa756d33242f6g8ffbca2b3963586f21</em>
                 </div>
-            </p>
+            </section>
 
-            <p>
+            <section>
                 <label>Radarr Storage Path</label>
                 <input type="text" data-option="radarrStoragePath" placeholder="Where does Radarr save movies?"/>
                 <div>
                     This should be the same path (verbatim) used in Radarr.<br/>
                     Such as <em>/storage/Movies/</em>
                 </div>
-            </p>
+            </section>
 
             <h3>Login Settings <em>(optional)</em></h3>
-            <p>
+            <section>
                 <label>username</label>
                 <input type="text" data-option="radarrBasicAuthUsername" placeholder="Enter your Radarr username"/>
                 <div>Only use this if you setup a Radarr username.</div>
-            </p>
-            <p>
+            </section>
+            <section>
                 <label>password</label>
                 <input type="text" data-option="radarrBasicAuthPassword" placeholder="Enter your Radarr password"/>
                 <div>Only use this if you setup a Radarr password.</div>
-            </p>
+            </section>
 
-            <p>
+            <section>
                 <button type="button" id="radarr_test" style="background: #cc7b19 !important;">Test Radarr Settings</button>
                 <span id="radarr_test_status"></span>
-            </p>
-            <p>
+            </section>
+            <section>
                 <label>Quality Profile</label>
                 <select data-option="radarrQualityProfileId">
                     <option value="">Press "Test Radarr Settings" first</option>
                 </select>
-            </p>
+            </section>
         </details>
 
         <details>
             <summary>Sonarr Settings (TV Shows)</summary>
 
             <h2>Connection Settings</h2>
-            <p>
+            <section>
                 <label>Sonarr URL</label>
                 <input type="text" data-option="sonarrURLRoot" placeholder="What's your Sonarr URL?"/>
                 <div>
                     Such as <em>https://example.com/sonarr</em> or <em>http://192.168.1.100:8989</em>
                 </div>
-            </p>
+            </section>
 
-            <p>
+            <section>
                 <label>Sonarr API Key</label>
                 <input type="text" data-option="sonarrToken" placeholder="What's your Sonarr API key?"/>
                 <div>
@@ -309,46 +321,46 @@
                     2. Click on "Show advanced," then copy/paste the "API Key."<br/>
                     Such as <em>aa756d33242f6g8ffbca2b3963586f21</em>
                 </div>
-            </p>
+            </section>
 
-            <p>
+            <section>
                 <label>Sonarr Storage Path</label>
                 <input type="text" data-option="sonarrStoragePath" placeholder="Where does Sonarr save TV Shows?"/>
                 <div>
                     This should be the same path (verbatim) used in Sonarr.<br/>
                     Such as <em>/storage/Movies/</em>
                 </div>
-            </p>
+            </section>
 
             <h3>Login Settings <em>(optional)</em></h3>
-            <p>
+            <section>
                 <label>username</label>
                 <input type="text" data-option="sonarrBasicAuthUsername" placeholder="Enter your Sonarr username"/>
                 <div>Only use this if you setup a Sonarr username.</div>
-            </p>
-            <p>
+            </section>
+            <section>
                 <label>password</label>
                 <input type="text" data-option="sonarrBasicAuthPassword" placeholder="Enter your Sonarr password"/>
                 <div>Only use this if you setup a Sonarr password.</div>
-            </p>
+            </section>
 
-            <p>
+            <section>
                 <button type="button" id="sonarr_test" style="background: #cc7b19 !important;">Test Sonarr Settings</button>
                 <span id="sonarr_test_status"></span>
-            </p>
-            <p>
+            </section>
+            <section>
                 <label>Quality Profile</label>
                 <select data-option="sonarrQualityProfileId">
                     <option value="">Press "Test Sonarr Settings" first</option>
                 </select>
-            </p>
+            </section>
         </details>
     </article>
 
-	<p>
+	<section>
 		<button id="save" style="background: #cc7b19">Save</button>
         <span id="status"></span>
-	</p>
+	</section>
 
 	<script src="lodash.min.js"></script>
 	<script src="xml.js"></script>

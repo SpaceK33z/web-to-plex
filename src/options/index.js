@@ -30,7 +30,9 @@ const storage = (chrome.storage.sync || chrome.storage.local),
             'sonarrQualityProfileId'
       ];
 
-var PlexServers = [];
+var PlexServers = [],
+    ClientID = null,
+    manifest = chrome.runtime.getManifest();
 
 function getServers(plexToken) {
 	return fetch('https://plex.tv/api/resources?includeHttps=1', {
@@ -50,25 +52,52 @@ function getServers(plexToken) {
     });
 }
 
-function getPlexConnections(server) {
-	// `server.Connection` can be an array or object.
-	let connections = [];
+/* See <https://github.com/SpaceK33z/web-to-plex/commit/db01d1a83d32e4d73f2ea671f634e6cc5b4c0fe7> */
+function tryPlexLogin(username, password) {
+    let hash = btoa(`${username}:${password}`);
 
-	if (server.Connection instanceof Array) {
-		connections = server.Connection;
- 	} else {
-		connections = [server.Connection];
-    }
+    return fetch(`https://plex.tv/users/sign_in.json`, {
+        method: 'POST',
+        headers: {
+            'X-Plex-Product': 'Web to Plex+',
+            'X-Plex-Version': manifest.version,
+            'X-Plex-Client-Identifier': ClientID,
+            'Authorization': `Basic ${ hash }`,
+        }
+    })
+    .then(response => response.json());
+}
 
-	return connections.map(connection => ({
-		uri: connection.uri,
-		local: connection.local === '1',
-	}));
+function performPlexLogin() {
+    let u = document.querySelector('#plex_username').value,
+        p = document.querySelector('#plex_password').value,
+        s = document.querySelector('#plex_test_status');
+
+    s.textContent = '';
+    __servers__.innerHTML = '';
+    __save__.disabled = true;
+
+    tryPlexLogin(u, p)
+        .then(response => {
+            if(response.error) {
+                s.textContent = 'Invalid login information';
+
+                return;
+            }
+
+            if(response.user) {
+                let t = document.querySelector('#plex_token');
+
+                ClientID = t.value = t.textContent = response.user.authToken;
+
+                return performPlexTest();
+            }
+        });
 }
 
 function performPlexTest(ServerID) {
-	let plexToken = document.getElementById('plex_token').value,
-        teststatus = document.getElementById('plex_test_status');
+	let plexToken = document.querySelector('#plex_token').value,
+        teststatus = document.querySelector('#plex_test_status');
 
 	__save__.disabled = true;
 	__servers__.innerHTML = '';
@@ -82,6 +111,7 @@ function performPlexTest(ServerID) {
         }
 
 		__save__.disabled = false;
+        teststatus.textContent = 'Success!';
 
 		servers.forEach(server => {
 			let $option = document.createElement('option'),
@@ -96,6 +126,22 @@ function performPlexTest(ServerID) {
 			__servers__.value = ServerID;
         }
 	});
+}
+
+function getPlexConnections(server) {
+	// `server.Connection` can be an array or object.
+	let connections = [];
+
+	if (server.Connection instanceof Array) {
+		connections = server.Connection;
+ 	} else {
+		connections = [server.Connection];
+    }
+
+	return connections.map(connection => ({
+		uri: connection.uri,
+		local: connection.local === '1',
+	}));
 }
 
 function getOptionValues() {
@@ -214,28 +260,28 @@ function saveOptions() {
 
 	let server = PlexServers.find(ID => ID.clientIdentifier === ServerID);
 
-	console.log('Selected server information:', server);
-
     // This should never happen, but can be useful for debugging.
 	if (!server) {
 		return status.textContent = `Could not find Plex server ${ ServerID }`,
             null;
     }
 
+	console.log('Selected server information:', server);
+
 	// Important detail: we get the token from the selected server, NOT the token the user has entered before.
 	let serverToken = server.accessToken,
-        ClientID = server.clientIdentifier,
         serverConnections = getPlexConnections(server);
-
-	console.log(
-		'Plex Server connections:',
-		serverConnections
-	);
+    ClientID = server.clientIdentifier;
 
 	if (!~serverConnections.length) {
 		return status.textContent = 'Could not locate Plex server URL',
             null;
     }
+
+	console.log(
+		'Plex Server connections:',
+		serverConnections
+	);
 
 	// With a "user token" you can access multiple servers. A "normal" token is just for one server.
 	let options = getOptionValues(),
@@ -254,6 +300,10 @@ function saveOptions() {
     } if (options.sonarrURLRoot && !options.sonarrQualityProfileId) {
 		return status.textContent = 'Select a Sonarr quality profile',
             null;
+    } if(!ClientID) {
+        ClientID = window.crypto.getRandomValues(new Uint32Array(5))
+            .join('-');
+        storage.set({ ClientID });
     }
 
     options.radarrURLRoot = (options.radarrURLRoot || "")
@@ -356,7 +406,14 @@ __save__.addEventListener('click', saveOptions);
 
 document
 	.getElementById('plex_test')
-	.addEventListener('click', performPlexTest);
+	.addEventListener('click', () => {
+        let t = document.querySelector('#plex_token');
+
+        if(t && t.value)
+            performPlexTest(ServerID);
+        else
+            performPlexLogin();
+    });
 document
 	.getElementById('radarr_test')
 	.addEventListener('click', performRadarrTest);
