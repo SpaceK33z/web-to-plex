@@ -19,12 +19,14 @@ Optionally, you can configure [Sonarr (TV Shows)](https://sonarr.tv/) and/or [Ra
  - [The TVDb](https://www.thetvdb.com/)
  - [The MovieDb](https://www.themoviedb.org/)
  - [VRV](https://vrv.co/)
+ - [Hulu](https://hulu.com/)
+ - [Google Play Store](https://play.google.com/store/movies/)
 	
 	*Note: Sites with `*` after their name also support the `Right click | Save as...` feature (file download).*
 
 **In Progress sites (adding support):**
 
-- Nothing here...
+- [Netflix](https://netflix.com/)
 
 **En Progress sites (may add support):**
 
