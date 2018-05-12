@@ -184,6 +184,32 @@ function addSonarr(request, sendResponse) {
         });
 }
 
+// Unfortunately the native Promise.race does not work as you would suspect.
+// If one promise (Plex request) fails, we still want the other requests to continue racing.
+// See https://www.jcore.com/2016/12/18/promise-me-you-wont-use-promise-race/ for an explanation
+function promiseRace(promises) {
+    if (!~promises.length) {
+        return Promise.reject('Cannot start a race without promises!');
+    }
+
+    // There is no way to know which promise is rejected.
+    // So we map it to a new promise to return the index when it fails
+    let Promises = promises.map((promise, index) =>
+        promise.catch(() => {
+            throw index;
+        })
+    );
+
+    return Promise.race(Promises)
+        .catch(index => {
+            // The promise has rejected, remove it from the list of promises and just continue the race.
+            let promise = promises.splice(index, 1)[0];
+
+            promise.catch(error => console.log(`Plex request #${ index } failed:`, error));
+            return promiseRace(promises);
+        });
+}
+
 function $serachPlex(connection, headers, options) {
     let type = options.type || 'movie',
         url = `${ connection.uri }/hubs/search`,
@@ -219,11 +245,11 @@ function $serachPlex(connection, headers, options) {
             // not when it was released (which is Movieo's definition).
             // For examples, see Bone Tomahawk, The Big Short, The Hateful Eight.
             // So we'll first try to find the movie with the given year, and then + 1 it.
-            let media = movies.find(meta => meta.year === options.year),
+            let media = movies.find(meta => meta.year === +options.year),
                 key = null;
 
             if (!media) {
-                media = movies.find(meta => meta.year === options.year + 1);
+                media = movies.find(meta => meta.year === +options.year + 1);
             } else {
                 key = media.key.replace('/children', '');
             }
@@ -232,32 +258,6 @@ function $serachPlex(connection, headers, options) {
                 found: !!media,
                 key
             };
-        });
-}
-
-// Unfortunately the native Promise.race does not work as you would suspect.
-// If one promise (Plex request) fails, we still want the other requests to continue racing.
-// See https://www.jcore.com/2016/12/18/promise-me-you-wont-use-promise-race/ for an explanation
-function promiseRace(promises) {
-    if (!~promises.length) {
-        return Promise.reject('Cannot start a race without promises!');
-    }
-
-    // There is no way to know which promise is rejected.
-    // So we map it to a new promise to return the index when it fails
-    let Promises = promises.map((promise, index) =>
-        promise.catch(() => {
-            throw index;
-        })
-    );
-
-    return Promise.race(Promises)
-        .catch(index => {
-            // The promise has rejected, remove it from the list of promises and just continue the race.
-            let promise = promises.splice(index, 1)[0];
-
-            promise.catch(error => console.log(`Plex request #${ index } failed:`, error));
-            return promiseRace(promises);
         });
 }
 
