@@ -215,8 +215,11 @@ function $serachPlex(connection, headers, options) {
         url = `${ connection.uri }/hubs/search`,
         field = options.field || 'title';
 
+    if(type === 'tv')
+        type = 'show';
+
     // Letterboxd can contain special white-space characters. Plex doesn't like this.
-    let title = encodeURIComponent(options.title.replace(/\s/g, ' ')),
+    let title = encodeURIComponent(options.title.replace(/\s+/g, ' ')),
         finalURL = `${ url }?query=${ field }:${ title }`;
 
     return fetch(finalURL, { headers })
