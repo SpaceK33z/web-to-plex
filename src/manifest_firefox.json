@@ -3,7 +3,7 @@
 	"description": "Adds a button on various movie & TV show sites to open it in Plex.",
     "homepage_url": "https://github.com/Ephellon/web-to-plex/",
 	"manifest_version": 2,
-    "version": "0.3.3.0",
+    "version": "0.5.0.0",
 	"icons": {
 		"16": "img/16.png",
 		"48": "img/48.png",
@@ -61,6 +61,11 @@
 			"matches": ["https://*.vrv.co/series/*"],
 			"js": ["utils.js", "vrv.js"],
 			"css": ["vrv.css"]
+		},
+		{
+			"matches": ["https://*.google.com/store/*"],
+			"js": ["utils.js", "google.js"],
+			"css": ["google.css"]
 		}
 	],
 	"background": {
@@ -73,6 +78,5 @@
 		"storage",
 		"http://*/",
 		"https://*/"
-	],
-    "web_accessible_resources": ["img/16.png", "img/48.png"]
+	]
 }

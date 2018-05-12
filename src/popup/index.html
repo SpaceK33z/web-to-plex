@@ -4,14 +4,9 @@
     <title>Web to Plex+</title>
 
     <style>
-        html {
-            height: 625px;
-            width: 625px;
-        }
-
-        body {
-            height: 600px;
-            width: 600px;
+        html, body {
+            height: 625px !important;
+            width: 625px !important;
         }
 
 		body {
@@ -19,11 +14,9 @@
 			color: #333 !important;
             font-family: Open Sans Regular, Helvetica Neue, Helvetica, Arial, sans-serif, system;
             font-size: 18px !important;
-			padding: 1em;
-			width: 100%;
             flex-grow: 1;
             padding: 1px;
-            overflow: auto;
+            overflow: hidden;
             position: absolute;
 		}
 
@@ -55,11 +48,12 @@
         table {
             height: 100%;
             width: 100%;
-            font-size: 16px !important;
+            font-size: 1em !important;
             position: relative;
-            overflow: hidden;
+            overflow: auto !important;
             color: #fff !important;
             font-weight: 400 !important;
+            padding-bottom: 1em;
         }
 
         tr {
@@ -121,12 +115,58 @@
             box-shadow: 0 10px 128px inset #FFDD00;
         }
 
+        #hulu:hover {
+            box-shadow: 0 10px 128px inset #66AA33;
+        }
+
+        #netflix:hover {
+            box-shadow: 0 10px 128px inset #E50914;
+        }
+
+        #google:hover {
+            box-shadow: 0 10px 128px inset #EEEEEE;
+        }
+
+        td[save-file]:after, td[cost-cash]:after, td[cost-more-cash]:after, td[cost-most-cash]:after {
+            content: "____";
+            color: transparent;
+            float: right;
+            width: 3em;
+            height: 3em;
+            margin-top: -9.5em;
+            margin-right: -1em;
+        }
+
+        td[is-slow] label:after {
+            content: " \23f3";
+        }
+
+        td[save-file]:after {
+            background: url("../img/48.png") no-repeat center;
+        }
+
+        /* $1 - $10 */
+        td[cost-cash]:after {
+            background: url("../img/$48.png") no-repeat center;
+        }
+
+        /* $11 - $30 */
+        td[cost-more-cash]:after {
+            background: url("../img/$$48.png") no-repeat center;
+        }
+
+        /* $31+ */
+        td[cost-most-cash]:after {
+            background: url("../img/$$$48.png") no-repeat center;
+        }
+
         td[disabled], td[disabled]:hover {
             box-shadow: 0 10px 128px inset #000 !important;
+            opacity: 0.5 !important;
         }
 
         td[disabled] label:after {
-            content: " (soon \1f622)" !important;
+            content: " (Soon...)" !important;
         }
 
         body::-webkit-scrollbar {
@@ -149,22 +189,43 @@
 <body>
     <table>
         <tr>
-            <td id="movieo">
-                <a href="https://movieo.me/" target="_blank">
-                    <img alt="Movieo" src="../img/movieo.png" />
-                    <label>Movieo</label>
-                </a>
-            </td>
-            <td id="imdb">
-                <a href="https://imdb.com/" target="_blank">
-                    <img alt="IMDb" src="../img/imdb.png" />
-                    <label>IMDb</label>
+            <td id="netflix" disabled cost-cash title="At least $7.99/month">
+                <a href="https://netflix.com/" target="_blank">
+                    <img alt="Netflix" src="../img/netflix.png" />
+                    <label>Netflix</label>
                 </a>
             </td>
             <td id="trakt">
                 <a href="https://trakt.tv/" target="_blank">
                     <img alt="Trakt" src="../img/trakt.png" />
                     <label>Trakt</label>
+                </a>
+            </td>
+            <td id="flenix" save-file title="Uses file downloads">
+                <a href="https://flenix.co/" target="_blank">
+                    <img alt="Flenix" src="../img/flenix.png" />
+                    <label>Flenix</label>
+                </a>
+            </td>
+        </tr>
+
+        <tr>
+            <td id="imdb">
+                <a href="https://imdb.com/" target="_blank">
+                    <img alt="IMDb" src="../img/imdb.png" />
+                    <label>IMDb</label>
+                </a>
+            </td>
+            <td id="vrv">
+                <a href="https://vrv.co/" target="_blank">
+                    <img alt="VRV" src="../img/vrv.png" />
+                    <label>VRV</label>
+                </a>
+            </td>
+            <td id="hulu" cost-cash title="At least $7.99/month">
+                <a href="https://hulu.com/" target="_blank">
+                    <img alt="Hulu" src="../img/hulu.png" />
+                    <label>Hulu</label>
                 </a>
             </td>
         </tr>
@@ -176,21 +237,6 @@
                     <label>Letterboxd</label>
                 </a>
             </td>
-            <td id="flenix">
-                <a href="https://flenix.co/" target="_blank">
-                    <img alt="Flenix" src="../img/flenix.png" />
-                    <label>Flenix</label>
-                </a>
-            </td>
-            <td id="tv-maze">
-                <a href="https://tvmaze.com/" target="_blank">
-                    <img alt="TV Maze" src="../img/tv-maze.png" />
-                    <label>TV Maze</label>
-                </a>
-            </td>
-        </tr>
-
-        <tr>
             <td id="tvdb">
                 <a href="https://thetvdb.com/" target="_blank">
                     <img alt="The TVDb" src="../img/tvdb.png" />
@@ -203,10 +249,25 @@
                     <label>The MovieDb</label>
                 </a>
             </td>
-            <td id="vrv">
-                <a href="https://vrv.co/" target="_blank">
-                    <img alt="VRV" src="../img/vrv.png" />
-                    <label>VRV</label>
+        </tr>
+
+        <tr>
+            <td id="movieo">
+                <a href="https://movieo.me/" target="_blank">
+                    <img alt="Movieo" src="../img/movieo.png" />
+                    <label>Movieo</label>
+                </a>
+            </td>
+            <td id="tv-maze">
+                <a href="https://tvmaze.com/" target="_blank">
+                    <img alt="TV Maze" src="../img/tv-maze.png" />
+                    <label>TV Maze</label>
+                </a>
+            </td>
+            <td id="google">
+                <a href="https://play.google.com/store/movies" target="_blank">
+                    <img alt="Google" src="../img/google.png" />
+                    <label>Google</label>
                 </a>
             </td>
         </tr>

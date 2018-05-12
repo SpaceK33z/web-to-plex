@@ -73,7 +73,7 @@ async function initPlexShow() {
 		return modifyPlexButton($button, 'error', `Could not extract ${ !$title? 'title': 'year' }`);
 
 	let title = $title.textContent.trim(),
-        year = parseInt(dateMatch[1]),
+        year = dateMatch[1],
         Db = await getIDs({ title, year, IMDbID }),
         TVDbID = Db.thetvdb;
 

@@ -72,8 +72,8 @@ async function initPlexThingy(type) {
 	if (!$title || !$year)
 		return modifyPlexButton($button, 'error', 'Could not extract ' + (!$title? 'title': 'year'));
 
-	let title = $title.textContent.replace(/(.+)\d{4}.*?$/, '$1').trim(),
-        year = parseInt($year.textContent.trim()),
+	let title = $title.textContent.replace(/(.+)(\d{4}).*?$/, '$1').trim(),
+        year = (RegExp.$2 || $year.textContent).trim(),
         IMDbID = getIMDbID(),
         TVDbID = getTVDbID();
 

@@ -51,7 +51,7 @@ function initPlexThingy() {
 		);
 
 	let title = $title.dataset.title.trim(),
-        year = parseInt($date.content.slice(0, 4)),
+        year = $date.content.slice(0, 4),
         IMDbID = getIMDbID();
 
 	findPlexMedia({ title, year, button: $button, type: 'movie', IMDbID });

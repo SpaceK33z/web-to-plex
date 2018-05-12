@@ -30,7 +30,7 @@ async function initPlexThingy(type) {
 		);
 
 	let title = $title.textContent.trim(),
-        year = parseInt($date.textContent.trim()),
+        year = $date.textContent.trim(),
         apid = window.location.pathname.replace(/\/(?:movie|tv)\/(\d+).*/, '$1');
 
     let Db = await getIDs({ title, year, APIType: type, APIID: apid }),

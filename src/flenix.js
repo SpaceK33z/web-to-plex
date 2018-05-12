@@ -47,7 +47,7 @@ async function initPlexThingy() {
     };
 
 	let title = $title.innerText.trim(),
-	    year = parseInt($date.innerText),
+	    year = $date.innerText,
 	    IMDbID = await getIDs({ title, year, type: 'imdb', meta });
 
 	findPlexMedia({ title, year, button: $button, IMDbID, type: 'movie', remote: '/engine/ajax/get.php', locale: 'flenix' });

@@ -113,16 +113,19 @@ async function getIDs({ title, year, type, IMDbID, TVDbID, APIType, APIID, meta 
         id = IMDbID || null;
 
     type = type || '*';
+    meta = { ...meta, mode: 'no-cors' };
 
     let url =
         (type === 'imdb' || (type === '*' && !id && title && year) || (apid || APIType))?
-            (apid)?
+            (apid && apit === 'tv')?
                 `https://api.themoviedb.org/3/${ apit }/${ apid }?api_key=${ api.tvdb }`:
             `https://api.themoviedb.org/3/search/${ apit }?api_key=${ api.tvdb }&query=${ encodeURI(title) }&year=${ year }`:
         (type === 'thetvdb' || apid || (type === '*' && (id || title)))?
             (id)?
                 `https://api.themoviedb.org/3/find/${ id }?api_key=${ api.tvdb }&external_source=imdb_id`:
             `https://api.tvmaze.com/${ (apid)? `shows/${ apid }`: `search/shows?q=${ encodeURI(title) }`}`:
+        (title && year)?
+            `https://www.theimdbapi.org/api/find/movie?title=${ encodeURI(title) }&year=${ year }`:
         null;
 
     if(url === null) return 0;
@@ -138,12 +141,15 @@ async function getIDs({ title, year, type, IMDbID, TVDbID, APIType, APIID, meta 
             throw error;
         });
 
+    // console.log({ url, json });
+
     if('results' in json) {
         json = json.results;
     }
 
     if(json instanceof Array) {
-        let crush = (string = "") => string.toLowerCase().replace(/\&/g, 'and').replace(/\W+/g, '');
+        let crush = (string = "") => string.toLowerCase().replace(/\&/g, 'and').replace(/\W+/g, ''),
+            blank = { release_date: '', year: '' };
 
         // Find an exact match: Title (Year) | #IMDbID
         for(var index = 0, found = false, $data; index < json.length && !found; index++) {
@@ -154,7 +160,7 @@ async function getIDs({ title, year, type, IMDbID, TVDbID, APIType, APIID, meta 
                 found = (IMDbID === $data.show.externals.imdb || ($data.show.name === title && year === $data.show.premiered.slice(0, 4)))?
                     $data:
                 found;
-            //api.themoviedb.org/ < local
+            //api.themoviedb.org/ \local
             else if('movie_results' in $data || 'tv_results' in $data)
                 found = (DATA => {
                     for(var i = 0, f = !1, o = DATA.movie_results, l = o.length | 0; i < l; i++)
@@ -165,13 +171,14 @@ async function getIDs({ title, year, type, IMDbID, TVDbID, APIType, APIID, meta 
 
                     return f? o: f;
                 })($data);
-            //api.themoviedb.org/ < remote
-            else if('original_name' in $data)
-                found = (TVDbID === $data.id || ($data.name === title || $data.original_name === title) && year == $data.release_date.slice(0, 4))?
+            //api.themoviedb.org/ \remote
+            else if('original_name' in $data && 'release_date' in $data)
+                found = (TVDbID === $data.id || ($data.original_name === title || $data.name === title) && year == ($data || blank).release_date.slice(0, 4))?
                     $data:
                 found;
+            // OR theimdbapi.org/
             else
-                found = ($data.title === title && year == $data.release_date.slice(0, 4))?
+                found = ($data.title === title && year == ($data.url || $data || blank).release_date.slice(0, 4))?
                     $data:
                 found;
         }
@@ -185,7 +192,7 @@ async function getIDs({ title, year, type, IMDbID, TVDbID, APIType, APIID, meta 
                 found = (crush($data.show.name) == crush(title))?
                     $data:
                 found;
-            //api.themoviedb.org/ < local
+            //api.themoviedb.org/ \local
             else if('movie_results' in $data || 'tv_results' in $data)
                 found = (DATA => {
                     for(var i = 0, f = !1, o = DATA.movie_results, l = o.length | 0; i < l; i++)
@@ -196,11 +203,12 @@ async function getIDs({ title, year, type, IMDbID, TVDbID, APIType, APIID, meta 
 
                     return f? o: f;
                 })($data);
-            //api.themoviedb.org/ < remote
+            //api.themoviedb.org/ \remote
             else if('original_name' in $data)
-                found = (crush($data.name) == crush(title) || crush($data.original_name) == crush(title))?
+                found = (crush($data.original_name) == crush(title) || crush($data.name) == crush(title))?
                     $data:
                 found;
+            // OR theimdbapi.org/
             else
                 found = (crush($data.title) == crush(title))?
                     $data:
@@ -407,7 +415,7 @@ function modifyPlexButton(el, action, title, options) {
         ty = 'Item', txt = 'textContent', hov = 'title';
 
     if(options) {
-        ty = (options.type === 'show'? 'TV Show': 'Movie');
+        ty = (options.type === 'movie'? 'Movie': 'TV Show');
         txt = options.txt || txt;
         hov = options.hov || hov;
     }
@@ -420,10 +428,10 @@ function modifyPlexButton(el, action, title, options) {
         el.parentElement.classList.replace('web-to-plex-wrapper', 'web-to-plex-wrapper--found');
     } else if (action === 'notfound' || action === 'error') {
         el.removeAttribute('href');
-        el[txt] = action === 'notfound' ? ty + ' not available' : 'Web to Plex+';
+        el[txt] = action === 'notfound' ? ty + ' not available' : 'Web to Plex-';
         el[hov] = `${ty} was not found`;
         el.classList.remove('web-to-plex-button--found');
-        el.parentElement.classList.replace('web-to-plex-wrapper--found', 'web-to-plex-wrapper');
+        el.parentElement.classList.remove('web-to-plex-wrapper--found');
     } else if (action === 'downloader') {
         if (options.remote) {
             let delimeter = '<!---->',
