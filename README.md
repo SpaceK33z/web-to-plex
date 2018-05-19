@@ -44,7 +44,7 @@ Optionally, you can configure [Sonarr](https://sonarr.tv/) (TV Shows) and/or [Co
 
 - **Download the [ZIP](https://github.com/Ephellon/web-to-plex/raw/master/hhkmjeeccipbolailpomhjhmccnnjhkj.zip)**
 
-- **Compile the [SRC](https://github.com/Ephellon/web-to-plex/tree/master/src)**
+- **Download the [SRC](https://github.com/Ephellon/web-to-plex/archive/master.zip)**
 
 ## Requirements
 
