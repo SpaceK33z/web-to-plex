@@ -168,6 +168,17 @@
 
 <body>
     <h1>Plex Settings</h1>
+
+	<section>
+		<label>Login using your Plex token</label>
+		<input type="text" id="plex_token" data-option="plexToken" placeholder="Enter your Plex token"/>
+        <div>
+            How to find your <a href="https://support.plex.tv/hc/en-us/articles/204059436-Finding-your-account-token-X-Plex-Token" title="How to find your token?" target="_blank">Plex Token</a>.
+        </div>
+    </section>
+
+    <h3 style="width: 35%; text-align: center;"><em>&mdash; OR &mdash;</em></h3>
+
     <section>
         <label>Login using your Plex credentials</label>
         <input type="text" id="plex_username" style="border-bottom-left-radius: 0 !important; border-bottom-right-radius: 0 !important;" placeholder="Enter your Plex username"/>
@@ -177,15 +188,6 @@
         </div>
 	</section>
 
-    <h3 style="width: 35%; text-align: center;"><em>&mdash; OR &mdash;</em></h3>
-
-	<section>
-		<label>Login using your Plex token</label>
-		<input type="text" id="plex_token" data-option="plexToken" placeholder="Enter your Plex token"/>
-        <div>
-            How to find your <a href="https://support.plex.tv/hc/en-us/articles/204059436-Finding-your-account-token-X-Plex-Token" title="How to find your token?" target="_blank">Plex Token</a>.
-        </div>
-    </section>
 	<section>
 		<button type="button" id="plex_test" style="background: #cc7b19 !important;">Test</button>
 		<div id="plex_test_status"></div>
@@ -232,6 +234,7 @@
                 <label>password</label>
                 <input type="text" data-option="couchpotatoBasicAuthPassword" placeholder="Enter your CouchPotato password"/>
                 <div>Only use this if you setup a CouchPotato password.</div>
+                <div>Your password will be hidden once saved.</div>
             </section>
 
             <section>
@@ -268,15 +271,6 @@
                 </div>
             </section>
 
-            <section>
-                <label>Radarr Storage Path</label>
-                <input type="text" data-option="radarrStoragePath" placeholder="Where does Radarr save movies?"/>
-                <div>
-                    This should be the same path (verbatim) used in Radarr.<br/>
-                    Such as <em>/storage/Movies/</em>
-                </div>
-            </section>
-
             <h3>Login Settings <em>(optional, saved)</em></h3>
             <section>
                 <label>username</label>
@@ -287,11 +281,23 @@
                 <label>password</label>
                 <input type="text" data-option="radarrBasicAuthPassword" placeholder="Enter your Radarr password"/>
                 <div>Only use this if you setup a Radarr password.</div>
+                <div>Your password will be hidden once saved.</div>
             </section>
 
             <section>
                 <button type="button" id="radarr_test" style="background: #cc7b19 !important;">Test Radarr Settings</button>
                 <span id="radarr_test_status"></span>
+            </section>
+
+            <section>
+                <label>Radarr Storage Path</label>
+                <select type="text" data-option="radarrStoragePath">
+                    <option value="">Press "Test Radarr Settings" first</option>
+                </select>
+                <div>
+                    This should be the same path (verbatim) used in Radarr.<br/>
+                    Such as <em>/storage/Movies/</em>
+                </div>
             </section>
             <section>
                 <label>Quality Profile</label>
@@ -323,15 +329,6 @@
                 </div>
             </section>
 
-            <section>
-                <label>Sonarr Storage Path</label>
-                <input type="text" data-option="sonarrStoragePath" placeholder="Where does Sonarr save TV Shows?"/>
-                <div>
-                    This should be the same path (verbatim) used in Sonarr.<br/>
-                    Such as <em>/storage/Movies/</em>
-                </div>
-            </section>
-
             <h3>Login Settings <em>(optional, saved)</em></h3>
             <section>
                 <label>username</label>
@@ -342,11 +339,23 @@
                 <label>password</label>
                 <input type="text" data-option="sonarrBasicAuthPassword" placeholder="Enter your Sonarr password"/>
                 <div>Only use this if you setup a Sonarr password.</div>
+                <div>Your password will be hidden once saved.</div>
             </section>
 
             <section>
                 <button type="button" id="sonarr_test" style="background: #cc7b19 !important;">Test Sonarr Settings</button>
                 <span id="sonarr_test_status"></span>
+            </section>
+
+            <section>
+                <label>Sonarr Storage Path</label>
+                <select type="text" data-option="sonarrStoragePath">
+                    <option value="">Press "Test Sonarr Settings" first</option>
+                </select>
+                <div>
+                    This should be the same path (verbatim) used in Sonarr.<br/>
+                    Such as <em>/storage/TV Shows/</em>
+                </div>
             </section>
             <section>
                 <label>Quality Profile</label>

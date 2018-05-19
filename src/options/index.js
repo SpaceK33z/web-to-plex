@@ -1,14 +1,27 @@
 /* global parseXML */
+/* Notes:
+    #1: See <https://github.com/SpaceK33z/web-to-plex/commit/db01d1a83d32e4d73f2ea671f634e6cc5b4c0fe7>
+    #2: See <https://github.com/SpaceK33z/web-to-plex/commit/27506b9a4c12496bd7aad6ee09deb8a5b9418cac>
+*/
+
 // FireFox doesn't support sync storage.
 const storage = (chrome.storage.sync || chrome.storage.local),
-      __servers__ = document.getElementById('plex_servers'),
+      __servers__ = document.querySelector('#plex_servers'),
       __radarr_qualityProfile__ = document.querySelector(
           `[data-option="radarrQualityProfileId"]`
+      ),
+      /* See #2 */
+      __radarr_storagePath__ = document.querySelector(
+            `[data-option="radarrStoragePath"]`
       ),
       __sonarr_qualityProfile__ = document.querySelector(
           `[data-option="sonarrQualityProfileId"]`
       ),
-      __save__ = document.getElementById('save'),
+      /* See #2 */
+      __sonarr_storagePath__ = document.querySelector(
+          `[data-option="sonarrStoragePath"]`
+      ),
+      __save__ = document.querySelector('#save'),
       __options__ = [
             'plexToken',
             'couchpotatoURLRoot',
@@ -52,7 +65,7 @@ function getServers(plexToken) {
     });
 }
 
-/* See <https://github.com/SpaceK33z/web-to-plex/commit/db01d1a83d32e4d73f2ea671f634e6cc5b4c0fe7> */
+/* See #1 */
 function tryPlexLogin(username, password) {
     let hash = btoa(`${username}:${password}`);
 
@@ -160,7 +173,7 @@ function getOptionValues() {
 	return options;
 }
 
-function getRadarrProfiles(options) {
+function getRadarr(options, api = "profile") {
 	let headers = {
 		'Accept': 'application/json',
 		'Content-Type': 'application/json',
@@ -173,7 +186,7 @@ function getRadarrProfiles(options) {
 
     options.radarrURLRoot = options.radarrURLRoot.replace(/^(?!^https?:)/, 'http://').replace(/\/+$/, '');
 
-	return fetch(`${ options.radarrURLRoot }/api/profile`, { headers })
+	return fetch(`${ options.radarrURLRoot }/api/${ api }`, { headers })
 		.then(response => response.json())
 		.catch(error => {
 			return console.error('Radarr failed to connect with error:', error),
@@ -181,14 +194,16 @@ function getRadarrProfiles(options) {
 		});
 }
 
-function performRadarrTest(QualityProfileID) {
+function performRadarrTest(QualityProfileID, StoragePath) {
 	let options = getOptionValues(),
-        teststatus = document.getElementById('radarr_test_status');
+        teststatus = document.querySelector('#radarr_test_status'),
+        storagepath = __radarr_storagePath__;
 
 	__radarr_qualityProfile__.innerHTML = '';
 	teststatus.textContent = '';
+    storagepath.textContent = '';
 
-	getRadarrProfiles(options).then(profiles => {
+	getRadarr(options, 'profile').then(profiles => {
 		teststatus.textContent = !~profiles.length ? 'Failed.' : 'Success!';
 		profiles.forEach(profile => {
 			let option = document.createElement('option');
@@ -203,9 +218,24 @@ function performRadarrTest(QualityProfileID) {
 			__radarr_qualityProfile__.value = QualityProfileID;
         }
 	});
+
+    getRadarr(options, 'rootfolder').then(storagepaths => {
+		storagepaths.forEach(path => {
+			let option = document.createElement('option');
+
+			option.value = path.path;
+			option.textContent = path.path;
+			__radarr_storagePath__.appendChild(option);
+		});
+
+		// Because the <select> was reset, the original value is lost.
+		if (StoragePath) {
+			__radarr_storagePath__.value = StoragePath;
+        }
+    });
 }
 
-function getSonarrProfiles(options) {
+function getSonarr(options, api = "profile") {
 	let headers = {
 		'Accept': 'application/json',
 		'Content-Type': 'application/json',
@@ -218,7 +248,7 @@ function getSonarrProfiles(options) {
 
     options.sonarrURLRoot = options.sonarrURLRoot.replace(/^(?!^https?:)/, 'http://').replace(/\/+$/, '');
 
-	return fetch(`${ options.sonarrURLRoot }/api/profile`, { headers })
+	return fetch(`${ options.sonarrURLRoot }/api/${ api }`, { headers })
 		.then(response => response.json())
 		.catch(error => {
 			return console.error('Sonarr failed to connect with error:', error),
@@ -226,14 +256,14 @@ function getSonarrProfiles(options) {
 		});
 }
 
-function performSonarrTest(QualityProfileID) {
+function performSonarrTest(QualityProfileID, StoragePath) {
 	let options = getOptionValues(),
-        teststatus = document.getElementById('sonarr_test_status');
+        teststatus = document.querySelector('#sonarr_test_status');
 
 	__sonarr_qualityProfile__.innerHTML = '';
 	teststatus.textContent = '';
 
-	getSonarrProfiles(options).then(profiles => {
+	getSonarr(options, 'profile').then(profiles => {
 		teststatus.textContent = !~profiles.length ? 'Failed.' : 'Success!';
 		profiles.forEach(profile => {
 			let option = document.createElement('option');
@@ -247,10 +277,25 @@ function performSonarrTest(QualityProfileID) {
 			__sonarr_qualityProfile__.value = QualityProfileID;
         }
 	});
+
+    getSonarr(options, 'rootfolder').then(storagepaths => {
+		storagepaths.forEach(path => {
+			let option = document.createElement('option');
+
+			option.value = path.path;
+			option.textContent = path.path;
+			__sonarr_storagePath__.appendChild(option);
+		});
+
+		// Because the <select> was reset, the original value is lost.
+		if (StoragePath) {
+			__sonarr_storagePath__.value = StoragePath;
+        }
+    });
 }
 
 function saveOptions() {
-	let status = document.getElementById('status'),
+	let status = document.querySelector('#status'),
         ServerID = __servers__.options[__servers__.selectedIndex].value;
 
 	if (!ServerID) {
@@ -377,16 +422,19 @@ function restoreOptions() {
 			el.value = items[option] || '';
 
             if(el.value !== '') {
-                el.placeholder = `Last save: ${ el.value }`;
+                if(/password$/i.test(option))
+                    el.setAttribute('type', el.type = 'password');
+                else 
+                    el.placeholder = `Last save: ${ el.value }`;
             }
 		});
 
 		if (items.plexToken) {
 			performPlexTest(items.servers ? items.servers[0].id : null);
         } if (items.radarrURLRoot) {
-			performRadarrTest(items.radarrQualityProfileId);
+			performRadarrTest(items.radarrQualityProfileId, items.radarrStoragePath);
         } if (items.sonarrURLRoot) {
-			performSonarrTest(items.sonarrQualityProfileId);
+			performSonarrTest(items.sonarrQualityProfileId, items.sonarrStoragePath);
         }
 	}
 
@@ -405,7 +453,7 @@ document.addEventListener('DOMContentLoaded', restoreOptions);
 __save__.addEventListener('click', saveOptions);
 
 document
-	.getElementById('plex_test')
+	.querySelector('#plex_test')
 	.addEventListener('click', () => {
         let t = document.querySelector('#plex_token');
 
@@ -415,8 +463,8 @@ document
             performPlexLogin();
     });
 document
-	.getElementById('radarr_test')
+	.querySelector('#radarr_test')
 	.addEventListener('click', performRadarrTest);
 document
-	.getElementById('sonarr_test')
+	.querySelector('#sonarr_test')
 	.addEventListener('click', performSonarrTest);
