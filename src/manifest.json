@@ -1,79 +1,86 @@
 {
-"update_url": "https://clients2.google.com/service/update2/crx",
+    "update_url": "https://clients2.google.com/service/update2/crx",
 
 	"name": "Web to Plex+",
 	"description": "Adds a button on various movie & TV show sites to open it in Plex.",
     "homepage_url": "https://github.com/Ephellon/web-to-plex/",
+
 	"manifest_version": 2,
-    "version": "0.5.0.0",
+    "version": "0.5.1.0",
+// Firefox Support =>
+//    "applications": {
+//        "gecko": {
+//            "id": "minkcbos@gmail.com",
+//            "strict_min_version": "57.0"
+//        }
+//    },
+
 	"icons": {
 		"16": "img/16.png",
 		"48": "img/48.png",
 		"128": "img/128.png",
         "256": "img/256.png"
 	},
+
 	"content_scripts": [
 		{
-			"matches": ["https://*.movieo.me/*"],
+			"matches": ["*://*.movieo.me/*"],
 			"js": ["history-hack.js", "utils.js", "movieo.js"],
 			"css": ["movieo.css"]
-		},
-		{
+		},{
 			"matches": ["*://*.imdb.com/*"],
 			"js": ["utils.js", "imdb.js"],
 			"css": ["imdb.css"]
-		},
-		{
-			"matches": ["https://*.trakt.tv/*"],
+		},{
+			"matches": ["*://*.trakt.tv/*"],
 			"js": ["history-hack.js", "utils.js", "trakt.js"],
 			"css": ["trakt.css"]
-		},
-		{
-			"matches": ["https://*.letterboxd.com/film/*"],
+		},{
+			"matches": ["*://*.letterboxd.com/film/*"],
 			"js": ["utils.js", "letterboxd.js"],
 			"css": ["letterboxd.css"]
-		},
-		{
-			"matches": ["https://*.flenix.co/movies/*"],
+		},{
+			"matches": ["*://*.flenix.co/movies/*", "*://*.flenix.cc/movies/*", "*://*.flenix.net/movies/*"],
 			"js": ["utils.js", "flenix.js"],
 			"css": ["flenix.css"]
-		},
-		{
-			"matches": ["https://*.tvmaze.com/shows/*"],
+		},{
+			"matches": ["*://*.tvmaze.com/shows/*"],
 			"js": ["utils.js", "tvmaze.js"],
 			"css": ["tvmaze.css"]
-		},
-		{
-			"matches": ["https://*.thetvdb.com/series/*"],
+		},{
+			"matches": ["*://*.thetvdb.com/series/*"],
 			"js": ["utils.js", "thetvdb.js"],
 			"css": ["thetvdb.css"]
-		},
-		{
-			"matches": ["https://*.themoviedb.org/movie/*", "https://*.themoviedb.org/tv/*"],
+		},{
+			"matches": ["*://*.themoviedb.org/movie/*", "https://*.themoviedb.org/tv/*"],
 			"js": ["utils.js", "themoviedb.js"],
 			"css": ["themoviedb.css"]
-		},
-		{
-			"matches": ["https://*.vrv.co/series/*"],
+		},{
+			"matches": ["*://*.vrv.co/series/*"],
 			"js": ["utils.js", "vrv.js"],
 			"css": ["vrv.css"]
-		},
-		{
-			"matches": ["https://*.hulu.com/*"],
+		},{
+			"matches": ["*://*.hulu.com/*"],
 			"js": ["utils.js", "hulu.js"],
 			"css": ["hulu.css"]
-		},
-		{
-			"matches": ["https://*.google.com/store/*"],
+		},{
+			"matches": ["*://*.google.com/store/*"],
 			"js": ["utils.js", "google.js"],
 			"css": ["google.css"]
 		}
 	],
+
 	"background": {
 		"scripts": ["background.js"],
 		"persistent": false
 	},
+
 	"options_page": "options/index.html",
+    "options_ui": {
+        "page": "options/index.html",
+        "open_in_tab": true
+    },
+
     "browser_action": {
         "default_icon": {
             "16": "img/16.png",
@@ -82,6 +89,7 @@
         "default_title": "Web to Plex+",
         "default_popup": "popup/index.html"
     },
+
 	"permissions": [
         "tabs",
 		"storage",

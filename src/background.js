@@ -21,9 +21,9 @@ function viewCouchPotato(request, sendResponse) {
 		headers: generateHeaders(request.basicAuth),
 	})
 		.then(response => response.json())
-		.then(response => {
-			let success = response.success;
-			sendResponse({ success, status: success ? response.media.status : null });
+		.then(json => {
+			let success = json.success;
+			sendResponse({ success, status: success ? json.media.status : null });
 		})
 		.catch(error => {
 			sendResponse({ error: String(error), location: 'view CouchPotato' });

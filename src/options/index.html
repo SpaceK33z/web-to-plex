@@ -8,7 +8,7 @@
         }
 
 		body {
-            background: url(../img/noise.png), url(../img/256.png) no-repeat fixed center, #3f4245 !important;
+            background: url(../img/noise.png) fixed, url(../img/256.png) no-repeat fixed center, #3f4245 !important;
 			color: #333 !important;
             font-family: Open Sans Regular, Helvetica Neue, Helvetica, Arial, sans-serif, system;
             font-size: 18px !important;
@@ -168,6 +168,17 @@
 
 <body>
     <h1>Plex Settings</h1>
+    <section>
+        <label>Login using your Plex credentials</label>
+        <input type="text" id="plex_username" style="border-bottom-left-radius: 0 !important; border-bottom-right-radius: 0 !important;" placeholder="Enter your Plex username"/>
+        <input type="text" id="plex_password" style="border-top-left-radius: 0 !important; border-top-right-radius: 0 !important;" placeholder="Enter your Plex password"/>
+		<div>
+            <em>Your Plex username and password are never stored, only your <a href="https://support.plex.tv/hc/en-us/articles/204059436-Finding-your-account-token-X-Plex-Token" title="How to find your token?" target="_blank">Plex Token</a>.</em>
+        </div>
+	</section>
+
+    <h3 style="width: 35%; text-align: center;"><em>&mdash; OR &mdash;</em></h3>
+
 	<section>
 		<label>Login using your Plex token</label>
 		<input type="text" id="plex_token" data-option="plexToken" placeholder="Enter your Plex token"/>
@@ -175,17 +186,6 @@
             How to find your <a href="https://support.plex.tv/hc/en-us/articles/204059436-Finding-your-account-token-X-Plex-Token" title="How to find your token?" target="_blank">Plex Token</a>.
         </div>
     </section>
-
-    <h3><em>OR</em></h3>
-
-    <section>
-        <label>Login using your Plex credentials</label>
-        <input type="text" id="plex_username" style="border-bottom-left-radius: 0 !important; border-bottom-right-radius: 0 !important;" placeholder="Enter your Plex username"/>
-        <input type="text" id="plex_password" style="border-top-left-radius: 0 !important; border-top-right-radius: 0 !important;" placeholder="Enter your Plex password"/>
-		<div>
-            <em>Your username and password are never sotred, only your <a href="https://support.plex.tv/hc/en-us/articles/204059436-Finding-your-account-token-X-Plex-Token" title="How to find your token?" target="_blank">Plex Token</a>.</em>
-        </div>
-	</section>
 	<section>
 		<button type="button" id="plex_test" style="background: #cc7b19 !important;">Test</button>
 		<div id="plex_test_status"></div>
@@ -222,7 +222,7 @@
                 </div>
             </section>
 
-            <h3>Login Settings <em>(optional)</em></h3>
+            <h3>Login Settings <em>(optional, saved)</em></h3>
             <section>
                 <label>username</label>
                 <input type="text" data-option="couchpotatoBasicAuthUsername" placeholder="Enter your CouchPotato username"/>
@@ -277,7 +277,7 @@
                 </div>
             </section>
 
-            <h3>Login Settings <em>(optional)</em></h3>
+            <h3>Login Settings <em>(optional, saved)</em></h3>
             <section>
                 <label>username</label>
                 <input type="text" data-option="radarrBasicAuthUsername" placeholder="Enter your Radarr username"/>
@@ -332,7 +332,7 @@
                 </div>
             </section>
 
-            <h3>Login Settings <em>(optional)</em></h3>
+            <h3>Login Settings <em>(optional, saved)</em></h3>
             <section>
                 <label>username</label>
                 <input type="text" data-option="sonarrBasicAuthUsername" placeholder="Enter your Sonarr username"/>
@@ -356,6 +356,8 @@
             </section>
         </details>
     </article>
+
+    <br>
 
 	<section>
 		<button id="save" style="background: #cc7b19">Save</button>
