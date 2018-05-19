@@ -141,15 +141,16 @@ async function getIDs({ title, year, type, IMDbID, TVDbID, APIType, APIID, meta 
             throw error;
         });
 
-    // console.log({ url, json });
+//    console.log('Search results', { title, year, url, json });
 
     if('results' in json) {
         json = json.results;
     }
 
     if(json instanceof Array) {
-        let crush = (string = "") => string.toLowerCase().replace(/\&/g, 'and').replace(/\W+/g, ''),
-            blank = { release_date: '', year: '' };
+        let b = { release_date: '', year: '' },
+            t = (s = "") => s.toLowerCase(),
+            c = (s = "") => t(s).replace(/\&/g, 'and').replace(/\W+/g, '');
 
         // Find an exact match: Title (Year) | #IMDbID
         for(var index = 0, found = false, $data; index < json.length && !found; index++) {
@@ -157,28 +158,28 @@ async function getIDs({ title, year, type, IMDbID, TVDbID, APIType, APIID, meta 
 
             //api.tvmaze.com/
             if('show' in $data)
-                found = (IMDbID === $data.show.externals.imdb || ($data.show.name === title && year === $data.show.premiered.slice(0, 4)))?
+                found = (IMDbID === $data.show.externals.imdb || (t($data.show.name) === t(title) && year == $data.show.premiered.slice(0, 4)))?
                     $data:
                 found;
             //api.themoviedb.org/ \local
             else if('movie_results' in $data || 'tv_results' in $data)
                 found = (DATA => {
                     for(var i = 0, f = !1, o = DATA.movie_results, l = o.length | 0; i < l; i++)
-                        f = (o.title === title && o.release_date.slice(0, 4) == year);
+                        f = (t(o.title) === t(title) && o.release_date.slice(0, 4) == year);
 
                     for(i = (+f * l), o = (f? o: DATA.tv_results), l = (f? l: o.length | 0); i < l; i++)
-                        f = (o.name === title && o.first_air_date.slice(0, 4) == year);
+                        f = (t(o.name) === t(title) && o.first_air_date.slice(0, 4) == year);
 
                     return f? o: f;
                 })($data);
             //api.themoviedb.org/ \remote
             else if('original_name' in $data && 'release_date' in $data)
-                found = (TVDbID === $data.id || ($data.original_name === title || $data.name === title) && year == ($data || blank).release_date.slice(0, 4))?
+                found = (TVDbID === $data.id || (t($data.original_name) === t(title) || t($data.name) === t(title)) && year == ($data || b).release_date.slice(0, 4))?
                     $data:
                 found;
             // OR theimdbapi.org/
             else
-                found = ($data.title === title && year == ($data.url || $data || blank).release_date.slice(0, 4))?
+                found = (t($data.title) === t(title) && year == ($data.url || $data || b).release_date.slice(0, 4))?
                     $data:
                 found;
         }
@@ -189,28 +190,28 @@ async function getIDs({ title, year, type, IMDbID, TVDbID, APIType, APIID, meta 
 
             //api.tvmaze.com/
             if('show' in $data)
-                found = (crush($data.show.name) == crush(title))?
+                found = (c($data.show.name) == c(title))?
                     $data:
                 found;
             //api.themoviedb.org/ \local
             else if('movie_results' in $data || 'tv_results' in $data)
                 found = (DATA => {
                     for(var i = 0, f = !1, o = DATA.movie_results, l = o.length | 0; i < l; i++)
-                        f = (crush(o.title) == crush(title));
+                        f = (c(o.title) == c(title));
 
                     for(i = (+f * l), o = (f? o: DATA.tv_results), l = (f? l: o.length | 0); i < l; i++)
-                        f = (crush(o.name) == crush(title));
+                        f = (c(o.name) == c(title));
 
                     return f? o: f;
                 })($data);
             //api.themoviedb.org/ \remote
             else if('original_name' in $data)
-                found = (crush($data.original_name) == crush(title) || crush($data.name) == crush(title))?
+                found = (c($data.original_name) == c(title) || c($data.name) == c(title))?
                     $data:
                 found;
             // OR theimdbapi.org/
             else
-                found = (crush($data.title) == crush(title))?
+                found = (c($data.title) == c(title))?
                     $data:
                 found;
         }
@@ -238,6 +239,8 @@ async function getIDs({ title, year, type, IMDbID, TVDbID, APIType, APIID, meta 
             thetvdb: json.id || 0,
             title, year
         };
+
+//    console.log('Best match', { title, year, json });
 
     type = (type === '*')? null: type;
 

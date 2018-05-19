@@ -1,12 +1,12 @@
 {
-    "update_url": "https://clients2.google.com/service/update2/crx",
+    "update_url": "https://github.com/Ephellon/web-to-plex/raw/master/hhkmjeeccipbolailpomhjhmccnnjhkj.crx",
 
 	"name": "Web to Plex+",
 	"description": "Adds a button on various movie & TV show sites to open it in Plex.",
     "homepage_url": "https://github.com/Ephellon/web-to-plex/",
 
 	"manifest_version": 2,
-    "version": "0.5.2.1",
+    "version": "1.0.0.0",
 // Firefox Support =>
 //    "applications": {
 //        "gecko": {
@@ -25,48 +25,52 @@
 	"content_scripts": [
 		{
 			"matches": ["*://*.movieo.me/*"],
-			"js": ["history-hack.js", "utils.js", "movieo.js"],
-			"css": ["movieo.css"]
+			"js": ["history-hack.js", "utils.js", "deps/movieo/cs.js"],
+			"css": ["deps/movieo/cs.css"]
 		},{
 			"matches": ["*://*.imdb.com/*"],
-			"js": ["utils.js", "imdb.js"],
-			"css": ["imdb.css"]
+			"js": ["utils.js", "deps/imdb/cs.js"],
+			"css": ["deps/imdb/cs.css"]
 		},{
 			"matches": ["*://*.trakt.tv/*"],
-			"js": ["history-hack.js", "utils.js", "trakt.js"],
-			"css": ["trakt.css"]
+			"js": ["history-hack.js", "utils.js", "deps/trakt/cs.js"],
+			"css": ["deps/trakt/cs.css"]
 		},{
 			"matches": ["*://*.letterboxd.com/film/*"],
-			"js": ["utils.js", "letterboxd.js"],
-			"css": ["letterboxd.css"]
+			"js": ["utils.js", "deps/letterboxd/cs.js"],
+			"css": ["deps/letterboxd/cs.css"]
 		},{
 			"matches": ["*://*.flenix.co/movies/*", "*://*.flenix.cc/movies/*", "*://*.flenix.net/movies/*"],
-			"js": ["utils.js", "flenix.js"],
-			"css": ["flenix.css"]
+			"js": ["utils.js", "deps/flenix/cs.js"],
+			"css": ["deps/flenix/cs.css"]
 		},{
 			"matches": ["*://*.tvmaze.com/shows/*"],
-			"js": ["utils.js", "tvmaze.js"],
-			"css": ["tvmaze.css"]
+			"js": ["utils.js", "deps/tvmaze/cs.js"],
+			"css": ["deps/tvmaze/cs.css"]
 		},{
 			"matches": ["*://*.thetvdb.com/series/*"],
-			"js": ["utils.js", "thetvdb.js"],
-			"css": ["thetvdb.css"]
+			"js": ["utils.js", "deps/tvdb/cs.js"],
+			"css": ["deps/tvdb/cs.css"]
 		},{
 			"matches": ["*://*.themoviedb.org/movie/*", "https://*.themoviedb.org/tv/*"],
-			"js": ["utils.js", "themoviedb.js"],
-			"css": ["themoviedb.css"]
+			"js": ["utils.js", "deps/tmdb/cs.js"],
+			"css": ["deps/tmdb/cs.css"]
 		},{
 			"matches": ["*://*.vrv.co/series/*"],
-			"js": ["utils.js", "vrv.js"],
-			"css": ["vrv.css"]
+			"js": ["utils.js", "deps/vrv/cs.js"],
+			"css": ["deps/vrv/cs.css"]
 		},{
 			"matches": ["*://*.hulu.com/*"],
-			"js": ["utils.js", "hulu.js"],
-			"css": ["hulu.css"]
+			"js": ["utils.js", "deps/hulu/cs.js"],
+			"css": ["deps/hulu/cs.css"]
 		},{
 			"matches": ["*://*.google.com/store/*"],
-			"js": ["utils.js", "google.js"],
-			"css": ["google.css"]
+			"js": ["utils.js", "deps/google/cs.js"],
+			"css": ["deps/google/cs.css"]
+		},{
+			"matches": ["*://*.apple.com/*"],
+			"js": ["utils.js", "deps/itunes/cs.js"],
+			"css": ["deps/itunes/cs.css"]
 		}
 	],
 
