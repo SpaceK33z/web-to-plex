@@ -195,12 +195,17 @@ function performRadarrTest(oldQualityProfileId, oldStoragePath) {
 	getRadarrStoragePaths(values).then(paths => {
 		paths.forEach(path => {
 			const $opt = document.createElement('option');
-			$opt.value = path.path;
 			$opt.textContent = path.path;
 			$selectRadarrStoragePath.appendChild($opt);
 		});
 		// Because the <select> was reset, the original value is lost.
 		if (oldStoragePath) {
+			// The original value may no longer exist...
+			if (!paths.some(path => path.path === oldStoragePath)) {
+				const $opt = document.createElement('option');
+				$opt.textContent = oldStoragePath;
+				$selectRadarrStoragePath.appendChild($opt);
+			}
 			$selectRadarrStoragePath.value = oldStoragePath;
 		}
 	});
