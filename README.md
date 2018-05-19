@@ -38,11 +38,11 @@ Optionally, you can configure [Sonarr](https://sonarr.tv/) (TV Shows) and/or [Co
 - [Rotten Tomatoes](https://www.rottentomatoes.com/)
 - [Metacritic](http://www.metacritic.com/)
 
-## Installing WP+
+## Installing Web to Plex+ (0.5.1.0)
 
-- **Download the [CRX](https://github.com/Ephellon/web-to-plex/raw/master/fmogifaocbjoobjbgmfbnhekmiahjgie.crx)**
+- **Download the [CRX](https://github.com/Ephellon/web-to-plex/raw/master/hhkmjeeccipbolailpomhjhmccnnjhkj.crx)**
 
-- **Download the [ZIP](https://github.com/Ephellon/web-to-plex/raw/master/fmogifaocbjoobjbgmfbnhekmiahjgie.zip)**
+- **Download the [ZIP](https://github.com/Ephellon/web-to-plex/raw/master/hhkmjeeccipbolailpomhjhmccnnjhkj.zip)**
 
 - **Compile the [SRC](https://github.com/Ephellon/web-to-plex/tree/master/src)**
 
