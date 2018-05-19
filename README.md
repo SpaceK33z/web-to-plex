@@ -30,7 +30,13 @@ Optionally, you can configure [Sonarr](https://sonarr.tv/) (TV Shows) and/or [Co
 
 **En Progress sites (may add support):**
 
-- Nothing here...
+- [iTunes](https://itunes.apple.com/)
+- [Fandango](https://www.fandango.com/)
+- [Amazon](https://www.amazon.com/)
+- [Vudu](https://www.vudu.com/)
+- [Verizon](https://www.verizon.com/)
+- [Rotten Tomatoes](https://www.rottentomatoes.com/)
+- [Metacritic](http://www.metacritic.com/)
 
 ## Installing WP+
 
