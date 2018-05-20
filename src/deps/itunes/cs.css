@@ -1,0 +1,51 @@
+.web-to-plex-button {
+	background: linear-gradient(0deg, #929292, #727272, #929292);
+	color: #fff!important;
+    margin: 12px 0;
+    display: block!important;
+    padding: 0 12px;
+    text-decoration: none!important;
+    outline: 0;
+    cursor: pointer;
+    width: max-content;
+    height: 16px;
+    margin: 12px 0;
+    border: 1px solid transparent;
+    border-radius: 1000px;
+    box-shadow: 0 3px 3px #222;
+}
+
+.web-to-plex-button--downloader {
+	background: linear-gradient(0deg, #f67e56, #f45a26, #f67e56);
+}
+
+.web-to-plex-button--found {
+	background: linear-gradient(0deg, #f9be03, #e5a00d, #f9be03);
+}
+
+.list_item .web-to-plex-button {
+	font-size: 10px;
+	padding: 4px 6px;
+	margin-top: 0;
+}
+
+.web-to-plex-notification {
+	cursor: pointer;
+	display: block;
+	position: fixed;
+	top: 80px;
+	left: 50%;
+	margin-left: -175px;
+	width: 350px;
+	background: #e5a00d;
+	color: #fff;
+	font-size: 13px;
+	padding: 10px;
+	border-radius: 4px;
+	z-index: 999000;
+	font-family: Verdana, Arial, sans-serif;
+}
+
+.web-to-plex-warning {
+	background: #fd6a00;
+}
