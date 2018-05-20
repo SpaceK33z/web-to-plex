@@ -4,7 +4,7 @@
 
 This browser extension searches your [Plex Media Server (PMS)](https://www.plex.tv/downloads/) for matching media on sites like [IMDb](https://imdb.com), letting you immediately open the movie or TV show in Plex Web if it is available. If the item isn't found on your PMS, then a download button is added instead.
 
-Optionally, you can configure [Sonarr](https://sonarr.tv/) (TV Shows) and/or [CouchPotato](https://couchpota.to/)/[Radarr](https://radarr.video/) (Movies) in the extension's options. After that, you can immediately add a TV show or movie to CouchPotato/Sonarr/Radarr with one click, right from your favorite site.
+Optionally, you can configure [Sonarr](https://sonarr.tv/) (TV Shows), [Radarr](https://radarr.video/) (Movies), and/or [CouchPotato](https://couchpota.to/) (Both) in the extension's options. After that, you can immediately add a TV show or movie to CouchPotato/Sonarr/Radarr with one click, right from your favorite site.
 
 ![Examples](example.png)
 
