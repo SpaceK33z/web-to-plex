@@ -70,7 +70,7 @@ async function initPlexThingy(type) {
         $year = document.querySelector('.mobile-title .year');
 
 	if (!$title || !$year)
-		return modifyPlexButton($button, 'error', 'Could not extract ' + (!$title? 'title': 'year'));
+		return modifyPlexButton($button, 'error',  `Could not extract ${ !$title? 'title': 'year' } from Trakt`);
 
 	let title = $title.textContent.replace(/(.+)(\d{4}).*?$/, '$1').trim(),
         year = (RegExp.$2 || $year.textContent).trim(),

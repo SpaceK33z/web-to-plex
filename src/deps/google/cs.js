@@ -77,7 +77,7 @@ async function initPlexThingy(type) {
         $year = document.querySelector(`h1 ~ div span:${ type === 'movie'? 'first': 'last' }-of-type`);
 
 	if (!$title || !$year)
-		return modifyPlexButton($button, 'error', 'Could not extract ' + (!$title? 'title': 'year'));
+		return modifyPlexButton($button, 'error', `Could not extract ${ !$title? 'title': 'year' } from Google`);
 
 	let title = $title.textContent.replace(/\(\s*(\d{4})\s*\).*?$/, '').trim(),
         year = (RegExp.$1 || $year.textContent).replace(/^.*?(\d+)/, '$1').trim(),

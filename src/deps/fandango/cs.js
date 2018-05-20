@@ -18,7 +18,6 @@ function renderPlexButton($parent) {
     el.textContent = 'Web to Plex+';
     el.title = 'Loading...';
 	el.classList.add('web-to-plex-button', 'subnav__link');
-    el.style.display = 'none';
 
     pa.appendChild(el);
 	$parent.insertBefore(pa, $parent.lastElementChild);

@@ -26,7 +26,7 @@ async function initPlexThingy(type) {
 		return console.log('failed'), modifyPlexButton(
 			$button,
 			'error',
-			'Could not extract title or year from Metacritic'
+			 `Could not extract ${ !$title? 'title': 'year' } from Metacritic`
 		);
 
 	let title = $title.textContent.trim(),
@@ -53,7 +53,6 @@ function renderPlexButton() {
 
     el.classList.add('web-to-plex-button');
     el.title = 'Web to Plex+';
-
     el.appendChild(ch);
 	$actions.appendChild(el);
 

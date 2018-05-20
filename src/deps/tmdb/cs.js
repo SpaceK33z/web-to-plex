@@ -26,7 +26,7 @@ async function initPlexThingy(type) {
 		return modifyPlexButton(
 			$button,
 			'error',
-			'Could not extract title or year from Movieo'
+			 `Could not extract ${ !$title? 'title': 'year' } from TheMovieDb`
 		);
 
 	let title = $title.textContent.trim(),

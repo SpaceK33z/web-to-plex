@@ -6,7 +6,7 @@
     "homepage_url": "https://github.com/Ephellon/web-to-plex/",
 
 	"manifest_version": 2,
-    "version": "1.0.1.0",
+    "version": "1.0.2.0",
 // Firefox Support =>
 //    "applications": {
 //        "gecko": {
@@ -79,6 +79,18 @@
 			"matches": ["*://*.fandango.com/*"],
 			"js": ["utils.js", "deps/fandango/cs.js"],
 			"css": ["deps/fandango/cs.css"]
+		},{
+			"matches": ["*://*.amazon.com/*"],
+			"js": ["utils.js", "deps/amazon/cs.js"],
+			"css": ["deps/amazon/cs.css"]
+		},{
+			"matches": ["*://*.vudu.com/*"],
+			"js": ["utils.js", "deps/vudu/cs.js"],
+			"css": ["deps/vudu/cs.css"]
+		},{
+			"matches": ["*://*.verizon.com/*"],
+			"js": ["utils.js", "deps/verizon/cs.js"],
+			"css": ["deps/verizon/cs.css"]
 		}
 	],
 

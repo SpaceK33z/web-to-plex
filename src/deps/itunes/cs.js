@@ -19,7 +19,6 @@ function renderPlexButton($parent) {
     el.textContent = 'Web to Plex+';
     el.title = 'Loading...';
 	el.classList.add('web-to-plex-button');
-    el.style.display = 'none';
 
 	$parent.insertBefore(el, $parent.querySelector('.view-in-itunes ~ *'));
 	return el;

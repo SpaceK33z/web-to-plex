@@ -47,7 +47,7 @@ function initPlexThingy() {
 		return modifyPlexButton(
 			$button,
 			'error',
-			'Could not extract title or year from Movieo'
+			 `Could not extract ${ !$title? 'title': 'year' } from Movieo`
 		);
 
 	let title = $title.dataset.title.trim(),
@@ -78,6 +78,7 @@ function renderPlexButton() {
     el.textContent = 'Web to Plex+';
     el.title = 'Loading...';
 	el.classList.add('button', 'comments-link', 'web-to-plex-button');
+
 	$actions.appendChild(el);
 	return el;
 }

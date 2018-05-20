@@ -8,6 +8,24 @@ function wait(check, then) {
     }
 }
 
+let date = new Date();
+
+const YEAR = date.getFullYear(),
+      MONTH = date.getMonth() + 1,
+      DATE = date.getDate();
+
+function watchlocationchange() {
+    watchlocationchange.pathname = watchlocationchange.pathname || location.pathname;
+
+    if(watchlocationchange.pathname != location.pathname) {
+        watchlocationchange.pathname = location.pathname;
+        if(window.onlocationchange)
+            return window.onlocationchange(new Event('locationchange', { bubbles: true }));
+    }
+}
+
+setInterval(watchlocationchange, 1000);
+
 function $getOptions() {
     const storage = chrome.storage.sync || chrome.storage.local;
 
@@ -114,10 +132,11 @@ async function getIDs({ title, year, type, IMDbID, TVDbID, APIType, APIID, meta 
 
     type = type || '*';
     meta = { ...meta, mode: 'no-cors' };
+    apit = /^(tv|show|series)$/i.test(apit)? 'tv': apit;
 
     let url =
         (type === 'imdb' || (type === '*' && !id && title && year) || (apid || APIType))?
-            (apid && apit === 'tv')?
+            (apid && apit)?
                 `https://api.themoviedb.org/3/${ apit }/${ apid }?api_key=${ api.tvdb }`:
             `https://api.themoviedb.org/3/search/${ apit }?api_key=${ api.tvdb }&query=${ encodeURI(title) }&year=${ year }`:
         (type === 'thetvdb' || apid || (type === '*' && (id || title)))?
@@ -218,6 +237,9 @@ async function getIDs({ title, year, type, IMDbID, TVDbID, APIType, APIID, meta 
 
         json = found;
     }
+
+    if(!json)
+        json = {};
 
     year = year || (json.first_air_date || '').slice(0, 4);
 

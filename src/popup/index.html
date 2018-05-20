@@ -126,6 +126,30 @@
             box-shadow: 0 10px 128px inset #EEEEEE;
         }
 
+        #itunes:hover {
+            box-shadow: 0 10px 128px inset #EEEEEE;
+        }
+
+        #metacritic:hover {
+            box-shadow: 0 10px 128px inset #001B36;
+        }
+
+        #fandango:hover {
+            box-shadow: 0 10px 128px inset #FF7300;
+        }
+
+        #amazon:hover {
+            box-shadow: 0 10px 128px inset #FF9900;
+        }
+
+        #vudu:hover {
+            box-shadow: 0 10px 128px inset #027FC5;
+        }
+
+        #verizon:hover {
+            box-shadow: 0 10px 128px inset #E10000;
+        }
+
         td[save-file]:after, td[cost-cash]:after, td[cost-more-cash]:after, td[cost-most-cash]:after {
             content: "____";
             color: transparent;
@@ -160,12 +184,13 @@
         }
 
         td[disabled], td[disabled]:hover {
-            box-shadow: 0 10px 128px inset #000 !important;
+/*            box-shadow: 0 10px 128px inset #000 !important;*/
             opacity: 0.5 !important;
         }
 
         td[disabled] label:after {
-            content: " (Soon...)" !important;
+            content: " \23f3" !important;
+            float: right;
         }
 
         body::-webkit-scrollbar {
@@ -194,52 +219,52 @@
                     <label>Netflix</label>
                 </a>
             </td>
+            <td id="verizon">
+                <a href="https://tv.verizon.com/" target="_blank">
+                    <img alt="Verizon" src="../img/verizon.png" />
+                    <label>Verizon</label>
+                </a>
+            </td>
             <td id="trakt">
                 <a href="https://trakt.tv/" target="_blank">
                     <img alt="Trakt" src="../img/trakt.png" />
                     <label>Trakt</label>
                 </a>
             </td>
+        </tr>
+
+        <tr>
             <td id="flenix" save-file title="Uses file downloads">
                 <a href="https://flenix.co/" target="_blank">
                     <img alt="Flenix" src="../img/flenix.png" />
                     <label>Flenix</label>
                 </a>
             </td>
-        </tr>
-
-        <tr>
+            <td id="fandango">
+                <a href="https://www.fandango.com/" target="_blank">
+                    <img alt="fandango" src="../img/fandango.png" />
+                    <label>fandango</label>
+                </a>
+            </td>
             <td id="imdb">
                 <a href="https://imdb.com/" target="_blank">
                     <img alt="IMDb" src="../img/imdb.png" />
                     <label>IMDb</label>
                 </a>
             </td>
+        </tr>
+
+        <tr>
+            <td id="amazon">
+                <a href="https://amazon.com/" target="_blank">
+                    <img alt="Amazon" src="../img/amazon.png" />
+                    <label>Amazon</label>
+                </a>
+            </td>
             <td id="vrv">
                 <a href="https://vrv.co/" target="_blank">
                     <img alt="VRV" src="../img/vrv.png" />
                     <label>VRV</label>
-                </a>
-            </td>
-            <td id="hulu" cost-cash title="At least $7.99/month">
-                <a href="https://hulu.com/" target="_blank">
-                    <img alt="Hulu" src="../img/hulu.png" />
-                    <label>Hulu</label>
-                </a>
-            </td>
-        </tr>
-
-        <tr>
-            <td id="letter">
-                <a href="https://letterboxd.com/" target="_blank">
-                    <img alt="Letterboxd" src="../img/letterboxd.png" />
-                    <label>Letterboxd</label>
-                </a>
-            </td>
-            <td id="tvdb">
-                <a href="https://thetvdb.com/" target="_blank">
-                    <img alt="The TVDb" src="../img/tvdb.png" />
-                    <label>The TVDb</label>
                 </a>
             </td>
             <td id="tmdb">
@@ -251,12 +276,48 @@
         </tr>
 
         <tr>
+            <td id="letter">
+                <a href="https://letterboxd.com/" target="_blank">
+                    <img alt="Letterboxd" src="../img/letterboxd.png" />
+                    <label>Letterboxd</label>
+                </a>
+            </td>
+            <td id="hulu" cost-cash title="At least $7.99/month">
+                <a href="https://hulu.com/" target="_blank">
+                    <img alt="Hulu" src="../img/hulu.png" />
+                    <label>Hulu</label>
+                </a>
+            </td>
+            <td id="tvdb">
+                <a href="https://thetvdb.com/" target="_blank">
+                    <img alt="The TVDb" src="../img/tvdb.png" />
+                    <label>The TVDb</label>
+                </a>
+            </td>
+        </tr>
+
+        <tr>
+            <td id="metacritic">
+                <a href="https://metacritic.com/" target="_blank">
+                    <img alt="iTunes" src="../img/metacritic.png" />
+                    <label>metacritic</label>
+                </a>
+            </td>
+            <td id="vudu">
+                <a href="https://vudu.com/" target="_blank">
+                    <img alt="Vudu" src="../img/vudu.png" />
+                    <label>Vudu</label>
+                </a>
+            </td>
             <td id="movieo">
                 <a href="https://movieo.me/" target="_blank">
                     <img alt="Movieo" src="../img/movieo.png" />
                     <label>Movieo</label>
                 </a>
             </td>
+        </tr>
+
+        <tr>
             <td id="tv-maze">
                 <a href="https://tvmaze.com/" target="_blank">
                     <img alt="TV Maze" src="../img/tv-maze.png" />
@@ -267,6 +328,12 @@
                 <a href="https://play.google.com/store/movies" target="_blank">
                     <img alt="Google" src="../img/google.png" />
                     <label>Google</label>
+                </a>
+            </td>
+            <td id="itunes">
+                <a href="https://itunes.apple.com/" target="_blank">
+                    <img alt="iTunes" src="../img/itunes.png" />
+                    <label>iTunes</label>
                 </a>
             </td>
         </tr>

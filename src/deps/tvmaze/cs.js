@@ -36,7 +36,7 @@ async function initPlexThingy() {
 		return modifyPlexButton(
 			$button,
 			'error',
-			'Could not extract title or year from TV Maze'
+			 `Could not extract ${ !$title? 'title': 'year' } from TV Maze`
 		),
           null;
 

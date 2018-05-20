@@ -37,7 +37,7 @@ function renderPlexButton($parent) {
     el.textContent = 'Web to Plex+';
     el.title = 'Loading...';
 	el.classList.add('web-to-plex-button');
-	el.style.display = 'none';
+
 	$parent.appendChild(el);
 	return el;
 }
@@ -70,7 +70,7 @@ async function initPlexShow() {
         dateMatch = date.match(/Series\s+(\d{4})/);
 
 	if (!$title || !dateMatch)
-		return modifyPlexButton($button, 'error', `Could not extract ${ !$title? 'title': 'year' }`);
+		return modifyPlexButton($button, 'error', `Could not extract ${ !$title? 'title': 'year' } from IMDb`);
 
 	let title = $title.textContent.trim(),
         year = dateMatch[1],
