@@ -8,32 +8,34 @@ Optionally, you can configure [Sonarr](https://sonarr.tv/) (TV Shows), [Radarr](
 
 ![Examples](example.png)
 
-**Supported sites:**
+**Supported sites: *Site (button location)***
 
-- [Movieo](http://movieo.me/)
-- [IMDb](http://imdb.com/)
-- [Trakt.tv](https://trakt.tv/)
-- [Letterboxd](https://letterboxd.com/)
-- [Flenix](https://flenix.co/)*
-- [TV Maze](http://www.tvmaze.com/)
-- [The TVDb](https://www.thetvdb.com/)
-- [The MovieDb](https://www.themoviedb.org/)
-- [VRV](https://vrv.co/)
-- [Hulu](https://hulu.com/)
-- [Google Play Store](https://play.google.com/store/movies/)
-- [iTunes](https://itunes.apple.com/)
-- [Metacritic](http://www.metacritic.com/)
-- [Fandango](https://www.fandango.com/)
-- [Amazon](https://www.amazon.com/)
-- [Vudu](https://www.vudu.com/)
-- [Verizon](https://www.tv.verizon.com/)
+- [Movieo](http://movieo.me/) (top of page, by ratings)
+- [IMDb](http://imdb.com/) (bottom right of poster)
+- [Trakt.tv](https://trakt.tv/) (below poster, with other links)
+- [Letterboxd](https://letterboxd.com/) ("watch" section under poster, last item)
+- [Flenix](https://flenix.co/)<sup>1</sup> (several locations: 1 in header, 1 above video, 1 below)
+- [TV Maze](http://www.tvmaze.com/) (below title on far right, by "Gallery")
+- [The TVDb](https://www.thetvdb.com/) (top of info. list, under languages)
+- [The MovieDb](https://www.themoviedb.org/) (far right of icons, before "play trailer")
+- [VRV](https://vrv.co/)<sup>2</sup> (below title, right of "watchlist" button)
+- [Hulu](https://hulu.com/)<sup>2</sup><sup>3</sup> (below video, far right of icons)
+- [Google Play Store](https://play.google.com/store/movies/) (right of poster, with purchasing options)
+- [iTunes](https://itunes.apple.com/)<sup>3</sup> (below "watch on iTunes" button)
+- [Metacritic](http://www.metacritic.com/) (last/rightmost social icon)
+- [Fandango](https://www.fandango.com/) (between title and video, left of "more" menu)
+- [Amazon](https://www.amazon.com/) (with purchasing and watchlist options, far right)
+- [Vudu](https://www.vudu.com/) (right of poster, above "synopsis")
+- [Verizon](https://www.tv.verizon.com/) (right of "watch" button, left of poster)
 	
-	*Note: Sites with `*` after their name also support the `Right click | Save as...` feature (file download).*
+	*Note: Sites with `1` after their name also support the `Right click | Save as...` feature (file download).*
+	*Note: Sites with `2` after their name have a loading issue, simply refresh the page if the button doesn't appear.*
+	*Note: Sites with `3` after their name don not allow media browsing, or require a subscription beforehand.*
 
 **In Progress sites (adding support):**
 
 - [CouchPotato](http://couchpotato.life/)
-- [Netflix](https://netflix.com/)
+- [Netflix](https://netflix.com/)<sup>3</sup>
 
 **En Progress sites (may add support):**
 
