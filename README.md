@@ -29,6 +29,7 @@ Optionally, you can configure [Sonarr](https://sonarr.tv/) (TV Shows), [Radarr](
 
 **In Progress sites (adding support):**
 
+- [CouchPotato](http://couchpotato.life/)
 - [Netflix](https://netflix.com/)
 
 **En Progress sites (may add support):**
