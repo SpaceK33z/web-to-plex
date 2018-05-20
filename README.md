@@ -24,6 +24,9 @@ Optionally, you can configure [Sonarr](https://sonarr.tv/) (TV Shows), [Radarr](
 - [iTunes](https://itunes.apple.com/)
 - [Metacritic](http://www.metacritic.com/)
 - [Fandango](https://www.fandango.com/)
+- [Amazon](https://www.amazon.com/)
+- [Vudu](https://www.vudu.com/)
+- [Verizon](https://www.tv.verizon.com/)
 	
 	*Note: Sites with `*` after their name also support the `Right click | Save as...` feature (file download).*
 
@@ -34,9 +37,6 @@ Optionally, you can configure [Sonarr](https://sonarr.tv/) (TV Shows), [Radarr](
 
 **En Progress sites (may add support):**
 
-- [Amazon](https://www.amazon.com/)
-- [Vudu](https://www.vudu.com/)
-- [Verizon](https://www.verizon.com/)
 - [Rotten Tomatoes](https://www.rottentomatoes.com/)
 
 ## Installing Web to Plex+ (0.5.1.0)
