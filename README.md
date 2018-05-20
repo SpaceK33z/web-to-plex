@@ -8,7 +8,7 @@ Optionally, you can configure [Sonarr](https://sonarr.tv/) (TV Shows), [Radarr](
 
 ![Examples](example.png)
 
-**Supported sites: *Site (button location)***
+## Supported sites: *Site (button location)*
 
 - [Movieo](http://movieo.me/) (top of page, by ratings)
 - [IMDb](http://imdb.com/) (bottom right of poster)
@@ -34,12 +34,12 @@ Optionally, you can configure [Sonarr](https://sonarr.tv/) (TV Shows), [Radarr](
 - `2` *This site has a loading issue, simply refresh the page if the button doesn't appear.*
 - `3` *This site doesn't allow media browsing, or requires a subscription beforehand.*
 
-**In Progress sites (adding support):**
+## In Progress sites (adding support):
 
 - [CouchPotato](http://couchpotato.life/)
 - [Netflix](https://netflix.com/)<sup>3</sup>
 
-**En Progress sites (may add support):**
+## En Progress sites (may add support):
 
 - [Rotten Tomatoes](https://www.rottentomatoes.com/)
 
