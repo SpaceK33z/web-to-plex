@@ -19,7 +19,7 @@ Optionally, you can configure [Sonarr](https://sonarr.tv/) (TV Shows), [Radarr](
 - [The TVDb](https://www.thetvdb.com/) (top of info. list, under languages)
 - [The MovieDb](https://www.themoviedb.org/) (far right of icons, before "play trailer")
 - [VRV](https://vrv.co/)<sup>2</sup> (below title, right of "watchlist" button)
-- [Hulu](https://hulu.com/)<sup>2</sup><sup>3</sup> (below video, far right of icons)
+- [Hulu](https://hulu.com/)<sup>2</sup> <sup>3</sup> (below video, far right of icons)
 - [Google Play Store](https://play.google.com/store/movies/) (right of poster, with purchasing options)
 - [iTunes](https://itunes.apple.com/)<sup>3</sup> (below "watch on iTunes" button)
 - [Metacritic](http://www.metacritic.com/) (last/rightmost social icon)
@@ -27,10 +27,12 @@ Optionally, you can configure [Sonarr](https://sonarr.tv/) (TV Shows), [Radarr](
 - [Amazon](https://www.amazon.com/) (with purchasing and watchlist options, far right)
 - [Vudu](https://www.vudu.com/) (right of poster, above "synopsis")
 - [Verizon](https://www.tv.verizon.com/) (right of "watch" button, left of poster)
-	
-	*Note: Sites with `1` after their name also support the `Right click | Save as...` feature (file download).*
-	*Note: Sites with `2` after their name have a loading issue, simply refresh the page if the button doesn't appear.*
-	*Note: Sites with `3` after their name don not allow media browsing, or require a subscription beforehand.*
+
+*Notes*
+
+- `1` *This site uses the `Right click | Save as...` feature (file download).*
+- `2` *This site has a loading issue, simply refresh the page if the button doesn't appear.*
+- `3` *This site doesn't allow media browsing, or requires a subscription beforehand.*
 
 **In Progress sites (adding support):**
 
