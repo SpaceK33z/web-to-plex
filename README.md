@@ -10,17 +10,20 @@ Optionally, you can configure [Sonarr](https://sonarr.tv/) (TV Shows) and/or [Co
 
 **Supported sites:**
 
- - [Movieo](http://movieo.me/)
- - [IMDb](http://imdb.com/)
- - [Trakt.tv](https://trakt.tv/)
- - [Letterboxd](https://letterboxd.com/)
- - [Flenix](https://flenix.co/)*
- - [TV Maze](http://www.tvmaze.com/)
- - [The TVDb](https://www.thetvdb.com/)
- - [The MovieDb](https://www.themoviedb.org/)
- - [VRV](https://vrv.co/)
- - [Hulu](https://hulu.com/)
- - [Google Play Store](https://play.google.com/store/movies/)
+- [Movieo](http://movieo.me/)
+- [IMDb](http://imdb.com/)
+- [Trakt.tv](https://trakt.tv/)
+- [Letterboxd](https://letterboxd.com/)
+- [Flenix](https://flenix.co/)*
+- [TV Maze](http://www.tvmaze.com/)
+- [The TVDb](https://www.thetvdb.com/)
+- [The MovieDb](https://www.themoviedb.org/)
+- [VRV](https://vrv.co/)
+- [Hulu](https://hulu.com/)
+- [Google Play Store](https://play.google.com/store/movies/)
+- [iTunes](https://itunes.apple.com/)
+- [Metacritic](http://www.metacritic.com/)
+- [Fandango](https://www.fandango.com/)
 	
 	*Note: Sites with `*` after their name also support the `Right click | Save as...` feature (file download).*
 
@@ -30,13 +33,10 @@ Optionally, you can configure [Sonarr](https://sonarr.tv/) (TV Shows) and/or [Co
 
 **En Progress sites (may add support):**
 
-- [iTunes](https://itunes.apple.com/)
-- [Fandango](https://www.fandango.com/)
 - [Amazon](https://www.amazon.com/)
 - [Vudu](https://www.vudu.com/)
 - [Verizon](https://www.verizon.com/)
 - [Rotten Tomatoes](https://www.rottentomatoes.com/)
-- [Metacritic](http://www.metacritic.com/)
 
 ## Installing Web to Plex+ (0.5.1.0)
 
