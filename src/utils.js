@@ -108,7 +108,7 @@ async function getIDs({ title, year, type, IMDbID, TVDbID, APIType, APIID, meta 
         api = {
             tvdb: 'bcb95f026f9a01ffa707fcff71900e94',
         },
-        apit = APIType || 'movies',
+        apit = APIType || 'movie',
         apid = APIID || null,
         id = IMDbID || null;
 
