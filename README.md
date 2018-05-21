@@ -33,6 +33,7 @@ Optionally, you can configure [Sonarr](https://sonarr.tv/) (TV Shows), [Radarr](
 - `1` *This site uses the `Right click | Save as...` feature (file download).*
 - `2` *This site has a loading issue, simply refresh the page if the button doesn't appear.*
 - `3` *This site doesn't allow media browsing, or requires a subscription beforehand.*
+- `4` *This site is network intensive (loads slowly). Be patient.*
 
 ## In Progress sites (adding support):
 
