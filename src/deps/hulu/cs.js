@@ -52,11 +52,17 @@ async function initPlexThingy(type) {
             .replace(/-+/g, ' ');
     }
 
-    let Db = await getIDs({ title, year, APIType: type }),
-        IMDbID = Db.imdb,
-        TVDbID = Db.thetvdb;
+    title = title.toCaps();
 
-	findPlexMedia({ type, title, year, button: $button, IMDbID, TVDbID });
+    let Db = await getIDs({ title, year, type }),
+        IMDbID = Db.imdb,
+        TMDbID = Db.tmdb,
+        TVDbID = Db.tvdb;
+
+    title = Db.title;
+    year = Db.year;
+
+	findPlexMedia({ type, title, year, button: $button, IMDbID, TMDbID, TVDbID });
 }
 
 if (isMovie() || isShow()) {

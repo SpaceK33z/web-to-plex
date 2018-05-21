@@ -31,15 +31,19 @@ async function initPlexThingy(type) {
 	if (!$button)
 		return;
 
-	let meta = document.querySelector('h1[itemprop="name"]'),
+	let meta = document.querySelector('h1[itemprop="name"], h1'),
         title = meta.textContent.replace(/\s*\((\d+)\)\s*/, '').trim(),
         year = +RegExp.$1;
 
-    let Db = await getIDs({ title, year, APIType: type }),
+    let Db = await getIDs({ title, year, type }),
         IMDbID = Db.imdb,
-        TVDbID = Db.thetvdb;
+        TMDbID = Db.tmdb,
+        TVDbID = Db.tvdb;
 
-	findPlexMedia({ type, title, year, button: $button, IMDbID, TVDbID });
+    title = Db.title;
+    year = Db.year;
+
+	findPlexMedia({ type, title, year, button: $button, IMDbID, TMDbID, TVDbID });
 }
 
 if (isMovie() || isShow()) {

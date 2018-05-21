@@ -81,11 +81,15 @@ async function initPlexThingy(type) {
 
 	let title = $title.textContent.replace(/\(\s*(\d{4})\s*\).*?$/, '').trim(),
         year = (RegExp.$1 || $year.textContent).replace(/^.*?(\d+)/, '$1').trim(),
-        Db = await getIDs({ title, year, APIType: type }),
+        Db = await getIDs({ title, year, type }),
         IMDbID = Db.imdb,
-        TVDbID = Db.thetvdb;
+        TMDbID = Db.tmdb,
+        TVDbID = Db.tvdb;
 
-	findPlexMedia({ type, title, year, button: $button, IMDbID, TVDbID });
+    title = Db.title;
+    year = Db.year;
+
+	findPlexMedia({ type, title, year, button: $button, IMDbID, TMDbID, TVDbID });
 }
 
 parseOptions().then(() => {

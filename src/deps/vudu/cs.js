@@ -26,22 +26,18 @@ function renderPlexButton($parent) {
 	if (existingButton)
 		existingButton.remove();
 
-	let pa = document.createElement('div'),
-        el = document.createElement('a');
-
-    pa.classList.add('web-to-plex-wrapper', 'cols-xs-4', 'nr-pr-0', 'nr-pl-15');
+	let el = document.createElement('a');
 
     el.textContent = 'Web to Plex+';
     el.title = 'Loading...';
 	el.classList.add('web-to-plex-button');
 
-    pa.appendChild(el);
-	$parent.appendChild(pa);
+	$parent.appendChild(el);
 	return el;
 }
 
 async function initPlexThingy(type) {
-	let $parent = document.querySelector('.container .row:nth-child(3) .row'),
+	let $parent = document.querySelector('.container .row:nth-child(3) .row > *, .container .row:nth-child(3) ~ * .row > *'),
         $button = renderPlexButton($parent);
 
 	if (!$button)
@@ -50,25 +46,28 @@ async function initPlexThingy(type) {
 	let $title = document.querySelector('.head-big'),
         $date = document.querySelector('.container .row:first-child .row ~ * > .row span');
 
-	if (!$title || !$date)
+	if (!$title)
 		return modifyPlexButton(
 			$button,
 			'error',
-			 `Could not extract ${ !$title? 'title': 'year' } from Vudu`
+			 `Could not extract title from Vudu`
 		);
 
-	let title = $title.textContent.trim(),
-        year = $date.textContent.split(/\s*\|\s*/);
+	let title = $title.textContent.replace(/\((\d{4})\)/, '').trim(),
+        year = $date? $date.textContent.split(/\s*\|\s*/): RegExp.$1;
 
     year = +year[year.length - 1].slice(0, 4);
     year |= 0;
-    year = year || YEAR;
 
-    let Db = await getIDs({ title, year, APIType: type }),
+    let Db = await getIDs({ title, year, type }),
         IMDbID = Db.imdb,
-        TVDbID = Db.thetvdb;
+        TMDbID = Db.tmdb,
+        TVDbID = Db.tvdb;
 
-	findPlexMedia({ type, title, year, button: $button, IMDbID, TVDbID });
+    title = Db.title;
+    year = Db.year;
+
+	findPlexMedia({ type, title, year, button: $button, IMDbID, TMDbID, TVDbID });
 }
 
 if (isMovie() || isShow()) {

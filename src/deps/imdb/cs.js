@@ -74,12 +74,13 @@ async function initPlexShow() {
 
 	let title = $title.textContent.trim(),
         year = dateMatch[1],
-        Db = await getIDs({ title, year, IMDbID }),
-        TVDbID = Db.thetvdb;
+        Db = await getIDs({ title, year, type: 'show', IMDbID }),
+        TMDbID = Db.tmdb,
+        TVDbID = Db.tvdb;
 
     IMDbID = IMDbID || Db.imdb;
 
-	findPlexMedia({ type: 'show', title, year, button: $button, IMDbID, TVDbID });
+	findPlexMedia({ type: 'show', title, year, button: $button, IMDbID, TMDbID, TVDbID });
 }
 
 function addInListItem(el) {

@@ -1,7 +1,7 @@
 /* global findPlexMedia, parseOptions, modifyPlexButton */
 function isShowPage() {
 	// An example movie page: /series/GR75MN7ZY/Deep-Space-69-Unrated
-	return window.location.pathname.startsWith('/series/');
+	return /^\/(?:series|watch)\//.test(window.location.pathname);
 }
 
 function isShowPageReady() {
@@ -21,7 +21,7 @@ function init() {
 parseOptions().then(() => {
 	window.addEventListener('popstate', init);
 	window.addEventListener('pushstate-changed', init);
-	init();
+	(window.onlocationchange = init)();
 });
 
 async function initPlexThingy() {
@@ -29,25 +29,28 @@ async function initPlexThingy() {
 	if (!$button)
 		return;
 
-	let $title = document.querySelector('.title'),
-        year = 0;
+	let $title = document.querySelector('.series, .title'),
+        $year = document.querySelector('.additional-information-item');
 
 	if (!$title)
 		return modifyPlexButton(
 			$button,
 			'error',
-			 `Could not extract ${ !$title? 'title': 'year' } from VRV`
+			 `Could not extract title from VRV`
 		),
           null;
 
 	let title = $title.innerText.replace(/(unrated|mature|tv-?\d{1,2})\s*$/i, '').trim(),
+        year = $year? $year.textContent.replace(/.+(\d{4}).*/, '$1').trim(): 0,
 	    Db = await getIDs({ title, year, APIType: 'tv' }),
         IMDbID = Db.imdb,
-        TVDbID = Db.thetvdb;
+        TMDbID = Db.tmdb,
+        TVDbID = Db.tvdb;
 
+    title = Db.title;
     year = Db.year;
 
-	findPlexMedia({ title, year, button: $button, type: 'show', IMDbID, TVDbID });
+	findPlexMedia({ title, year, button: $button, type: 'show', IMDbID, TMDbID, TVDbID });
 }
 
 function renderPlexButton() {

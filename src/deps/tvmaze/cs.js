@@ -42,11 +42,15 @@ async function initPlexThingy() {
 
 	let title = $title.innerText.trim(),
 	    year = $date.innerText.replace(/\((\d+).+\)/, '$1'),
-        Db = await getIDs({ APIID: $apid }),
+        Db = await getIDs({ title, year, type: 'tv', APIID: $apid }),
         IMDbID = Db.imdb,
-        TVDbID = Db.thetvdb;
+        TMDbID = Db.tmdb,
+        TVDbID = Db.tvdb;
 
-	findPlexMedia({ title, year, button: $button, type: 'show', IMDbID, TVDbID });
+    title = Db.title;
+    year = Db.year;
+
+	findPlexMedia({ title, year, button: $button, type: 'show', IMDbID, TMDbID, TVDbID });
 }
 
 function renderPlexButton() {

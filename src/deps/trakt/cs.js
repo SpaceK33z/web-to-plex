@@ -32,6 +32,16 @@ function getTVDbID() {
 		return $link.href.replace(/^.*?thetvdb.com\/.+(?:(?:series)?id=(\d+)).*?$/, '$1');
 }
 
+function getTMDbID() {
+	let $link = document.querySelector(
+        // HTTPS and HTTP
+		'[href*="themoviedb.org/"]'
+	);
+
+	if ($link)
+		return $link.href.replace(/^.*?themoviedb.org\/(?:movie|tv)\/(\d+).*?$/, '$1');
+}
+
 function init() {
 	if (isMoviePage() || isShowPage()) {
 		wait(
@@ -72,19 +82,23 @@ async function initPlexThingy(type) {
 	if (!$title || !$year)
 		return modifyPlexButton($button, 'error',  `Could not extract ${ !$title? 'title': 'year' } from Trakt`);
 
-	let title = $title.textContent.replace(/(.+)(\d{4}).*?$/, '$1').trim(),
+	let title = $title.textContent.replace(/(.+)(\d{4}).*?$/, '$1').replace(/\s*\:\s*Season.*$/i, '').trim(),
         year = (RegExp.$2 || $year.textContent).trim(),
         IMDbID = getIMDbID(),
+        TMDbID = getTMDbID(),
         TVDbID = getTVDbID();
 
-    if(!IMDbID || !TVDbID) {
-        let Db = await getIDs({ title, year, IMDbID });
+    if((!IMDbID && !TMDbID) || !TVDbID) {
+        let Db = await getIDs({ title, year, type, IMDbID, TMDbID, TVDbID });
 
-        IMDbID = IMDbID || Db.imdb;
-        TVDbID = TVDbID || Db.thetvdb;
+        IMDbID = IMDbID || Db.imdb,
+        TMDbID = TMDbID || Db.tmdb,
+        TVDbID = TVDbID || Db.tvdb;
+        title = Db.title;
+        year = Db.year;
     }
 
-	findPlexMedia({ type, title, year, button: $button, IMDbID, TVDbID });
+	findPlexMedia({ type, title, year, button: $button, IMDbID, TMDbID, TVDbID });
 }
 
 parseOptions().then(() => {

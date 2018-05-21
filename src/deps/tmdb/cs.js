@@ -33,13 +33,17 @@ async function initPlexThingy(type) {
         year = $date.textContent.trim(),
         apid = window.location.pathname.replace(/\/(?:movie|tv)\/(\d+).*/, '$1');
 
-    let Db = await getIDs({ title, year, APIType: type, APIID: apid }),
+    let Db = await getIDs({ title, year, TMDbID: apid, APIType: type, APIID: apid }),
         IMDbID = Db.imdb,
-        TVDbID = Db.thetvdb;
+        TMDbID = Db.tmdb,
+        TVDbID = Db.tvdb;
+
+    title = Db.title;
+    year = Db.year;
 
     type = type === 'tv'? 'show': type;
 
-	findPlexMedia({ title, year, button: $button, type, IMDbID, TVDbID, txt: 'title', hov: 'null' });
+	findPlexMedia({ title, year, button: $button, type, IMDbID, TMDbID, TVDbID, txt: 'title', hov: 'null' });
 }
 
 function renderPlexButton() {

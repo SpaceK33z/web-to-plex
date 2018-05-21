@@ -29,16 +29,20 @@ async function initPlexThingy(type) {
 			 `Could not extract ${ !$title? 'title': 'year' } from Metacritic`
 		);
 
-	let title = $title.textContent.trim(),
-        year = $date.textContent.replace(/.*(\d{4}).*$/, '$1').trim();
+	let title = $title.textContent.replace(/\s+/g, ' ').trim(),
+        year = $date.textContent.replace(/\s+/g, ' ').replace(/.*(\d{4}).*$/, '$1').trim();
 
-    let Db = await getIDs({ title, year, APIType: type }),
+    let Db = await getIDs({ title, year, type }),
         IMDbID = Db.imdb,
-        TVDbID = Db.thetvdb;
+        TMDbID = Db.tmdb,
+        TVDbID = Db.tvdb;
+
+    title = Db.title;
+    year = Db.year;
 
     type = type === 'tv'? 'show': type;
 
-	findPlexMedia({ title, year, button: $button, type, IMDbID, TVDbID, txt: 'title', hov: 'null' });
+	findPlexMedia({ title, year, button: $button, type, IMDbID, TMDbID, TVDbID, txt: 'title', hov: 'null' });
 }
 
 function renderPlexButton() {

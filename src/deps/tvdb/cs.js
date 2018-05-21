@@ -34,7 +34,7 @@ function initPlexThingy() {
 		return modifyPlexButton(
 			$button,
 			'error',
-			 `Could not extract ${ !$title? 'title': 'year' } from TheTVDb`
+			 `Could not extract title from TheTVDb`
 		),
           null;
 

@@ -51,7 +51,7 @@ function addRadarr(request, sendResponse) {
             'X-Api-Key': request.token,
             ...generateHeaders(request.basicAuth)
         },
-        query = encodeURIComponent(`imdb:${ request.IMDbID }`);
+        query = encodeURIComponent(`imdb:${ request.IMDbID },tmdb:${ request.TMDbID }`);
 
     fetch(`${ request.url }/lookup?term=${ query }`, { headers })
         .then(response => response.json())
@@ -67,6 +67,7 @@ function addRadarr(request, sendResponse) {
                 qualityProfileId: request.QualityProfileId,
                 rootFolderPath: request.StoragePath,
                 imdbId: request.IMDbID,
+                tmdbId: request.TMDbID,
                 addOptions: {
                     searchForMovie: true,
                 },
@@ -120,7 +121,7 @@ function addSonarr(request, sendResponse) {
             'X-Api-Key': request.token,
             ...generateHeaders(request.basicAuth)
         },
-        query = encodeURIComponent(`imdb:${ request.IMDbID }`);
+        query = encodeURIComponent(`imdb:${ request.IMDbID },tvdb:${ request.TVDbID }`);
 
     fetch(`${ request.url }/lookup?term=${ query }`, { headers })
         .then(response => response.json())
@@ -237,11 +238,11 @@ function $serachPlex(connection, headers, options) {
             // Weirdly enough Plex doesn't seem to have an easy way to filter those libraries so we invent our own hack.
             let movies = hub.Metadata.filter(
                 meta =>
-                meta.Country ||
-                meta.Directory ||
-                meta.Genre ||
-                meta.Role ||
-                meta.Writer
+                    meta.Country ||
+                    meta.Directory ||
+                    meta.Genre ||
+                    meta.Role ||
+                    meta.Writer
             );
 
             // This is messed up, but Plex's definition of a year is year when it was available,

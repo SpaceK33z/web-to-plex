@@ -15,6 +15,11 @@
     text-overflow: ellipsis;
     cursor: pointer;
     text-decoration: none!important;
+    margin-top: 12px;
+}
+
+.web-to-plex-button:hover {
+    opacity: 0.7;
 }
 
 [class*="web-to-plex-wrapper"] {
