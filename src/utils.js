@@ -191,7 +191,7 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
             c = (s = "") => t(s).replace(/\&/g, 'and').replace(/\W+/g, '');
 
         // Find an exact match: Title (Year) | #IMDbID
-        for(var index = 0, found = false, $data; index < json.length && !found; index++) {
+        for(var index = 0, found = false, $data, lastscore = 0; index < json.length && !found; index++) {
             $data = json[index];
 
             //api.tvmaze.com/
@@ -223,14 +223,19 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
         }
 
         // Find a close match: Title
-        for(index = 0; index < json.length && !found; index++) {
+        for(index = 0; index < json.length && (!found || lastscore > 0); index++) {
             $data = json[index];
 
             //api.tvmaze.com/
             if('show' in $data)
-                found = (c($data.show.name) == c(title))?
-                    $data:
-                found;
+                found =
+                    // ignore language barriers
+                    (c($data.show.name) == c(title))?
+                        $data:
+                    // trust the api matching
+                    ($data.score >= lastscore)?
+                        (lastscore = $data.score, $data):
+                    found;
             //api.themoviedb.org/ \local
             else if('movie_results' in $data || 'tv_results' in $data)
                 found = (DATA => {
@@ -248,7 +253,7 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
                     $data:
                 found;
             //theimdbapi.org/
-            else
+            else if(/english/i.test($data.language))
                 found = (c($data.title) == c(title))?
                     $data:
                 found;
@@ -301,7 +306,7 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
     year = (data.year + '').slice(0, 4);
     year = data.year = +year | 0;
 
-//    console.log('Best match', { title, year, data, type, rqut });
+//    console.log('Best match', { title, year, data, type, rqut, score: json.score | 0 });
 
     return data;
 }
