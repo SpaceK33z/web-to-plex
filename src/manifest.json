@@ -56,7 +56,7 @@
 			"js": ["utils.js", "deps/tmdb/cs.js"],
 			"css": ["deps/tmdb/cs.css"]
 		},{
-			"matches": ["*://*.vrv.co/series/*"],
+			"matches": ["*://*.vrv.co/*"],
 			"js": ["utils.js", "deps/vrv/cs.js"],
 			"css": ["deps/vrv/cs.css"]
 		},{
