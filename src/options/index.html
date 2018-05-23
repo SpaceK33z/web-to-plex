@@ -86,6 +86,14 @@
             user-select: none;
         }
 
+        [id$="_test"] {
+            background: #cc7b19 !important;
+        }
+
+        em {
+            color: #cc7b19 !important;
+        }
+
         select {
             margin-left: 10px !important;
             font-size: 16px !important;
@@ -141,7 +149,7 @@
         }
 
         body::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.2);
+            background: rgba(0, 0, 0, 0);
         }
 
         input::placeholder, input:placeholder {
@@ -184,12 +192,12 @@
         <input type="text" id="plex_username" style="border-bottom-left-radius: 0 !important; border-bottom-right-radius: 0 !important;" placeholder="Enter your Plex username"/>
         <input type="text" id="plex_password" style="border-top-left-radius: 0 !important; border-top-right-radius: 0 !important;" placeholder="Enter your Plex password"/>
 		<div>
-            <em>Your Plex username and password are never stored, only your <a href="https://support.plex.tv/hc/en-us/articles/204059436-Finding-your-account-token-X-Plex-Token" title="How to find your token?" target="_blank">Plex Token</a>.</em>
+            Your Plex username and password are never stored, only your <a href="https://support.plex.tv/hc/en-us/articles/204059436-Finding-your-account-token-X-Plex-Token" title="How to find your token?" target="_blank">Plex Token</a>.
         </div>
 	</section>
 
 	<section>
-		<button type="button" id="plex_test" style="background: #cc7b19 !important;">Test</button>
+		<button type="button" id="plex_test">Test</button>
 		<div id="plex_test_status"></div>
 	</section>
 	<section>
@@ -203,7 +211,7 @@
 
     <article>
         <details>
-            <summary>CouchPotato Settings (TV Shows)</summary>
+            <summary>CouchPotato Settings (Movies)</summary>
 
             <h2>Connection Settings</h2>
             <section>
@@ -238,13 +246,13 @@
             </section>
 
             <section>
-                <button type="button" id="couchpotato_test" style="background: #cc7b19 !important;">Test CouchPotato Settings</button>
+                <button type="button" id="couchpotato_test">Test</button>
                 <span id="couchpotato_test_status"></span>
             </section>
             <section>
                 <label>Quality Profile</label>
                 <select data-option="couchpotatoQualityProfileId">
-                    <option value="">Press "Test CouchPotato Settings" first</option>
+                    <option value="">Press "CouchPotato Settings | Test" first</option>
                 </select>
             </section>
         </details>
@@ -285,24 +293,23 @@
             </section>
 
             <section>
-                <button type="button" id="radarr_test" style="background: #cc7b19 !important;">Test Radarr Settings</button>
+                <button type="button" id="radarr_test">Test</button>
                 <span id="radarr_test_status"></span>
             </section>
 
             <section>
                 <label>Radarr Storage Path</label>
                 <select type="text" data-option="radarrStoragePath">
-                    <option value="">Press "Test Radarr Settings" first</option>
+                    <option value="">Press "Radarr Settings | Test" first</option>
                 </select>
                 <div>
-                    This should be the same path (verbatim) used in Radarr.<br/>
-                    Such as <em>/storage/Movies/</em>
+                    This should be the same path (verbatim) used in Radarr
                 </div>
             </section>
             <section>
                 <label>Quality Profile</label>
                 <select data-option="radarrQualityProfileId">
-                    <option value="">Press "Test Radarr Settings" first</option>
+                    <option value="">Press "Radarr Settings | Test" first</option>
                 </select>
             </section>
         </details>
@@ -350,17 +357,16 @@
             <section>
                 <label>Sonarr Storage Path</label>
                 <select type="text" data-option="sonarrStoragePath">
-                    <option value="">Press "Test Sonarr Settings" first</option>
+                    <option value="">Press "Sonarr Settings | Test" first</option>
                 </select>
                 <div>
-                    This should be the same path (verbatim) used in Sonarr.<br/>
-                    Such as <em>/storage/TV Shows/</em>
+                    This should be the same path (verbatim) used in Sonarr
                 </div>
             </section>
             <section>
                 <label>Quality Profile</label>
                 <select data-option="sonarrQualityProfileId">
-                    <option value="">Press "Test Sonarr Settings" first</option>
+                    <option value="">Press "Sonarr Settings | Test" first</option>
                 </select>
             </section>
         </details>
@@ -369,7 +375,7 @@
     <br>
 
 	<section>
-		<button id="save" style="background: #cc7b19">Save</button>
+		<button id="save">Save</button>
         <span id="status"></span>
 	</section>
 

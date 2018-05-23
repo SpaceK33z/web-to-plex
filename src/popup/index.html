@@ -150,7 +150,7 @@
             box-shadow: 0 10px 128px inset #E10000;
         }
 
-        td[save-file]:after, td[cost-cash]:after, td[cost-more-cash]:after, td[cost-most-cash]:after {
+        td[save-file]:after, td[cost-cash-low]:after, td[cost-cash-med]:after, td[cost-cash-hig]:after {
             content: "____";
             color: transparent;
             float: right;
@@ -162,6 +162,12 @@
 
         td[is-slow] label:after {
             content: " \23f3";
+            float: right;
+        }
+
+        td[is-shy] label:after {
+            content: " \1f910";
+            float: right;
         }
 
         td[save-file]:after {
@@ -169,17 +175,17 @@
         }
 
         /* $1 - $10 */
-        td[cost-cash]:after {
+        td[cost-cash-low]:after {
             background: url("../img/$48.png") no-repeat center;
         }
 
         /* $11 - $30 */
-        td[cost-more-cash]:after {
+        td[cost-cash-med]:after {
             background: url("../img/$$48.png") no-repeat center;
         }
 
         /* $31+ */
-        td[cost-most-cash]:after {
+        td[cost-cash-hig]:after {
             background: url("../img/$$$48.png") no-repeat center;
         }
 
@@ -213,7 +219,7 @@
 <body>
     <table>
         <tr>
-            <td id="netflix" disabled cost-cash title="At least $7.99/month">
+            <td id="netflix" disabled cost-cash-low="$7.99/month">
                 <a href="https://netflix.com/" target="_blank">
                     <img alt="Netflix" src="../img/netflix.png" />
                     <label>Netflix</label>
@@ -234,7 +240,7 @@
         </tr>
 
         <tr>
-            <td id="flenix" save-file title="Uses file downloads">
+            <td id="flenix" save-file>
                 <a href="https://flenix.co/" target="_blank">
                     <img alt="Flenix" src="../img/flenix.png" />
                     <label>Flenix</label>
@@ -243,7 +249,7 @@
             <td id="fandango">
                 <a href="https://www.fandango.com/" target="_blank">
                     <img alt="fandango" src="../img/fandango.png" />
-                    <label>fandango</label>
+                    <label>Fandango</label>
                 </a>
             </td>
             <td id="imdb">
@@ -256,7 +262,7 @@
 
         <tr>
             <td id="amazon">
-                <a href="https://amazon.com/" target="_blank">
+                <a href="https://www.amazon.com/Amazon-Video/s/browse/ref=web_to_plex_plus?node=2858778011" target="_blank">
                     <img alt="Amazon" src="../img/amazon.png" />
                     <label>Amazon</label>
                 </a>
@@ -282,7 +288,7 @@
                     <label>Letterboxd</label>
                 </a>
             </td>
-            <td id="hulu" cost-cash title="At least $7.99/month">
+            <td id="hulu" is-slow cost-cash-low="$7.99/month">
                 <a href="https://hulu.com/" target="_blank">
                     <img alt="Hulu" src="../img/hulu.png" />
                     <label>Hulu</label>
@@ -300,7 +306,7 @@
             <td id="metacritic" is-slow>
                 <a href="https://www.metacritic.com/" target="_blank">
                     <img alt="iTunes" src="../img/metacritic.png" />
-                    <label>metacritic</label>
+                    <label>Metacritic</label>
                 </a>
             </td>
             <td id="vudu">
@@ -330,7 +336,7 @@
                     <label>Google</label>
                 </a>
             </td>
-            <td id="itunes">
+            <td id="itunes" is-shy="Trakt">
                 <a href="https://itunes.apple.com/" target="_blank">
                     <img alt="iTunes" src="../img/itunes.png" />
                     <label>iTunes</label>
@@ -339,4 +345,6 @@
         </tr>
     </table>
 </body>
+
+<script type="text/javascript" src="index.js"></script>
 </html>

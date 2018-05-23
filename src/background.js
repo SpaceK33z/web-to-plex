@@ -26,7 +26,7 @@ function viewCouchPotato(request, sendResponse) {
 			sendResponse({ success, status: success ? json.media.status : null });
 		})
 		.catch(error => {
-			sendResponse({ error: String(error), location: 'view CouchPotato' });
+			sendResponse({ error: String(error), location: 'viewCouchPotato' });
 		});
 }
 
@@ -41,7 +41,7 @@ function addCouchpotato(request, sendResponse) {
 			sendResponse({ success: response.success });
 		})
 		.catch(error => {
-			sendResponse({ error: String(error) , location: '+CouchPotato'});
+			sendResponse({ error: String(error) , location: 'addCouchPotato'});
 		});
 }
 
@@ -92,7 +92,7 @@ function addRadarr(request, sendResponse) {
             if (data && data[0] && data[0].errorMessage) {
                 sendResponse({
                     error: data[0].errorMessage,
-                    location: '+Radarr'
+                    location: 'addRadarr'
                 });
             } else if (data && data.path) {
                 console.log(`%cAdded to Radarr [${data.path}]`, 'color: #0f0');
@@ -103,7 +103,7 @@ function addRadarr(request, sendResponse) {
             } else {
                 sendResponse({
                     error: 'Unknown error',
-                    location: '+Radarr'
+                    location: 'addRadarr'
                 });
             }
         })
@@ -162,7 +162,7 @@ function addSonarr(request, sendResponse) {
             if (data && data[0] && data[0].errorMessage) {
                 sendResponse({
                     error: data[0].errorMessage,
-                    location: '+Sonarr'
+                    location: 'addSonarr'
                 });
             } else if (data && data.path) {
                 console.log(`%cAdded to Sonarr [${data.path}]`, 'color: #0f0');
@@ -173,7 +173,7 @@ function addSonarr(request, sendResponse) {
             } else {
                 sendResponse({
                     error: 'Unknown error',
-                    location: '+Sonarr'
+                    location: 'addSonarr'
                 });
             }
         })

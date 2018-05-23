@@ -132,7 +132,8 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
         iid = IMDbID || null,
         mid = TMDbID || null,
         tid = TVDbID || null,
-        rqut = type || apit;
+        rqut = type || apit,
+        cors = 'https://cors-anywhere.herokuapp.com/';
 
     type = type || null;
     meta = { ...meta, mode: 'no-cors' };
@@ -145,13 +146,15 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
     title = title? title.replace(/\s*[\:,]\s*Season\s+\d+.*$/i, '').toCaps(): title;
     year = year? (year + '').replace(/\D+/g, ''): year;
 
-//    console.log(`Searching for "${ title } (${ year })" in ${ type || apit }/${ rqut }`);
+    function plus(string) { return string.replace(/\s+/g, '+') }
 
     let url =
         (rqut === 'imdb' || (rqut === '*' && !iid && title))?
             (year)?
-                `https://www.omdbapi.com/?t=${ title.replace(/\s+/g, '+') }&y=${ year }&apikey=${ api.omdb }`:
-            `https://www.omdbapi.com/?t=${ title.replace(/\s+/g, '+') }&apikey=${ api.omdb }`:
+                `${ cors }http://theapache64.com/movie_db/search?keyword=${ plus(title) }`:
+//                `https://www.omdbapi.com/?t=${ plus(title) }&y=${ year }&apikey=${ api.omdb }`:
+            `${ cors }http://theapache64.com/movie_db/search?keyword=${ plus(title) }`:
+//            `https://www.omdbapi.com/?t=${ plus(title) }&apikey=${ api.omdb }`:
         (rqut === 'tmdb' || (rqut === '*' && !mid && title && year) || apit === 'movie')?
             (apit && apid)?
                 `https://api.themoviedb.org/3/${ apit }/${ apid }?api_key=${ api.tmdb }`:
@@ -168,6 +171,8 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
 
     if(url === null) return 0;
 
+    console.log(`Searching for "${ title } (${ year })" in ${ type || apit }/${ rqut } => ${ url }`);
+
     await(meta? fetch(url/*, meta*/): fetch(url))
         .then(response => {
             return response.json();
@@ -179,7 +184,7 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
             throw error;
         });
 
-//    console.log('Search results', { title, year, url, json });
+    console.log('Search results', { title, year, url, json });
 
     if('results' in json) {
         json = json.results;
@@ -294,6 +299,15 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
             title,
             year: year || json.Year
         };
+    //theapache64.com/movie_db/
+    else if('data' in json)
+        data = {
+            imdb: IMDbID || json.data.imdb_id || ei,
+            tmdb: TMDbID || json.data.tmdb_id | 0,
+            tvdb: TVDbID || json.data.tvdb_id | 0,
+            title,
+            year: year || json.data.year
+        };
     //theimdbapi.org/
     else
         data = {
@@ -367,7 +381,7 @@ function $pushAddToCouchpotato(options) {
 					'warning',
 					'CouchPotato request failed (see your console)'
 				),
-				console.error('Error with viewing on CouchPotato:', response.error);
+				console.error('Error viewing CouchPotato:', response.error);
 			}
 			if (!movieExists) {
 				pushCouchPotatoRequest(options);
@@ -398,10 +412,10 @@ function pushCouchPotatoRequest(options) {
 					'warning',
 					'Could not add to CouchPotato (see your console)'
 				),
-				console.error('Error with adding on CouchPotato:', response.error);
+				console.error('Error adding to CouchPotato:', response.error);
 			}
 			if (response.success) {
-				showNotification('info', 'Added movie on CouchPotato.');
+				showNotification('info', 'Added movie to CouchPotato.');
 			} else {
 				showNotification('warning', 'Could not add to CouchPotato.');
 			}
