@@ -42,7 +42,7 @@ function initPlexThingy() {
 	if (!$button) {
 		return;
 	}
-	const $title = document.getElementById('doc_title');
+	const $title = document.getElementById('doc_title') as HTMLHeadingElement;
 	const $date = document.querySelector(
 		'meta[itemprop="datePublished"]'
 	) as HTMLMetaElement;
@@ -54,7 +54,7 @@ function initPlexThingy() {
 		);
 		return;
 	}
-	const title = $title.dataset.title.trim();
+	const title = $title.dataset.title!.trim();
 	const year = parseInt($date.content.slice(0, 4));
 	const imdbId = getImdbId();
 
@@ -93,5 +93,5 @@ function getImdbId() {
 	if ($link) {
 		return $link.href.replace('http://www.imdb.com/title/', '');
 	}
-	return null;
+	return '';
 }

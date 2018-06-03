@@ -54,11 +54,15 @@ function initPlexMovie() {
 	if (!$button) {
 		return;
 	}
-	const $title = document.querySelector('.title_wrapper h1');
-	const $year = document.querySelector('.title_wrapper #titleYear');
+	const $title = document.querySelector(
+		'.title_wrapper h1'
+	) as HTMLHeadingElement;
+	const $year = document.querySelector(
+		'.title_wrapper #titleYear'
+	) as HTMLSpanElement;
 	// TODO: Hmm there should be a less risky way...
-	const title = $title.childNodes[0].textContent.trim();
-	const year = cleanYear($year.textContent);
+	const title = $title.childNodes[0].textContent!.trim();
+	const year = cleanYear($year.textContent!);
 
 	findPlexMedia({ type: 'movie', title, year, button: $button, imdbId });
 }
@@ -69,14 +73,17 @@ function initPlexShow() {
 	if (!$button) {
 		return;
 	}
-	const $title = document.querySelector('.title_wrapper h1');
-	const date = document.querySelector('title').textContent;
+	const $title = document.querySelector(
+		'.title_wrapper h1'
+	) as HTMLHeadingElement;
+	const $date = document.querySelector('title') as HTMLTitleElement;
+	const date = $date.textContent!;
 	const dateMatch = date.match(/Series (\d{4})/);
 	if (!$title || !dateMatch) {
 		modifyPlexButton($button, 'error', 'Could not extract title or year');
 		return;
 	}
-	const title = $title.textContent.trim();
+	const title = $title.textContent!.trim();
 	const year = parseInt(dateMatch[1]);
 
 	findPlexMedia({ type: 'show', title, year, button: $button, imdbId });
@@ -95,9 +102,9 @@ function addInListItem(el: Element) {
 		modifyPlexButton($button, 'error', 'Could not extract title or year');
 		return;
 	}
-	const type = $date.textContent.includes('TV Series') ? 'show' : 'movie';
-	const title = $title.textContent.trim();
-	const year = cleanYear($date.textContent);
+	const type = $date.textContent!.includes('TV Series') ? 'show' : 'movie';
+	const title = $title.textContent!.trim();
+	const year = cleanYear($date.textContent!);
 	const myImdbId = $imdbId.dataset.tconst;
 
 	findPlexMedia({ type, title, year, button: $button, imdbId: myImdbId });

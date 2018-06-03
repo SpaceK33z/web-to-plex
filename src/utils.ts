@@ -1,3 +1,5 @@
+import { StoredItems, FormattedOptions } from './options/types';
+
 type CheckFn = () => boolean;
 type ThenFn = () => void;
 export function wait(check: CheckFn, then: ThenFn) {
@@ -11,7 +13,7 @@ export function wait(check: CheckFn, then: ThenFn) {
 export function getPlexMediaRequest({
 	button,
 	...mediaOptions
-}): Promise<{ found: boolean; key: string | null }> {
+}: PlexMediaOptions): Promise<{ found: boolean; key: string | null }> {
 	return new Promise((resolve, reject) => {
 		chrome.runtime.sendMessage(
 			{
@@ -29,27 +31,11 @@ export function getPlexMediaRequest({
 	});
 }
 
-interface FormattedOptions {
-	server: {
-		id: string;
-		token: string;
-		url?: string; // deprecated
-		connections: { uri: string }[];
-	};
-	couchpotatoBasicAuth?: { username: string; password: string };
-	couchpotatoUrl?: string;
-	radarrBasicAuth?: { username: string; password: string };
-	radarrUrl?: string;
-	radarrToken?: string;
-	radarrStoragePath?: string;
-	radarrQualityProfileId?: string;
-}
-
-function _getOptions() {
+function _getOptions(): Promise<FormattedOptions> {
 	const storage = chrome.storage.sync || chrome.storage.local;
 
 	return new Promise((resolve, reject) => {
-		function handleOptions(items) {
+		function handleOptions(items: StoredItems) {
 			if (!items.plexToken || !items.servers) {
 				reject(new Error('Unset options.'));
 				return;
@@ -94,9 +80,9 @@ function _getOptions() {
 		}
 		storage.get(null, items => {
 			if (chrome.runtime.lastError) {
-				chrome.storage.local.get(null, handleOptions);
+				chrome.storage.local.get(null, handleOptions as any);
 			} else {
-				handleOptions(items);
+				handleOptions(items as any);
 			}
 		});
 	});
@@ -106,7 +92,7 @@ export function openOptionsPage() {
 	chrome.runtime.sendMessage({ type: 'OPEN_OPTIONS' });
 }
 
-let config;
+let config: FormattedOptions;
 export function parseOptions() {
 	return _getOptions().then(
 		options => {
@@ -165,7 +151,9 @@ function showNotification(
 	notificationTimeout = setTimeout(close, timeout || 5000);
 }
 
-function _maybeAddToCouchpotato(options) {
+type AddToDownloaderOptions = { imdbId?: string };
+
+function _maybeAddToCouchpotato(options: AddToDownloaderOptions) {
 	// TODO: this does not work anymore!
 	if (!options.imdbId) {
 		showNotification(
@@ -203,7 +191,7 @@ function _maybeAddToCouchpotato(options) {
 	);
 }
 
-function _addToCouchPotatoRequest(options) {
+function _addToCouchPotatoRequest(options: AddToDownloaderOptions) {
 	chrome.runtime.sendMessage(
 		{
 			type: 'ADD_COUCHPOTATO',
@@ -229,7 +217,7 @@ function _addToCouchPotatoRequest(options) {
 	);
 }
 
-function _addToRadarrRequest(options) {
+function _addToRadarrRequest(options: AddToDownloaderOptions) {
 	if (!options.imdbId) {
 		showNotification(
 			'warning',
@@ -299,7 +287,16 @@ export function modifyPlexButton(
 	}
 }
 
-export function findPlexMedia(options: any) {
+interface PlexMediaOptions {
+	button: HTMLAnchorElement;
+	field?: string;
+	type?: 'show' | 'movie';
+	title: string;
+	year: number;
+	imdbId?: string;
+}
+
+export function findPlexMedia(options: PlexMediaOptions) {
 	getPlexMediaRequest(options)
 		.then(({ found, key }) => {
 			if (found) {

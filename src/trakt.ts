@@ -25,7 +25,7 @@ function getImdbId() {
 	if ($link) {
 		return $link.href.replace('http://www.imdb.com/title/', '');
 	}
-	return null;
+	return '';
 }
 
 function init() {
@@ -71,14 +71,18 @@ function initPlexThingy(type: 'movie' | 'show') {
 	if (!$button) {
 		return;
 	}
-	const $title = document.querySelector('.summary .mobile-title');
-	const $year = document.querySelector('.summary .mobile-title .year'); // <-- THIS DOES NOT EXIST FOR TV SHOWS
+	const $title = document.querySelector(
+		'.summary .mobile-title'
+	) as HTMLSpanElement;
+	const $year = document.querySelector(
+		'.summary .mobile-title .year'
+	) as HTMLSpanElement; // <-- THIS DOES NOT EXIST FOR TV SHOWS
 	if (!$title || !$year) {
 		modifyPlexButton($button, 'error', 'Could not extract title or year');
 		return;
 	}
-	const title = $title.firstChild.childNodes[0].textContent.trim();
-	const year = parseInt($year.textContent.trim());
+	const title = $title.firstChild!.childNodes[0].textContent!.trim();
+	const year = parseInt($year.textContent!.trim());
 	const imdbId = getImdbId();
 
 	findPlexMedia({ type, title, year, button: $button, imdbId });

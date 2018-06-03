@@ -14,8 +14,12 @@ function initPlexThingy() {
 	if (!$button) {
 		return;
 	}
-	const $title = document.querySelector('.headline-1[itemprop="name"]');
-	const $date = document.querySelector('small[itemprop="datePublished"]');
+	const $title = document.querySelector(
+		'.headline-1[itemprop="name"]'
+	) as HTMLHeadingElement;
+	const $date = document.querySelector(
+		'small[itemprop="datePublished"]'
+	) as HTMLSpanElement;
 
 	if (!$title || !$date) {
 		modifyPlexButton(
@@ -25,8 +29,8 @@ function initPlexThingy() {
 		);
 		return;
 	}
-	const title = $title.textContent.trim();
-	const year = parseInt($date.textContent.trim());
+	const title = $title.textContent!.trim();
+	const year = parseInt($date.textContent!.trim());
 	const imdbId = getImdbId();
 
 	findPlexMedia({ title, year, button: $button, imdbId });
@@ -55,7 +59,7 @@ function getImdbId() {
 		const link = $link.href.replace('http://www.imdb.com/title/', '');
 		return link.replace('/maindetails', '');
 	}
-	return null;
+	return '';
 }
 
 parseOptions().then(() => {

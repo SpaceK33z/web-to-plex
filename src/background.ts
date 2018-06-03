@@ -1,4 +1,6 @@
-function generateHeaders(auth: any) {
+type SendResponseFn = (response: any) => void;
+
+function generateHeaders(auth: { username: string; password: string }) {
 	const headers = { Accept: 'application/json' };
 	if (!auth) {
 		return headers;
@@ -14,7 +16,7 @@ function generateHeaders(auth: any) {
 // these requests in a background page instead of the content script?
 // This is because Movieo is served over HTTPS, so it won't accept requests to
 // HTTP servers. Unfortunately, many people use CouchPotato over HTTP.
-function viewCouchpotato(request: any, sendResponse: any) {
+function viewCouchpotato(request: any, sendResponse: SendResponseFn) {
 	fetch(`${request.url}?id=${request.imdbId}`, {
 		headers: generateHeaders(request.basicAuth),
 	})
@@ -28,7 +30,7 @@ function viewCouchpotato(request: any, sendResponse: any) {
 		});
 }
 
-function addCouchpotato(request: any, sendResponse: any) {
+function addCouchpotato(request: any, sendResponse: SendResponseFn) {
 	fetch(`${request.url}?identifier=${request.imdbId}`, {
 		headers: generateHeaders(request.basicAuth),
 	})
@@ -41,7 +43,7 @@ function addCouchpotato(request: any, sendResponse: any) {
 		});
 }
 
-function addRadarr(request: any, sendResponse: any) {
+function addRadarr(request: any, sendResponse: SendResponseFn) {
 	const headers = {
 		...generateHeaders(request.basicAuth),
 		'Content-Type': 'application/json',
@@ -89,7 +91,7 @@ function addRadarr(request: any, sendResponse: any) {
 		});
 }
 
-function _searchPlex(connection: any, headers: any, options: any) {
+function _searchPlex(connection: any, headers: HeadersInit, options: any) {
 	const type = options.type || 'movie';
 	const url = `${connection.uri}/hubs/search`;
 	const field = options.field || 'title';
@@ -137,7 +139,7 @@ function _searchPlex(connection: any, headers: any, options: any) {
 // Unfortunately the native Promise.race does not work as you would suspect.
 // If one promise (Plex request) fails, we still want the other requests to continue racing.
 // See https://www.jcore.com/2016/12/18/promise-me-you-wont-use-promise-race/ for explanation
-function promiseRace(promises: any) {
+function promiseRace(promises: Promise<any>[]) {
 	if (promises.length < 1) {
 		return Promise.reject('Cannot start a race without promises!');
 	}
@@ -158,7 +160,7 @@ function promiseRace(promises: any) {
 	});
 }
 
-async function searchPlex(request: any, sendResponse: any) {
+async function searchPlex(request: any, sendResponse: SendResponseFn) {
 	const { options, serverConfig } = request;
 	const headers = {
 		'X-Plex-Token': serverConfig.token,

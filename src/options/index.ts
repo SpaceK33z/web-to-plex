@@ -1,14 +1,5 @@
 import { parseXml } from './xml';
-
-interface InputValues {
-	radarrToken: string;
-	radarrBasicAuthUsername: string;
-	radarrBasicAuthPassword: string;
-	radarrQualityProfileId: string;
-	radarrStoragePath: string;
-	radarrUrlRoot: string;
-	couchpotatoUrlRoot: string;
-}
+import { InputValues, StoredItems } from './types';
 
 // FireFox doesn't support sync storage.
 const storage = chrome.storage.sync || chrome.storage.local;
@@ -24,7 +15,7 @@ const $selectRadarrStoragePath = document.querySelector(
 	`[data-option="radarrStoragePath"]`
 ) as HTMLSelectElement;
 const $saveButton = document.getElementById('save') as HTMLButtonElement;
-let plexServers = [];
+let plexServers: any[] = [];
 let plexClientId: null | string = null;
 const manifest = chrome.runtime.getManifest();
 
@@ -86,7 +77,7 @@ function tryPlexLogin(username: string, password: string) {
 		headers: {
 			'X-Plex-Product': 'Web To Plex Extension',
 			'X-Plex-Version': manifest.version,
-			'X-Plex-Client-Identifier': plexClientId,
+			'X-Plex-Client-Identifier': plexClientId!,
 			Authorization: `Basic ${hash}`,
 		},
 	}).then(res => res.json());
@@ -99,7 +90,9 @@ function performPlexLogin() {
 	const plexPassword = (document.getElementById(
 		'plex_password'
 	) as HTMLInputElement).value;
-	const $testStatus = document.getElementById('plex_login_status');
+	const $testStatus = document.getElementById(
+		'plex_login_status'
+	) as HTMLDivElement;
 	$selectServer.innerHTML = '';
 	$testStatus.textContent = '';
 	$saveButton.disabled = true;
@@ -122,7 +115,9 @@ function performPlexLogout() {
 
 function performPlexTest(oldServerId?: string) {
 	const plexToken = $plexToken.value;
-	const $testStatus = document.getElementById('plex_login_status');
+	const $testStatus = document.getElementById(
+		'plex_login_status'
+	) as HTMLDivElement;
 	$selectServer.innerHTML = '';
 	$testStatus.textContent = '';
 	$saveButton.disabled = true;
@@ -166,7 +161,7 @@ function doRadarrRequest(values: InputValues, entity: string) {
 		Accept: 'application/json',
 		'Content-Type': 'application/json',
 		'X-Api-Key': values.radarrToken,
-		Authorization: undefined,
+		Authorization: '',
 	};
 	if (values.radarrBasicAuthUsername) {
 		const hash = btoa(
@@ -235,11 +230,11 @@ function performRadarrTest(
 }
 
 function saveOptions() {
-	const status = document.getElementById('status');
+	const status = document.getElementById('status') as HTMLSpanElement;
 	const selectedServerId = $selectServer!.options[$selectServer!.selectedIndex]
 		.value;
 	if (!selectedServerId) {
-		status!.textContent = 'Select a server first!';
+		status.textContent = 'Select a server first!';
 		return;
 	}
 
@@ -254,7 +249,7 @@ function saveOptions() {
 
 	if (!server) {
 		// This _should_ never happen, but can be useful for debugging.
-		status!.textContent = 'Could not find Plex server by identifier.';
+		status.textContent = 'Could not find Plex server by identifier.';
 		return;
 	}
 
@@ -334,7 +329,7 @@ function saveOptions() {
 				connections: serverConnections,
 			},
 		],
-	};
+	} as Partial<StoredItems>;
 	storage.set(data, () => {
 		if (chrome.runtime.lastError) {
 			console.log('[WTP] Error with saving', chrome.runtime.lastError.message);
@@ -348,7 +343,7 @@ function saveOptions() {
 // Restores select box and checkbox state using the preferences
 // stored in chrome.storage.
 function restoreOptions() {
-	function setOptions(items: any) {
+	function setOptions(items: StoredItems) {
 		optionNames.forEach(optionName => {
 			const $option = document.querySelector(
 				`[data-option="${optionName}"]`
@@ -356,9 +351,8 @@ function restoreOptions() {
 			$option.value = items[optionName] || '';
 		});
 
-		if (items.plexToken) {
-			const serverId = items.servers ? items.servers[0].id : null;
-			performPlexTest(serverId);
+		if (items.plexToken && items.servers) {
+			performPlexTest(items.servers[0].id);
 		}
 		if (items.radarrUrlRoot) {
 			performRadarrTest(items.radarrQualityProfileId, items.radarrStoragePath);
@@ -377,20 +371,20 @@ function restoreOptions() {
 		// Sigh... This is a workaround for Firefox; newer versions do have support for the `chrome.storage.sync` API,
 		// but it will throw an error if you haven't enabled that. ARGHHHHHHHHH.
 		if (chrome.runtime.lastError) {
-			chrome.storage.local.get(null, setOptions);
+			chrome.storage.local.get(null, setOptions as any);
 		} else {
-			setOptions(items);
+			setOptions(items as any);
 		}
 	});
 }
 document.addEventListener('DOMContentLoaded', restoreOptions);
 $saveButton.addEventListener('click', saveOptions);
 document
-	.getElementById('plex_login')
+	.getElementById('plex_login')!
 	.addEventListener('click', () => performPlexLogin());
 document
-	.getElementById('plex_logout')
+	.getElementById('plex_logout')!
 	.addEventListener('click', () => performPlexLogout());
 document
-	.getElementById('radarr_test')
+	.getElementById('radarr_test')!
 	.addEventListener('click', () => performRadarrTest());
