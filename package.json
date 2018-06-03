@@ -2,16 +2,27 @@
   "name": "web-to-plex",
   "private": true,
   "scripts": {
+    "start": "tsc -w",
     "lint": "eslint src",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "rm -rf build && rollup -c rollup.config.js"
   },
   "author": "Kees Kluskens <kees@webduck.nl>",
   "license": "ISC",
   "devDependencies": {
-    "@volst/eslint-config": "2.1.0",
+    "@types/chrome": "^0.0.68",
+    "@volst/tslint-config": "^0.2.1",
     "addons-linter": "^0.39.1",
     "chrome-webstore-upload-cli": "^1.1.1",
-    "eslint": "^4.18.2"
+    "rollup": "^0.59.4",
+    "rollup-plugin-commonjs": "^9.1.3",
+    "rollup-plugin-copy": "^0.2.3",
+    "rollup-plugin-node-resolve": "^3.3.0",
+    "rollup-plugin-typescript2": "^0.14.0",
+    "tslint": "^5.10.0",
+    "typescript": "^2.9.1"
   },
-  "dependencies": {}
+  "dependencies": {
+    "lodash-es": "^4.17.10"
+  }
 }

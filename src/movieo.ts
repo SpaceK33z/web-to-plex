@@ -1,4 +1,5 @@
-/* global parseOptions, modifyPlexButton, findPlexMedia */
+import { modifyPlexButton, parseOptions, findPlexMedia } from './utils';
+
 function isMoviePage() {
 	const path = window.location.pathname;
 	if (!path.startsWith('/movies/')) {
@@ -42,7 +43,9 @@ function initPlexThingy() {
 		return;
 	}
 	const $title = document.getElementById('doc_title');
-	const $date = document.querySelector('meta[itemprop="datePublished"]');
+	const $date = document.querySelector(
+		'meta[itemprop="datePublished"]'
+	) as HTMLMetaElement;
 	if (!$title || !$date) {
 		modifyPlexButton(
 			$button,
@@ -86,7 +89,7 @@ function renderPlexButton() {
 function getImdbId() {
 	const $link = document.querySelector(
 		'.tt-parent[href^="http://www.imdb.com/title/tt"]'
-	);
+	) as HTMLAnchorElement;
 	if ($link) {
 		return $link.href.replace('http://www.imdb.com/title/', '');
 	}

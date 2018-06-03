@@ -1,4 +1,5 @@
-/* global wait, modifyPlexButton, parseOptions, findPlexMedia */
+import { wait, modifyPlexButton, parseOptions, findPlexMedia } from './utils';
+
 function isMoviePage() {
 	const path = window.location.pathname;
 	if (!path.startsWith('/movies/')) {
@@ -20,7 +21,7 @@ function isShowPage() {
 function getImdbId() {
 	const $link = document.querySelector(
 		'ul.external [href^="http://www.imdb.com/title/tt"]'
-	);
+	) as HTMLLinkElement;
 	if ($link) {
 		return $link.href.replace('http://www.imdb.com/title/', '');
 	}
@@ -33,12 +34,14 @@ function init() {
 			() => {
 				// Tricky hack; Trakt uses TurboLinks and the body content is not replaced immediately when navigating to another URL.
 				// So we wait on the loading div to stop being displayed.
-				const loadDiv = document.querySelector('#loading-bg');
-				const hasWrapper = document.querySelector('#info-wrapper ul.external');
+				const loadDiv = document.querySelector('#loading-bg') as HTMLDivElement;
+				const hasWrapper = document.querySelector(
+					'#info-wrapper ul.external'
+				) as HTMLUListElement;
 				if (loadDiv) {
-					return loadDiv.style.display !== 'block' && hasWrapper;
+					return loadDiv.style.display !== 'block' && !!hasWrapper;
 				}
-				return hasWrapper;
+				return !!hasWrapper;
 			},
 			() => {
 				initPlexThingy(isMoviePage() ? 'movie' : 'show');
@@ -63,7 +66,7 @@ function renderPlexButton() {
 	return el;
 }
 
-function initPlexThingy(type) {
+function initPlexThingy(type: 'movie' | 'show') {
 	const $button = renderPlexButton();
 	if (!$button) {
 		return;

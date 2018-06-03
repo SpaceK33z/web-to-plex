@@ -1,11 +1,19 @@
-/* global _ */
-/* eslint-disable no-unused-vars */
+import {
+	isPlainObject,
+	size,
+	values,
+	reduce,
+	each,
+	has,
+	isArray,
+	isEmpty,
+} from 'lodash-es';
 
 // flattens an object (recursively!), similarly to Array#flatten
 // e.g. flatten({ a: { b: { c: "hello!" } } }); // => "hello!"
 function _flatten(object) {
-	const check = _.isPlainObject(object) && _.size(object) === 1;
-	return check ? _flatten(_.values(object)[0]) : object;
+	const check = isPlainObject(object) && size(object) === 1;
+	return check ? _flatten(values(object)[0]) : object;
 }
 
 function _parse(xml) {
@@ -34,7 +42,7 @@ function _parse(xml) {
 
 	// if it's an element with attributes, add them to data.attributes
 	if (isElement && hasAttributes) {
-		data.attributes = _.reduce(
+		data.attributes = reduce(
 			xml.attributes,
 			(obj, name, id) => {
 				const attr = xml.attributes.item(id);
@@ -46,19 +54,19 @@ function _parse(xml) {
 	}
 
 	// recursively call #parse over children, adding results to data
-	_.each(xml.children, child => {
+	each(xml.children, child => {
 		const name = child.nodeName;
 
 		// if we've not come across a child with this nodeType, add it as an object
 		// and return here
-		if (!_.has(data, name)) {
+		if (!has(data, name)) {
 			data[name] = _parse(child);
 			return;
 		}
 
 		// if we've encountered a second instance of the same nodeType, make our
 		// representation of it an array
-		if (!_.isArray(data[name])) {
+		if (!isArray(data[name])) {
 			data[name] = [data[name]];
 		}
 
@@ -67,7 +75,7 @@ function _parse(xml) {
 	});
 
 	// if we can, let's fold some attributes into the body
-	_.each(data.attributes, (value, key) => {
+	each(data.attributes, (value, key) => {
 		if (data[key] != null) {
 			return;
 		}
@@ -76,7 +84,7 @@ function _parse(xml) {
 	});
 
 	// if data.attributes is now empty, get rid of it
-	if (_.isEmpty(data.attributes)) {
+	if (isEmpty(data.attributes)) {
 		delete data.attributes;
 	}
 
@@ -84,7 +92,7 @@ function _parse(xml) {
 	return _flatten(data);
 }
 
-function parseXml(string) {
+export function parseXml(string) {
 	const xml = new DOMParser().parseFromString(string, 'text/xml');
 	return _parse(xml);
 }

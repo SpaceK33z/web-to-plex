@@ -1,11 +1,16 @@
-/* global findPlexMedia, parseOptions, modifyPlexButton */
+import { modifyPlexButton, parseOptions, findPlexMedia } from './utils';
+
 function isMovie() {
-	const tag = document.querySelector('meta[property="og:type"]');
+	const tag = document.querySelector(
+		'meta[property="og:type"]'
+	) as HTMLMetaElement;
 	return tag && tag.content === 'video.movie';
 }
 
 function isShow() {
-	const tag = document.querySelector('meta[property="og:type"]');
+	const tag = document.querySelector(
+		'meta[property="og:type"]'
+	) as HTMLMetaElement;
 	return tag && tag.content === 'video.tv_show';
 }
 
@@ -14,18 +19,20 @@ function isList() {
 }
 
 function getImdbId() {
-	const tag = document.querySelector('meta[property="pageId"]');
+	const tag = document.querySelector(
+		'meta[property="pageId"]'
+	) as HTMLMetaElement;
 	return tag && tag.content;
 }
 
-function cleanYear(year) {
+function cleanYear(year: string) {
 	// The year can contain `()`, so we need to strip it out.
 	return parseInt(year.trim().replace(/\(|\)/g, ''));
 }
 
 const imdbId = getImdbId();
 
-function renderPlexButton($parent) {
+function renderPlexButton($parent?: HTMLDivElement) {
 	if (!$parent) {
 		console.log('[WTP] Could not add Plex button.');
 		return null;
@@ -42,7 +49,7 @@ function renderPlexButton($parent) {
 }
 
 function initPlexMovie() {
-	const $parent = document.querySelector('.plot_summary');
+	const $parent = document.querySelector('.plot_summary') as HTMLDivElement;
 	const $button = renderPlexButton($parent);
 	if (!$button) {
 		return;
@@ -57,7 +64,7 @@ function initPlexMovie() {
 }
 
 function initPlexShow() {
-	const $parent = document.querySelector('.plot_summary');
+	const $parent = document.querySelector('.plot_summary') as HTMLDivElement;
 	const $button = renderPlexButton($parent);
 	if (!$button) {
 		return;
@@ -75,15 +82,15 @@ function initPlexShow() {
 	findPlexMedia({ type: 'show', title, year, button: $button, imdbId });
 }
 
-function addInListItem(el) {
-	const $parent = el.querySelector('.button_strip');
+function addInListItem(el: Element) {
+	const $parent = el.querySelector('.button_strip') as HTMLDivElement;
 	const $button = renderPlexButton($parent);
 	if (!$button) {
 		return;
 	}
-	const $imdbId = el.querySelector('.wlb_lite');
-	const $title = el.querySelector('.info b a');
-	const $date = el.querySelector('.info .year_type');
+	const $imdbId = el.querySelector('.wlb_lite') as HTMLDivElement;
+	const $title = el.querySelector('.info b a') as HTMLDivElement;
+	const $date = el.querySelector('.info .year_type') as HTMLDivElement;
 	if (!$imdbId || !$title || !$date) {
 		modifyPlexButton($button, 'error', 'Could not extract title or year');
 		return;

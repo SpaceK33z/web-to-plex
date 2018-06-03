@@ -22,12 +22,14 @@ firefox: FORCE
 
 release-chrome: FORCE
 	rm -f pkg-chrome.zip
-	cd src; zip -r ../pkg-chrome.zip **
+	npm run -s build
+	cd build; zip -r ../pkg-chrome.zip **
 
 build-firefox: FORCE firefox
 	rm -f pkg-firefox.zip
-	find build/firefox -name '.DS_Store' -type f -delete
-	cd build/firefox; zip -r ../../pkg-firefox.zip **
+	FIREFOX=1 npm run -s build
+	find build -name '.DS_Store' -type f -delete
+	cd build; zip -r ../../pkg-firefox.zip **
 
 release-firefox: FORCE build-firefox lint
 

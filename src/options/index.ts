@@ -1,17 +1,31 @@
-/* global parseXml */
+import { parseXml } from './xml';
+
+interface InputValues {
+	radarrToken: string;
+	radarrBasicAuthUsername: string;
+	radarrBasicAuthPassword: string;
+	radarrQualityProfileId: string;
+	radarrStoragePath: string;
+	radarrUrlRoot: string;
+	couchpotatoUrlRoot: string;
+}
+
 // FireFox doesn't support sync storage.
 const storage = chrome.storage.sync || chrome.storage.local;
 
-const $selectServer = document.getElementById('plex_servers');
+const $selectServer = document.getElementById(
+	'plex_servers'
+) as HTMLSelectElement;
+const $plexToken = document.getElementById('plex_token') as HTMLInputElement;
 const $selectRadarrQualityProfile = document.querySelector(
 	`[data-option="radarrQualityProfileId"]`
-);
+) as HTMLSelectElement;
 const $selectRadarrStoragePath = document.querySelector(
 	`[data-option="radarrStoragePath"]`
-);
-const $saveButton = document.getElementById('save');
+) as HTMLSelectElement;
+const $saveButton = document.getElementById('save') as HTMLButtonElement;
 let plexServers = [];
-let plexClientId = null;
+let plexClientId: null | string = null;
 const manifest = chrome.runtime.getManifest();
 
 const optionNames = [
@@ -28,14 +42,14 @@ const optionNames = [
 	'radarrQualityProfileId',
 ];
 
-function toggleAuthenticated(isAuth) {
+function toggleAuthenticated(isAuth: boolean) {
 	const $plexUnauthenticated = document.getElementById('plex_unauthenticated');
 	const $plexAuthenticated = document.getElementById('plex_authenticated');
-	$plexUnauthenticated.style.display = isAuth ? 'none' : 'block';
-	$plexAuthenticated.style.display = isAuth ? 'block' : 'none';
+	$plexUnauthenticated!.style.display = isAuth ? 'none' : 'block';
+	$plexAuthenticated!.style.display = isAuth ? 'block' : 'none';
 }
 
-function getServers(plexToken) {
+function getServers(plexToken: string) {
 	return fetch('https://plex.tv/api/resources?includeHttps=1', {
 		headers: {
 			'X-Plex-Token': plexToken,
@@ -51,9 +65,9 @@ function getServers(plexToken) {
 		});
 }
 
-function getPlexConnections(server) {
+function getPlexConnections(server: any) {
 	// `server.Connection` can be an array or object.
-	let connections = [];
+	let connections: any[] = [];
 	if (Array.isArray(server.Connection)) {
 		connections = server.Connection;
 	} else {
@@ -65,7 +79,7 @@ function getPlexConnections(server) {
 	}));
 }
 
-function tryPlexLogin(username, password) {
+function tryPlexLogin(username: string, password: string) {
 	const hash = btoa(`${username}:${password}`);
 	return fetch('https://plex.tv/users/sign_in.json', {
 		method: 'post',
@@ -79,8 +93,12 @@ function tryPlexLogin(username, password) {
 }
 
 function performPlexLogin() {
-	const plexUsername = document.getElementById('plex_username').value;
-	const plexPassword = document.getElementById('plex_password').value;
+	const plexUsername = (document.getElementById(
+		'plex_username'
+	) as HTMLInputElement).value;
+	const plexPassword = (document.getElementById(
+		'plex_password'
+	) as HTMLInputElement).value;
 	const $testStatus = document.getElementById('plex_login_status');
 	$selectServer.innerHTML = '';
 	$testStatus.textContent = '';
@@ -91,7 +109,7 @@ function performPlexLogin() {
 			$testStatus.textContent = 'Invalid username or password.';
 		}
 		if (res.user) {
-			document.getElementById('plex_token').value = res.user.authToken;
+			$plexToken.value = res.user.authToken;
 			return performPlexTest();
 		}
 	});
@@ -99,11 +117,11 @@ function performPlexLogin() {
 
 function performPlexLogout() {
 	toggleAuthenticated(false);
-	document.getElementById('plex_token').value = '';
+	$plexToken.value = '';
 }
 
-function performPlexTest(oldServerId) {
-	const plexToken = document.getElementById('plex_token').value;
+function performPlexTest(oldServerId?: string) {
+	const plexToken = $plexToken.value;
 	const $testStatus = document.getElementById('plex_login_status');
 	$selectServer.innerHTML = '';
 	$testStatus.textContent = '';
@@ -135,18 +153,20 @@ function performPlexTest(oldServerId) {
 function getOptionValues() {
 	const values = {};
 	optionNames.forEach(optionName => {
-		values[optionName] = document.querySelector(
+		const $option = document.querySelector(
 			`[data-option="${optionName}"]`
-		).value;
+		) as HTMLOptionElement;
+		values[optionName] = $option.value;
 	});
-	return values;
+	return values as InputValues;
 }
 
-function doRadarrRequest(values, entity) {
+function doRadarrRequest(values: InputValues, entity: string) {
 	const headers = {
 		Accept: 'application/json',
 		'Content-Type': 'application/json',
 		'X-Api-Key': values.radarrToken,
+		Authorization: undefined,
 	};
 	if (values.radarrBasicAuthUsername) {
 		const hash = btoa(
@@ -162,41 +182,44 @@ function doRadarrRequest(values, entity) {
 		});
 }
 
-function getRadarrProfiles(values) {
+function getRadarrProfiles(values: InputValues) {
 	return doRadarrRequest(values, 'profile');
 }
 
-function getRadarrStoragePaths(values) {
+function getRadarrStoragePaths(values: InputValues) {
 	return doRadarrRequest(values, 'rootfolder');
 }
 
-function performRadarrTest(oldQualityProfileId, oldStoragePath) {
+function performRadarrTest(
+	oldQualityProfileId?: string,
+	oldStoragePath?: string
+) {
 	const values = getOptionValues();
 	const $testStatus = document.getElementById('radarr_test_status');
-	$testStatus.textContent = '';
+	$testStatus!.textContent = '';
 
-	$selectRadarrQualityProfile.innerHTML = '';
+	$selectRadarrQualityProfile!.innerHTML = '';
 	getRadarrProfiles(values).then(profiles => {
-		$testStatus.textContent =
+		$testStatus!.textContent =
 			profiles.length > 0 ? 'It works!' : 'Could not connect.';
 		profiles.forEach(profile => {
 			const $opt = document.createElement('option');
 			$opt.value = profile.id;
 			$opt.textContent = profile.name;
-			$selectRadarrQualityProfile.appendChild($opt);
+			$selectRadarrQualityProfile!.appendChild($opt);
 		});
 		// Because the <select> was reset, the original value is lost.
 		if (oldQualityProfileId) {
-			$selectRadarrQualityProfile.value = oldQualityProfileId;
+			$selectRadarrQualityProfile!.value = oldQualityProfileId;
 		}
 	});
 
-	$selectRadarrStoragePath.innerHTML = '';
+	$selectRadarrStoragePath!.innerHTML = '';
 	getRadarrStoragePaths(values).then(paths => {
 		paths.forEach(path => {
 			const $opt = document.createElement('option');
 			$opt.textContent = path.path;
-			$selectRadarrStoragePath.appendChild($opt);
+			$selectRadarrStoragePath!.appendChild($opt);
 		});
 		// Because the <select> was reset, the original value is lost.
 		if (oldStoragePath) {
@@ -204,19 +227,19 @@ function performRadarrTest(oldQualityProfileId, oldStoragePath) {
 			if (!paths.some(path => path.path === oldStoragePath)) {
 				const $opt = document.createElement('option');
 				$opt.textContent = oldStoragePath;
-				$selectRadarrStoragePath.appendChild($opt);
+				$selectRadarrStoragePath!.appendChild($opt);
 			}
-			$selectRadarrStoragePath.value = oldStoragePath;
+			$selectRadarrStoragePath!.value = oldStoragePath;
 		}
 	});
 }
 
 function saveOptions() {
 	const status = document.getElementById('status');
-	const selectedServerId =
-		$selectServer.options[$selectServer.selectedIndex].value;
+	const selectedServerId = $selectServer!.options[$selectServer!.selectedIndex]
+		.value;
 	if (!selectedServerId) {
-		status.textContent = 'Select a server first!';
+		status!.textContent = 'Select a server first!';
 		return;
 	}
 
@@ -231,7 +254,7 @@ function saveOptions() {
 
 	if (!server) {
 		// This _should_ never happen, but can be useful for debugging.
-		status.textContent = 'Could not find Plex server by identifier.';
+		status!.textContent = 'Could not find Plex server by identifier.';
 		return;
 	}
 
@@ -251,7 +274,7 @@ function saveOptions() {
 
 	// With a "user token" you can access multiple servers. A "normal" token is just for one server.
 	const values = getOptionValues();
-	function testRootUrl(url) {
+	function testRootUrl(url: string) {
 		return url && (!url.startsWith('http') || url.endsWith('/'));
 	}
 
@@ -278,7 +301,7 @@ function saveOptions() {
 		return;
 	}
 
-	function requestUrlPermissions(url) {
+	function requestUrlPermissions(url: string) {
 		// TODO: FireFox doesn't have support for chrome.permissions API.
 		if (url && chrome.permissions) {
 			// When asking permissions the URL needs to have a trailing slash.
@@ -325,10 +348,12 @@ function saveOptions() {
 // Restores select box and checkbox state using the preferences
 // stored in chrome.storage.
 function restoreOptions() {
-	function setOptions(items) {
+	function setOptions(items: any) {
 		optionNames.forEach(optionName => {
-			document.querySelector(`[data-option="${optionName}"]`).value =
-				items[optionName] || '';
+			const $option = document.querySelector(
+				`[data-option="${optionName}"]`
+			) as HTMLOptionElement;
+			$option.value = items[optionName] || '';
 		});
 
 		if (items.plexToken) {
@@ -339,9 +364,10 @@ function restoreOptions() {
 			performRadarrTest(items.radarrQualityProfileId, items.radarrStoragePath);
 		}
 		if (!items.plexClientId) {
-			plexClientId = window.crypto
-				.getRandomValues(new Uint32Array(5))
-				.join('-');
+			const randomArray = window.crypto.getRandomValues(
+				new Uint32Array(5)
+			) as Uint32Array;
+			plexClientId = randomArray.join('-');
 			storage.set({ plexClientId });
 		} else {
 			plexClientId = items.plexClientId;

@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "outDir": "build/src",
+    "module": "esnext",
+		"rootDir": "src",
+		"allowJs": true,
+    "target": "es2017",
+    "lib": ["esnext", "dom", "dom.iterable"],
+    "moduleResolution": "node",
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "strictFunctionTypes": true,
+    "alwaysStrict": true,
+		"noUnusedLocals": true,
+		"types": [
+			"chrome"
+		]
+  },
+  "include": [
+    "src/**/*",
+  ]
+}

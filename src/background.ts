@@ -1,5 +1,4 @@
-/* global chrome */
-function generateHeaders(auth) {
+function generateHeaders(auth: any) {
 	const headers = { Accept: 'application/json' };
 	if (!auth) {
 		return headers;
@@ -15,7 +14,7 @@ function generateHeaders(auth) {
 // these requests in a background page instead of the content script?
 // This is because Movieo is served over HTTPS, so it won't accept requests to
 // HTTP servers. Unfortunately, many people use CouchPotato over HTTP.
-function viewCouchpotato(request, sendResponse) {
+function viewCouchpotato(request: any, sendResponse: any) {
 	fetch(`${request.url}?id=${request.imdbId}`, {
 		headers: generateHeaders(request.basicAuth),
 	})
@@ -29,7 +28,7 @@ function viewCouchpotato(request, sendResponse) {
 		});
 }
 
-function addCouchpotato(request, sendResponse) {
+function addCouchpotato(request: any, sendResponse: any) {
 	fetch(`${request.url}?identifier=${request.imdbId}`, {
 		headers: generateHeaders(request.basicAuth),
 	})
@@ -42,7 +41,7 @@ function addCouchpotato(request, sendResponse) {
 		});
 }
 
-function addRadarr(request, sendResponse) {
+function addRadarr(request: any, sendResponse: any) {
 	const headers = {
 		...generateHeaders(request.basicAuth),
 		'Content-Type': 'application/json',
@@ -80,7 +79,7 @@ function addRadarr(request, sendResponse) {
 			if (res && res[0] && res[0].errorMessage) {
 				sendResponse({ err: res[0].errorMessage });
 			} else if (res && res.path) {
-				sendResponse({ success: 'Added to ' + res.path });
+				sendResponse({ success: `Added to ${res.path}` });
 			} else {
 				sendResponse({ err: 'unknown error' });
 			}
@@ -90,7 +89,7 @@ function addRadarr(request, sendResponse) {
 		});
 }
 
-function _searchPlex(connection, headers, options) {
+function _searchPlex(connection: any, headers: any, options: any) {
 	const type = options.type || 'movie';
 	const url = `${connection.uri}/hubs/search`;
 	const field = options.field || 'title';
@@ -138,14 +137,14 @@ function _searchPlex(connection, headers, options) {
 // Unfortunately the native Promise.race does not work as you would suspect.
 // If one promise (Plex request) fails, we still want the other requests to continue racing.
 // See https://www.jcore.com/2016/12/18/promise-me-you-wont-use-promise-race/ for explanation
-function promiseRace(promises) {
+function promiseRace(promises: any) {
 	if (promises.length < 1) {
 		return Promise.reject('Cannot start a race without promises!');
 	}
 
 	// There is no way to know which promise is rejected.
 	// So we map it to a new promise to return the index when it fails
-	let indexPromises = promises.map((p, index) =>
+	const indexPromises = promises.map((p, index) =>
 		p.catch(() => {
 			throw index;
 		})
@@ -153,13 +152,13 @@ function promiseRace(promises) {
 
 	return Promise.race(indexPromises).catch(index => {
 		// The promise has rejected, remove it from the list of promises and just continue the race.
-		let p = promises.splice(index, 1)[0];
+		const p = promises.splice(index, 1)[0];
 		p.catch(e => console.log(`[WTP] Plex request ${index} failed:`, e));
 		return promiseRace(promises);
 	});
 }
 
-async function searchPlex(request, sendResponse) {
+async function searchPlex(request: any, sendResponse: any) {
 	const { options, serverConfig } = request;
 	const headers = {
 		'X-Plex-Token': serverConfig.token,

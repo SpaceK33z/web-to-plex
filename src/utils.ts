@@ -1,6 +1,6 @@
-/* eslint-disable no-unused-vars */
-/* global config */
-function wait(check, then) {
+type CheckFn = () => boolean;
+type ThenFn = () => void;
+export function wait(check: CheckFn, then: ThenFn) {
 	if (check()) {
 		then();
 	} else {
@@ -8,7 +8,10 @@ function wait(check, then) {
 	}
 }
 
-function getPlexMediaRequest({ button, ...mediaOptions }) {
+export function getPlexMediaRequest({
+	button,
+	...mediaOptions
+}): Promise<{ found: boolean; key: string | null }> {
 	return new Promise((resolve, reject) => {
 		chrome.runtime.sendMessage(
 			{
@@ -26,6 +29,22 @@ function getPlexMediaRequest({ button, ...mediaOptions }) {
 	});
 }
 
+interface FormattedOptions {
+	server: {
+		id: string;
+		token: string;
+		url?: string; // deprecated
+		connections: { uri: string }[];
+	};
+	couchpotatoBasicAuth?: { username: string; password: string };
+	couchpotatoUrl?: string;
+	radarrBasicAuth?: { username: string; password: string };
+	radarrUrl?: string;
+	radarrToken?: string;
+	radarrStoragePath?: string;
+	radarrQualityProfileId?: string;
+}
+
 function _getOptions() {
 	const storage = chrome.storage.sync || chrome.storage.local;
 
@@ -39,7 +58,7 @@ function _getOptions() {
 			// For now we support only one Plex server, but the options already
 			// allow multiple for easy migration in the future.
 			const server = items.servers[0];
-			const options = {
+			const options: FormattedOptions = {
 				server: {
 					...server,
 					// Compatibility for users who have not updated their settings yet.
@@ -83,12 +102,12 @@ function _getOptions() {
 	});
 }
 
-function openOptionsPage() {
+export function openOptionsPage() {
 	chrome.runtime.sendMessage({ type: 'OPEN_OPTIONS' });
 }
 
 let config;
-function parseOptions() {
+export function parseOptions() {
 	return _getOptions().then(
 		options => {
 			config = options;
@@ -105,14 +124,21 @@ function parseOptions() {
 	);
 }
 
-function getPlexMediaUrl(plexMachineId, key) {
+function getPlexMediaUrl(plexMachineId: string, key: string) {
 	return `https://app.plex.tv/web/app#!/server/${plexMachineId}/details?key=${encodeURIComponent(
 		key
 	)}`;
 }
 
+type CallBackFn = () => void;
+
 let notificationTimeout;
-function showNotification(state, text, timeout, callback) {
+function showNotification(
+	state: 'warning' | 'info',
+	text: string,
+	timeout?: number,
+	callback?: CallBackFn
+) {
 	if (notificationTimeout) {
 		clearTimeout(notificationTimeout);
 		notificationTimeout = null;
@@ -151,7 +177,7 @@ function _maybeAddToCouchpotato(options) {
 	chrome.runtime.sendMessage(
 		{
 			type: 'VIEW_COUCHPOTATO',
-			url: config.couchpotatoUrl + '/media.get',
+			url: `${config.couchpotatoUrl}/media.get`,
 			imdbId: options.imdbId,
 			basicAuth: config.couchpotatoBasicAuth,
 		},
@@ -223,7 +249,7 @@ function _addToRadarrRequest(options) {
 		},
 		res => {
 			if (res && res.err) {
-				showNotification('warning', 'Could not add to Radarr.' + res.err);
+				showNotification('warning', `Could not add to Radarr. ${res.err}`);
 				console.error('Error with adding on Radarr:', res.err);
 				return;
 			} else if (res && res.success) {
@@ -235,7 +261,14 @@ function _addToRadarrRequest(options) {
 	);
 }
 
-function modifyPlexButton(el, action, title, options) {
+type Action = 'found' | 'notfound' | 'downloader' | 'error';
+
+export function modifyPlexButton(
+	el: HTMLAnchorElement,
+	action: Action,
+	title: string,
+	options?: any
+) {
 	el.style.removeProperty('display');
 	if (action === 'found') {
 		el.href = getPlexMediaUrl(config.server.id, options.key);
@@ -266,28 +299,28 @@ function modifyPlexButton(el, action, title, options) {
 	}
 }
 
-function findPlexMedia(options) {
+export function findPlexMedia(options: any) {
 	getPlexMediaRequest(options)
 		.then(({ found, key }) => {
 			if (found) {
 				modifyPlexButton(options.button, 'found', 'Found on Plex', { key });
-			} else {
-				options.field = 'original_title';
-				return getPlexMediaRequest(options).then(({ found, key }) => {
-					if (found) {
-						modifyPlexButton(options.button, 'found', 'Found on Plex', key);
-					} else {
-						const showDownloader =
-							(config.couchpotatoUrl || config.radarrUrl) &&
-							options.type !== 'show';
-						const action = showDownloader ? 'downloader' : 'notfound';
-						const title = showDownloader
-							? 'Could not find, want to download?'
-							: 'Could not find on Plex';
-						modifyPlexButton(options.button, action, title, options);
-					}
-				});
+				return Promise.resolve();
 			}
+			options.field = 'original_title';
+			return getPlexMediaRequest(options).then(({ found, key }) => {
+				if (found) {
+					modifyPlexButton(options.button, 'found', 'Found on Plex', key);
+				} else {
+					const showDownloader =
+						(config.couchpotatoUrl || config.radarrUrl) &&
+						options.type !== 'show';
+					const action = showDownloader ? 'downloader' : 'notfound';
+					const title = showDownloader
+						? 'Could not find, want to download?'
+						: 'Could not find on Plex';
+					modifyPlexButton(options.button, action, title, options);
+				}
+			});
 		})
 		.catch(err => {
 			modifyPlexButton(

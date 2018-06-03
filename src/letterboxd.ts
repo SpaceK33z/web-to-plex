@@ -1,7 +1,8 @@
-/* global wait, modifyPlexButton, parseOptions, findPlexMedia */
+import { wait, modifyPlexButton, parseOptions, findPlexMedia } from './utils';
+
 function init() {
 	wait(
-		() => document.querySelector('.js-watch-panel'),
+		() => !!document.querySelector('.js-watch-panel'),
 		() => {
 			initPlexThingy();
 		}
@@ -49,7 +50,7 @@ function renderPlexButton() {
 function getImdbId() {
 	const $link = document.querySelector(
 		'.track-event[href^="http://www.imdb.com/title/tt"]'
-	);
+	) as HTMLAnchorElement;
 	if ($link) {
 		const link = $link.href.replace('http://www.imdb.com/title/', '');
 		return link.replace('/maindetails', '');

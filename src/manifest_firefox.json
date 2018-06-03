@@ -17,18 +17,18 @@
 	"content_scripts": [
 		{
 			"matches": ["https://movieo.me/*"],
-			"js": ["history-hack.js", "utils.js", "movieo.js"],
-			"css": ["movieo.css"]
+			"js": ["history-hack.js", "movieo.js"],
+			"css": ["css/movieo.css"]
 		},
 		{
 			"matches": ["*://*.imdb.com/*"],
-			"js": ["utils.js", "imdb.js"],
-			"css": ["imdb.css"]
+			"js": ["imdb.js"],
+			"css": ["css/imdb.css"]
 		},
 		{
 			"matches": ["https://trakt.tv/*"],
-			"js": ["history-hack.js", "utils.js", "trakt.js"],
-			"css": ["trakt.css"]
+			"js": ["history-hack.js", "trakt.js"],
+			"css": ["css/trakt.css"]
 		}
 	],
 	"background": {
