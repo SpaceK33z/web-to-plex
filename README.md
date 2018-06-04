@@ -1,6 +1,8 @@
 # Status: DOWN (401): Unauthorized API Requests
 # Description: Radarr and Sonarr say the API calls are unauthorized, even though the tests pass...
-# Sites uneffected: Flenix
+# Sites unaffected: Flenix
+
+----
 
 # Web to Plex+ ![Icon](src/img/48.png)
 
