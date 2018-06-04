@@ -48,13 +48,14 @@ function addRadarr(request, sendResponse) {
             'X-Api-Key': request.token,
             ...generateHeaders(request.basicAuth)
         },
-        query = encodeURIComponent(`imdb:${ request.imdbId }`),
+        id = (/^(tt-?)?$/.test(request.imdbId)? request.tmdbId: request.imdbId),
+        query = encodeURIComponent(`${ (/tt-/.test(id)? ('imdb:' + id): request.title + request.year) }`),
         debug = { headers, query, ...request };
 
     fetch(debug.url = `${ request.url }lookup?apikey=${ request.token }&term=${ query }`)
         .then(response => response.json())
         .then(data => {
-            if (!data instanceof Array || !~data.length) {
+            if (!data instanceof Array || !data.length) {
                 throw new Error('Movie not found');
             }
 
@@ -87,7 +88,7 @@ function addRadarr(request, sendResponse) {
         })
         .then(response => response.text())
         .then(data => {
-            debug.text = data;
+            debug.data =
             data = JSON.parse(data || `{"path":"${ request.StoragePath.replace(/\\/g, '\\\\') }${ request.title } (${ request.year })"}`);
 
             if (data && data[0] && data[0].errorMessage) {
@@ -129,7 +130,7 @@ function addSonarr(request, sendResponse) {
     fetch(debug.url = `${ request.url }lookup?apikey=${ request.token }&term=${ query }`)
         .then(response => response.json())
         .then(data => {
-            if (!data instanceof Array || !~data.length) {
+            if (!data instanceof Array || !data.length) {
                 throw new Error('TV Show not found');
             }
 
@@ -162,7 +163,7 @@ function addSonarr(request, sendResponse) {
         })
         .then(response => response.text())
         .then(data => {
-            debug.text = data;
+            debug.data =
             data = JSON.parse(data || `{"path":"${ request.StoragePath.replace(/\\/g, '\\\\') }${ request.title } (${ request.year })"}`);
 
             if (data && data[0] && data[0].errorMessage) {
@@ -187,7 +188,6 @@ function addSonarr(request, sendResponse) {
             sendResponse({
                 error: String(error),
                 location: `addSonarr => fetch("${ request.url }", { headers }).catch(error => { sendResponse })`,
-                ...error,
                 debug
             });
         });

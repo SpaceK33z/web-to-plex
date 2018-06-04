@@ -354,7 +354,7 @@ function showNotification(state, text, timeout, callback) {
 
     el.textContent = text;
     document.body.appendChild(el);
-    lastNotification = setTimeout(el.onclick, timeout || 7000);
+    lastNotification = setTimeout(() => {}, timeout || 7000);
 }
 
 function $pushAddToCouchpotato(options) {
@@ -425,10 +425,10 @@ function pushCouchPotatoRequest(options) {
 
 // Movies
 function pushRadarrRequest(options) {
-    if (!options.IMDbID) {
+    if (!options.IMDbID && !options.TMDbID) {
         return showNotification(
             'warning',
-            'Stopped adding to Radarr: No IMDb ID'
+            'Stopped adding to Radarr: No IMDb/TMDb ID'
         );
     }
 
@@ -441,7 +441,10 @@ function pushRadarrRequest(options) {
             StoragePath: config.radarrStoragePath,
             QualityProfileId: config.radarrQualityProfileId,
             basicAuth: config.radarrBasicAuth,
+            title: options.title,
+            year: options.year,
             imdbId: options.IMDbID,
+            tmdbId: options.TMDbID,
         },
         response => {
             if (response && response.error) {
@@ -451,7 +454,7 @@ function pushRadarrRequest(options) {
                 let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').toLowerCase(),
                     TMDbID = options.TMDbID || response.tmdbId;
 
-                showNotification('info', 'Added movie to Radarr', 0, () => window.open(`${config.radarrURL}${TMDbID? `movies/${title}-${TMDbID}`: '' }`, '_blank'));
+                showNotification('info', 'Added movie to Radarr', 7000, () => window.open(`${config.radarrURL}${TMDbID? `movies/${title}-${TMDbID}`: '' }`, '_blank'));
             } else {
                 showNotification('warning', 'Could not add to Radarr: Unknown Error'),
                 console.error('Error adding to Radarr:', response);
@@ -462,7 +465,7 @@ function pushRadarrRequest(options) {
 
 // TV Shows
 function pushSonarrRequest(options) {
-    if (!options.TVDbID) {
+    if (!options.TVDbID || options.TVDbID == "") {
         return showNotification(
             'warning',
             'Stopped adding to Sonarr: No TVDb ID'
@@ -478,6 +481,8 @@ function pushSonarrRequest(options) {
             StoragePath: config.sonarrStoragePath,
             QualityProfileId: config.sonarrQualityProfileId,
             basicAuth: config.sonarrBasicAuth,
+            title: options.title,
+            year: options.year,
             tvdbId: options.TVDbID,
         },
         response => {
@@ -487,7 +492,7 @@ function pushSonarrRequest(options) {
             } else if (response && response.success) {
                 let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').toLowerCase();
 
-                showNotification('info', 'Added series to Sonarr', 0, () => window.open(`${config.sonarrURL}series/${title}`, '_blank'));
+                showNotification('info', 'Added series to Sonarr', 7000, () => window.open(`${config.sonarrURL}series/${title}`, '_blank'));
             } else {
                 showNotification('warning', 'Could not add to Sonarr: Unknown Error'),
                 console.error('Error adding to Sonarr:', response);
@@ -650,12 +655,15 @@ function modifyPlexButton(el, action, title, options) {
             el[txt] = 'Get ' + ty;
             el.classList.add('web-to-plex-button--downloader');
             el.addEventListener('click', e => {
+                let tv = /(tv[\s-]?)(shows?|series)|\1|\2/i;
+
                 e.preventDefault();
+                console.log(options);
                 if (config.radarrURL && options.type === 'movie') {
                     pushRadarrRequest(options);
-                } else if (config.sonarrURL && options.type === 'show') {
+                } else if (config.sonarrURL && tv.test(options.type)) {
                     pushSonarrRequest(options);
-                } else if(config.couchpotatoURL && options.type === 'show') {
+                } else if(config.couchpotatoURL && tv.test(options.type)) {
                     $pushAddToCouchpotato(options);
                 }
             });
