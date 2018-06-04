@@ -2,9 +2,8 @@
 function generateHeaders(auth) {
     let headers = { Accept: 'application/json' };
 
-    if (!auth) {
+    if (!auth)
         return headers;
-    }
 
     return {
         Authorization: `Basic ${ btoa(`${ auth.username }:${ auth.password }`) }`,
@@ -17,8 +16,8 @@ function generateHeaders(auth) {
 // This is because Movieo is served over HTTPS, so it won't accept requests to
 // HTTP servers. Unfortunately, many people use CouchPotato over HTTP.
 function viewCouchPotato(request, sendResponse) {
-	fetch(`${ request.url }?id=${ request.IMDbID }`, {
-		headers: generateHeaders(request.basicAuth),
+	fetch(`${ request.url }?id=${ request.imdbId }`, {
+		headers: generateHeaders(request.basicAuth)
 	})
 		.then(response => response.json())
 		.then(json => {
@@ -31,13 +30,11 @@ function viewCouchPotato(request, sendResponse) {
 }
 
 function addCouchpotato(request, sendResponse) {
-	fetch(`${ request.url }?identifier=${ request.IMDbID }`, {
-		headers: generateHeaders(request.basicAuth),
+	fetch(`${ request.url }?identifier=${ request.imdbId }`, {
+		headers: generateHeaders(request.basicAuth)
 	})
 		.then(response => response.json())
 		.then(response => {
-            console.log('%cAdded to CouchPotato', 'color: #0f0');
-
 			sendResponse({ success: response.success });
 		})
 		.catch(error => {
@@ -51,9 +48,10 @@ function addRadarr(request, sendResponse) {
             'X-Api-Key': request.token,
             ...generateHeaders(request.basicAuth)
         },
-        query = encodeURIComponent(`imdb:${ request.IMDbID },tmdb:${ request.TMDbID }`);
+        query = encodeURIComponent(`imdb:${ request.imdbId }`),
+        debug = { headers, query, ...request };
 
-    fetch(`${ request.url }/lookup?term=${ query }`, { headers })
+    fetch(debug.url = `${ request.url }lookup?apikey=${ request.token }&term=${ query }`)
         .then(response => response.json())
         .then(data => {
             if (!data instanceof Array || !~data.length) {
@@ -66,51 +64,55 @@ function addRadarr(request, sendResponse) {
                 minimumAvailability: 'preDB',
                 qualityProfileId: request.QualityProfileId,
                 rootFolderPath: request.StoragePath,
-                imdbId: request.IMDbID,
-                tmdbId: request.TMDbID,
                 addOptions: {
-                    searchForMovie: true,
-                },
+                    searchForMovie: true
+                }
             };
 
-            console.group('Generated URL');
-            console.log('Generated URL', request.url, headers);
-            console.log('Body', body);
-            console.groupEnd();
+//            console.group('Generated URL');
+//              console.log('URL', request.url);
+//              console.log('Head', headers);
+//              console.log('Body', body);
+//            console.groupEnd();
 
-            return body;
+            return debug.body = body;
         })
         .then(body => {
-            return fetch(request.url, {
-                method: 'post',
-                headers,
+            return fetch(`${ request.url }?apikey=${ request.token }`, debug.request = {
+                method: 'POST',
+                mode: 'no-cors',
                 body: JSON.stringify(body),
+                headers
             });
         })
-        .then(response => response.json())
+        .then(response => response.text())
         .then(data => {
+            debug.text = data;
+            data = JSON.parse(data || `{"path":"${ request.StoragePath.replace(/\\/g, '\\\\') }${ request.title } (${ request.year })"}`);
+
             if (data && data[0] && data[0].errorMessage) {
                 sendResponse({
                     error: data[0].errorMessage,
-                    location: 'addRadarr'
+                    location: `addRadarr => fetch("${ request.url }", { headers }).then(data => { if })`,
+                    debug
                 });
             } else if (data && data.path) {
-                console.log(`%cAdded to Radarr [${data.path}]`, 'color: #0f0');
-
                 sendResponse({
                     success: 'Added to ' + data.path
                 });
             } else {
                 sendResponse({
                     error: 'Unknown error',
-                    location: 'addRadarr'
+                    location: `addRadarr => fetch("${ request.url }", { headers }).then(data => { else })`,
+                    debug
                 });
             }
         })
         .catch(error => {
             sendResponse({
                 error: String(error),
-                ...error
+                location: `addRadarr => fetch("${ request.url }", { headers }).catch(error => { sendResponse })`,
+                debug
             });
         });
 }
@@ -121,9 +123,10 @@ function addSonarr(request, sendResponse) {
             'X-Api-Key': request.token,
             ...generateHeaders(request.basicAuth)
         },
-        query = encodeURIComponent(`imdb:${ request.IMDbID },tvdb:${ request.TVDbID }`);
+        query = encodeURIComponent(`tvdb:${ request.tvdbId }`),
+        debug = { headers, query, ...request };
 
-    fetch(`${ request.url }/lookup?term=${ query }`, { headers })
+    fetch(debug.url = `${ request.url }lookup?apikey=${ request.token }&term=${ query }`)
         .then(response => response.json())
         .then(data => {
             if (!data instanceof Array || !~data.length) {
@@ -136,51 +139,56 @@ function addSonarr(request, sendResponse) {
                 minimumAvailability: 'preDB',
                 qualityProfileId: request.QualityProfileId,
                 rootFolderPath: request.StoragePath,
-                imdbId: request.IMDbID,
-                tvdbId: request.TVDbID,
                 addOptions: {
-                    searchForMissingEpisodes: true,
-                },
+                    searchForMissingEpisodes: true
+                }
             };
 
-            console.group('Generated URL');
-            console.log('Generated URL', request.url, headers);
-            console.log('Body', body);
-            console.groupEnd();
+//            console.group('Generated URL');
+//              console.log('URL', request.url);
+//              console.log('Head', headers);
+//              console.log('Body', body);
+//            console.groupEnd();
 
-            return body;
+            return debug.body = body;
         })
         .then(body => {
-            return fetch(request.url, {
-                method: 'post',
-                headers,
+            return fetch(`${ request.url }?apikey=${ request.token }`, debug.request = {
+                method: 'POST',
+                mode: 'no-cors',
                 body: JSON.stringify(body),
+                headers
             });
         })
-        .then(response => response.json())
+        .then(response => response.text())
         .then(data => {
+            debug.text = data;
+            data = JSON.parse(data || `{"path":"${ request.StoragePath.replace(/\\/g, '\\\\') }${ request.title } (${ request.year })"}`);
+
             if (data && data[0] && data[0].errorMessage) {
                 sendResponse({
                     error: data[0].errorMessage,
-                    location: 'addSonarr'
+                    location: `addSonarr => fetch("${ request.url }", { headers }).then(data => { if })`,
+                    debug
                 });
             } else if (data && data.path) {
-                console.log(`%cAdded to Sonarr [${data.path}]`, 'color: #0f0');
-
                 sendResponse({
                     success: 'Added to ' + data.path
                 });
             } else {
                 sendResponse({
                     error: 'Unknown error',
-                    location: 'addSonarr'
+                    location: `addSonarr => fetch("${ request.url }", { headers }).then(data => { else })`,
+                    debug
                 });
             }
         })
         .catch(error => {
             sendResponse({
                 error: String(error),
-                ...error
+                location: `addSonarr => fetch("${ request.url }", { headers }).catch(error => { sendResponse })`,
+                ...error,
+                debug
             });
         });
 }
@@ -211,7 +219,7 @@ function promiseRace(promises) {
         });
 }
 
-function $serachPlex(connection, headers, options) {
+function $searchPlex(connection, headers, options) {
     let type = options.type || 'movie',
         url = `${ connection.uri }/hubs/search`,
         field = options.field || 'title';
@@ -226,9 +234,9 @@ function $serachPlex(connection, headers, options) {
     return fetch(finalURL, { headers })
         .then(response => response.json())
         .then(data => {
-            let hub = data.MediaContainer.Hub.find(hub => hub.type === type);
+            let Hub = data.MediaContainer.Hub.find(hub => hub.type === type);
 
-            if (!hub || !hub.Metadata) {
+            if (!Hub || !Hub.Metadata) {
                 return {
                     found: false
                 };
@@ -236,7 +244,7 @@ function $serachPlex(connection, headers, options) {
 
             // We only want to search in Plex libraries with the type "Movie", i.e. not the type "Other Videos".
             // Weirdly enough Plex doesn't seem to have an easy way to filter those libraries so we invent our own hack.
-            let movies = hub.Metadata.filter(
+            let movies = Hub.Metadata.filter(
                 meta =>
                     meta.Country ||
                     meta.Directory ||
@@ -267,14 +275,14 @@ function $serachPlex(connection, headers, options) {
 
 async function searchPlex(request, sendResponse) {
     let { options, serverConfig } = request,
-    headers = {
-        'X-Plex-Token': serverConfig.token,
-        'Accept': 'application/json',
-    };
+        headers = {
+            'X-Plex-Token': serverConfig.token,
+            'Accept': 'application/json'
+        };
 
     // Try all Plex connection URLs
     let requests = serverConfig.connections.map(connection =>
-        $serachPlex(connection, headers, options)
+        $searchPlex(connection, headers, options)
     );
 
     try {
@@ -284,10 +292,7 @@ async function searchPlex(request, sendResponse) {
 
         sendResponse(result);
     } catch (error) {
-        sendResponse({
-            error: String(error),
-            location: '?Plex'
-        });
+        sendResponse({ error: String(error), location: 'searchPlex' });
     }
 }
 

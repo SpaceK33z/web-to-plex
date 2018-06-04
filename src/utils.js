@@ -4,7 +4,7 @@ function wait(check, then) {
     if (check()) {
         then();
     } else {
-        setTimeout(() => wait(check, then), 1000);
+        setTimeout(() => wait(check, then), 50);
     }
 }
 
@@ -42,26 +42,26 @@ function $getOptions() {
                     server: {
                         ...server,
                         // Compatibility for users who have not updated their settings yet.
-                        connections: server.connections || [{ uri: server.url }],
-                    },
+                        connections: server.connections || [{ uri: server.url }]
+                    }
                 };
             if (items.couchpotatoBasicAuthUsername) {
                 options.couchpotatoBasicAuth = {
                     username: items.couchpotatoBasicAuthUsername,
-                    password: items.couchpotatoBasicAuthPassword,
+                    password: items.couchpotatoBasicAuthPassword
                 };
             }
             // TODO: stupid copy/pasta
             if (items.radarrBasicAuthUsername)
                 options.radarrBasicAuth = {
                     username: items.radarrBasicAuthUsername,
-                    password: items.radarrBasicAuthPassword,
+                    password: items.radarrBasicAuthPassword
                 };
 
             if (items.sonarrBasicAuthUsername)
                 options.sonarrBasicAuth = {
                     username: items.sonarrBasicAuthUsername,
-                    password: items.sonarrBasicAuthPassword,
+                    password: items.sonarrBasicAuthPassword
                 };
 
             if (items.couchpotatoURLRoot && items.couchpotatoToken) {
@@ -101,7 +101,7 @@ function openOptionsPage() {
     });
 }
 
-var config = null;
+var config;
 
 function parseOptions() {
     return $getOptions()
@@ -125,14 +125,14 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
         promise,
         api = {
             tmdb: 'bcb95f026f9a01ffa707fcff71900e94',
-            omdb: 'PlzBanMe',
+            omdb: 'PlzBanMe'
         },
-        apit = APIType || null,
+        apit = APIType || type,
         apid = APIID || null,
         iid = IMDbID || null,
         mid = TMDbID || null,
         tid = TVDbID || null,
-        rqut = type || apit,
+        rqut = apit,
         cors = 'https://cors-anywhere.herokuapp.com/';
 
     type = type || null;
@@ -141,7 +141,7 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
     /(tv|show|series)/i.test(rqut)?
         'tvdb':
     /(movie|film)/i.test(rqut)?
-        'imdb':
+        'tmdb':
     rqut || '*';
     title = title? title.replace(/\s*[\:,]\s*Season\s+\d+.*$/i, '').toCaps(): title;
     year = year? (year + '').replace(/\D+/g, ''): year;
@@ -151,7 +151,7 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
     let url =
         (rqut === 'imdb' || (rqut === '*' && !iid && title))?
             (year)?
-                `${ cors }http://theapache64.com/movie_db/search?keyword=${ plus(title) }`:
+                `${ cors }http://theapache64.com/movie_db/search?keyword=${ plus(title) }+${ year }`:
 //                `https://www.omdbapi.com/?t=${ plus(title) }&y=${ year }&apikey=${ api.omdb }`:
             `${ cors }http://theapache64.com/movie_db/search?keyword=${ plus(title) }`:
 //            `https://www.omdbapi.com/?t=${ plus(title) }&apikey=${ api.omdb }`:
@@ -171,7 +171,7 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
 
     if(url === null) return 0;
 
-    console.log(`Searching for "${ title } (${ year })" in ${ type || apit }/${ rqut } => ${ url }`);
+//    console.log(`Searching for "${ title } (${ year })" in ${ type || apit }/${ rqut } => ${ url.replace(cors, '') }`);
 
     await(meta? fetch(url/*, meta*/): fetch(url))
         .then(response => {
@@ -184,7 +184,7 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
             throw error;
         });
 
-    console.log('Search results', { title, year, url, json });
+//    console.log('Search results', { title, year, url, json });
 
     if('results' in json) {
         json = json.results;
@@ -372,7 +372,7 @@ function $pushAddToCouchpotato(options) {
             IMDbID: options.IMDbID,
             TMDbID: options.TMDbID,
             TVDbID: options.TVDbID,
-			basicAuth: config.couchpotatoBasicAuth,
+			basicAuth: config.couchpotatoBasicAuth
 		},
 		response => {
 			let movieExists = response.success;
@@ -404,7 +404,7 @@ function pushCouchPotatoRequest(options) {
             IMDbID: options.IMDbID,
             TMDbID: options.TMDbID,
             TVDbID: options.TVDbID,
-			basicAuth: config.couchpotatoBasicAuth,
+			basicAuth: config.couchpotatoBasicAuth
 		},
 		response => {
 			if (response.error) {
@@ -432,28 +432,29 @@ function pushRadarrRequest(options) {
         );
     }
 
+//    console.log({ config, options });
+
     chrome.runtime.sendMessage({
             type: 'ADD_RADARR',
-            url: `${ config.radarrURL }api/movie`,
-            IMDbID: options.IMDbID,
-            TMDbID: options.TMDbID,
-            TVDbID: options.TVDbID,
+            url: `${ config.radarrURL }api/movie/`,
             token: config.radarrToken,
             StoragePath: config.radarrStoragePath,
             QualityProfileId: config.radarrQualityProfileId,
-            basicAuth: config.radarrBasicAuth
+            basicAuth: config.radarrBasicAuth,
+            imdbId: options.IMDbID,
         },
         response => {
             if (response && response.error) {
                 return showNotification('warning', 'Could not add to Radarr: ' + response.error),
-                    console.error('Error adding to Radarr:', response.error, response.location);
+                    console.error('Error adding to Radarr:', response.error, response.location, response.debug);
             } else if (response && response.success) {
-                let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/\W+/g, '').toLowerCase(),
-                    TMDbID = options.TMDbID;
+                let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').toLowerCase(),
+                    TMDbID = options.TMDbID || response.tmdbId;
 
-                showNotification('info', 'Added movie to Radarr', 0, () => window.open(`${config.radarrURL}${TMDbID? `movie/${title}-${TMDbID}`: '' }`, '_blank'));
+                showNotification('info', 'Added movie to Radarr', 0, () => window.open(`${config.radarrURL}${TMDbID? `movies/${title}-${TMDbID}`: '' }`, '_blank'));
             } else {
-                showNotification('warning', 'Could not add to Radarr: Unknown Error');
+                showNotification('warning', 'Could not add to Radarr: Unknown Error'),
+                console.error('Error adding to Radarr:', response);
             }
         }
     );
@@ -468,27 +469,28 @@ function pushSonarrRequest(options) {
         );
     }
 
+//    console.log({ config, options });
+
     chrome.runtime.sendMessage({
             type: 'ADD_SONARR',
-            url: `${ config.sonarrURL }api/series`,
-            IMDbID: options.IMDbID,
-            TMDbID: options.TMDbID,
-            TVDbID: options.TVDbID,
+            url: `${ config.sonarrURL }api/series/`,
             token: config.sonarrToken,
             StoragePath: config.sonarrStoragePath,
             QualityProfileId: config.sonarrQualityProfileId,
-            basicAuth: config.sonarrBasicAuth
+            basicAuth: config.sonarrBasicAuth,
+            tvdbId: options.TVDbID,
         },
         response => {
             if (response && response.error) {
                 return showNotification('warning', 'Could not add to Sonarr: ' + response.error),
-                    console.error('Error adding to Sonarr:', response.error, response.location);
+                    console.error('Error adding to Sonarr:', response.error, response.location, response.debug);
             } else if (response && response.success) {
                 let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').toLowerCase();
 
                 showNotification('info', 'Added series to Sonarr', 0, () => window.open(`${config.sonarrURL}series/${title}`, '_blank'));
             } else {
-                showNotification('warning', 'Could not add to Sonarr: Unknown Error');
+                showNotification('warning', 'Could not add to Sonarr: Unknown Error'),
+                console.error('Error adding to Sonarr:', response);
             }
         }
     );
@@ -524,7 +526,7 @@ function modifyPlexButton(el, action, title, options) {
         if (options.remote) {
             let delimeter = '<!---->',
                 xhr = new XMLHttpRequest(),
-                data, type;
+                data, head, body, foot, type;
 
             xhr.open('POST', options.remote);
 
@@ -537,27 +539,56 @@ function modifyPlexButton(el, action, title, options) {
                     el.classList.add('web-to-plex-button--downloader');
 
                     let $data = document.querySelector('#videoplayer ~ script').innerText,
-                        regx;
+                        regx = {
+                            file: /^\s*file\:\s*((["']).+?\2),?/m,
+                            hash: /^\s*hash\:\s*((["']).+?\2),?/m
+                        };
 
-                    data = $data = $data
-                        .replace(/[^]*\((\{[^]+?\})\);[^]+/, '$1');
+                    head = $data.replace(/[^]*?(\{.*\})[^]*/, '$1');
+                    body = $data.replace(/[^]*\((\{[^]+?\})\);[^]+/, '$1');
+                    $data = data = head;
 
-                    if((regx = /^\s*file\:\s*(".+?"),?/m).test(data))
-                        data.replace(regx, '$1'),
-                        data = RegExp.$1,
-                        type = 'string';
-                    else
-                        regex = /^\s*hash\:\s*(".+?"),?/m,
-                        data.replace(regex),
-                        data = RegExp.$1.replace(/(?:^|,)(\w+)\:/g, '&$1='),
-                        type = 'url';
-                    data = data.replace(/^&|["']/g, '');
+                    try {
+                        data = JSON.parse(data.replace(/(\w+)\:/g, '"$1":').replace(/([^\\])'/g, '$1"').replace(/\:\s*([a-z]+),/gi, ': null,'));
+                    } catch(error) {
+                        console.error(error);
+                        data = $data;
+                    }
 
-                    if(type === 'url')
+                    if(typeof data == 'string') {
+                        if(regx.file.test(data))
+                            data.replace(regx.file),
+                            data = RegExp.$1,
+                            type = 'string';
+                        else if(regx.hash.test(data))
+                            data.replace(regx.hash),
+                            data = RegExp.$1.replace(/(?:^|,)(\w+)\:/g, '&$1='),
+                            type = 'url';
+                    } else {
+                        if(data.file)
+                            data = data.file,
+                            type = 'string';
+                        else if(data.hash)
+                            data = data.hash,
+                            type = 'url';
+                        else
+                            type = 'url';
+                    }
+
+                    if(type === 'url') {
                         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                        $data = [];
+                        for(var property in data)
+                            $data.push(`${ property }=${ data[property] }`);
+                        $data = data = $data.join('&');
+                    }
+
+                    data = encodeURI(data.replace(/^&|["']/g, ''));
 
                     xhr.callback = function(response) {
                         let ar = [], tl;
+
+//                        console.log('GOT:', typeof response, response);
 
                         response.split(',http')
                             .join(delimeter + 'http')
@@ -602,15 +633,14 @@ function modifyPlexButton(el, action, title, options) {
 
             if(type === 'url') {
                 xhr.onload = function() {
-                    if (xhr.status !== 200) {
+                    if (xhr.status !== 200)
                         return modifyPlexButton(el, action, title, {
                             ...options,
                             locale: null,
                             remote: null
                         });
-                    }
 
-                    xhr.callback(xhr.response);
+                    return xhr.callback(xhr.response);
                 }
 
                 xhr.send(data);
@@ -677,7 +707,7 @@ function getPlexMediaRequest({ ...options }) {
         chrome.runtime.sendMessage({
                 type: 'SEARCH_PLEX',
                 options,
-                serverConfig: config.server,
+                serverConfig: config.server
             },
             response => {
                 if (response.error) {
