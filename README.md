@@ -1,9 +1,3 @@
-# Status: DOWN (401): Unauthorized API Requests
-# Description: Radarr and Sonarr say the API calls are unauthorized, even though the tests pass...
-# Sites unaffected: Flenix
-
-----
-
 # Web to Plex+ ![Icon](src/img/48.png)
 
 ![Logo](src/img/256.png)
@@ -13,6 +7,8 @@ This browser extension searches your [Plex Media Server (PMS)](https://www.plex.
 Optionally, you can configure [Sonarr](https://sonarr.tv/) (TV Shows), [Radarr](https://radarr.video/) (Movies), and/or [CouchPotato](https://couchpota.to/) (Both) in the extension's options. After that, you can immediately add a TV show or movie to CouchPotato/Sonarr/Radarr with one click, right from your favorite site.
 
 ![Examples](example.png)
+
+## Status: 200 (OK)
 
 ## Supported sites: *Site (button location)*
 
