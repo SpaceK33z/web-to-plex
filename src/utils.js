@@ -375,7 +375,7 @@ function $pushAddToCouchpotato(options) {
             IMDbID: options.IMDbID,
             TMDbID: options.TMDbID,
             TVDbID: options.TVDbID,
-			basicAuth: config.couchpotatoBasicAuth
+			basicAuth: config.couchpotatoBasicAuth,
 		},
 		response => {
 			let movieExists = response.success;
@@ -407,7 +407,7 @@ function pushCouchPotatoRequest(options) {
             IMDbID: options.IMDbID,
             TMDbID: options.TMDbID,
             TVDbID: options.TVDbID,
-			basicAuth: config.couchpotatoBasicAuth
+			basicAuth: config.couchpotatoBasicAuth,
 		},
 		response => {
 			if (response.error) {
@@ -454,11 +454,7 @@ function pushRadarrRequest(options) {
                 return showNotification('warning', 'Could not add to Radarr: ' + response.error),
                     console.error('Error adding to Radarr:', response.error, response.location, response.debug);
             } else if (response && response.success) {
-<<<<<<< HEAD
                 let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-{2,}/g, '-').toLowerCase(),
-=======
-                let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').toLowerCase(),
->>>>>>> fa12a6b3d2b7e9bdff8ef13d4963f21d872d20f9
                     TMDbID = options.TMDbID || response.tmdbId;
 
                 showNotification('info', 'Added movie to Radarr', 7000, () => window.open(`${config.radarrURL}${TMDbID? `movies/${title}-${TMDbID}`: '' }`, '_blank'));
@@ -665,18 +661,10 @@ function modifyPlexButton(el, action, title, options) {
             el[txt] = 'Get ' + ty;
             el.classList.add('web-to-plex-button--downloader');
             el.addEventListener('click', e => {
-<<<<<<< HEAD
                 let tv = /tv[\s-]?|shows?|series/i;
 
                 e.preventDefault();
                 if (config.radarrURL && !tv.test(options.type)) {
-=======
-                let tv = /(tv[\s-]?)(shows?|series)|\1|\2/i;
-
-                e.preventDefault();
-                console.log(options);
-                if (config.radarrURL && options.type === 'movie') {
->>>>>>> fa12a6b3d2b7e9bdff8ef13d4963f21d872d20f9
                     pushRadarrRequest(options);
                 } else if (config.sonarrURL && tv.test(options.type)) {
                     pushSonarrRequest(options);

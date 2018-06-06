@@ -1,7 +1,7 @@
 /* global parseOptions, modifyPlexButton, findPlexMedia */
 function isMoviePage() {
 	// An example movie page: /movies/3030-the-1517-to-paris.html
-	return window.location.pathname.startsWith('/movies/');
+	return /\/(movies?|views?)\//.test(window.location.pathname);
 }
 
 function isMoviePageReady() {

@@ -6,11 +6,7 @@
     "homepage_url": "https://github.com/Ephellon/web-to-plex/",
 
 	"manifest_version": 2,
-<<<<<<< HEAD
-    "version": "1.2.0.0",
-=======
-    "version": "1.1.2.1",
->>>>>>> fa12a6b3d2b7e9bdff8ef13d4963f21d872d20f9
+    "version": "1.2.0.1",
 // Firefox Support =>
 //    "applications": {
 //        "gecko": {
@@ -44,7 +40,7 @@
 			"js": ["utils.js", "deps/letterboxd/cs.js"],
 			"css": ["deps/letterboxd/cs.css"]
 		},{
-			"matches": ["*://*.flenix.co/movies/*", "*://*.flenix.cc/movies/*", "*://*.flenix.net/movies/*"],
+			"matches": ["*://*.flenix.co/*/*", "*://*.flenix.cc/*/*", "*://*.flenix.net/*/*"],
 			"js": ["utils.js", "deps/flenix/cs.js"],
 			"css": ["deps/flenix/cs.css"]
 		},{
