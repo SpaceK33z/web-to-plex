@@ -50,6 +50,14 @@
     color: #f8c022!important;
 }
 
+#tt--0-0 {
+	border-color: #666!important;;
+}
+
+#tt--0-0:hover {
+    border-color: #888!important;
+}
+
 .web-to-plex-notification {
 	cursor: pointer;
 	display: block;

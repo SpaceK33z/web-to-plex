@@ -1,23 +1,27 @@
 /* global wait, modifyPlexButton, parseOptions, findPlexMedia */
 function isMoviePage() {
-	return window.location.pathname.startsWith('/movie/');
+	return /\bmovies?\b/i.test(window.location.pathname);
 }
 
 function isShowPage() {
-	return window.location.pathname.startsWith('/series/');
+	return /\bseries\b/i.test(window.location.pathname);
+}
+
+function isOnDemand() {
+    return /ondemand/i.test(window.location.pathname);
 }
 
 function init() {
 	if (isMoviePage() || isShowPage()) {
 		wait(
-			() => document.querySelector('.container .btn-with-play'),
+			() => document.querySelector('.container .btn-with-play, .moredetails, .more-like'),
 			() => initPlexThingy(isMoviePage() ? 'movie' : 'tv')
 		);
 	}
 }
 
 function renderPlexButton() {
-	let $actions = document.querySelector('.container .content-holder');
+	let $actions = document.querySelector('.container .content-holder, .detail .fl');
 	if (!$actions)
 		return;
 
@@ -29,7 +33,7 @@ function renderPlexButton() {
 
     el.textContent = 'Web to Plex+';
     el.title = 'Loading...';
-	el.classList.add('web-to-plex-button', 'btn');
+	el.classList.add('web-to-plex-button', 'button', 'btn', 'detail-btn');
 	$actions.appendChild(el);
 
 	return el;
@@ -41,10 +45,24 @@ async function initPlexThingy(type) {
 	if (!$button)
 		return;
 
-	let $title = document.querySelector('.copy > .title'),
+    var $title, $year;
+
+    if(isOnDemand()) {
+        if(isMoviePage()) {
+            $title = document.querySelector('.detail *');
+            $year = document.querySelector('.rating *');
+        } else {
+            $title = {textContent: window.location.pathname.replace(/\/ondemand\/tvshows?\/([^\/]+?)\/.*/i)};
+            $year = document.querySelector('#showDetails > * > *:nth-child(4) *:last-child');
+
+            $title.textContent = decodeURL($title.textContent).toCpas();
+        }
+    } else {
+        $title = document.querySelector('.copy > .title');
         $year = (type === 'movie')?
             document.querySelector('.copy > .details'):
         document.querySelector('.summary ~ .title ~ *');
+    }
 
 	if (!$title || !$year)
 		return modifyPlexButton($button, 'error', `Could not extract ${ !$title? 'title': 'year' } from Verizon`);

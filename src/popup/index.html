@@ -45,8 +45,8 @@
 */
         }
 
-        table {
-            height: 100% !important;
+        table, footer {
+            height: 35% !important;
             width: 100% !important;
             font-size: 1em !important;
             overflow: auto !important;
@@ -55,13 +55,14 @@
             padding-bottom: 1em !important;
         }
 
-        tr {
+        tr, footer > * {
             box-shadow: none !important;
             height: calc(33% - 25px);
             width: calc(100% - 25px);
+            padding: 0 !important;
         }
 
-        td {
+        td, footer > * > * {
             padding: 15px !important;
             line-height: 1.33 !important;
             border-radius: 3px;
@@ -76,6 +77,7 @@
             height: calc(100% - 30px);
             width: calc(100% - 30px);
             transition: box-shadow 0.5s !important;
+            display: table-cell !important;
         }
 
         #movieo:hover {
@@ -150,7 +152,24 @@
             box-shadow: 0 10px 128px inset #E10000;
         }
 
-        td[save-file]:after, td[cost-cash-low]:after, td[cost-cash-med]:after, td[cost-cash-hig]:after {
+        /* Constant Footer */
+        #plex:hover {
+            box-shadow: 0 10px 128px inset #F9BE03;
+        }
+
+        #radarr:hover {
+            box-shadow: 0 10px 128px inset #FFC230;
+        }
+
+        #sonarr:hover {
+            box-shadow: 0 10px 128px inset #36C6F4;
+        }
+
+        #couch-potato:hover {
+            box-shadow: 0 10px 128px inset #ECB501;
+        }
+
+        [save-file]:after, [cost-cash-low]:after, [cost-cash-med]:after, [cost-cash-hig]:after {
             content: "____";
             color: transparent;
             float: right;
@@ -160,50 +179,50 @@
             margin-right: -1em;
         }
 
-        td[is-slow] label:after {
+        [is-slow] label:after {
             content: " \23f3";
             float: right;
         }
 
-        td[is-shy] label:after {
+        [is-shy] label:after {
             content: " \1f910";
             float: right;
         }
 
-        td[save-file]:after {
+        [save-file]:after {
             background: url("../img/48.png") no-repeat center;
         }
 
         /* $1 - $10 */
-        td[cost-cash-low]:after {
+        [cost-cash-low]:after {
             background: url("../img/$48.png") no-repeat center;
         }
 
         /* $11 - $30 */
-        td[cost-cash-med]:after {
+        [cost-cash-med]:after {
             background: url("../img/$$48.png") no-repeat center;
         }
 
         /* $31+ */
-        td[cost-cash-hig]:after {
+        [cost-cash-hig]:after {
             background: url("../img/$$$48.png") no-repeat center;
         }
 
-        td[disabled], td[disabled]:hover {
+        [disabled], [disabled]:hover {
 /*            box-shadow: 0 10px 128px inset #000 !important;*/
             opacity: 0.5 !important;
         }
 
-        td[disabled] label:after {
+        [disabled] label:after {
             content: " \23f3" !important;
             float: right;
         }
 
-        body::-webkit-scrollbar {
+        *::-webkit-scrollbar {
             width: 15px;
         }
 
-        body::-webkit-scrollbar-thumb {
+        *::-webkit-scrollbar-thumb {
             min-height: 50px;
             background: rgba(255, 255, 255, 0.15);
             border: 2px solid rgba(0, 0, 0, 0);
@@ -211,7 +230,7 @@
             background-clip: padding-box;
         }
 
-        body::-webkit-scrollbar-track {
+        *::-webkit-scrollbar-track {
             background: rgba(0, 0, 0, 0.2);
         }
     </style>
@@ -336,7 +355,7 @@
                     <label>Google</label>
                 </a>
             </td>
-            <td id="itunes" is-shy="Trakt">
+            <td id="itunes" is-shy="Trakt, Letterboxd">
                 <a href="https://itunes.apple.com/" target="_blank">
                     <img alt="iTunes" src="../img/itunes.png" />
                     <label>iTunes</label>
@@ -344,6 +363,38 @@
             </td>
         </tr>
     </table>
+
+    <!-- Constant Footer -->
+<!--
+    <footer>
+        <ul>
+            <li id="plex">
+                <a href="http://plex.tv/" target="_blank">
+                    <img alt="Plex" src="../img/plex.png" />
+                    <label>Plex</label>
+                </a>
+            </li>
+            <li id="radarr">
+                <a href="https://radarr.video/" target="_blank">
+                    <img alt="Radarr" src="../img/radarr.png" />
+                    <label>Radarr</label>
+                </a>
+            </li>
+            <li id="sonarr">
+                <a href="https://sonarr.tv/" target="_blank">
+                    <img alt="Sonarr" src="../img/sonarr.png" />
+                    <label>Sonarr</label>
+                </a>
+            </li>
+            <li id="couch-potato">
+                <a href="https://couchpota.to/" target="_blank">
+                    <img alt="Couch Potato" src="../img/couchpotato.png" />
+                    <label>Couch Potato</label>
+                </a>
+            </li>
+        </ul>
+    </footer>
+-->
 </body>
 
 <script type="text/javascript" src="index.js"></script>

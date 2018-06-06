@@ -1,3 +1,9 @@
+.web-to-plex-button {
+    border-color: #f45a26!important;
+    background: #f45a26!important;
+    color: #fff;
+}
+
 .web-to-plex-button--downloader {
 	border-color: #f45a26!important;
 	background: #f45a26!important;
@@ -16,6 +22,15 @@
 
 .web-to-plex-button--found:hover {
 	background: #f9be03!important;
+}
+
+#tt--0-0 {
+	background: #666!important;
+}
+
+#tt--0-0:hover {
+    background: #888!important;
+	border-color: #888!important;
 }
 
 .web-to-plex-notification {

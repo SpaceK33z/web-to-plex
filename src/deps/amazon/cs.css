@@ -21,6 +21,14 @@
 	background-color: #f8c022!important;
 }
 
+#tt--0-0 {
+	background: #666!important;
+}
+
+#tt--0-0:hover {
+    background: #888!important;
+}
+
 .web-to-plex-notification {
 	cursor: pointer;
 	display: block;
