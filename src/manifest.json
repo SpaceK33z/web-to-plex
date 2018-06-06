@@ -6,7 +6,11 @@
     "homepage_url": "https://github.com/Ephellon/web-to-plex/",
 
 	"manifest_version": 2,
+<<<<<<< HEAD
     "version": "1.2.0.0",
+=======
+    "version": "1.1.2.1",
+>>>>>>> fa12a6b3d2b7e9bdff8ef13d4963f21d872d20f9
 // Firefox Support =>
 //    "applications": {
 //        "gecko": {

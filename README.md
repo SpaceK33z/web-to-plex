@@ -8,6 +8,8 @@ Optionally, you can configure [Sonarr](https://sonarr.tv/) (TV Shows), [Radarr](
 
 ![Examples](example.png)
 
+## Status: 200 (OK)
+
 ## Supported sites: *Site (button location)*
 
 - [Movieo](http://movieo.me/) (top of page, by ratings)
@@ -44,7 +46,7 @@ Optionally, you can configure [Sonarr](https://sonarr.tv/) (TV Shows), [Radarr](
 
 - [Rotten Tomatoes](https://www.rottentomatoes.com/)
 
-## Installing Web to Plex+ (0.5.1.0)
+## Installing Web to Plex+
 
 - **Download the [CRX](https://github.com/Ephellon/web-to-plex/raw/master/hhkmjeeccipbolailpomhjhmccnnjhkj.crx)**
 

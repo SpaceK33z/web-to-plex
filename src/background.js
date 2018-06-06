@@ -82,10 +82,17 @@ function addRadarr(request, sendResponse) {
             ...generateHeaders(request.basicAuth)
         },
         id = (/^(tt-?)?$/.test(request.imdbId)? request.tmdbId: request.imdbId),
+<<<<<<< HEAD
         query = (/tt-/.test(id)? 'imdb?imdbid': /^\d{2,}$/.test(id)? 'tmdb?tmdbid': id = encodeURI(`${request.title} ${request.year}`), 'term'),
         debug = { headers, query, request };
 
     fetch(debug.url = `${ request.url }lookup/${ query }=${ id }&apikey=${ request.token }`)
+=======
+        query = encodeURIComponent(`${ (/tt-/.test(id)? ('imdb:' + id): request.title + request.year) }`),
+        debug = { headers, query, ...request };
+
+    fetch(debug.url = `${ request.url }lookup?apikey=${ request.token }&term=${ query }`)
+>>>>>>> fa12a6b3d2b7e9bdff8ef13d4963f21d872d20f9
         .then(response => response.json())
         .then(data => {
             if (!data instanceof Array || !data.length) {
@@ -157,9 +164,14 @@ function addSonarr(request, sendResponse) {
             'X-Api-Key': request.token,
             ...generateHeaders(request.basicAuth)
         },
+<<<<<<< HEAD
         id = request.tvdbId,
         query = encodeURIComponent(`tvdb:${ id }`),
         debug = { headers, query, request };
+=======
+        query = encodeURIComponent(`tvdb:${ request.tvdbId }`),
+        debug = { headers, query, ...request };
+>>>>>>> fa12a6b3d2b7e9bdff8ef13d4963f21d872d20f9
 
     fetch(debug.url = `${ request.url }lookup?apikey=${ request.token }&term=${ query }`)
         .then(response => response.json())
