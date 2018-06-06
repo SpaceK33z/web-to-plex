@@ -8,7 +8,11 @@ Optionally, you can configure [Sonarr](https://sonarr.tv/) (TV Shows), [Radarr](
 
 ![Examples](example.png)
 
+----
+
 ## Status: 200 (OK)
+
+----
 
 ## Supported sites: *Site (button location)*
 
@@ -21,10 +25,10 @@ Optionally, you can configure [Sonarr](https://sonarr.tv/) (TV Shows), [Radarr](
 - [The TVDb](https://www.thetvdb.com/) (top of info. list, under languages)
 - [The MovieDb](https://www.themoviedb.org/) (far right of icons, before "play trailer")
 - [VRV](https://vrv.co/)<sup>2</sup> (below title, right of "watchlist" button)
-- [Hulu](https://hulu.com/)<sup>2</sup> <sup>3</sup> (below video, far right of icons)
+- [Hulu](https://hulu.com/)<sup>2/3/4</sup> (below video, far right of icons)
 - [Google Play Store](https://play.google.com/store/movies/) (right of poster, with purchasing options)
 - [iTunes](https://itunes.apple.com/)<sup>3</sup> (below "watch on iTunes" button)
-- [Metacritic](http://www.metacritic.com/) (last/rightmost social icon)
+- [Metacritic](http://www.metacritic.com/)<sup>4</sup> (last/rightmost social icon)
 - [Fandango](https://www.fandango.com/) (between title and video, left of "more" menu)
 - [Amazon](https://www.amazon.com/) (with purchasing and watchlist options, far right)
 - [Vudu](https://www.vudu.com/) (right of poster, above "synopsis")
