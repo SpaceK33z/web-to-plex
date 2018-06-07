@@ -14,6 +14,16 @@ Optionally, you can configure [Sonarr](https://sonarr.tv/) (TV Shows), [Radarr](
 
 ----
 
+## Features:
+
+- Can save media directly from noted sites
+- Can push requests to your chosen NBZ manager
+- Offers search options via right-click (context menu)
+- Offers a Plex-like GUI
+- Offers a status via the browser badge (orange meaning "available/found," grey meaning "unavailable/not found")
+- Offers an easy login feature
+	- Offers an API login feature
+
 ## Supported sites: *Site (button location)*
 
 - [Movieo](http://movieo.me/) ([button location](button-locations/movieo.png))
