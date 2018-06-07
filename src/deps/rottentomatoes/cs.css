@@ -1,0 +1,75 @@
+.web-to-plex--container {
+    color: #fff!important;
+
+    display: block;
+    margin-top: 6px;
+}
+
+.web-to-plex-button {
+    background-color: #f45a26!important;
+    border: 1px solid #f45a26!important;
+    border-radius: 4px;
+    color: #fff!important;
+    font-size: 16px;
+    font-weight: bold;
+
+    display: inline-block;
+    line-height: 1.25;
+    margin-bottom: 0;
+    padding: 6px 12px;
+    text-align: center;
+    vertical-align: middle;
+    white-space: nowrap;
+
+    cursor: pointer;
+}
+
+.web-to-plex-button--downloader {
+	background-color: #f45a26!important;
+    border-color: #f45a26!important;
+}
+
+.web-to-plex-button--downloader:hover {
+	background-color: #f67e56!important;
+    border-color: #f67e56!important;
+}
+
+.web-to-plex-button--found {
+	background-color: #e5a00d!important;
+    border-color: #e5a00d!important;
+}
+
+.web-to-plex-button--found:hover {
+	background-color: #f9be03!important;
+    border-color: #f9be03!important;
+}
+
+#tt--0-0 {
+	background-color: #666!important;
+    border-color: #666!important;
+}
+
+#tt--0-0:hover {
+	background-color: #888!important;
+    border-color: #888!important;
+}
+
+.web-to-plex-notification {
+	cursor: pointer;
+	display: block;
+	position: fixed;
+	top: 80px;
+	left: 50%;
+	margin-left: -175px;
+	width: 350px;
+	background: #21262e;
+	color: #fff;
+	font-size: 20px;
+	padding: 10px;
+	border-radius: 4px;
+	z-index: 999000;
+}
+
+.web-to-plex-warning {
+	background: #fd6a00;
+}

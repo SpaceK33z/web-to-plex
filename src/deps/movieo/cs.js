@@ -85,8 +85,8 @@ function renderPlexButton() {
 
 function getIMDbID() {
 	let $link = document.querySelector(
-		'.tt-parent[href^="http://www.imdb.com/title/tt"]'
+		'.tt-parent[href*="imdb.com/title/tt"]'
 	);
 	if ($link)
-		return $link.href.replace('http://www.imdb.com/title/', '');
+		return $link.href.replace(/^.*imdb\.com\/title\//, '');
 }

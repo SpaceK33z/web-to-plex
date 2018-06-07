@@ -53,10 +53,10 @@ function renderPlexButton() {
 
 function getIMDbID() {
 	let $link = document.querySelector(
-		'.track-event[href^="http://www.imdb.com/title/tt"]'
+		'.track-event[href*="imdb.com/title/tt"]'
 	);
 	if ($link) {
-		let link = $link.href.replace('http://www.imdb.com/title/', '');
+		let link = $link.href.replace(/^.*imdb\.com\/title\//, '');
 		return link.replace('/maindetails', '');
 	}
 }
