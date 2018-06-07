@@ -33,6 +33,8 @@ Optionally, you can configure [Sonarr](https://sonarr.tv/) (TV Shows), [Radarr](
 - [Amazon](https://www.amazon.com/) (with purchasing and watchlist options, far right)
 - [Vudu](https://www.vudu.com/) (right of poster, above "synopsis")
 - [Verizon](https://www.tv.verizon.com/) (right of "watch" button, left of poster)
+- [CouchPotato](http://couchpotato.life/) (right of IMDb rating)
+- [Rotten Tomatoes](https://www.rottentomatoes.com/) (under "Collection" or "Episode List" button)
 
 *Notes*
 
@@ -43,12 +45,9 @@ Optionally, you can configure [Sonarr](https://sonarr.tv/) (TV Shows), [Radarr](
 
 ## In Progress sites (adding support):
 
-- [CouchPotato](http://couchpotato.life/)
 - [Netflix](https://netflix.com/)<sup>3</sup>
 
 ## En Progress sites (may add support):
-
-- [Rotten Tomatoes](https://www.rottentomatoes.com/)
 
 ## Installing Web to Plex+
 
