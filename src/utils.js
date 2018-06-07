@@ -122,7 +122,7 @@ function parseOptions() {
         );
 }
 
-async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APIID, meta }) {
+async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APIID, meta, rerun }) {
     let json = {},
         data = {},
         promise,
@@ -152,7 +152,7 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
     function plus(string) { return string.replace(/\s+/g, '+') }
 
     let url =
-        (rqut === 'imdb' || (rqut === '*' && !iid && title))?
+        (rqut === 'imdb' || (rqut === '*' && !iid && title) || (rqut === 'tvdb' && !iid && title && rerun))?
             (year)?
                 `${ cors }http://theapache64.com/movie_db/search?keyword=${ plus(title) }+${ year }`:
 //                `https://www.omdbapi.com/?t=${ plus(title) }&y=${ year }&apikey=${ api.omdb }`:
@@ -270,7 +270,9 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
         json = found;
     }
 
-    if(!json)
+    if(!json && !rerun)
+        return json = getIDs({ title, year: YEAR, type, IMDbID, TMDbID, TVDbID, APIType, APIID, meta, rerun: true });
+    else if(!json)
         json = {};
 
     var ei = 'tt-';

@@ -16,25 +16,25 @@ Optionally, you can configure [Sonarr](https://sonarr.tv/) (TV Shows), [Radarr](
 
 ## Supported sites: *Site (button location)*
 
-- [Movieo](http://movieo.me/) (top of page, by ratings)
-- [IMDb](http://imdb.com/) (bottom right of poster)
-- [Trakt.tv](https://trakt.tv/) (below poster, with other links)
-- [Letterboxd](https://letterboxd.com/) ("watch" section under poster, last item)
-- [Flenix](https://flenix.co/)<sup>1</sup> (several locations: 1 in header, 1 above video, 1 below)
-- [TV Maze](http://www.tvmaze.com/) (below title on far right, by "Gallery")
-- [The TVDb](https://www.thetvdb.com/) (top of info. list, under languages)
-- [The MovieDb](https://www.themoviedb.org/) (far right of icons, before "play trailer")
-- [VRV](https://vrv.co/)<sup>2</sup> (below title, right of "watchlist" button)
-- [Hulu](https://hulu.com/)<sup>2/3/4</sup> (below video, far right of icons)
-- [Google Play Store](https://play.google.com/store/movies/) (right of poster, with purchasing options)
-- [iTunes](https://itunes.apple.com/)<sup>3</sup> (below "watch on iTunes" button)
-- [Metacritic](http://www.metacritic.com/)<sup>4</sup> (last/rightmost social icon)
-- [Fandango](https://www.fandango.com/) (between title and video, left of "more" menu)
-- [Amazon](https://www.amazon.com/) (with purchasing and watchlist options, far right)
-- [Vudu](https://www.vudu.com/) (right of poster, above "synopsis")
-- [Verizon](https://www.tv.verizon.com/) (right of "watch" button, left of poster)
-- [CouchPotato](http://couchpotato.life/) (right of IMDb rating)
-- [Rotten Tomatoes](https://www.rottentomatoes.com/) (under "Collection" or "Episode List" button)
+- [Movieo](http://movieo.me/) [button location](button-locations/movieo.png)
+- [IMDb](http://imdb.com/) [button location](button-locations/imdb.png)
+- [Trakt.tv](https://trakt.tv/) [button location](button-locations/trakt.png)
+- [Letterboxd](https://letterboxd.com/) [button location](button-locations/letterboxd.png)
+- [Flenix](https://flenix.co/)<sup>1</sup> [button locations](button-locations/flenix.png)
+- [TV Maze](http://www.tvmaze.com/) [button location](button-locations/tvmaze.png)
+- [The TVDb](https://www.thetvdb.com/) [button location](button-locations/tvdb.png)
+- [The MovieDb](https://www.themoviedb.org/) [button location](button-locations/tmdb.png)
+- [VRV](https://vrv.co/)<sup>2</sup> [button location](button-locations/vrv.png)
+- [Hulu](https://hulu.com/)<sup>2/3/4</sup> [button location](button-locations/hulu.png)
+- [Google Play Store](https://play.google.com/store/movies/) [button location](button-locations/google.png)
+- [iTunes](https://itunes.apple.com/)<sup>3</sup> [button location](button-locations/itunes.png)
+- [Metacritic](http://www.metacritic.com/)<sup>4</sup> [button location](button-locations/metacritic.png)
+- [Fandango](https://www.fandango.com/) [button location](button-locations/fandango.png)
+- [Amazon](https://www.amazon.com/) [button location](button-locations/amazon.png)
+- [Vudu](https://www.vudu.com/) [button location](button-locations/vudu.png)
+- [Verizon](https://www.tv.verizon.com/) [button location](button-locations/verizon.png)
+- [CouchPotato](http://couchpotato.life/) [button location](button-locations/couch-potato.png)
+- [Rotten Tomatoes](https://www.rottentomatoes.com/) [button location](button-locations/rotten-tomatoes.png)
 
 *Notes*
 
@@ -45,9 +45,11 @@ Optionally, you can configure [Sonarr](https://sonarr.tv/) (TV Shows), [Radarr](
 
 ## In Progress sites (adding support):
 
-- [Netflix](https://netflix.com/)<sup>3</sup>
+- Nothing here... for now
 
 ## En Progress sites (may add support):
+
+- [Netflix](https://netflix.com/)<sup>3</sup>
 
 ## Installing Web to Plex+
 

@@ -31,9 +31,9 @@ async function initPlexThingy(type) {
 	if (!$button)
 		return;
 
-	let meta = document.querySelector('h1[itemprop="name"], h1'),
-        title = meta.textContent.replace(/\s*\((\d+)\)\s*/, '').trim(),
-        year = +RegExp.$1;
+	let meta = [document.querySelector('h1[itemprop="name"], h1'), document.querySelector('.release-date > *:last-child')],
+        title = meta[0].textContent.replace(/\s*\((\d+)\)\s*/, '').trim(),
+        year = meta[1].textContent.replace(/[^]*(\d{4})[^]*?$/g, '$1').trim();
 
     let Db = await getIDs({ title, year, type }),
         IMDbID = Db.imdb,
