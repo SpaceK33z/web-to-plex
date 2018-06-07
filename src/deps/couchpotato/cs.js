@@ -65,7 +65,7 @@ function getIMDbID() {
 	);
 	if ($link) {
 		let link = $link.href.replace(/^.*imdb\.com\/title\//, '');
-		return link.replace('/maindetails', '');
+		return link.replace(/\/(?:maindetails\/?)?$/, '');
 	}
 }
 
