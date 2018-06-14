@@ -88,13 +88,8 @@ function addRadarr(request, sendResponse) {
     fetch(debug.url = `${ request.url }lookup/${ query }=${ id }&apikey=${ request.token }`)
         .then(response => response.json())
         .then(data => {
-            var body;
-
-            if (!data instanceof Array && !data.length && !data.title) {
-                throw new Error('Movie not found');
-            } else if(data.length) {
-                body = {
-                    ...data[0],
+            var body,
+                props = {
                     monitored: true,
                     minimumAvailability: 'preDB',
                     qualityProfileId: request.QualityProfileId,
@@ -103,16 +98,18 @@ function addRadarr(request, sendResponse) {
                         searchForMovie: true
                     }
                 };
+
+            if (!data instanceof Array && !data.length && !data.title) {
+                throw new Error('Movie not found');
+            } else if(data.length) {
+                body = {
+                    ...data[0],
+                    ...props
+                };
             } else if(data.title) {
                 body = {
                     ...data,
-                    monitored: true,
-                    minimumAvailability: 'preDB',
-                    qualityProfileId: request.QualityProfileId,
-                    rootFolderPath: request.StoragePath,
-                    addOptions: {
-                        searchForMovie: true
-                    }
+                    ...props
                 };
             }
 
