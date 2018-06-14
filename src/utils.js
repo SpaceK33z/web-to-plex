@@ -497,7 +497,7 @@ function pushSonarrRequest(options) {
             } else if (response && response.success) {
                 let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-{2,}/g, '-').toLowerCase();
 
-                showNotification('info', 'Added series to Sonarr', 7000, () => window.open(`${config.sonarrURL}series/${title}`, '_blank'));
+                showNotification('info', 'Added series to Sonarr', 7000, () => window.open(`${config.sonarrURL}series/${(year == YEAR? options.TVDbID: title)}`, '_blank'));
             } else {
                 showNotification('warning', 'Could not add to Sonarr: Unknown Error'),
                 console.error('Error adding to Sonarr:', response);

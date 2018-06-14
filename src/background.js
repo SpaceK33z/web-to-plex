@@ -82,26 +82,39 @@ function addRadarr(request, sendResponse) {
             ...generateHeaders(request.basicAuth)
         },
         id = (/^(tt-?)?$/.test(request.imdbId)? request.tmdbId: request.imdbId),
-        query = (/tt-/.test(id)? 'imdb?imdbid': /^\d{2,}$/.test(id)? 'tmdb?tmdbid': id = encodeURI(`${request.title} ${request.year}`), 'term'),
+        query = (/^tt-?\d+$/i.test(id)? 'imdb?imdbid': /^\d+$/.test(id)? 'tmdb?tmdbid': (id = encodeURI(`${request.title} ${request.year}`), 'term')),
         debug = { headers, query, request };
 
     fetch(debug.url = `${ request.url }lookup/${ query }=${ id }&apikey=${ request.token }`)
         .then(response => response.json())
         .then(data => {
-            if (!data instanceof Array || !data.length) {
-                throw new Error('Movie not found');
-            }
+            var body;
 
-            let body = {
-                ...data[0],
-                monitored: true,
-                minimumAvailability: 'preDB',
-                qualityProfileId: request.QualityProfileId,
-                rootFolderPath: request.StoragePath,
-                addOptions: {
-                    searchForMovie: true
-                }
-            };
+            if (!data instanceof Array && !data.length && !data.title) {
+                throw new Error('Movie not found');
+            } else if(data.length) {
+                body = {
+                    ...data[0],
+                    monitored: true,
+                    minimumAvailability: 'preDB',
+                    qualityProfileId: request.QualityProfileId,
+                    rootFolderPath: request.StoragePath,
+                    addOptions: {
+                        searchForMovie: true
+                    }
+                };
+            } else if(data.title) {
+                body = {
+                    ...data,
+                    monitored: true,
+                    minimumAvailability: 'preDB',
+                    qualityProfileId: request.QualityProfileId,
+                    rootFolderPath: request.StoragePath,
+                    addOptions: {
+                        searchForMovie: true
+                    }
+                };
+            }
 
 //            console.group('Generated URL');
 //              console.log('URL', request.url);
