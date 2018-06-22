@@ -16,8 +16,8 @@ Optionally, you can configure [Sonarr](https://sonarr.tv/) (TV Shows), [Radarr](
 
 ## Features:
 
-- Can save media directly from noted sites
-- Can push requests to your chosen NBZ manager
+- Can save media directly from noted sites (file downloads)
+- Can push requests to your chosen NZB manager
 - Offers search options via right-click (context menu)
 - Offers a Plex-like GUI
 - Offers a status via the browser badge (orange meaning "available/found," grey meaning "unavailable/not found")
