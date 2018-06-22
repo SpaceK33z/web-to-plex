@@ -154,10 +154,8 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
     let url =
         (rqut === 'imdb' || (rqut === '*' && !iid && title) || (rqut === 'tvdb' && !iid && title && rerun))?
             (year)?
-                `${ cors }http://theapache64.com/movie_db/search?keyword=${ plus(title) }+${ year }`:
-//                `https://www.omdbapi.com/?t=${ plus(title) }&y=${ year }&apikey=${ api.omdb }`:
-            `${ cors }http://theapache64.com/movie_db/search?keyword=${ plus(title) }`:
-//            `https://www.omdbapi.com/?t=${ plus(title) }&apikey=${ api.omdb }`:
+                `https://www.omdbapi.com/?t=${ plus(title) }&y=${ year }&apikey=${ api.omdb }`:
+            `https://www.omdbapi.com/?t=${ plus(title) }&apikey=${ api.omdb }`:
         (rqut === 'tmdb' || (rqut === '*' && !mid && title && year) || apit === 'movie')?
             (apit && apid)?
                 `https://api.themoviedb.org/3/${ apit }/${ apid }?api_key=${ api.tmdb }`:
