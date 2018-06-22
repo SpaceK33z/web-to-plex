@@ -345,13 +345,13 @@ async function searchPlex(request, sendResponse) {
 // You have to make API calls on ALL clicks...
 
 chrome.contextMenus.onClicked.addListener((item) => {
-    if(!/^W2P/.test(item.menuItemId)) return;
+    if(!/^W2P/i.test(item.menuItemId)) return;
 
     let url = "",
-        db = item.menuItemId.toLowerCase().replace(/^W2P-?/i, ''),
-        pv = external.P.toLowerCase().slice(0, 2);
+        db = item.menuItemId.slice(-2).toLowerCase(),
+        pv = external.P.slice(0, 2).toLowerCase();
 
-    switch(db.slice(-2)) {
+    switch(db) {
         case 'im':
             url = (external.Q && pv == 'im')?
                 `imdb.com/title/${ external.Q }/`:
