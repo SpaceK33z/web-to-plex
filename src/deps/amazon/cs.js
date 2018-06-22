@@ -4,11 +4,11 @@ function isMovie() {
 }
 
 function isShow() {
-	return document.querySelector('[data-automation-id="num-of-seasons-badge"]');
+	return document.querySelector('[data-automation-id="num-of-seasons"], .num-of-seasons');
 }
 
 function isPageReady() {
-    return document.querySelector('[data-automation-id="imdb-rating-badge"]');
+    return document.querySelector('[data-automation-id="imdb-rating-badge"], #most-recent-reviews-content > *:first-child');
 }
 
 async function init() {
@@ -30,21 +30,22 @@ function renderPlexButton($parent) {
 
     el.textContent = 'Web to Plex+';
     el.title = 'Loading...';
-	el.classList.add('web-to-plex-button', 'av-button', 'av-button--default');
+	el.classList.add('web-to-plex-button', 'av-button', 'av-button--default', 'dv-sub-btn-content');
 
 	$parent.appendChild(el);
 	return el;
 }
 
 async function initPlexThingy(type) {
-	let $parent = document.querySelector('#dv-action-box .av-action-button-box'),
-        $button = renderPlexButton($parent);
+	let $parent = document.querySelector('#dv-action-box .av-action-button-box, #dv-action-box'),
+        $button = renderPlexButton($parent),
+        R = RegExp;
 
 	if (!$button)
 		return;
 
-    let $title = document.querySelector('[data-automation-id="title"]'),
-        $year = document.querySelector('[data-automation-id="release-year-badge"]');
+    let $title = document.querySelector('[data-automation-id="title"], #aiv-content-title'),
+        $year = document.querySelector('[data-automation-id="release-year-badge"], .release-year');
 
     if (!$title)
 		return modifyPlexButton(
@@ -54,8 +55,8 @@ async function initPlexThingy(type) {
 		),
           null;
 
-	let title = $title.textContent.replace(/\(.+?\)$/, '').trim(),
-        year = $year? $year.textContent.trim(): YEAR;
+	let title = $title.textContent.replace(/(?:\(.+?\)|(\d+)|\d+\s+seasons?\s+(\d+))\s*$/gi, '').trim(),
+        year = $year? $year.textContent.trim(): R.$1 || R.$2 || YEAR;
 
     let Db = await getIDs({ title, year, type }),
         IMDbID = Db.imdb,

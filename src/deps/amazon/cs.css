@@ -3,30 +3,31 @@
 	color: #fff!important;
     margin-bottom: 8px!important;
     line-height: 2!important;
+    text-decoration: none!important;
 }
 
 .web-to-plex-button--downloader {
-	background-color: #f45a26!important;
+	background: linear-gradient(180deg, #f67e56, #f45a26)!important;
 }
 
 .web-to-plex-button--downloader:hover {
-	background-color: #f67e56!important;
+	background: linear-gradient(180deg, #ff8960, #fd6430)!important;
 }
 
 .web-to-plex-button--found {
-	background-color: #ca7c1f!important;
+	background: linear-gradient(180deg, #f7dfa5, #ca7c1f)!important;
 }
 
 .web-to-plex-button--found:hover {
-	background-color: #f8c022!important;
+	background: linear-gradient(180deg, #f7dfa5, #f8c022)!important;
 }
 
 #tt--0-0 {
-	background: #666!important;
+	background: linear-gradient(180deg, #70767d 0, #696f78 0, #3d444e 100%)!important;
 }
 
 #tt--0-0:hover {
-    background: #888!important;
+    background: linear-gradient(180deg, #70767d 0, #696f78 0, #3d444e 100%)!important;
 }
 
 .web-to-plex-notification {
