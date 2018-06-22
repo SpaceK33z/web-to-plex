@@ -4,7 +4,7 @@ function isMovie() {
 }
 
 function isShow() {
-	return document.querySelector('[data-automation-id="num-of-seasons"], .num-of-seasons');
+	return document.querySelector('[data-automation-id="num-of-seasons"], .num-of-seasons, [class^="season"]');
 }
 
 function isPageReady() {
