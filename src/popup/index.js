@@ -2,7 +2,7 @@ document.body.onload = function() {
     var elements = document.querySelectorAll('[disabled], [is-shy], [is-slow], [save-file], [cost-cash], [cost-more-cash], [cost-most-cash]'),
         messages = {
             "disabled": "Not yet implemented",
-            "save-file": "Uses file downloads before your managers",
+            "save-file": "Uses {*} before using your manager(s)",
             "is-shy": "Can only be accessed via: {*}",
             "is-slow": "Resource intensive (loads slowly)",
             // $0.99 one time; $0.99 - $9.99/mon

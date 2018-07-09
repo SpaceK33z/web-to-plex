@@ -61,11 +61,11 @@
 }
 
 #tt--0-0 {
-	background: #666!important;
+	color: #666!important;
 }
 
 #tt--0-0:hover {
-    background: #888!important;
+    color: #888!important;
 }
 
 .web-to-plex-notification {

@@ -88,6 +88,32 @@
 
         [id$="_test"] {
             background: #cc7b19 !important;
+            margin-bottom: 2px;
+            padding: 10px 8px 10px 10px !important;
+        }
+
+        [id$="_status"] {
+            padding: 0 6px !important;
+            font-size: 16px !important;
+            border-radius: 3px;
+            font-family: monospace, sans-serif, sans, arial;
+            border: 0;
+            box-shadow: none !important;
+            color: #fff !important;
+            background: #666 !important;
+            border-radius: 4px;
+        }
+
+        [id$="_status"].false {
+            background: #cc1b19 !important;
+        }
+
+        [id$="_status"].true {
+            background: #7bcc19 !important;
+        }
+
+        [id$="token"], [data-option$="Token"], [data-option$="API"] {
+            font-family: monospace, consolas, sans-serif, sans serif, sans, arial;
         }
 
         em {
@@ -105,6 +131,10 @@
             margin: 0 20px;
             color: #999 !important;
             box-sizing: border-box;
+        }
+
+        [type="password"] ~ .hidden-help {
+            display: none;
         }
 
         article {
@@ -149,7 +179,7 @@
         }
 
         body::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0);
+            background: url(../img/noise.png) repeat, #3f4245 !important;
         }
 
         input::placeholder, input:placeholder {
@@ -197,13 +227,12 @@
 	</section>
 
 	<section>
-		<button type="button" id="plex_test">Test</button>
-		<div id="plex_test_status"></div>
+		<button type="button" id="plex_test">Test <span id="plex_test_status">?</span></button>
 	</section>
 	<section>
 		<label>Select a server</label>
 		<select id="plex_servers">
-			<option value="">Press "Test" first</option>
+			<option value="">Press "Test [?]" first</option>
 		</select>
 	</section>
 
@@ -211,7 +240,7 @@
 
     <article>
         <details>
-            <summary>CouchPotato Settings (Movies)</summary>
+            <summary>CouchPotato (Movies/TV Shows)</summary>
 
             <h2>Connection Settings</h2>
             <section>
@@ -232,33 +261,32 @@
                 </div>
             </section>
 
-            <h3>Login Settings <em>(optional, saved)</em></h3>
+            <h3>Login <em>(optional, saved)</em></h3>
             <section>
-                <label>username</label>
+                <label>Username</label>
                 <input type="text" data-option="couchpotatoBasicAuthUsername" placeholder="Enter your CouchPotato username"/>
                 <div>Only use this if you setup a CouchPotato username.</div>
             </section>
             <section>
-                <label>password</label>
+                <label>Password</label>
                 <input type="text" data-option="couchpotatoBasicAuthPassword" placeholder="Enter your CouchPotato password"/>
                 <div>Only use this if you setup a CouchPotato password.</div>
-                <div>Your password will be hidden once saved.</div>
+                <div class="hidden-help">Your password will be hidden once saved.</div>
             </section>
 
             <section>
-                <button type="button" id="couchpotato_test">Test</button>
-                <span id="couchpotato_test_status"></span>
+                <button type="button" id="couchpotato_test">Test <span id="couchpotato_test_status">?</span></button>
             </section>
             <section>
                 <label>Quality Profile</label>
                 <select data-option="couchpotatoQualityProfileId">
-                    <option value="">Press "CouchPotato Settings | Test" first</option>
+                    <option value="">Press "Test [?]" first</option>
                 </select>
             </section>
         </details>
 
         <details>
-            <summary>Radarr Settings (Movies)</summary>
+            <summary>Radarr (Movies)</summary>
 
             <h2>Connection Settings</h2>
             <section>
@@ -279,43 +307,42 @@
                 </div>
             </section>
 
-            <h3>Login Settings <em>(optional, saved)</em></h3>
+            <h3>Login <em>(optional, saved)</em></h3>
             <section>
-                <label>username</label>
+                <label>Username</label>
                 <input type="text" data-option="radarrBasicAuthUsername" placeholder="Enter your Radarr username"/>
                 <div>Only use this if you setup a Radarr username.</div>
             </section>
             <section>
-                <label>password</label>
+                <label>Password</label>
                 <input type="text" data-option="radarrBasicAuthPassword" placeholder="Enter your Radarr password"/>
                 <div>Only use this if you setup a Radarr password.</div>
-                <div>Your password will be hidden once saved.</div>
+                <div class="hidden-help">Your password will be hidden once saved.</div>
             </section>
 
             <section>
-                <button type="button" id="radarr_test">Test</button>
-                <span id="radarr_test_status"></span>
+                <button type="button" id="radarr_test">Test <span id="radarr_test_status">?</span></button>
             </section>
 
             <section>
                 <label>Radarr Storage Path</label>
                 <select type="text" data-option="radarrStoragePath">
-                    <option value="">Press "Radarr Settings | Test" first</option>
+                    <option value="">Press "Test [?]" first</option>
                 </select>
                 <div>
-                    This should be the same path (verbatim) used in Radarr
+                    This should be the same path (verbatim) used in Radarr.
                 </div>
             </section>
             <section>
                 <label>Quality Profile</label>
                 <select data-option="radarrQualityProfileId">
-                    <option value="">Press "Radarr Settings | Test" first</option>
+                    <option value="">Press "Test [?]" first</option>
                 </select>
             </section>
         </details>
 
         <details>
-            <summary>Sonarr Settings (TV Shows)</summary>
+            <summary>Sonarr (TV Shows)</summary>
 
             <h2>Connection Settings</h2>
             <section>
@@ -336,38 +363,82 @@
                 </div>
             </section>
 
-            <h3>Login Settings <em>(optional, saved)</em></h3>
+            <h3>Login <em>(optional, saved)</em></h3>
             <section>
-                <label>username</label>
+                <label>Username</label>
                 <input type="text" data-option="sonarrBasicAuthUsername" placeholder="Enter your Sonarr username"/>
                 <div>Only use this if you setup a Sonarr username.</div>
             </section>
             <section>
-                <label>password</label>
+                <label>Password</label>
                 <input type="text" data-option="sonarrBasicAuthPassword" placeholder="Enter your Sonarr password"/>
                 <div>Only use this if you setup a Sonarr password.</div>
-                <div>Your password will be hidden once saved.</div>
+                <div class="hidden-help">Your password will be hidden once saved.</div>
             </section>
 
             <section>
-                <button type="button" id="sonarr_test" style="background: #cc7b19 !important;">Test Sonarr Settings</button>
-                <span id="sonarr_test_status"></span>
+                <button type="button" id="sonarr_test">Test <span id="sonarr_test_status">?</span></button>
             </section>
 
             <section>
                 <label>Sonarr Storage Path</label>
                 <select type="text" data-option="sonarrStoragePath">
-                    <option value="">Press "Sonarr Settings | Test" first</option>
+                    <option value="">Press "Test [?]" first</option>
                 </select>
                 <div>
-                    This should be the same path (verbatim) used in Sonarr
+                    This should be the same path (verbatim) used in Sonarr.
                 </div>
             </section>
             <section>
                 <label>Quality Profile</label>
                 <select data-option="sonarrQualityProfileId">
-                    <option value="">Press "Sonarr Settings | Test" first</option>
+                    <option value="">Press "Test [?]" first</option>
                 </select>
+            </section>
+        </details>
+    </article>
+
+    <h1>Other Settings</h1>
+
+    <article>
+        <details>
+            <summary>API Keys</summary>
+
+            <h2>Extra API Keys</h2>
+            <section>
+                <label>OMDb</label>
+                <input type="text" data-option="OMDbAPI" placeholder="Enter your OMDb API Key"/>
+                <div>
+                    You can <a href="https://www.omdbapi.com/apikey.aspx" target="_blank">sign up</a> for an API key, or have OMDb used as a last resort.
+                </div>
+            </section>
+        </details>
+    </article>
+
+    <article>
+        <details>
+            <summary>Managers</summary>
+
+            <h2>External Links</h2>
+            <section>
+                <label>CouchPotato's Website</label>
+                <div>
+                    Download, and/or find more information for <a href="https://couchpota.to/" target="_blank">CouchPotato</a>.
+                </div>
+            </section>
+
+            <section>
+                <label>Radarr's Website</label>
+                <div>
+                    Download, and/or find more information for <a href="http://radarr.movie/" target="_blank">Radarr</a>.
+                </div>
+            </section>
+
+            <section>
+                <label>Sonarr's Website</label>
+                <div>
+                    Download, and/or find more information for <a href="https://sonarr.tv/" target="_blank">Sonarr</a>.
+                </div>
             </section>
         </details>
     </article>

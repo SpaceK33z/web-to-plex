@@ -26,6 +26,14 @@ function watchlocationchange() {
 
 setInterval(watchlocationchange, 1000);
 
+function load(name) {
+    return JSON.parse(localStorage.getItem(btoa(name)));
+}
+
+function save(name, data) {
+    return localStorage.setItem(btoa(name), JSON.stringify(data));
+}
+
 function $getOptions() {
     const storage = chrome.storage.sync || chrome.storage.local;
 
@@ -128,7 +136,7 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
         promise,
         api = {
             tmdb: 'bcb95f026f9a01ffa707fcff71900e94',
-            omdb: 'PlzBanMe'
+            omdb: config.OMDbAPI || 'PlzBanMe'
         },
         apit = APIType || type,
         apid = APIID || null,
@@ -147,9 +155,17 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
         'tmdb':
     rqut || '*';
     title = title? title.replace(/\s*[\:,]\s*Season\s+\d+.*$/i, '').toCaps(): title;
-    year = year? (year + '').replace(/\D+/g, ''): year;
+    year = year? (year + '').replace(/\D+/g, ''): load(title) || year;
 
     function plus(string) { return string.replace(/\s+/g, '+') }
+
+    let savename = `${title} (${year})`,
+        local = load(savename);
+
+    if(local) {
+//        console.log('[LOCAL] Search results', local);
+        return local;
+    }
 
     let url =
         (rqut === 'imdb' || (rqut === '*' && !iid && title) || (rqut === 'tvdb' && !iid && title && rerun))?
@@ -324,6 +340,11 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
     year = data.year = +year | 0;
 
 //    console.log('Best match', { title, year, data, type, rqut, score: json.score | 0 });
+
+    save(savename, data);
+    save(title, year);
+
+//    console.log(`Saved as "${ savename }"`, data);
 
     return data;
 }

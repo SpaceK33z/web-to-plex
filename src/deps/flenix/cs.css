@@ -1,6 +1,10 @@
-.web-to-plex-wrapper, .web-to-plex-wrapper > *, .web-to-plex-button {
+.web-to-plex-wrapper, .web-to-plex-button {
 	color: #fff!important;
     transition: background 0.2s;
+}
+
+[class^="web-to-plex-wrapper"] > .web-to-plex-button {
+    transition: background 0s;
 }
 
 .web-to-plex-button.roundButton {

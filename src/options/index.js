@@ -40,7 +40,8 @@ const storage = (chrome.storage.sync || chrome.storage.local),
             'sonarrBasicAuthUsername',
             'sonarrBasicAuthPassword',
             'sonarrStoragePath',
-            'sonarrQualityProfileId'
+            'sonarrQualityProfileId',
+            'OMDbAPI'
       ];
 
 var PlexServers = [],
@@ -114,17 +115,19 @@ function performPlexTest(ServerID) {
 
 	__save__.disabled = true;
 	__servers__.innerHTML = '';
-	teststatus.textContent = '';
+	teststatus.textContent = '?';
 
 	getServers(plexToken).then(servers => {
 		PlexServers = servers || [];
+        teststatus.textContent = '!';
 
 		if (!servers) {
-			return teststatus.textContent = 'Plex: invalid token';
+            teststatus.classList = false;
+            return;
         }
 
 		__save__.disabled = false;
-        teststatus.textContent = 'Success!';
+        teststatus.classList = true;
 
 		servers.forEach(server => {
 			let $option = document.createElement('option'),
@@ -200,11 +203,13 @@ function performRadarrTest(QualityProfileID, StoragePath) {
         storagepath = __radarr_storagePath__;
 
 	__radarr_qualityProfile__.innerHTML = '';
-	teststatus.textContent = '';
+	teststatus.textContent = '?';
     storagepath.textContent = '';
 
 	getRadarr(options, 'profile').then(profiles => {
-		teststatus.textContent = !~profiles.length ? 'Failed.' : 'Success!';
+		teststatus.textContent = '!';
+        teststatus.classList = !!profiles.length;
+
 		profiles.forEach(profile => {
 			let option = document.createElement('option');
 
@@ -258,13 +263,17 @@ function getSonarr(options, api = "profile") {
 
 function performSonarrTest(QualityProfileID, StoragePath) {
 	let options = getOptionValues(),
-        teststatus = document.querySelector('#sonarr_test_status');
+        teststatus = document.querySelector('#sonarr_test_status'),
+        storagepath = __sonarr_storagePath__;
 
 	__sonarr_qualityProfile__.innerHTML = '';
-	teststatus.textContent = '';
+	teststatus.textContent = '?';
+    storagepath.textContent = '';
 
 	getSonarr(options, 'profile').then(profiles => {
-		teststatus.textContent = !~profiles.length ? 'Failed.' : 'Success!';
+		teststatus.textContent = '!';
+        teststatus.classList = !!profiles.length;
+
 		profiles.forEach(profile => {
 			let option = document.createElement('option');
 			option.value = profile.id;
@@ -318,7 +327,7 @@ function saveOptions() {
         serverConnections = getPlexConnections(server);
     ClientID = server.clientIdentifier;
 
-	if (!~serverConnections.length) {
+	if (!serverConnections.length) {
 		return status.textContent = 'Could not locate Plex server URL',
             null;
     }
@@ -425,9 +434,13 @@ function restoreOptions() {
                 if(/password$/i.test(option))
                     el.setAttribute('type', el.type = 'password');
                 else 
-                    el.placeholder = `Last save: ${ el.value }`;
+                    el.placeholder = `Last save: ${ el.value }`,
+                    el.title = `Double-click to restore value ("${ el.value }")`,
+                    el.setAttribute('save', el.value);
             }
-		});
+
+            el.ondblclick = event => el.value = el.getAttribute('save');
+        });
 
 		if (items.plexToken) {
 			performPlexTest(items.servers ? items.servers[0].id : null);

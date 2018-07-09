@@ -45,10 +45,11 @@ Optionally, you can configure [Sonarr](https://sonarr.tv/) (TV Shows), [Radarr](
 - [Verizon](https://www.tv.verizon.com/) ([button location](button-locations/verizon.png))
 - [CouchPotato](http://couchpotato.life/) ([button location](button-locations/couch-potato.png))
 - [Rotten Tomatoes](https://www.rottentomatoes.com/) ([button location](button-locations/rotten-tomatoes.png))
+- [ShowRSS](https://showrss.info/)<sup>1</sup> (no button location)
 
 *Notes*
 
-- `1` *This site uses the `Right click | Save as...` feature (file download).*
+- `1` *This site uses the `Right click | Save as...` feature (file download), or a direct link (usually magnet URL).*
 - `2` *This site has a loading issue, simply refresh the page if the button doesn't appear.*
 - `3` *This site doesn't allow media browsing, or requires a subscription beforehand.*
 - `4` *This site is network intensive (loads slowly). Be patient.*
