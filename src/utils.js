@@ -638,18 +638,20 @@ function modifyPlexButton(el, action, title, options) {
                         xhr.callback(data);
 
                     el.addEventListener('click', e => {
-                        e.preventDefault();
                         let el = e.target,
                             hs = el.dataset.hrefs.split(delimeter),
                             tl;
 
-                        if (el.index == hs.length) {
-                            el.index = 0;
-                        }
-
                         el.href = tl = hs[el.index++];
                         tl = (tl.replace(/.*(?:\.(\w+))?$/, '$1') || 'mp4').toUpperCase();
                         el[txt] = el[txt].replace(/\d+\/.+?$/, `${el.index}/${hs.length} (${tl})`);
+
+                        if(hs.length == 1)
+                            return el.index = 0;
+                        else if(el.index == hs.length)
+                            el.index = 0;
+
+                        e.preventDefault(true);
                     });
                     break;
 
