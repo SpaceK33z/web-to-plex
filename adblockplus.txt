@@ -5,4 +5,5 @@
 @@||localhost:8686/$document
 metacritic.*##div[id*="muccuzs"]
 flenix.*##.trailer_frame~div
-flenix.*##.wrapper~div[id]
+flenix.*##body>script~div[id]
+flenix.*##body>div[id]:last-child
