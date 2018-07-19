@@ -1,6 +1,5 @@
 ! AdBlock Plus: https://chrome.google.com/webstore/detail/adblock/gighmmpiobklfepjocnamgkkbiglidom
 ! This list is to help remove ads from various sites used by W2P+
-! -------------------------------------------------------------------------------------------------------------------------------- !
 @@||127.0.0.1:32400/$document
 @@||localhost:8989/$document
 @@||localhost:7878/$document
