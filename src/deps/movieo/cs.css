@@ -33,23 +33,3 @@
     background: #888!important;
 	border-color: #888!important;
 }
-
-.web-to-plex-notification {
-	cursor: pointer;
-	display: block;
-	position: fixed;
-	top: 80px;
-	left: 50%;
-	margin-left: -175px;
-	width: 350px;
-	background: #21262e;
-	color: #fff;
-	font-size: 20px;
-	padding: 10px;
-	border-radius: 4px;
-	z-index: 999000;
-}
-
-.web-to-plex-warning {
-	background: #fd6a00;
-}

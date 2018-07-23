@@ -37,24 +37,3 @@
 #tt--0-0:hover {
     color: #888!important;
 }
-
-.web-to-plex-notification {
-	cursor: pointer;
-	display: block;
-	position: fixed;
-	top: 80px;
-	left: 50%;
-	margin-left: -175px;
-	width: 350px;
-	background: #e5a00d;
-	color: #fff;
-	font-size: 13px;
-	padding: 10px;
-	border-radius: 4px;
-	z-index: 999000;
-	font-family: Verdana, Arial, sans-serif;
-}
-
-.web-to-plex-warning {
-	background: #fd6a00;
-}

@@ -27,11 +27,11 @@ function watchlocationchange() {
 setInterval(watchlocationchange, 1000);
 
 function load(name) {
-    return JSON.parse(localStorage.getItem(btoa(name)));
+    return JSON.parse((sessionStorage || localStorage).getItem(btoa(name)));
 }
 
 function save(name, data) {
-    return localStorage.setItem(btoa(name), JSON.stringify(data));
+    return (sessionStorage || localStorage).setItem(btoa(name), JSON.stringify(data));
 }
 
 function $getOptions() {
@@ -628,7 +628,7 @@ function modifyPlexButton(el, action, title, options) {
                             .forEach(value => (/\.html?$/i.test(value)? null: ar.push(value)));
 
                         el.dataset.hrefs = ar.join(delimeter);
-                        el.download = `${options.title} (${options.year})`;
+                        el.download = `${options.title.replace(/\s*\:\s*/g, ' - ')} (${options.year})`;
                         el.href = tl = ar[el.index = 0];
                         tl = (tl.replace(/.*(?:\.(\w+))?$/, '$1') || 'mp4').toUpperCase();
                         el[txt] = el[txt].replace(/\d+\/.+?$/, `${++el.index}/${ar.length} (${tl})`);
@@ -760,7 +760,8 @@ function getPlexMediaURL(PlexUIID, key) {
 
 String.prototype.toCaps = String.prototype.toCaps || function toCaps(all) {
     var array = this.toLowerCase(),
-        titles = /(?!^)\b(a(nd?)?|as|but|of|[fn]?or|the|to|yet)\b/gi;
+        titles = /(?!^)\b(a(nd?)?|as|but|of|[fn]?or|the|to|yet)\b/gi,
+        exceptions = /([\:\|\.\!\?\"\(]\s*)\b(a(nd?)?|as|but|of|[fn]?or|the|to|yet)\b/gi;
 
     array = array.split(/\s+/);
     for(var index = 0, length = array.length, string = [], word; index < length; index++)
@@ -770,7 +771,7 @@ String.prototype.toCaps = String.prototype.toCaps || function toCaps(all) {
     string = string.join(' ');
 
     if(!all)
-        string = string.replace(titles, ($0, $1, $$, $_) => $1.toLowerCase());
+        string = string.replace(titles, ($0, $1, $$, $_) => $1.toLowerCase()).replace(exceptions, ($0, $1, $2, $$, $_) => $1 + $2[0].toUpperCase() + $2.slice(1, word.length));
 
     return string;
 };

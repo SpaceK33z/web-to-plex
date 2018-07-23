@@ -17,7 +17,7 @@ function generateHeaders(auth) {
 function changeStatus({ id, tt, ty, tv, pv, tl, yr }) {
 
     id = id && !/^tt-?$/i.test(id)? id: null;
-    tl = tt.replace(/\-/g, ' ').replace(/\s{2,}/g, ' - ');
+    tl = tt.replace(/\-/g, ' ').replace(/[\s\:]{2,}/g, ' - ');
     tt = tt.replace(/[\-\s]+/g, '-').replace(/[^\w\-]+/g, '');
 
     external = { P: pv, Q: id, T: tt, Y: ty };
@@ -281,31 +281,31 @@ function $searchPlex(connection, headers, options) {
             let Hub = data.MediaContainer.Hub.find(hub => hub.type === type);
 
             if (!Hub || !Hub.Metadata) {
-                return {
-                    found: false
-                };
+                return { found: false };
             }
 
             // We only want to search in Plex libraries with the type "Movie", i.e. not the type "Other Videos".
             // Weirdly enough Plex doesn't seem to have an easy way to filter those libraries so we invent our own hack.
             let movies = Hub.Metadata.filter(
                 meta =>
-                    meta.Country ||
                     meta.Directory ||
                     meta.Genre ||
+                    meta.Country ||
                     meta.Role ||
                     meta.Writer
-            );
+            ),
+                strip = (string) => string.replace(/\W+/g, '').toLowerCase();
 
             // This is messed up, but Plex's definition of a year is year when it was available,
             // not when it was released (which is Movieo's definition).
             // For examples, see Bone Tomahawk, The Big Short, The Hateful Eight.
             // So we'll first try to find the movie with the given year, and then + 1 it.
-            let media = movies.find(meta => meta.year === +options.year),
+            // Added [strip] to prevent mix-ups, see: "Kingsman: The Golden Circle" v. "The Circle"
+            let media = movies.find(meta => ((meta.year === +options.year) && strip(meta.title) === strip(options.title))),
                 key = null;
 
             if (!media) {
-                media = movies.find(meta => meta.year === +options.year + 1);
+                media = movies.find(meta => ((meta.year === +options.year + 1) && strip(meta.title) === strip(options.title)));
             } else {
                 key = media.key.replace('/children', '');
             }
