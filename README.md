@@ -12,6 +12,8 @@ Optionally, you can configure [Sonarr](https://sonarr.tv/) (TV Shows), [Radarr](
 
 ## Status: 200 (OK)
 
+No known errors.
+
 ----
 
 ## Features:
