@@ -48,6 +48,8 @@ var PlexServers = [],
     ClientID = null,
     manifest = chrome.runtime.getManifest();
 
+chrome.manifest = chrome.runtime.getManifest();
+
 function getServers(plexToken) {
 	return fetch('https://plex.tv/api/resources?includeHttps=1', {
 		headers: {
@@ -481,3 +483,6 @@ document
 document
 	.querySelector('#sonarr_test')
 	.addEventListener('click', performSonarrTest);
+document
+    .querySelector('#version')
+    .innerHTML = `Version ${ chrome.manifest.version }`;
