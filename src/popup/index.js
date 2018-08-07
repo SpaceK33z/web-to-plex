@@ -1,5 +1,5 @@
 document.body.onload = function() {
-    var elements = document.querySelectorAll('[disabled], [is-shy], [is-slow], [save-file], [cost-cash], [cost-more-cash], [cost-most-cash]'),
+    let elements = document.querySelectorAll('[disabled], [is-shy], [is-slow], [save-file], [cost-cash-low], [cost-cash-med], [cost-cash-hig]'),
         messages = {
             "disabled": "Not yet implemented",
             "save-file": "Uses {*} before using your manager(s)",
@@ -13,10 +13,8 @@ document.body.onload = function() {
             "cost-cash-hig": "At least {*} (expensive)"
         };
 
-    for(var element, index = 0, length = elements.length; index < length; index++) {
-        element = elements[index];
-        for(var message in messages)
-            if(message in element.attributes)
+    for(let element, index = 0, length = elements.length; index < length; index++)
+        for(let message in messages)
+            if(message in (element = elements[index]).attributes)
                 element.title = `${ messages[message].replace(/\{\*\}/g, element.getAttribute(message)) }. ${ element.title }`;
-    }
 }

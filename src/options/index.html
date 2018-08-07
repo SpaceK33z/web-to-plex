@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Web To Plex+ Options</title>
+	<title>Web To Plex Options</title>
 	<style>
         html, body {
             height: 100%;
@@ -216,6 +216,24 @@
 </head>
 
 <body>
+<!--
+
+Layout of code (Jade/Pug)
+
+div
+    article
+        details
+            summary
+                | Title
+            h2
+                | Sub-Title
+            section
+                label
+                    | Description
+                div
+                    | Help text
+
+-->
 <div>
     <h1>Plex Settings</h1>
 
@@ -251,6 +269,20 @@
                 <select id="plex_servers">
                     <option value="">Press "Test [?]" first</option>
                 </select>
+            </section>
+        </details>
+
+        <details>
+            <summary>Advance</summary>
+
+            <h2>Server Options</h2>
+            <section>
+                <label>Server URL</label>
+                <input type="text" data-option="plexURL" placeholder="Enter your Plex URL (for direct access)"/>
+                <div>
+                    Use this to communicate directly with your Plex server.<br/>
+                    Such as <em>http://localhost:32400</em> or <em>http://192.168.1.100:32400</em>
+                </div>
             </section>
         </details>
     </article>

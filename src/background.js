@@ -1,6 +1,9 @@
 /* global chrome */
-var external = {},
-    parentItem;
+let external = {},
+    parentItem,
+    terminal =
+//                { error: m => m, info: m => m, log: m => m, warn: m => m } ||
+                console;
 
 function generateHeaders(auth) {
     let headers = { Accept: 'application/json' };
@@ -34,7 +37,7 @@ function changeStatus({ id, tt, ty, tv, pv, tl, yr }) {
         title: `"${ tl } (${ yr || 'N/A' })"`
     });
 
-    for(var array = 'IM TM TV'.split(' '), length = array.length, index = 0, item; index < length; index++)
+    for(let array = 'IM TM TV'.split(' '), length = array.length, index = 0, item; index < length; index++)
         chrome.contextMenus.update('W2P-' + (item = array[index]), {
             title: (
                 ((pv == (item += 'Db')) && id)?
@@ -88,7 +91,7 @@ function addRadarr(request, sendResponse) {
     fetch(debug.url = `${ request.url }lookup/${ query }=${ id }&apikey=${ request.token }`)
         .then(response => response.json())
         .then(data => {
-            var body,
+            let body,
                 props = {
                     monitored: true,
                     minimumAvailability: 'preDB',
@@ -113,11 +116,11 @@ function addRadarr(request, sendResponse) {
                 };
             }
 
-//            console.group('Generated URL');
-//              console.log('URL', request.url);
-//              console.log('Head', headers);
-//              console.log('Body', body);
-//            console.groupEnd();
+            terminal.group('Generated URL');
+              terminal.log('URL', request.url);
+              terminal.log('Head', headers);
+              terminal.log('Body', body);
+            terminal.groupEnd();
 
             return debug.body = body;
         })
@@ -189,11 +192,11 @@ function addSonarr(request, sendResponse) {
                 }
             };
 
-//            console.group('Generated URL');
-//              console.log('URL', request.url);
-//              console.log('Head', headers);
-//              console.log('Body', body);
-//            console.groupEnd();
+            terminal.group('Generated URL');
+              terminal.log('URL', request.url);
+              terminal.log('Head', headers);
+              terminal.log('Body', body);
+            terminal.groupEnd();
 
             return debug.body = body;
         })
@@ -258,7 +261,7 @@ function promiseRace(promises) {
             // The promise has rejected, remove it from the list of promises and just continue the race.
             let promise = promises.splice(index, 1)[0];
 
-            promise.catch(error => console.log(`Plex request #${ index } failed:`, error));
+            promise.catch(error => terminal.log(`Plex request #${ index } failed:`, error));
             return promiseRace(promises);
         });
 }
@@ -376,7 +379,7 @@ chrome.contextMenus.onClicked.addListener((item) => {
 });
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    console.log('From:', sender);
+    terminal.log('From:', sender);
 
     let id = (request? request.options || request: {}),
         tt = id.title,
@@ -414,10 +417,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 parentItem = chrome.contextMenus.create({
     id: 'W2P',
-    title: 'Web to Plex+'
+    title: 'Web to Plex'
 });
 
-for(var array = 'IM TM TV'.split(' '), DL = {}, length = array.length, index = 0, item; index < length; index++)
+for(let array = 'IM TM TV'.split(' '), DL = {}, length = array.length, index = 0, item; index < length; index++)
     chrome.contextMenus.create({
         id: 'W2P-' + (item = array[index]),
         parentId: parentItem,

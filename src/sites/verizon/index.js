@@ -45,7 +45,7 @@ async function initPlexThingy(type) {
 	if (!$button)
 		return;
 
-    var $title, $year;
+    let $title, $year;
 
     if(isOnDemand()) {
         if(isMoviePage()) {
