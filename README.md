@@ -1,8 +1,8 @@
-# Web to Plex+ ![Icon](src/img/48.png)
+# Web to Plex ![Icon](src/img/48.png)
 
 ![Logo](src/img/256.png)
 
-This browser extension searches your [Plex Media Server (PMS)](https://www.plex.tv/downloads/) for matching media on sites like [IMDb](https://imdb.com), letting you immediately open the movie or TV show in Plex Web if it is available. If the item isn't found on your PMS, then a download button is added instead.
+This browser extension searches your [Plex Media Server (PMS)](https://www.plex.tv/downloads/) for matching media on sites like [IMDb](https://imdb.com), letting you immediately open the movie or TV show in Plex, if it is available. If the item isn't found on your PMS, then a download button is added instead.
 
 Optionally, you can configure [Sonarr](https://sonarr.tv/) (TV Shows), [Radarr](https://radarr.video/) (Movies), and/or [CouchPotato](https://couchpota.to/) (Both) in the extension's options. After that, you can immediately add a TV show or movie to CouchPotato/Sonarr/Radarr with one click, right from your favorite site.
 
@@ -10,9 +10,9 @@ Optionally, you can configure [Sonarr](https://sonarr.tv/) (TV Shows), [Radarr](
 
 ----
 
-## Status: 200 (OK)
+## Status: 426 (UPGR-RQ)
 
-No known errors.
+Getting the repo ready for a pull request.
 
 ----
 
@@ -25,6 +25,7 @@ No known errors.
 - Offers a status via the browser badge (orange meaning "available/found," grey meaning "unavailable/not found")
 - Offers an easy login feature
 	- Offers an API login feature
+- Offers a Plex URL feature (i.e. you can specify `localhost:32400` as your Plex URL)
 
 ## Supported sites: *Site (button location)*
 
@@ -64,7 +65,7 @@ No known errors.
 
 - [Netflix](https://netflix.com/)<sup>3</sup>
 
-## Installing Web to Plex+
+## Installing Web to Plex
 
 - **Download the [CRX](https://github.com/Ephellon/web-to-plex/raw/master/hhkmjeeccipbolailpomhjhmccnnjhkj.crx)**
 
