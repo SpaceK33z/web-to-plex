@@ -1,0 +1,39 @@
+.web-to-plex-button:before {
+    content: "\1f4e5 ";
+    font-size: 20px !important;
+    vertical-align: text-bottom !important;
+}
+
+.web-to-plex-button {
+	display: inline-block !important;
+    color: #e6e6e6 !important;
+    font-size: 12px !important;
+    height: 20px !important;
+    text-decoration: none !important;
+    user-select: none !important;
+    vertical-align: top !important;
+}
+
+.web-to-plex-button--downloader {
+	color: #f45a26 !important;
+}
+
+.web-to-plex-button--downloader:hover {
+	color: #f67e56 !important;
+}
+
+.web-to-plex-button--found {
+	color: #e5a00d !important;
+}
+
+.web-to-plex-button--found:hover {
+	color: #f9be03 !important;
+}
+
+#tt--0-0 {
+	color: #666!important;
+}
+
+#tt--0-0:hover {
+    color: #888!important;
+}

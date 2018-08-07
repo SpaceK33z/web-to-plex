@@ -1,0 +1,27 @@
+.web-to-plex-button {
+	color: #727272;
+}
+
+.web-to-plex-button--downloader {
+    color: #f45a26!important;
+}
+
+.web-to-plex-wrapper--found, .web-to-plex-button--found {
+	color: #e5a00d!important;
+}
+
+.web-to-plex-wrapper:hover, .web-to-plex-wrapper:hover > *, .web-to-plex-button--downloader:hover {
+	color: #f67e56!important;
+}
+
+.web-to-plex-wrapper--found:hover, .web-to-plex-wrapper--found:hover > *, .web-to-plex-button--found:hover {
+	color: #f8c022!important;
+}
+
+#tt--0-0 {
+	color: #666!important;
+}
+
+#tt--0-0:hover {
+    color: #888!important;
+}
