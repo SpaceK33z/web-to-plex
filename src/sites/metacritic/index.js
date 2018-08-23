@@ -56,7 +56,7 @@ function renderPlexButton() {
     ch.classList.add('fa', 'fa-fw', 'fa-arrow-down');
 
     el.classList.add('web-to-plex-button');
-    el.title = 'Web to Plex+';
+    el.title = 'Web to Plex';
     el.appendChild(ch);
 	$actions.appendChild(el);
 

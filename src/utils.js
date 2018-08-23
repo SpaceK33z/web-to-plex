@@ -26,7 +26,7 @@ function watchlocationchange() {
     }
 }
 
-setInterval(watchlocationchange, 1000);
+setInterval(watchlocationchange, 1000); // at least 1s is needed to properly fire the event :/
 
 function load(name) {
     return JSON.parse((sessionStorage || localStorage).getItem(btoa(name)));
@@ -67,6 +67,12 @@ function $getOptions() {
                 };
 
             // TODO: stupid copy/pasta
+            if (items.watcherBasicAuthUsername)
+                options.watcherBasicAuth = {
+                    username: items.watcherBasicAuthUsername,
+                    password: items.watcherBasicAuthPassword
+                };
+
             if (items.radarrBasicAuthUsername)
                 options.radarrBasicAuth = {
                     username: items.radarrBasicAuthUsername,
@@ -82,6 +88,11 @@ function $getOptions() {
             if (items.couchpotatoURLRoot && items.couchpotatoToken)
                 options.couchpotatoURL = `${ items.couchpotatoURLRoot }/api/${encodeURIComponent(items.couchpotatoToken)}`;
 
+            if (items.watcherURLRoot && items.watcherToken) {
+                options.watcherURL = items.watcherURLRoot;
+                options.watcherToken = items.watcherToken;
+            }
+
             if (items.radarrURLRoot && items.radarrToken) {
                 options.radarrURL = items.radarrURLRoot;
                 options.radarrToken = items.radarrToken;
@@ -92,6 +103,7 @@ function $getOptions() {
                 options.sonarrToken = items.sonarrToken;
             }
 
+            options.watcherStoragePath = items.watcherStoragePath;
             options.radarrStoragePath = items.radarrStoragePath;
             options.radarrQualityProfileId = items.radarrQualityProfileId;
             options.sonarrStoragePath = items.sonarrStoragePath;
@@ -138,7 +150,7 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
         data = {},
         promise,
         api = {
-            tmdb: 'bcb95f026f9a01ffa707fcff71900e94',
+            tmdb: config.TMDbAPI || 'bcb95f026f9a01ffa707fcff71900e94',
             omdb: config.OMDbAPI || 'PlzBanMe'
         },
         apit = APIType || type,
@@ -171,15 +183,15 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
     }
 
     let url =
-        (rqut === 'imdb' || (rqut === '*' && !iid && title) || (rqut === 'tvdb' && !iid && title && rerun))?
+        (rqut == 'imdb' || (rqut == '*' && !iid && title) || (rqut == 'tvdb' && !iid && title && rerun))?
             (year)?
                 `https://www.omdbapi.com/?t=${ plus(title) }&y=${ year }&apikey=${ api.omdb }`:
             `https://www.omdbapi.com/?t=${ plus(title) }&apikey=${ api.omdb }`:
-        (rqut === 'tmdb' || (rqut === '*' && !mid && title && year) || apit === 'movie')?
+        (rqut == 'tmdb' || (rqut == '*' && !mid && title && year) || apit == 'movie')?
             (apit && apid)?
                 `https://api.themoviedb.org/3/${ apit }/${ apid }?api_key=${ api.tmdb }`:
             `https://api.themoviedb.org/3/search/${ apit }?api_key=${ api.tmdb }&query=${ encodeURI(title) }&year=${ year }`:
-        (rqut === 'tvdb' || (rqut === '*' && !tid && title) || apid)?
+        (rqut == 'tvdb' || (rqut == '*' && !tid && title) || apid)?
             (apid)?
                 `https://api.tvmaze.com/shows/${ apid }`:
             `https://api.tvmaze.com/search/shows?q=${ encodeURI(title) }`:
@@ -222,7 +234,7 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
 
             //api.tvmaze.com/
             if('show' in $data)
-                found = (IMDbID === $data.show.externals.imdb || (t($data.show.name) === t(title) && year == $data.show.premiered.slice(0, 4)))?
+                found = (IMDbID == $data.show.externals.imdb || (t($data.show.name) === t(title) && year == $data.show.premiered.slice(0, 4)))?
                     $data:
                 found;
             //api.themoviedb.org/ \local
@@ -238,7 +250,7 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
                 })($data);
             //api.themoviedb.org/ \remote
             else if('original_name' in $data && 'release_date' in $data)
-                found = (TMDbID === $data.id || (t($data.original_name) === t(title) || t($data.name) === t(title)) && year == ($data || b).release_date.slice(0, 4))?
+                found = (TMDbID == $data.id || (t($data.original_name) === t(title) || t($data.name) === t(title)) && year == ($data || b).release_date.slice(0, 4))?
                     $data:
                 found;
             //theimdbapi.org/
@@ -378,7 +390,7 @@ function showNotification(state, text, timeout, callback) {
         return callback();
     };
 
-    if (state === 'warning') {
+    if (state == 'warning') {
         el.classList.add('web-to-plex-warning');
     }
 
@@ -451,6 +463,45 @@ function pushCouchPotatoRequest(options) {
 			}
 		}
 	);
+}
+
+// Movies
+function pushWatcherRequest(options) {
+    if (!options.IMDbID && !options.TMDbID) {
+        return showNotification(
+            'warning',
+            'Stopped adding to Watcher: No IMDb/TMDb ID'
+        );
+    }
+
+    terminal.log({ config, options });
+
+    chrome.runtime.sendMessage({
+            type: 'ADD_WATCHER',
+            url: `${ config.watcherURL }api/`,
+            token: config.watcherToken,
+            StoragePath: config.watcherStoragePath,
+            basicAuth: config.watcherBasicAuth,
+            title: options.title,
+            year: options.year,
+            imdbId: options.IMDbID,
+            tmdbId: options.TMDbID,
+        },
+        response => {
+            if (response && response.error) {
+                return showNotification('warning', 'Could not add to Watcher: ' + response.error),
+                    terminal.error('Error adding to Watcher:', response.error, response.location, response.debug);
+            } else if (response && (response.success || (response.response + "") == "true")) {
+                let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-{2,}/g, '-').toLowerCase(),
+                    TMDbID = options.TMDbID || response.tmdbId;
+
+                showNotification('info', 'Added movie to Watcher', 7000, () => window.open(`${config.watcherURL}library/status${TMDbID? `#${title}-${TMDbID}`: '' }`, '_blank'));
+            } else {
+                showNotification('warning', 'Could not add to Watcher: Unknown Error'),
+                terminal.error('Error adding to Watcher:', response);
+            }
+        }
+    );
 }
 
 // Movies
@@ -538,29 +589,25 @@ function modifyPlexButton(el, action, title, options) {
 
     let pa = el.parentElement,
         ty = 'Item', txt = 'textContent', hov = 'title',
-        em = /^(tt-?|0)?$/;
+        em = /^(tt-?|0)?$/i,
+        empty = (em.test(options.IMDbID) && em.test(options.TMDbID) && em.test(options.TVDbID));
 
     if(options) {
-        ty = (options.type === 'movie'? 'Movie': 'TV Show');
+        ty = (options.type == 'movie'? 'Movie': 'TV Show');
         txt = options.txt || txt;
         hov = options.hov || hov;
     }
 
-    if (action === 'found') {
+    options.fileonly = empty && options.remote;
+
+    if (action == 'found') {
         el.href = getPlexMediaURL(config.server.id, options.key);
         el[txt] = 'Watch on Plex';
         el[hov] = `Watch "${options.title}" on Plex`;
         el.classList.add('web-to-plex-button--found');
 
         if(pa) pa.classList.replace('web-to-plex-wrapper', 'web-to-plex-wrapper--found');
-    } else if (action === 'notfound' || action === 'error' || (em.test(options.IMDbID) && em.test(options.TMDbID) && em.test(options.TVDbID))) {
-        el.removeAttribute('href');
-        el[txt] = action === 'notfound' ? ty + ' not available' : 'Web to Plex-';
-        el[hov] = `${ty} was not found`;
-        el.classList.remove('web-to-plex-button--found');
-
-        if(pa) pa.classList.remove('web-to-plex-wrapper--found');
-    } else if (action === 'downloader') {
+    } else if (action == 'downloader' || options.fileonly) {
         if (options.remote) {
             let delimeter = '<!---->',
                 xhr = new XMLHttpRequest(),
@@ -613,7 +660,7 @@ function modifyPlexButton(el, action, title, options) {
                             type = 'url';
                     }
 
-                    if(type === 'url') {
+                    if(type == 'url') {
                         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
                         $data = [];
                         for(let property in data)
@@ -640,7 +687,7 @@ function modifyPlexButton(el, action, title, options) {
                         el[txt] = el[txt].replace(/\d+\/.+?$/, `${++el.index}/${ar.length} (${tl})`);
                     };
 
-                    if(type === 'string')
+                    if(type == 'string')
                         xhr.callback(data);
 
                     el.addEventListener('click', e => {
@@ -671,7 +718,7 @@ function modifyPlexButton(el, action, title, options) {
                     });
             }
 
-            if(type === 'url') {
+            if(type == 'url') {
                 xhr.onload = function() {
                     if (xhr.status !== 200)
                         return modifyPlexButton(el, action, title, {
@@ -693,7 +740,9 @@ function modifyPlexButton(el, action, title, options) {
                 let tv = /tv[\s-]?|shows?|series/i;
 
                 e.preventDefault();
-                if (config.radarrURL && !tv.test(options.type)) {
+                if (config.watcherURL && !tv.test(options.type)) {
+                    pushWatcherRequest(options);
+                } else if (config.radarrURL && !tv.test(options.type)) {
                     pushRadarrRequest(options);
                 } else if (config.sonarrURL && tv.test(options.type)) {
                     pushSonarrRequest(options);
@@ -703,8 +752,15 @@ function modifyPlexButton(el, action, title, options) {
             });
         }
 
-        el[hov] = `Add "${options.title}" to your ${ty}s`;
+        el[hov] = `Add "${options.title}" | ${ty + (options.fileonly? ` - No ${ty} ID`: '')}`;
         el.style.removeProperty('display');
+    } else if (action == 'notfound' || action == 'error' || empty) {
+        el.removeAttribute('href');
+        el[txt] = action == 'notfound' ? ty + ' not available' : 'Web to Plex-';
+        el[hov] = `${ty} was not found`;
+        el.classList.remove('web-to-plex-button--found');
+
+        if(pa) pa.classList.remove('web-to-plex-wrapper--found');
     }
 
     el.id = options? `${options.IMDbID || 'tt'}-${options.TMDbID | 0}-${options.TVDbID | 0}`: 'tt-0-0';
@@ -723,7 +779,7 @@ function findPlexMedia(options) {
                         if (found) {
                             modifyPlexButton(options.button, 'found', 'On Plex', { ...options, key });
                         } else {
-                            let available = (config.radarrURL || config.sonarrURL || config.couchpotatoURL),
+                            let available = (config.watcherURL || config.radarrURL || config.sonarrURL || config.couchpotatoURL),
                                 action = available ? 'downloader' : 'notfound',
                                 title = available ?
                                     'Not on Plex (download available)':
@@ -738,7 +794,8 @@ function findPlexMedia(options) {
             return modifyPlexButton(
                     options.button,
                     'error',
-                    'Request to Plex Media Server failed'
+                    'Request to Plex Media Server failed',
+                    options
                 ),
                 terminal.error('Request to Plex failed', error);
         });
@@ -766,8 +823,8 @@ function getPlexMediaURL(PlexUIID, key) {
 
 String.prototype.toCaps = String.prototype.toCaps || function toCaps(all) {
     let array = this.toLowerCase(),
-        titles = /(?!^)\b(a(nd?)?|as|but|o[fn]|[fn]?or|the|to|yet)\b/gi,
-        exceptions = /([\:\|\.\!\?\"\(]\s*)\b(a(nd?)?|as|but|o[fn]|[fn]?or|the|to|yet)\b/gi;
+        titles = /(?!^)\b(a(s|nd?)?|but|o[fn]|[fn]?or|the|to|yet)\b/gi,
+        exceptions = /([\:\|\.\!\?\"\(]\s*)\b(a(s|nd?)?|but|o[fn]|[fn]?or|the|to|yet)\b/gi;
 
     array = array.split(/\s+/);
 

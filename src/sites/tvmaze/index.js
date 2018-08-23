@@ -73,7 +73,7 @@ function renderPlexButton() {
             li = /^[ou]l$/i.test(e.tagName);
 
         pa.classList.add('web-to-plex-wrapper');
-        el.textContent = 'Web to Plex+';
+        el.textContent = 'Web to Plex';
         el.title = 'Loading...';
 	    el.classList.add((li? 'flatButton': 'roundButton'), 'web-to-plex-button');
         e.appendChild(li? (pa.appendChild(el), pa): el);

@@ -40,7 +40,7 @@ function renderPlexButton() {
     ch.classList.add('icon', '-web-to-plex');
     ch.setAttribute('style', `background: url("${ chrome.extension.getURL('img/16.png') }") no-repeat !important`);
 
-    el.textContent = 'Web to Plex+';
+    el.textContent = 'Web to Plex';
     el.title = 'Loading...';
 	el.classList.add('label', 'web-to-plex-button');
 

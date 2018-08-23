@@ -1,58 +1,59 @@
 /* global wait, modifyPlexButton, parseOptions, findPlexMedia */
+let $$ = (element, all = false) => (element = document.querySelectorAll(element)).length > 1 && all? element: element[0];
+
 function isMoviePage() {
-	return window.location.pathname.startsWith('/movies/');
+	return !isDash() && window.location.pathname.startsWith('/movies/');
 }
 
 function isShowPage() {
-	let path = window.location.pathname;
-	if (!path.startsWith('/shows/'))
-		return false;
+	return !isDash() && window.location.pathname.startsWith('/shows/');
+}
 
-	// TODO: e.g. /shows/trending is not really a show page...
-	return !/\btrending$/.test(path);
+function isDash() {
+    return /^\/(dashboard|calendars|search|(?:movies|shows)\/(?:trending|popular|watched|collected|anticipated|boxoffice)|$)/i.test(window.location.pathname);
 }
 
 function getIMDbID() {
-	let $link = document.querySelector(
+    let $link = $$(
         // HTTPS and HTTP
-		'[href*="imdb.com/title/tt"]'
-	);
+        '[href*="imdb.com/title/tt"]'
+    );
 
-	if ($link)
-		return $link.href.replace(/^.*?imdb\.com\/title\/(tt\d+)/, '$1');
+    if ($link)
+        return $link.href.replace(/^.*?imdb\.com\/title\/(tt\d+)/, '$1');
 }
 
 function getTVDbID() {
-	let $link = document.querySelector(
+    let $link = $$(
         // HTTPS and HTTP
-		'[href*="thetvdb.com/"]'
-	);
+        '[href*="thetvdb.com/"]'
+    );
 
-	if ($link)
-		return $link.href.replace(/^.*?thetvdb.com\/.+(?:(?:series)?id=(\d+)).*?$/, '$1');
+    if ($link)
+        return $link.href.replace(/^.*?thetvdb.com\/.+(?:(?:series)?id=(\d+)).*?$/, '$1');
 }
 
 function getTMDbID() {
-	let $link = document.querySelector(
+    let $link = $$(
         // HTTPS and HTTP
-		'[href*="themoviedb.org/"]'
-	);
+        '[href*="themoviedb.org/"]'
+    );
 
-	if ($link)
-		return $link.href.replace(/^.*?themoviedb.org\/(?:movie|tv)\/(\d+).*?$/, '$1');
+    if ($link)
+        return $link.href.replace(/^.*?themoviedb.org\/(?:movie|tv)\/(\d+).*?$/, '$1');
 }
 
 function init() {
-	if (isMoviePage() || isShowPage()) {
+	if (isMoviePage() || isShowPage() || isDash()) {
 		wait(
-			() => document.querySelector('#info-wrapper ul.external'),
-			() => initPlexThingy(isMoviePage() ? 'movie' : 'show')
+			() => ($$('#info-wrapper ul.external, .format-date') || document.readyState == 'complete'),
+			() => (isDash()? initDash(): initPlexThingy(isMoviePage() ? 'movie' : 'show'))
 		);
 	}
 }
 
 function renderPlexButton() {
-	let $actions = document.querySelector('ul.external li:first-child');
+	let $actions = $$('#info-wrapper .action-buttons');
 	if (!$actions)
 		return;
 
@@ -60,12 +61,21 @@ function renderPlexButton() {
 	if (existingButton)
 		return;
 
-	let el = document.createElement('a');
+	let pa = document.createElement('a'),
+        ma = document.createElement('div'),
+        ch = document.createElement('div'),
+        el = document.createElement('div');
 
-    el.textContent = 'Web to Plex+';
+	pa.classList.add('btn', 'btn-block', 'btn-summary', 'btn-w2p');
+    ma.classList.add('fa', 'fa-fw', 'fa-download');
+    ch.classList.add('text');
+    el.textContent = 'Web to Plex';
     el.title = 'Loading...';
-	el.classList.add('web-to-plex-button');
-	$actions.insertBefore(el, $actions.childNodes[0]);
+    el.classList.add('web-to-plex-button', 'main-info');
+    pa.appendChild(ma);
+    pa.appendChild(ch);
+    ch.appendChild(el);
+	$actions.insertBefore(pa, $actions.childNodes[3]);
 
 	return el;
 }
@@ -76,8 +86,8 @@ async function initPlexThingy(type) {
 	if (!$button)
 		return;
 
-	let $title = document.querySelector('.mobile-title'),
-        $year = document.querySelector('.mobile-title .year');
+	let $title = $$('.mobile-title'),
+        $year = $$('.mobile-title .year');
 
 	if (!$title || !$year)
 		return modifyPlexButton($button, 'error',  `Could not extract ${ !$title? 'title': 'year' } from Trakt`);
@@ -101,8 +111,67 @@ async function initPlexThingy(type) {
 	findPlexMedia({ type, title, year, button: $button, IMDbID, TMDbID, TVDbID });
 }
 
+async function initDash() {
+    let buttons = $$(".btn-watch-now, .quick-icons .watch-now", true);
+
+    buttons.forEach((element, index, array) => {
+        element.preclick = element.preclick || element.onclick || (() => {});
+
+        element.onclick = async(event, rerun) => {
+            event.path.filter((v, i, a) => !!~[].slice.call(buttons).indexOf(v)).forEach((e, i, a) => e.preclick(event));
+
+            let ready = /^[^]+$/.test($$('#watch-now-content').innerText);
+
+            if(!ready || !rerun)
+                return setTimeout( () => element.onclick(event, true), 5 );
+
+            let title = $$("#watch-now-content h3").innerText.replace(/^\s*where\s+to\s+watch\s*/i, ''),
+                type = 'show',
+                year = YEAR,
+                button = $$(".w2p-channel");
+
+            if(title == '')
+                title = $$("#watch-now-content h1").innerText.replace(/^\s*(.+)\s+(\d+)\s*$/, '$1'),
+                year = RegExp.$2,
+                type = 'movie';
+
+            title = title.toCaps();
+
+            if(!button) {
+                $$("#watch-now-content .streaming-links").innerHTML +=
+`
+<div class="title">ondemand</div>
+<div class="section">
+    <a class="w2p-channel web-to-plex-button" href="#" title>
+      <div class="icon btn-amazon">
+        <img class="lazy" src="${ chrome.extension.getURL('img/_48.png') }" style="height: 45px; width: auto;" alt="Plugin">
+      </div>
+      <div class="price">Free</div>
+    </a>
+</div>
+`;
+                wait(() => button = $$(".w2p-channel"), () => {});
+            }
+
+            let Db = await getIDs({ title, year, type }),
+                IMDbID = Db.imdb,
+                TMDbID = Db.tmdb,
+                TVDbID = Db.tvdb;
+
+            title = Db.title;
+            year = Db.year;
+
+            findPlexMedia({ type, title, year, button, IMDbID, TMDbID, TVDbID, txt: 'title', hov: 'null' });
+        };
+    });
+}
+
 parseOptions().then(() => {
 	window.addEventListener('popstate', init);
 	window.addEventListener('pushstate-changed', init);
 	init();
 });
+
+window.onlocationchange = (event) => {
+    init();
+};

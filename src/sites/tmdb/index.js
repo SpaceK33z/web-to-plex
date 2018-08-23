@@ -60,7 +60,7 @@ function renderPlexButton() {
     el.classList.add('web-to-plex-button');
 
 	pa.classList.add('tooltip', 'use_tooltip');
-    pa.title = 'Web to Plex+';
+    pa.title = 'Web to Plex';
 
     el.appendChild(ch);
     pa.appendChild(el);

@@ -121,6 +121,10 @@
             font-family: monospace, consolas, sans-serif, sans serif, sans, arial;
         }
 
+        [id$="-token"]:not(:placeholder-shown), [data-option$="-Token"]:not(:placeholder-shown), [data-option$="-API"]:not(:placeholder-shown) {
+            text-transform: uppercase;
+        }
+
         em {
             color: #cc7b19 !important;
         }
@@ -192,9 +196,16 @@
         }
 
         #version {
+            color: #fff;
+
             position: fixed;
             right: 0;
             top: calc(100vh - 20px);
+        }
+
+        [disabled] {
+            cursor: not-allowed!important;
+            color: #909090EE!important;
         }
 
         ::-webkit-input-placeholder {
@@ -287,27 +298,28 @@ div
         </details>
     </article>
 </div>
+
 <div>
 	<h1>Manager Settings</h1>
 
     <article>
         <details>
-            <summary>CouchPotato (Movies/TV Shows)</summary>
+            <summary>Watcher (Movies)</summary>
 
             <h2>Connection Settings</h2>
             <section>
-                <label>CouchPotato URL</label>
-                <input type="text" data-option="couchpotatoURLRoot" placeholder="What's your CouchPotato URL?"/>
+                <label>Watcher URL</label>
+                <input type="text" data-option="watcherURLRoot" placeholder="What's your Watcher URL?"/>
                 <div>
-                    Such as <em>https://example.com/couchpotato</em> or <em>http://192.168.1.100:5050</em>
+                    Such as <em>https://example.com/watcher</em> or <em>http://192.168.1.100:9090</em>
                 </div>
             </section>
 
             <section>
-                <label>CouchPotato API Key</label>
-                <input type="text" data-option="couchpotatoToken" placeholder="What's your CouchPotato API key?"/>
+                <label>Watcher API Key</label>
+                <input type="text" data-option="watcherToken" placeholder="What's your Watcher API key?"/>
                 <div>
-                    1. Go to CouchPotato | Settings<br/>
+                    1. Go to Watcher | Settings | Server<br/>
                     2. Copy/Paste the "API Key."<br/>
                     Such as <em>aa756d33242f6g8ffbca2b3963586f21</em>
                 </div>
@@ -316,22 +328,27 @@ div
             <h3>Login <em>(optional, saved)</em></h3>
             <section>
                 <label>Username</label>
-                <input type="text" data-option="couchpotatoBasicAuthUsername" placeholder="Enter your CouchPotato username"/>
-                <div>Only use this if you setup a CouchPotato username.</div>
+                <input type="text" data-option="watcherBasicAuthUsername" placeholder="Enter your Watcher username"/>
+                <div>Only use this if you setup a Watcher username.</div>
             </section>
             <section>
                 <label>Password</label>
-                <input type="text" data-option="couchpotatoBasicAuthPassword" placeholder="Enter your CouchPotato password"/>
-                <div>Only use this if you setup a CouchPotato password.</div>
+                <input type="text" data-option="watcherBasicAuthPassword" placeholder="Enter your Watcher password"/>
+                <div>Only use this if you setup a Watcher password.</div>
                 <div class="hidden-help">Your password will be hidden once saved.</div>
             </section>
 
             <section>
-                <button type="button" id="couchpotato_test">Test <span id="couchpotato_test_status">?</span></button>
+                <button type="button" id="watcher_test">Test <span id="watcher_test_status">?</span></button>
+            </section>
+
+            <section>
+                <label>Watcher Storage Path</label>
+                <input type="text" disabled="true" data-option="watcherStoragePath" placeholder="Can only be changed via Watcher's settings"/>
             </section>
             <section>
                 <label>Quality Profile</label>
-                <select data-option="couchpotatoQualityProfileId">
+                <select data-option="watcherQualityProfileId">
                     <option value="">Press "Test [?]" first</option>
                 </select>
             </section>
@@ -448,6 +465,52 @@ div
                 </select>
             </section>
         </details>
+
+        <details>
+            <summary>CouchPotato (Movies/TV Shows)</summary>
+
+            <h2>Connection Settings</h2>
+            <section>
+                <label>CouchPotato URL</label>
+                <input type="text" data-option="couchpotatoURLRoot" placeholder="What's your CouchPotato URL?"/>
+                <div>
+                    Such as <em>https://example.com/couchpotato</em> or <em>http://192.168.1.100:5050</em>
+                </div>
+            </section>
+
+            <section>
+                <label>CouchPotato API Key</label>
+                <input type="text" data-option="couchpotatoToken" placeholder="What's your CouchPotato API key?"/>
+                <div>
+                    1. Go to CouchPotato | Settings<br/>
+                    2. Copy/Paste the "API Key."<br/>
+                    Such as <em>aa756d33242f6g8ffbca2b3963586f21</em>
+                </div>
+            </section>
+
+            <h3>Login <em>(optional, saved)</em></h3>
+            <section>
+                <label>Username</label>
+                <input type="text" data-option="couchpotatoBasicAuthUsername" placeholder="Enter your CouchPotato username"/>
+                <div>Only use this if you setup a CouchPotato username.</div>
+            </section>
+            <section>
+                <label>Password</label>
+                <input type="text" data-option="couchpotatoBasicAuthPassword" placeholder="Enter your CouchPotato password"/>
+                <div>Only use this if you setup a CouchPotato password.</div>
+                <div class="hidden-help">Your password will be hidden once saved.</div>
+            </section>
+
+            <section>
+                <button type="button" id="couchpotato_test">Test <span id="couchpotato_test_status">?</span></button>
+            </section>
+            <section>
+                <label>Quality Profile</label>
+                <select data-option="couchpotatoQualityProfileId">
+                    <option value="">Press "Test [?]" first</option>
+                </select>
+            </section>
+        </details>
     </article>
 </div>
 <div>
@@ -465,6 +528,14 @@ div
                     You can <a href="https://www.omdbapi.com/apikey.aspx" target="_blank">sign up</a> for an API key, or have OMDb used as a last resort.
                 </div>
             </section>
+
+            <section>
+                <label>TMDb</label>
+                <input type="text" data-option="TMDbAPI" placeholder="Enter your TMDb API Key"/>
+                <div>
+                    You can <a href="https://developers.themoviedb.org/3/" target="_blank">learn more</a> on how to obtain an API key.
+                </div>
+            </section>
         </details>
     </article>
 
@@ -474,9 +545,9 @@ div
 
             <h2>External Links</h2>
             <section>
-                <label>CouchPotato's Website</label>
+                <label>Watcher's Website</label>
                 <div>
-                    Download, and/or find more information for <a href="https://couchpota.to/" target="_blank">CouchPotato</a>.
+                    Download, and/or find more information for <a href="https://nosmokingbandit.github.io/" target="_blank">Watcher</a>.
                 </div>
             </section>
 
@@ -491,6 +562,13 @@ div
                 <label>Sonarr's Website</label>
                 <div>
                     Download, and/or find more information for <a href="https://sonarr.tv/" target="_blank">Sonarr</a>.
+                </div>
+            </section>
+
+            <section>
+                <label>CouchPotato's Website</label>
+                <div>
+                    Download, and/or find more information for <a href="https://couchpota.to/" target="_blank">CouchPotato</a>.
                 </div>
             </section>
         </details>

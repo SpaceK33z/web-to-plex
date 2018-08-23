@@ -56,7 +56,7 @@ function initPlexThingy() {
                 o[n] = /,/.test(v)? v.split(/\s*,\s*/): v;
             });
 
-	findPlexMedia({ title, year: o.first_aired.slice(0, 4), button: $button, type: 'show', IMDbID: o.imdb, TVDbID: o.thetvdb });
+	findPlexMedia({ title, year: ((o.first_aired || YEAR) + "").slice(0, 4), button: $button, type: 'show', IMDbID: o.imdb, TVDbID: o.thetvdb });
 }
 
 function renderPlexButton() {
@@ -80,7 +80,7 @@ function renderPlexButton() {
     pa.appendChild(el);
     el.appendChild(ch);
     ch.classList.add('web-to-plex-button');
-    ch.textContent = 'Web to Plex+';
+    ch.textContent = 'Web to Plex';
     ch.title = 'Loading...';
 
     $actions.insertBefore(pa, $actions.firstChild);

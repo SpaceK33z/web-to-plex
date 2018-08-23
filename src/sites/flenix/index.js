@@ -64,14 +64,10 @@ async function initPlexThingy() {
 function renderPlexButton() {
 	// The "download" buttons
 	let $downloadButtons = document.querySelectorAll(
-		'#dle-content .about > .buttons > a[target="_blank"],\
-         #dle-content > .header_tabs > ul > li:last-child,\
-         .movieTabs > ul > li:last-child'
+		'#dle-content > .header_tabs > ul > li:last-child'
 	),
         $actions = document.querySelectorAll(
-            '#dle-content .about > .buttons,\
-             #dle-content > .header_tabs > ul,\
-             .movieTabs > ul'
+            '#dle-content > .header_tabs > ul'
     );
 
 	if (!$actions)
@@ -88,7 +84,7 @@ function renderPlexButton() {
             li = /^[ou]l$/i.test(e.tagName);
 
         pa.classList.add('web-to-plex-wrapper');
-        el.textContent = 'Web to Plex+';
+        el.textContent = 'Web to Plex';
         el.title = 'Loading...';
 	    el.classList.add((li? 'flatButton': 'roundButton'), 'web-to-plex-button');
         e.appendChild(li? (pa.appendChild(el), pa): el);

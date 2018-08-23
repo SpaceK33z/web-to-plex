@@ -9,6 +9,12 @@
 const storage = (chrome.storage.sync || chrome.storage.local),
       $$ = selector => document.querySelector(selector),
       __servers__ = $$('#plex_servers'),
+      __watcher_qualityProfile__ = $$(
+          `[data-option="watcherQualityProfileId"]`
+      ),
+      __watcher_storagePath__ = $$(
+            `[data-option="watcherStoragePath"]`
+      ),
       __radarr_qualityProfile__ = $$(
           `[data-option="radarrQualityProfileId"]`
       ),
@@ -32,6 +38,12 @@ const storage = (chrome.storage.sync || chrome.storage.local),
             'couchpotatoBasicAuthUsername',
             'couchpotatoBasicAuthPassword',
             'couchpotatoQualityProfileId',
+            'watcherURLRoot',
+            'watcherToken',
+            'watcherBasicAuthUsername',
+            'watcherBasicAuthPassword',
+            'watcherStoragePath',
+            'watcherQualityProfileId',
             'radarrURLRoot',
             'radarrToken',
             'radarrBasicAuthUsername',
@@ -44,7 +56,8 @@ const storage = (chrome.storage.sync || chrome.storage.local),
             'sonarrBasicAuthPassword',
             'sonarrStoragePath',
             'sonarrQualityProfileId',
-            'OMDbAPI'
+            'OMDbAPI',
+            'TMDbAPI'
       ];
 
 let PlexServers = [],
@@ -179,6 +192,65 @@ function getOptionValues() {
 	});
 
 	return options;
+}
+
+function getWatcher(options, api = "getconfig") {
+	let headers = {
+		'Accept': 'application/json',
+		'Content-Type': 'application/json',
+		'X-Api-Key': options.watcherToken
+	};
+
+	if(options.watcherBasicAuthUsername)
+		headers.Authorization = `Basic ${ btoa(`${ options.watcherBasicAuthUsername }:${ options.watcherBasicAuthPassword }`) }`;
+
+    options.watcherURLRoot = options.watcherURLRoot.replace(/^(?!^https?:)/, 'http://').replace(/\/+$/, '');
+
+	return fetch(`${ options.watcherURLRoot }/api/?apikey=${ options.watcherToken }&mode=${ api }&quality=${ options.watcherQualityProfileId || 'Default' }`, { headers })
+		.then(response => response.json())
+		.catch(error => {
+			return terminal.error('Watcher failed to connect with error:', error),
+              [];
+		});
+}
+
+function performWatcherTest(QualityProfileID = 'Default') {
+	let options = getOptionValues(),
+        teststatus = $$('#watcher_test_status'),
+        storagepath = __watcher_storagePath__;
+
+	__watcher_qualityProfile__.innerHTML = '';
+	teststatus.textContent = '?';
+    storagepath.value = '[Empty]';
+
+    getWatcher(options, 'getconfig').then(config => {
+        let names = config.config.Quality.Profiles,
+            path = config.config.Postprocessing.moverpath,
+            profiles = [];
+
+        for(let name in names)
+            profiles.push({
+                id: name,
+                name
+            });
+
+		teststatus.textContent = '!';
+        teststatus.classList = !!profiles.length;
+
+		profiles.forEach(profile => {
+			let option = document.createElement('option');
+
+			option.value = profile.id;
+			option.textContent = profile.name;
+			__watcher_qualityProfile__.appendChild(option);
+		});
+
+		// Because the <select> was reset, the original value is lost.
+		if(QualityProfileID)
+			__watcher_qualityProfile__.value = QualityProfileID;
+
+        storagepath.value = path || '[Empty]';
+	});
 }
 
 function getRadarr(options, api = "profile") {
@@ -341,17 +413,20 @@ function saveOptions() {
         endingSlash = ($0, $1, $$, $_) => ($1 + (/\\/.test($_)? '\\': '/'));
 
     // Instead of having the user be so wordy, complete the URL ourselves here
-    if(!options.radarrURLRoot && !options.sonarrURLRoot) {
-      return status.textContent = 'Please enter a valid URL',
+    if((!options.radarrURLRoot && options.radarrToken) || (!options.sonarrURLRoot && options.sonarrToken) || (!options.watcherURLRoot && options.watcherToken)) {
+      return status.textContent = 'Please enter a valid manager URL',
           null;
-    } if(!options.radarrStoragePath && !options.sonarrStoragePath) {
-      return status.textContent = 'Please enter a valid storage path',
+    } if((options.radarrURLRoot && !options.radarrStoragePath) && (options.sonarrURLRoot && !options.sonarrStoragePath)) {
+      return status.textContent = 'Please enter a valid manager storage path',
           null;
+    } if(options.watcherURLRoot && !options.watcherQualityProfileId) {
+        return status.textContent = 'Select a Watcher quality profile',
+            null;
     } if(options.radarrURLRoot && !options.radarrQualityProfileId) {
-		return status.textContent = 'Select a Radarr quality profile',
+        return status.textContent = 'Select a Radarr quality profile',
             null;
     } if(options.sonarrURLRoot && !options.sonarrQualityProfileId) {
-		return status.textContent = 'Select a Sonarr quality profile',
+        return status.textContent = 'Select a Sonarr quality profile',
             null;
     } if(!ClientID) {
         ClientID = window.crypto.getRandomValues(new Uint32Array(5))
@@ -360,6 +435,10 @@ function saveOptions() {
     }
 
     options.plexURL = (options.plexURL || "")
+        .replace(/([^\\\/])$/, endingSlash)
+        .replace(/^(?!^https?:\/\/)(.+)/, 'http://$1');
+
+    options.watcherURLRoot = (options.watcherURLRoot || "")
         .replace(/([^\\\/])$/, endingSlash)
         .replace(/^(?!^https?:\/\/)(.+)/, 'http://$1');
 
@@ -391,6 +470,7 @@ function saveOptions() {
 
 	// Dynamically asking permissions
 	requestURLPermissions(options.couchpotatoURLRoot);
+	requestURLPermissions(options.watcherURLRoot);
 	requestURLPermissions(options.radarrURLRoot);
 	requestURLPermissions(options.sonarrURLRoot);
 
@@ -433,7 +513,7 @@ function restoreOptions() {
 
 			el.value = items[option] || '';
 
-            if(el.value !== '') {
+            if(el.value !== '' && !el.disabled) {
                 if(/password$/i.test(option))
                     el.setAttribute('type', el.type = 'password');
                 else 
@@ -446,8 +526,12 @@ function restoreOptions() {
         });
 
 		if(items.plexToken)
-			performPlexTest(items.servers ? items.servers[0].id : null); if(items.radarrURLRoot)
-			performRadarrTest(items.radarrQualityProfileId, items.radarrStoragePath); if(items.sonarrURLRoot)
+			performPlexTest(items.servers ? items.servers[0].id : null);
+        if(items.watcherURLRoot)
+			performWatcherTest(items.watcherQualityProfileId);
+        if(items.radarrURLRoot)
+			performRadarrTest(items.radarrQualityProfileId, items.radarrStoragePath);
+        if(items.sonarrURLRoot)
 			performSonarrTest(items.sonarrQualityProfileId, items.sonarrStoragePath);
 	}
 
@@ -474,6 +558,9 @@ document
         else
             performPlexLogin();
     });
+document
+	.querySelector('#watcher_test')
+	.addEventListener('click', performWatcherTest);
 document
 	.querySelector('#radarr_test')
 	.addEventListener('click', performRadarrTest);

@@ -28,7 +28,7 @@ function renderPlexButton($parent) {
 
 	let el = document.createElement('a');
 
-    el.textContent = 'Web to Plex+';
+    el.textContent = 'Web to Plex';
     el.title = 'Loading...';
 	el.classList.add('web-to-plex-button', 'av-button', 'av-button--default', 'dv-sub-btn-content');
 

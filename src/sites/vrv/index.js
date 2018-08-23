@@ -69,7 +69,7 @@ function renderPlexButton() {
     let el = document.createElement('a');
 
     el.classList.add('web-to-plex-button', 'action-button', 'h-button');
-    el.textContent = 'Web to Plex+';
+    el.textContent = 'Web to Plex';
     el.title = 'Loading...';
 
     $actions.appendChild(el);

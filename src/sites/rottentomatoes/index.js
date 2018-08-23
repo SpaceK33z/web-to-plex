@@ -82,7 +82,7 @@ function renderPlexButton(type) {
         el.classList.add('fullWidth', 'web-to-plex-button');
         pa.classList.add('poster_button', 'hidden-xs');
 
-        el.textContent = 'Web to Plex+';
+        el.textContent = 'Web to Plex';
         el.title = 'Loading...';
 
         pa.appendChild(el);

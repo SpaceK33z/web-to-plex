@@ -51,7 +51,7 @@ function renderPlexButton(type) {
         ma = document.createElement('button'),
         el = document.createElement('a');
 
-    el.textContent = 'Web to Plex+';
+    el.textContent = 'Web to Plex';
     el.title = 'Loading...';
 
     pa.classList = _1.classList;

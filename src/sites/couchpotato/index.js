@@ -48,7 +48,7 @@ function renderPlexButton() {
     ch.setAttribute('src', chrome.extension.getURL('img/16.png'));
     pa.classList.add('web-to-plex--container');
 
-    el.textContent = 'W2P+';
+    el.textContent = 'W2P';
     el.title = 'Loading...';
 	el.classList.add('web-to-plex-button');
 

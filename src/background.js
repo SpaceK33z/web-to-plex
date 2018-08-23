@@ -5,6 +5,7 @@ let external = {},
 //                { error: m => m, info: m => m, log: m => m, warn: m => m } ||
                 console;
 
+// Object{username, password} => Object
 function generateHeaders(auth) {
     let headers = { Accept: 'application/json' };
 
@@ -17,10 +18,13 @@ function generateHeaders(auth) {
     };
 }
 
-function changeStatus({ id, tt, ty, tv, pv, tl, yr }) {
+// Object{MovieOrShowID, MovieOrShowTitle, MovieOrShowType, MovieOrShowIDProvider, MovieOrShowYear} => undefined
+function changeStatus({ id, tt, ty, pv, yr }) {
+
+    let tl = tt.replace(/\-/g, ' ').replace(/[\s\:]{2,}/g, ' - ');
+    // File friendly title
 
     id = id && !/^tt-?$/i.test(id)? id: null;
-    tl = tt.replace(/\-/g, ' ').replace(/[\s\:]{2,}/g, ' - ');
     tt = tt.replace(/[\-\s]+/g, '-').replace(/[^\w\-]+/g, '');
 
     external = { P: pv, Q: id, T: tt, Y: ty };
@@ -76,6 +80,35 @@ function addCouchpotato(request, sendResponse) {
 		.catch(error => {
 			sendResponse({ error: String(error) , location: 'addCouchPotato'});
 		});
+}
+
+function addWatcher(request, sendResponse) {
+    let headers = {
+            'Content-Type': 'application/json',
+            'X-Api-Key': request.token,
+            ...generateHeaders(request.basicAuth)
+        },
+        id = (/^(tt-?)?$/.test(request.imdbId)? request.tmdbId: request.imdbId),
+        query = (/^tt-?\d+$/i.test(id)? 'imdbid': /^\d+$/.test(id)? 'tmdbid': (id = encodeURI(`${request.title} ${request.year}`), 'term')),
+        debug = { headers, query, request };
+
+    fetch(debug.url = `${ request.url }?apikey=${ request.token }&mode=addmovie&${ query }=${ id }`)
+        .then(response => response.json())
+        .then(response => {
+            if((response.response + "") == "true")
+                return sendResponse({
+                    success: `Added to Watcher (${ request.StoragePath })`
+                });
+
+            throw new Error(response.error);
+        })
+        .catch(error => {
+            sendResponse({
+                error: String(error),
+                location: `addWatcher => fetch("${ request.url }", { headers }).catch(error => { sendResponse })`,
+                debug
+            });
+        });
 }
 
 function addRadarr(request, sendResponse) {
@@ -343,7 +376,7 @@ async function searchPlex(request, sendResponse) {
     }
 }
 
-// Chrome is fucking retarted...
+// Chrome is f**king retarted...
 // Instead of having an object returned (for the context-menu)
 // You have to make API calls on ALL clicks...
 
@@ -407,6 +440,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         case 'ADD_SONARR':
             addSonarr(request, sendResponse);
             return true;
+        case 'ADD_WATCHER':
+            addWatcher(request, sendResponse);
+            return true;
         case 'OPEN_OPTIONS':
             chrome.runtime.openOptionsPage();
             return true;
@@ -426,5 +462,5 @@ for(let array = 'IM TM TV'.split(' '), DL = {}, length = array.length, index = 0
         parentId: parentItem,
         title: `Using ${ item }Db`,
         type: 'checkbox',
-        checked: true
+        checked: true // implement a way to use the checkboxes?
     });
