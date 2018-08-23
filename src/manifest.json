@@ -6,7 +6,7 @@
     "homepage_url": "https://github.com/Ephellon/web-to-plex/",
 
 	"manifest_version": 2,
-    "version": "3.0.0.0",
+    "version": "3.0.1.0",
 // Firefox Support =>
 //    "applications": {
 //        "gecko": {
@@ -125,6 +125,7 @@
 	"permissions": [
         "tabs",
 		"storage",
+        "downloads",
         "contextMenus",
 		"https://*.plex.direct/*"
 	],

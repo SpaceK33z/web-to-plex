@@ -36,6 +36,15 @@ function save(name, data) {
     return (sessionStorage || localStorage).setItem(btoa(name), JSON.stringify(data));
 }
 
+function sendUpdate(type, options = {}) {
+    terminal.log(`Requesting update: ${ type }`, options);
+
+    chrome.runtime.sendMessage({
+        type,
+        options
+    });
+}
+
 function $getOptions() {
     const storage = chrome.storage.sync || chrome.storage.local;
 
@@ -683,28 +692,30 @@ function modifyPlexButton(el, action, title, options) {
                         el.dataset.hrefs = ar.join(delimeter);
                         el.download = `${options.title.replace(/\s*\:\s*/g, ' - ')} (${options.year})`;
                         el.href = tl = ar[el.index = 0];
-                        tl = (tl.replace(/.*(?:\.(\w+))?$/, '$1') || 'mp4').toUpperCase();
-                        el[txt] = el[txt].replace(/\d+\/.+?$/, `${++el.index}/${ar.length} (${tl})`);
+                        tl = (tl.replace(/.*(?:\.(\w+))?$/, '$1') || 'mp4');
+                        el[txt] = el[txt].replace(/\d+\/.+?$/, `${++el.index}/${ar.length} (${tl.toUpperCase()})`);
+
+                        sendUpdate('SAVE_AS', { ...options, href: el.href, tail: tl });
                     };
 
                     if(type == 'string')
                         xhr.callback(data);
 
                     el.addEventListener('click', e => {
+                        e.preventDefault(true);
+
                         let el = e.target,
                             hs = el.dataset.hrefs.split(delimeter),
                             tl;
 
                         el.href = tl = hs[el.index++];
-                        tl = (tl.replace(/.*(?:\.(\w+))?$/, '$1') || 'mp4').toUpperCase();
-                        el[txt] = el[txt].replace(/\d+\/.+?$/, `${el.index}/${hs.length} (${tl})`);
+                        tl = (tl.replace(/.*(?:\.(\w+))?$/, '$1') || 'mp4');
+                        el[txt] = el[txt].replace(/\d+\/.+?$/, `${el.index}/${hs.length} (${tl.toUpperCase()})`);
 
-                        if(hs.length == 1)
-                            return el.index = 0;
-                        else if(el.index == hs.length)
+                        if(hs.length == 1 || el.index == hs.length)
                             el.index = 0;
 
-                        e.preventDefault(true);
+                        sendUpdate('SAVE_AS', { ...options, href: el.href, tail: tl });
                     });
                     break;
 
@@ -814,7 +825,7 @@ function getPlexMediaRequest(options) {
                 }
                 resolve(response);
             });
-    });
+        });
 }
 
 function getPlexMediaURL(PlexUIID, key) {

@@ -18,16 +18,17 @@ function generateHeaders(auth) {
     };
 }
 
-// Object{MovieOrShowID, MovieOrShowTitle, MovieOrShowType, MovieOrShowIDProvider, MovieOrShowYear} => undefined
-function changeStatus({ id, tt, ty, pv, yr }) {
+// Object{MovieOrShowID, MovieOrShowTitle, MovieOrShowType, MovieOrShowIDProvider, MovieOrShowYear, LinkURL, FileType} => undefined
+function changeStatus({ id, tt, ty, pv, yr, ur, ft }) {
 
-    let tl = tt.replace(/\-/g, ' ').replace(/[\s\:]{2,}/g, ' - ');
+    let tl = tt.replace(/\-/g, ' ').replace(/[\s\:]{2,}/g, ' - '),
     // File friendly title
+        st = tt.replace(/[\-\s]+/g, '-').replace(/[^\w\-]+/g, '');
+    // Search friendly title
 
     id = id && !/^tt-?$/i.test(id)? id: null;
-    tt = tt.replace(/[\-\s]+/g, '-').replace(/[^\w\-]+/g, '');
 
-    external = { P: pv, Q: id, T: tt, Y: ty };
+    external = { ...external, F: tl, P: pv, Q: id, T: st, U: ur, V: ty, X: {}, Y: yr, Z: ft };
 
     chrome.browserAction.setBadgeText({
         text: pv
@@ -38,7 +39,7 @@ function changeStatus({ id, tt, ty, pv, yr }) {
     });
 
     chrome.contextMenus.update('W2P', {
-        title: `"${ tl } (${ yr || 'N/A' })"`
+        title: `About "${ tt } (${ yr || YEAR })"`
     });
 
     for(let array = 'IM TM TV'.split(' '), length = array.length, index = 0, item; index < length; index++)
@@ -383,32 +384,45 @@ async function searchPlex(request, sendResponse) {
 chrome.contextMenus.onClicked.addListener((item) => {
     if(!/^W2P/i.test(item.menuItemId)) return;
 
-    let url = "",
+    let url = "", dnl = false,
         db = item.menuItemId.slice(-2).toLowerCase(),
-        pv = external.P.slice(0, 2).toLowerCase();
+        pv = external.P.slice(0, 2).toLowerCase(),
+        qu = external.Q,
+        tl = external.T;
 
     switch(db) {
         case 'im':
-            url = (external.Q && pv == 'im')?
-                `imdb.com/title/${ external.Q }/`:
-            `imdb.com/find?ref_=nv_sr_fn&s=all&q=${ external.T }`;
+            url = (qu && pv == 'im')?
+                `imdb.com/title/${ qu }/`:
+            `imdb.com/find?ref_=nv_sr_fn&s=all&q=${ tl }`;
             break;
         case 'tm':
-            url = (external.Q && pv == 'tm')?
-                `themoviedb.org/${ external.Y == 'show'? 'tv': 'movie' }/${ external.Q }`:
-            `themoviedb.org/search?query=${ external.T }`;
+            url = (qu && pv == 'tm')?
+                `themoviedb.org/${ external.V == 'show'? 'tv': 'movie' }/${ qu }`:
+            `themoviedb.org/search?query=${ tl }`;
             break;
         case 'tv':
-            url = (external.Q && pv == 'tv')?
-                `thetvdb.com/series/${ external.T }`:
-            `thetvdb.com/search?q=${ external.T.replace(/-/g, '+') }`;
+            url = (qu && pv == 'tv')?
+                `thetvdb.com/series/${ tl }`:
+            `thetvdb.com/search?q=${ tl.replace(/-/g, '+') }`;
+            break;
+        case 'dl':
+            dnl = true;
+            url = external.U;
             break;
         default:
-            url = external.U[db];
+            url = external.X[db];
             break;
     }
 
-    window.open(`https://${ url }`, '_blank');
+    if(!dnl)
+        window.open(`https://${ url }#${ db }`, '_blank');
+    else
+        chrome.downloads.download({
+          url,
+          filename: `${ external.F } (${ external.Y }).${ external.Z }`,
+          saveAs: true
+        });
 });
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
@@ -419,10 +433,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         yr = id.year,
         ty = id.type,
         pv = (id.TVDbID || id.tvdbId? 'TVDb': id.TMDbID || id.tmdbId? 'TMDb': 'IMDb'),
-        tv = pv[1] == 'V';
+        ur = id.href,
+        ft = id.tail;
     id = id[pv + 'ID'] || id[pv.toLowerCase() + 'Id'];
 
-    changeStatus({ id, tt, ty, tv, pv, yr });
+    changeStatus({ id, tt, ty, pv, yr, ur, ft });
 
     switch (request.type) {
         case 'SEARCH_PLEX':
@@ -446,6 +461,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         case 'OPEN_OPTIONS':
             chrome.runtime.openOptionsPage();
             return true;
+        case 'SAVE_AS':
+            chrome.contextMenus.update('W2P-DL', {
+                title: `Save as "${ tt } (${ yr })"`
+            });
+            return true;
         default:
             return false;
     }
@@ -454,6 +474,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 parentItem = chrome.contextMenus.create({
     id: 'W2P',
     title: 'Web to Plex'
+});
+
+saveItem = chrome.contextMenus.create({
+    id: 'W2P-DL',
+    title: 'Ready'
 });
 
 for(let array = 'IM TM TV'.split(' '), DL = {}, length = array.length, index = 0, item; index < length; index++)

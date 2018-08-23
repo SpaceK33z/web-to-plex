@@ -4,9 +4,17 @@
 
 # TODO
 
-- Use the "download" API to save files (i.e. Flenix's "Save As" option for non-Flenix domains)
-- Close issues: #13, #14, #21, #25, and #53
-- Revisit issues: #17, and #16
+- [x] Use the "download" API to save files (i.e. Flenix's "Save As" option for non-Flenix domains)
+  - v3.0.1.0
+- Close issues:
+  - [ ] #13
+  - [ ] #14
+  - [ ] #21
+  - [ ] #25
+  - [x] #53
+- Revisit issues:
+  - [x] #17
+  - [ ] #16
 
 # CHANGELOG (Oldest to Newest)
 
@@ -170,7 +178,7 @@
 - Hid debugging information
   - see issue #21 
 
-## v3.0.0.0 / unreleased
+## v3.0.0.0 / SpaceK33z@934d4c542df495a551769b1188b6cd049f785d18
 
 - Made numerous changes as a BETA for v4 (explained below)
 
@@ -191,7 +199,11 @@
     - See issue #24
 - **Added support for Trakt's "Watch Now" links**
   - see issue #25
-- Added `/img/_16.png` and `/img/_48.png` as monochrome, logo icons
-- Added new button location images
-- **Added a TMDb API key section**
-  - Not sure if this'll be used
+
+## v3.0.1.0 / unreleased
+
+- **Added the download API**
+  - uses the download API to save files (i.e. Flenix's "Save As" option for non-Flenix domains)
+- Restructured the context menu
+- **Added the `sendUpdate(String type[, Object options])` method to `/utils.js`**
+- Fixed Trakt's button error

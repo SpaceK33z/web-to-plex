@@ -70,14 +70,13 @@ function renderPlexButton() {
     ma.classList.add('fa', 'fa-fw', 'fa-download');
     ch.classList.add('text');
     el.textContent = 'Web to Plex';
-    el.title = 'Loading...';
     el.classList.add('web-to-plex-button', 'main-info');
     pa.appendChild(ma);
     pa.appendChild(ch);
     ch.appendChild(el);
 	$actions.insertBefore(pa, $actions.childNodes[3]);
 
-	return el;
+	return pa;
 }
 
 async function initPlexThingy(type) {
@@ -108,7 +107,7 @@ async function initPlexThingy(type) {
         year = Db.year;
     }
 
-	findPlexMedia({ type, title, year, button: $button, IMDbID, TMDbID, TVDbID });
+	findPlexMedia({ type, title, year, button: $button, IMDbID, TMDbID, TVDbID, txt: 'title', hov: 'null' });
 }
 
 async function initDash() {
