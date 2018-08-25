@@ -1,60 +1,47 @@
 /* global findPlexMedia, parseOptions, modifyPlexButton */
+function isReady() {
+    return $$('#content [class$="__meta"]');
+}
+
 function isMovie() {
-	return window.location.pathname.startsWith('/watch/');
+	return window.location.pathname.startsWith('/movie/'); // /movies/ is STRICTLY for a collection of movies (e.g. the line-up)
 }
 
 function isShow() {
-	return !isMovie();
+	return window.location.pathname.startsWith('/series/'); // /tv/ is STRICTLY for a collection of movies (e.g. the line-up)
 }
+
+let $$ = selector => document.querySelector(selector);
 
 function renderPlexButton($parent) {
 	if (!$parent) return;
 
-	let existingButton = document.querySelector('a.web-to-plex-button');
+	let existingButton = $$('a.web-to-plex-button');
 	if (existingButton)
 		existingButton.remove();
 
-	let el = document.createElement('a'),
-        ma = el, pa;
+	let el = document.createElement('a');
 
-    if(isShow()) {
-        pa = document.createElement('span');
-        pa.appendChild(el);
-        pa.classList.add('details-action');
-        ma = pa;
-    }
+    el.classList.add('Nav__item', 'web-to-plex-button');
 
-    el.textContent = 'Web to Plex';
+    el.innerHTML = `<img src="${ chrome.extension.getURL('img/o48.png') }"/>`;
     el.title = 'Loading...';
-	el.classList.add('web-to-plex-button');
 
-	$parent.insertBefore(ma, $parent.lastElementChild);
+	$parent.insertBefore(el, $parent.lastChild);
 	return el;
 }
 
 async function initPlexThingy(type) {
-	let $parent = document.querySelector('.functional-bar, .show-details'),
-        $button = renderPlexButton($parent);
+	let $button = renderPlexButton($$('#content .Nav .Nav__container'));
 
 	if (!$button)
 		return;
 
-	let meta = document.querySelector('.video-meta'),
-        title, year = 0;
-
-	// TODO: Hmm there should be a less risky way...
-    if(type === 'movie' && !!meta) {
-        title = meta.textContent.replace(/\s*\((\d+)\)\s*/, '').trim();
-        year = +RegExp.$1;
-    } else {
-        title = window.location.pathname
-            .replace(/^\/(.+?)(\/.*)?/, '$1')
-            .replace(/-+/g, ' ');
-    }
-
-    title = title.toCaps();
-
-    let Db = await getIDs({ title, year, type }),
+	let $title = $$('#content [class$="__name"]'),
+        $year = $$('#content [class$="__meta"] [class$="segment"]:last-child'),
+        title = $title.innerText.replace(/^\s+|\s+$/g, '').toCaps(),
+        year = +$year.textContent.replace(/.*\((\d{4})\).*/, '$1'),
+        Db = await getIDs({ title, year, type }),
         IMDbID = Db.imdb,
         TMDbID = Db.tmdb,
         TVDbID = Db.tvdb;
@@ -62,9 +49,9 @@ async function initPlexThingy(type) {
     title = Db.title;
     year = Db.year;
 
-	findPlexMedia({ type, title, year, button: $button, IMDbID, TMDbID, TVDbID });
+	findPlexMedia({ type, title, year, button: $button, IMDbID, TMDbID, TVDbID, txt: 'title', hov: 'null' });
 }
 
-if (isMovie() || isShow()) {
-	parseOptions().then(async() => await initPlexThingy(isMovie()? 'movie': 'tv'));
-}
+(window.onlocationchange = () =>
+    wait(isReady, () => parseOptions().then(async() => await initPlexThingy(isMovie()? 'movie': 'tv')))
+)();

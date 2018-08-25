@@ -20,7 +20,7 @@ function getIMDbID() {
     );
 
     if ($link)
-        return $link.href.replace(/^.*?imdb\.com\/title\/(tt\d+)/, '$1');
+        return $link.href.replace(/^.*?imdb\.com\/.+\b(tt\d+)\b/, '$1');
 }
 
 function getTVDbID() {
@@ -30,7 +30,7 @@ function getTVDbID() {
     );
 
     if ($link)
-        return $link.href.replace(/^.*?thetvdb.com\/.+(?:(?:series)?id=(\d+)).*?$/, '$1');
+        return $link.href.replace(/^.*?thetvdb.com\/.+(?:(?:series\/?(?:\?id=)?)(\d+)\b).*?$/, '$1');
 }
 
 function getTMDbID() {
@@ -40,7 +40,7 @@ function getTMDbID() {
     );
 
     if ($link)
-        return $link.href.replace(/^.*?themoviedb.org\/(?:movie|tv)\/(\d+).*?$/, '$1');
+        return $link.href.replace(/^.*?themoviedb.org\/(?:movie|tv|shows?|series)\/(\d+).*?$/, '$1');
 }
 
 function init() {

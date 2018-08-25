@@ -4,6 +4,7 @@
     margin-bottom: 8px!important;
     line-height: 2!important;
     text-decoration: none!important;
+    width: auto!important;
 }
 
 .web-to-plex-button--downloader {

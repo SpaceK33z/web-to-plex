@@ -200,10 +200,33 @@
 - **Added support for Trakt's "Watch Now" links**
   - see issue #25
 
-## v3.0.1.0 / unreleased
+## v3.0.1.0 / SpaceK33z@62bc193b7f24095024aeb6ec473fccfa7753e849
 
 - **Added the download API**
   - uses the download API to save files (i.e. Flenix's "Save As" option for non-Flenix domains)
 - Restructured the context menu
 - **Added the `sendUpdate(String type[, Object options])` method to `/utils.js`**
 - Fixed Trakt's button error
+
+## v3.0.2.0 / unreleased
+
+- **Added "Best guess" searching feature (context menu)**
+  - **Avoided bug: `/background.js` error: `changeStatus` was incorrectly implemented**
+    - specifically, `id.replace` was a TypeError (`Number..replace` is undefined)
+- Fixed Trakt's `getTVDbID` method (was returning a URL instead of a number)
+- Fixed VRV's title finding error (the site was updated)
+- **Added "used managers" to the pop-up feature, i.e. if you have Watcher defined in the options, a link will show up in the pop-up**
+- Added "instrusive ads" icon to the pop-up
+- Fixed Amazon, again... website upgrade
+- Fixed Hulu -- who got a much needed website upgrade as well
+- Added *transparent* icon images
+- **Fixed API lookup feature (TV Shows / TV Maze)**
+- Fixed iTunes (Movies) -- who also got a website update
+- Changed `/utils.js` and `/background.js` to find items more accurately
+  - stopped trusting the obtained years (i.e. Trakt's episode air-date shouldn't count as the series' air-date)
+  - enclosed the `chrome.runtime.onMessage.addListener` method in a `try / catch` for better debugging
+- Removed variable ghosting
+  - variables, most notably `options.watcherURL` would persist after being removed
+- Updated the manifest's description
+- Renamed `/hhkmjeeccipbolailpomhjhmccnnjhkj.crx` to `src.crx`
+- Renamed `/hhkmjeeccipbolailpomhjhmccnnjhkj.zip` to `src.zip`

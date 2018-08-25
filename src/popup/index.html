@@ -164,6 +164,26 @@
             box-shadow: 0 10px 128px inset #6A8592;
         }
 
+        #local-plex:hover {
+            box-shadow: 0 10px 128px inset #F9BD03;
+        }
+
+        #local-watcher:hover {
+            box-shadow: 0 10px 128px inset #EA554E;
+        }
+
+        #local-radarr:hover {
+            box-shadow: 0 10px 128px inset #FFC230;
+        }
+
+        #local-sonarr:hover {
+            box-shadow: 0 10px 128px inset #36C6F4;
+        }
+
+        #local-couchpotato:hover {
+            box-shadow: 0 10px 128px inset #D20000;
+        }
+
         /* Constant Footer */
         #plex:hover {
             box-shadow: 0 10px 128px inset #F9BE03;
@@ -185,6 +205,16 @@
             height: 3em;
             margin-top: -8.5em;
             margin-right: -1em;
+        }
+
+        [pop-ups] label:after {
+            content: " \1F92C";
+            float: right;
+        }
+
+        [local] label:after {
+            content: " \1F5A5";
+            float: right;
         }
 
         [is-slow] label:after {
@@ -267,7 +297,7 @@
         </tr>
 
         <tr>
-            <td id="flenix" save-file="media files">
+            <td id="flenix" save-file="media files" pop-ups>
                 <a href="https://flenix.co/" target="_blank">
                     <img alt="Flenix" src="../img/flenix.png" />
                     <label>Flenix</label>

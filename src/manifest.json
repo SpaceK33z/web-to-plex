@@ -2,11 +2,11 @@
     "update_url": "https://github.com/Ephellon/web-to-plex/raw/master/hhkmjeeccipbolailpomhjhmccnnjhkj.crx",
 
 	"name": "Web to Plex",
-	"description": "Adds a button on various movie & TV show sites to open it in Plex.",
+	"description": "Adds a button on various movie & TV show sites to open the item in Plex, or send to your designated NZB manager for download.",
     "homepage_url": "https://github.com/Ephellon/web-to-plex/",
 
 	"manifest_version": 2,
-    "version": "3.0.1.0",
+    "version": "3.0.2.0",
 // Firefox Support =>
 //    "applications": {
 //        "gecko": {
@@ -133,5 +133,5 @@
 		"http://*/",
 		"https://*/"
 	],
-    "web_accessible_resources": ["img/16.png", "img/48.png", "img/_16.png", "img/_48.png"]
+    "web_accessible_resources": ["img/16.png", "img/48.png", "img/_16.png", "img/_48.png", "img/o16.png", "img/o48.png"]
 }

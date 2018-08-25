@@ -5,6 +5,28 @@ let external = {},
 //                { error: m => m, info: m => m, log: m => m, warn: m => m } ||
                 console;
 
+let date = new Date(),
+    YEAR = date.getFullYear(),
+    MONTH = date.getMonth() + 1,
+    DATE = date.getDate();
+
+class Key {
+    constructor(length = 8, symbol = '') {
+        let values = [];
+
+        window.crypto.getRandomValues(new Uint32Array(16)).forEach((value, index, array) => values.push(value.toString(36)));
+
+        return this.value = values.join(symbol);
+    }
+
+    rehash(length) {
+        return this.value = new Key(length);
+    }
+}
+
+// Session key
+let SessionKey = new Key(16);
+
 // Object{username, password} => Object
 function generateHeaders(auth) {
     let headers = { Accept: 'application/json' };
@@ -19,16 +41,18 @@ function generateHeaders(auth) {
 }
 
 // Object{MovieOrShowID, MovieOrShowTitle, MovieOrShowType, MovieOrShowIDProvider, MovieOrShowYear, LinkURL, FileType} => undefined
-function changeStatus({ id, tt, ty, pv, yr, ur, ft }) {
+function changeStatus({ id, tt, ty, pv, yr, ur = '', ft = '' }) {
 
     let tl = tt.replace(/\-/g, ' ').replace(/[\s\:]{2,}/g, ' - '),
     // File friendly title
-        st = tt.replace(/[\-\s]+/g, '-').replace(/[^\w\-]+/g, '');
+        st = tt.replace(/[\-\s]+/g, '-').replace(/[^\w\-]+/g, ''),
     // Search friendly title
+        xx = /[it]m/i.test(pv)? 'FX': 'GG';
 
-    id = id && !/^tt-?$/i.test(id)? id: null;
+    id = (id && !/^tt-?$/i.test(id)? id: '') + '';
+    id = id.replace(/^.*\b(tt\d+)\b.*$/, '$1').replace(/^.*\bid=(\d+)\b.*$/, '$1').replace(/^.*(?:movie|tv|(?:tv-?)?(?:shows?|series|episodes?))\/(\d+).*$/, '$1');
 
-    external = { ...external, F: tl, P: pv, Q: id, T: st, U: ur, V: ty, X: {}, Y: yr, Z: ft };
+    external = { ...external, F: tl, P: pv, Q: id, S: tt, T: st, U: ur, V: ty, X: xx, Y: yr, Z: ft };
 
     chrome.browserAction.setBadgeText({
         text: pv
@@ -39,18 +63,23 @@ function changeStatus({ id, tt, ty, pv, yr, ur, ft }) {
     });
 
     chrome.contextMenus.update('W2P', {
-        title: `About "${ tt } (${ yr || YEAR })"`
+        title: `Find "${ tt } (${ yr || YEAR })"`
     });
 
     for(let array = 'IM TM TV'.split(' '), length = array.length, index = 0, item; index < length; index++)
         chrome.contextMenus.update('W2P-' + (item = array[index]), {
             title: (
                 ((pv == (item += 'Db')) && id)?
-                    `Open in ${ item } (${ (+id? '#': '') }${ id })`:
+                    `Open in ${ item } (${ (+id? '#': '') + id })`:
                 `Find in ${ item }`
             ),
             checked: false
         });
+
+    chrome.contextMenus.update('W2P-XX', {
+        title: `Find on ${ (xx == 'FX'? 'Flenix': 'Google') }`,
+        checked: false
+    });
 }
 
 // At this point you might want to think, WHY would you want to do
@@ -338,11 +367,11 @@ function $searchPlex(connection, headers, options) {
             // For examples, see Bone Tomahawk, The Big Short, The Hateful Eight.
             // So we'll first try to find the movie with the given year, and then + 1 it.
             // Added [strip] to prevent mix-ups, see: "Kingsman: The Golden Circle" v. "The Circle"
-            let media = movies.find(meta => ((meta.year === +options.year) && strip(meta.title) === strip(options.title))),
+            let media = movies.find(meta => ((meta.year == +options.year) && strip(meta.title) == strip(options.title))),
                 key = null;
 
             if (!media) {
-                media = movies.find(meta => ((meta.year === +options.year + 1) && strip(meta.title) === strip(options.title)));
+                media = movies.find(meta => ((meta.year == +options.year + 1) && strip(meta.title) == strip(options.title)));
             } else {
                 key = media.key.replace('/children', '');
             }
@@ -388,7 +417,10 @@ chrome.contextMenus.onClicked.addListener((item) => {
         db = item.menuItemId.slice(-2).toLowerCase(),
         pv = external.P.slice(0, 2).toLowerCase(),
         qu = external.Q,
-        tl = external.T;
+        tl = external.T,
+        yr = external.Y,
+        tt = external.S,
+        p = (s, r = '+') => s.replace(/-/g, r);
 
     switch(db) {
         case 'im':
@@ -403,20 +435,23 @@ chrome.contextMenus.onClicked.addListener((item) => {
             break;
         case 'tv':
             url = (qu && pv == 'tv')?
-                `thetvdb.com/series/${ tl }`:
-            `thetvdb.com/search?q=${ tl.replace(/-/g, '+') }`;
+                `thetvdb.com/series/${ tl }#${ qu }`: // TVDb accepts either: a title, or a series number... but only one
+            `thetvdb.com/search?q=${ p(tl) }`;
+            break;
+        case 'xx':
+            url = external.X == 'FX'?
+                `flenix.tv/?do=search&story=${ p(tt) }&min_year=${ yr || 1990 }&filter=true&max_year=${ yr }&min_imdb=0&max_imdb=10&cat=1&order=date&g-recaptcha-response=${ SessionKey.value }`:
+            `google.com/search?q="${ p(tl, ' ') } ${ yr }"+${ pv }db`;
             break;
         case 'dl':
             dnl = true;
             url = external.U;
             break;
-        default:
-            url = external.X[db];
-            break;
+        default: return;
     }
 
     if(!dnl)
-        window.open(`https://${ url }#${ db }`, '_blank');
+        window.open(`https://${ url }`, '_blank');
     else
         chrome.downloads.download({
           url,
@@ -433,41 +468,45 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         yr = id.year,
         ty = id.type,
         pv = (id.TVDbID || id.tvdbId? 'TVDb': id.TMDbID || id.tmdbId? 'TMDb': 'IMDb'),
-        ur = id.href,
-        ft = id.tail;
+        ur = id.href || '',
+        ft = id.tail || '';
     id = id[pv + 'ID'] || id[pv.toLowerCase() + 'Id'];
 
-    changeStatus({ id, tt, ty, pv, yr, ur, ft });
+    changeStatus({ id, tt, yr, ty, pv, ur, ft });
 
-    switch (request.type) {
-        case 'SEARCH_PLEX':
-            searchPlex(request, sendResponse);
-            return true;
-        case 'VIEW_COUCHPOTATO':
-            viewCouchPotato(request, sendResponse);
-            return true;
-        case 'ADD_COUCHPOTATO':
-            addCouchpotato(request, sendResponse);
-            return true;
-        case 'ADD_RADARR':
-            addRadarr(request, sendResponse);
-            return true;
-        case 'ADD_SONARR':
-            addSonarr(request, sendResponse);
-            return true;
-        case 'ADD_WATCHER':
-            addWatcher(request, sendResponse);
-            return true;
-        case 'OPEN_OPTIONS':
-            chrome.runtime.openOptionsPage();
-            return true;
-        case 'SAVE_AS':
-            chrome.contextMenus.update('W2P-DL', {
-                title: `Save as "${ tt } (${ yr })"`
-            });
-            return true;
-        default:
-            return false;
+    try {
+        switch (request.type) {
+            case 'SEARCH_PLEX':
+                searchPlex(request, sendResponse);
+                return true;
+            case 'VIEW_COUCHPOTATO':
+                viewCouchPotato(request, sendResponse);
+                return true;
+            case 'ADD_COUCHPOTATO':
+                addCouchpotato(request, sendResponse);
+                return true;
+            case 'ADD_RADARR':
+                addRadarr(request, sendResponse);
+                return true;
+            case 'ADD_SONARR':
+                addSonarr(request, sendResponse);
+                return true;
+            case 'ADD_WATCHER':
+                addWatcher(request, sendResponse);
+                return true;
+            case 'OPEN_OPTIONS':
+                chrome.runtime.openOptionsPage();
+                return true;
+            case 'SAVE_AS':
+                chrome.contextMenus.update('W2P-DL', {
+                    title: `Save as "${ tt } (${ yr })"`
+                });
+                return true;
+            default:
+                return false;
+        }   
+    } catch (error) {
+        return sendResonpse(String(error));
     }
 });
 
@@ -481,6 +520,7 @@ saveItem = chrome.contextMenus.create({
     title: 'Ready'
 });
 
+// Standard search engines
 for(let array = 'IM TM TV'.split(' '), DL = {}, length = array.length, index = 0, item; index < length; index++)
     chrome.contextMenus.create({
         id: 'W2P-' + (item = array[index]),
@@ -489,3 +529,12 @@ for(let array = 'IM TM TV'.split(' '), DL = {}, length = array.length, index = 0
         type: 'checkbox',
         checked: true // implement a way to use the checkboxes?
     });
+
+// Non-standard search engines
+chrome.contextMenus.create({
+    id: 'W2P-XX',
+    parentId: parentItem,
+    title: `Using best guess`,
+    type: 'checkbox',
+    checked: true // implement a way to use the checkboxes?
+});

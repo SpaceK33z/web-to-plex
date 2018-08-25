@@ -1,4 +1,10 @@
-.web-to-plex-button {
+.web-to-plex-container {
+    border-color: #f45a26!important;
+    color: #f45a26!important;
+    margin-top: 1%;
+}
+
+.web-to-plex-button.tv {
 	background: linear-gradient(0deg, #929292, #727272, #929292);
 	color: #fff!important;
     margin: 12px 0;
@@ -15,15 +21,20 @@
     box-shadow: 0 3px 3px #222;
 }
 
-.web-to-plex-button--downloader {
+.web-to-plex-button.movie {
+    border-color: #f45a26!important;
+    color: #f45a26!important;
+}
+
+.web-to-plex-button--downloader.tv {
 	background: linear-gradient(0deg, #f67e56, #f45a26, #f67e56);
 }
 
-.web-to-plex-button--found {
+.web-to-plex-button--found.tv {
 	background: linear-gradient(0deg, #f9be03, #e5a00d, #f9be03);
 }
 
-.list_item .web-to-plex-button {
+.list_item .web-to-plex-button.tv {
 	font-size: 10px;
 	padding: 4px 6px;
 	margin-top: 0;

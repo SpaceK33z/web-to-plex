@@ -67,9 +67,9 @@ Getting the repo ready for a pull request.
 
 ## Installing Web to Plex
 
-- **Download the [CRX](https://github.com/Ephellon/web-to-plex/raw/master/hhkmjeeccipbolailpomhjhmccnnjhkj.crx)**
+- **Download the [CRX](https://github.com/Ephellon/web-to-plex/raw/master/src.crx)**
 
-- **Download the [ZIP](https://github.com/Ephellon/web-to-plex/raw/master/hhkmjeeccipbolailpomhjhmccnnjhkj.zip)**
+- **Download the [ZIP](https://github.com/Ephellon/web-to-plex/raw/master/src.zip)**
 
 - **Download the [SRC](https://github.com/Ephellon/web-to-plex/archive/master.zip)**
 

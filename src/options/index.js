@@ -61,6 +61,7 @@ const storage = (chrome.storage.sync || chrome.storage.local),
       ];
 
 let PlexServers = [],
+    ServerID = null,
     ClientID = null,
     manifest = chrome.runtime.getManifest(),
     terminal = // See #3
@@ -68,6 +69,14 @@ let PlexServers = [],
                 console;
 
 chrome.manifest = chrome.runtime.getManifest();
+
+function load(name) {
+    return JSON.parse(localStorage.getItem(btoa(name)));
+}
+
+function save(name, data) {
+    return localStorage.setItem(btoa(name), JSON.stringify(data));
+}
 
 function getServers(plexToken) {
 	return fetch('https://plex.tv/api/resources?includeHttps=1', {
@@ -375,8 +384,9 @@ function performSonarrTest(QualityProfileID, StoragePath) {
 }
 
 function saveOptions() {
-	let status = $$('#status'),
-        ServerID = __servers__.options[__servers__.selectedIndex].value;
+	let status = $$('#status');
+
+    ServerID = __servers__.options[__servers__.selectedIndex].value;
 
 	if(!ServerID) {
 		return status.textContent = 'Select a server!',
@@ -434,7 +444,11 @@ function saveOptions() {
         storage.set({ ClientID });
     }
 
-    options.plexURL = (options.plexURL || "")
+    options.watcherURLRoot = null;
+    options['c2x1ZytyaW90KzIwMTg'] = null;
+    options['slug+riot+2018'] = null;
+
+    options.plexURL = options.plexURLRoot = (options.plexURL || "")
         .replace(/([^\\\/])$/, endingSlash)
         .replace(/^(?!^https?:\/\/)(.+)/, 'http://$1');
 
@@ -455,6 +469,11 @@ function saveOptions() {
 
     options.sonarrStoragePath = options.sonarrStoragePath
         .replace(/([^\\\/])$/, endingSlash);
+
+    terminal.log(options);
+
+    for(let index = 0, array = 'plex watcher radarr sonarr couchpotato'.split(' '), item = save('URLs', array); index < array.length; index++)
+        save(`${ item = array[index] }.url`, options[`${ item }URLRoot`]);
 
 	function requestURLPermissions(url) {
         if(!url) return;
@@ -539,9 +558,9 @@ function restoreOptions() {
 		// Sigh... This is a workaround for Firefox; newer versions have support for the `chrome.storage.sync` API,
 		// BUT, it will throw an error if you haven't enabled it...
 		if(chrome.runtime.lastError)
-			chrome.storage.local.get(null, setOptions); else {
+			chrome.storage.local.get(null, setOptions);
+        else
 			setOptions(items);
-        }
 	});
 }
 
@@ -550,7 +569,7 @@ __save__.addEventListener('click', saveOptions);
 
 document
 	.querySelector('#plex_test')
-	.addEventListener('click', () => {
+	.addEventListener('click', event => {
         let t = $$('#plex_token');
 
         if(t && t.value)

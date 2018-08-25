@@ -50,7 +50,7 @@ async function initPlexThingy() {
     title = Db.title;
     year = Db.year;
 
-	findPlexMedia({ title, year, button: $button, type: 'show', IMDbID, TMDbID, TVDbID });
+	findPlexMedia({ title, year, button: $button, type: 'tv', IMDbID, TMDbID, TVDbID });
 }
 
 function renderPlexButton() {

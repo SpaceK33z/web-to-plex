@@ -4,7 +4,7 @@ function isMovie() {
 }
 
 function isShow() {
-	return document.querySelector('[data-automation-id="num-of-seasons"], .num-of-seasons, [class^="season"]');
+	return document.querySelector('[data-automation-id*="seasons"], [class*="num-of-seasons"]');
 }
 
 function isPageReady() {
@@ -13,7 +13,7 @@ function isPageReady() {
 
 async function init() {
 	if (isPageReady())
-        await initPlexThingy(isMovie()? 'movie': 'tv');
+        await initPlexThingy(isShow()? 'tv': 'movie');
 	else
 		// This almost never happens, but sometimes the page is too slow so we need to wait a bit.
 		setTimeout(init, 1000);
@@ -37,7 +37,7 @@ function renderPlexButton($parent) {
 }
 
 async function initPlexThingy(type) {
-	let $parent = document.querySelector('#dv-action-box .av-action-button-box, #dv-action-box'),
+	let $parent = document.querySelector(type == 'tv'? '#dv-action-box .av-action-button-box': '#dv-action-box'),
         $button = renderPlexButton($parent),
         R = RegExp;
 

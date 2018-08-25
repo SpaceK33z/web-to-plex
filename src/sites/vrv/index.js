@@ -29,7 +29,7 @@ async function initPlexThingy() {
 	if (!$button)
 		return;
 
-	let $title = document.querySelector('.series, .title'),
+	let $title = document.querySelector('[class^="series"] .title, .series'),
         $year = document.querySelector('.additional-information-item');
 
 	if (!$title)

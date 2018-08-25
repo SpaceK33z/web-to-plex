@@ -1,9 +1,3 @@
-.web-to-plex-button:before {
-    content: "\1f4e5 ";
-    font-size: 20px !important;
-    vertical-align: text-bottom !important;
-}
-
 .web-to-plex-button {
 	display: inline-block !important;
     color: #e6e6e6 !important;
@@ -12,6 +6,8 @@
     text-decoration: none !important;
     user-select: none !important;
     vertical-align: top !important;
+    margin-top: 1%;
+    margin-right: 5%;
 }
 
 .web-to-plex-button--downloader {
