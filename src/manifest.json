@@ -1,12 +1,12 @@
 {
-    "update_url": "https://github.com/Ephellon/web-to-plex/raw/master/hhkmjeeccipbolailpomhjhmccnnjhkj.crx",
+    "update_url": "https://github.com/Ephellon/web-to-plex/raw/master/src.crx",
 
 	"name": "Web to Plex",
 	"description": "Adds a button on various movie & TV show sites to open the item in Plex, or send to your designated NZB manager for download.",
     "homepage_url": "https://github.com/Ephellon/web-to-plex/",
 
 	"manifest_version": 2,
-    "version": "3.0.2.0",
+    "version": "3.1.0.0",
 // Firefox Support =>
 //    "applications": {
 //        "gecko": {
@@ -99,6 +99,10 @@
 			"matches": ["*://*.rottentomatoes.com/*/*"],
 			"js": ["utils.js", "sites/rottentomatoes/index.js"],
 			"css": ["sites/rottentomatoes/index.css", "sites/common.css"]
+		},{
+			"matches": ["*://*.netflix.com/watch/*"],
+			"js": ["utils.js", "sites/netflix/index.js"],
+			"css": ["sites/netflix/index.css", "sites/common.css"]
 		}
 	],
 

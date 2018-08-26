@@ -208,14 +208,14 @@
 - **Added the `sendUpdate(String type[, Object options])` method to `/utils.js`**
 - Fixed Trakt's button error
 
-## v3.0.2.0 / unreleased
+## v3.0.2.0 / SpaceK33z@44a84c575c6ec8f8a0b83c95fd7c81cc41c9a35e
 
 - **Added "Best guess" searching feature (context menu)**
   - **Avoided bug: `/background.js` error: `changeStatus` was incorrectly implemented**
     - specifically, `id.replace` was a TypeError (`Number..replace` is undefined)
 - Fixed Trakt's `getTVDbID` method (was returning a URL instead of a number)
 - Fixed VRV's title finding error (the site was updated)
-- **Added "used managers" to the pop-up feature, i.e. if you have Watcher defined in the options, a link will show up in the pop-up**
+- Added "used managers" to the pop-up feature, i.e. if you have Watcher defined in the options, a link will show up in the pop-up
 - Added "instrusive ads" icon to the pop-up
 - Fixed Amazon, again... website upgrade
 - Fixed Hulu -- who got a much needed website upgrade as well
@@ -228,5 +228,10 @@
 - Removed variable ghosting
   - variables, most notably `options.watcherURL` would persist after being removed
 - Updated the manifest's description
-- Renamed `/hhkmjeeccipbolailpomhjhmccnnjhkj.crx` to `src.crx`
-- Renamed `/hhkmjeeccipbolailpomhjhmccnnjhkj.zip` to `src.zip`
+
+## v3.1.0.0 / unreleased
+
+- **Added Netflix support**
+- Made changes to the `String..toCaps` method
+- Made searches better via `/utils.js`
+  - replaced some non-latin characters (i.e. the curly apostrophe) with an acceptable counter-part (a "normal" apostrophe)

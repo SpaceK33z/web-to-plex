@@ -29,11 +29,11 @@ function watchlocationchange() {
 setInterval(watchlocationchange, 1000); // at least 1s is needed to properly fire the event :/
 
 function load(name) {
-    return JSON.parse((sessionStorage || localStorage).getItem(btoa(name)));
+    return JSON.parse((sessionStorage || localStorage).getItem('Web-to-Plex@' + name));
 }
 
 function save(name, data) {
-    return (sessionStorage || localStorage).setItem(btoa(name), JSON.stringify(data));
+    return (sessionStorage || localStorage).setItem('Web-to-Plex@' + name, JSON.stringify(data));
 }
 
 function sendUpdate(type, options = {}) {
@@ -184,7 +184,11 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
     /(movie|film)/i.test(rqut)?
         'tmdb':
     rqut || '*';
-    title = title? title.replace(/\s*[\:,]\s*Season\s+\d+.*$/i, '').toCaps(): title;
+    title = (title? title.replace(/\s*[\:,]\s*Season\s+\d+.*$/i, '').toCaps(): title)
+        .replace(/\u201a/g, ',')
+        .replace(/[\u2019\u201b]/g, "'")
+        .replace(/[\u201c\u201d]/g, '"')
+        .replace(/[^\u0000-\u00ff]+/g, '');
     year = year? (year + '').replace(/\D+/g, ''): load(title) || year;
 
     function plus(string) { return string.replace(/\s+/g, '+') }
@@ -205,7 +209,7 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
         (rqut == 'tmdb' || (rqut == '*' && !mid && title && year) || apit == 'movie')?
             (apit && apid)?
                 `https://api.themoviedb.org/3/${ apit }/${ apid }?api_key=${ api.tmdb }`:
-            `https://api.themoviedb.org/3/search/${ apit }?api_key=${ api.tmdb }&query=${ encodeURI(title) }&year=${ year }`:
+            `https://api.themoviedb.org/3/search/${ apit }?api_key=${ api.tmdb }&query=${ encodeURI(title) }${ year? '&year=' + year: '' }`:
         (rqut == 'tvdb' || (rqut == '*' && !tid && title) || apid)?
             (apid)?
                 `https://api.tvmaze.com/shows/${ apid }`:
@@ -213,7 +217,7 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
         (title)?
             (apit && year)?
                 `https://www.theimdbapi.org/api/find/${ apit }?title=${ encodeURI(title) }&year=${ year }`:
-            `https://www.theimdbapi.org/api/find/movie?title=${ encodeURI(title) }&year=${ year }`:
+            `https://www.theimdbapi.org/api/find/movie?title=${ encodeURI(title) }${ year? '&year=' + year: '' }`:
         null;
 
     if(url === null) return 0;
@@ -264,8 +268,8 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
                     return f? o: f;
                 })($data);
             //api.themoviedb.org/ \remote
-            else if('original_name' in $data && 'release_date' in $data)
-                found = (TMDbID == $data.id || (t($data.original_name) === t(title) || t($data.name) === t(title)) && year == ($data || b).release_date.slice(0, 4))?
+            else if(('original_name' in $data || 'original_title' in $data) && 'release_date' in $data)
+                found = (TMDbID == $data.id || (t($data.original_name) === t(title) || t($data.original_title) === t(title) || t($data.name) === t(title)) && year == ($data || b).release_date.slice(0, 4))?
                     $data:
                 found;
             //theimdbapi.org/
@@ -303,8 +307,8 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
                     return f? o: f;
                 })($data);
             //api.themoviedb.org/ \remote
-            else if('original_name' in $data)
-                found = (c($data.original_name) == c(title) || c($data.name) == c(title))?
+            else if('original_name' in $data || 'original_title' in $data)
+                found = (c($data.original_name) == c(title) || c($data.original_title) == c(title) || c($data.name) == c(title))?
                     $data:
                 found;
             //theimdbapi.org/
@@ -331,16 +335,16 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
             tmdb: TMDbID || json.externals.themoviedb | 0,
             tvdb: TVDbID || json.externals.thetvdb | 0,
             title,
-            year: json.premiered || json.first_aired_date || year
+            year: ((json.premiered || json.first_aired_date || year) + '').slice(0, 4)
         };
     //api.themoviedb.org/
-    else if('imdb_id' in json)
+    else if('imdb_id' in json || 'original_name' in json || 'original_title' in json)
         data = {
             imdb: IMDbID || json.imdb_id || ei,
             tmdb: TMDbID || json.id | 0,
             tvdb: TVDbID || json.tvdb | 0,
             title,
-            year: json.release_date || json.first_air_date || year
+            year: ((json.release_date || json.first_air_date || year) + '').slice(0, 4)
         };
     //omdbapi.com/
     else if('imdbID' in json)
@@ -366,15 +370,17 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
             imdb: IMDbID || json.imdb || ei,
             tmdb: TMDbID || json.id | 0,
             tvdb: TVDbID || json.tvdb | 0,
-            title, year
+            title,
+            year
         };
 
-    year = (data.year + '').slice(0, 4);
-    year = data.year = +year | 0;
+    year = +((data.year + '').slice(0, 4)) || 0;
+    data.year = year;
 
     terminal.log('Best match', { title, year, data, type, rqut, score: json.score | 0 });
 
-    save(savename, data);
+    save(savename, data); // e.g. "Coco (0)" on Netflix before correction / no repeat searches
+    save(savename = `${title} (${year}).${rqut}`, data); // e.g. "Coco (2017)" on Netflix after correction / no repeat searches
     save(title, year);
 
     terminal.log(`Saved as "${ savename }"`, data);
@@ -850,15 +856,18 @@ String.prototype.toCaps = String.prototype.toCaps || function toCaps(all) {
      * Prepositions: across, after, although, at, because, before, between, by, during, from, if, in, into, of, on, to, through, under, with, & without
      */
     let array = this.toLowerCase(),
-        titles = /(?!^)\b(a([st]|nd?|cross|fter|lthough)?|b(e(cause|fore|tween)|ut|y)|during|from|in(to)?|[io][fn]|[fn]?or|the|[st]o|through|under|with(out)?|yet)\b/gi,
+        titles = /(?!^|an?|the)\b(a([st]|nd?|cross|fter|lthough)?|b(e(cause|fore|tween)|ut|y)|during|from|in(to)?|[io][fn]|[fn]?or|the|[st]o|through|under|with(out)?|yet)(?!\s*$)\b/gi,
         exceptions = /([\:\|\.\!\?\"\(]\s*[a-z]|\b[^aeiou\d\W]+\b)/gi;
 
     array = array.split(/\s+/);
 
     let index, length, string, word;
-    for(index = 0, length = array.length, string = [], word; index < length; index++)
-        word = array[index],
-        string.push( word[0].toUpperCase() + word.slice(1, word.length) );
+    for(index = 0, length = array.length, string = [], word; index < length; index++) {
+        word = array[index];
+
+        if(word)
+            string.push( word[0].toUpperCase() + word.slice(1, word.length) );
+    }
 
     string = string.join(' ');
 
