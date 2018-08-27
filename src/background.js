@@ -43,7 +43,7 @@ function generateHeaders(auth) {
 // Object{MovieOrShowID, MovieOrShowTitle, MovieOrShowType, MovieOrShowIDProvider, MovieOrShowYear, LinkURL, FileType} => undefined
 function changeStatus({ id, tt, ty, pv, yr, ur = '', ft = '' }) {
 
-    let tl = tt.replace(/\-/g, ' ').replace(/[\s\:]{2,}/g, ' - '),
+    let tl = tt.replace(/\-/g, ' ').replace(/[\s\:]{2,}/g, ' - ').replace(/[^\w\s\-\']+/g, ''),
     // File friendly title
         st = tt.replace(/[\-\s]+/g, '-').replace(/[^\w\-]+/g, ''),
     // Search friendly title
@@ -420,6 +420,8 @@ chrome.contextMenus.onClicked.addListener((item) => {
         tl = external.T,
         yr = external.Y,
         tt = external.S,
+        lt = external.F,
+        ft = external.Z,
         p = (s, r = '+') => s.replace(/-/g, r);
 
     switch(db) {
@@ -455,7 +457,7 @@ chrome.contextMenus.onClicked.addListener((item) => {
     else
         chrome.downloads.download({
           url,
-          filename: `${ external.F } (${ external.Y }).${ external.Z }`,
+          filename: `${ lt } (${ yr }).${ ft }`,
           saveAs: true
         });
 });
@@ -517,7 +519,7 @@ parentItem = chrome.contextMenus.create({
 
 saveItem = chrome.contextMenus.create({
     id: 'W2P-DL',
-    title: 'Ready'
+    title: 'Nothing to Save'
 });
 
 // Standard search engines

@@ -57,7 +57,9 @@ const storage = (chrome.storage.sync || chrome.storage.local),
             'sonarrStoragePath',
             'sonarrQualityProfileId',
             'OMDbAPI',
-            'TMDbAPI'
+            'TMDbAPI',
+            'UseLoose',
+            'UseLooseScore'
       ];
 
 let PlexServers = [],
@@ -196,7 +198,9 @@ function getOptionValues() {
 			`[data-option="${ option }"]`
 		);
 
-        if(element)
+        if(element.type == 'checkbox')
+            options[option] = element.checked;
+        else if(element)
             options[option] = element.value;
 	});
 
@@ -444,10 +448,6 @@ function saveOptions() {
         storage.set({ ClientID });
     }
 
-    options.watcherURLRoot = null;
-    options['c2x1ZytyaW90KzIwMTg'] = null;
-    options['slug+riot+2018'] = null;
-
     options.plexURL = options.plexURLRoot = (options.plexURL || "")
         .replace(/([^\\\/])$/, endingSlash)
         .replace(/^(?!^https?:\/\/)(.+)/, 'http://$1');
@@ -469,8 +469,6 @@ function saveOptions() {
 
     options.sonarrStoragePath = options.sonarrStoragePath
         .replace(/([^\\\/])$/, endingSlash);
-
-    terminal.log(options);
 
     for(let index = 0, array = 'plex watcher radarr sonarr couchpotato'.split(' '), item = save('URLs', array); index < array.length; index++)
         save(`${ item = array[index] }.url`, options[`${ item }URLRoot`]);
@@ -516,6 +514,7 @@ function saveOptions() {
 			terminal.error('Error with saving', chrome.runtime.lastError.message);
 			chrome.storage.local.set(data, showOptionsSaved);
 		} else {
+            terminal.log('Saved Options:', options);
 			showOptionsSaved();
 		}
 	});
@@ -530,18 +529,25 @@ function restoreOptions() {
 
             if(!el) return;
 
-			el.value = items[option] || '';
+            if(el.type == 'checkbox')
+                el.checked = (items[option] + '') == 'true';
+            else
+                el.value = items[option] || '';
 
             if(el.value !== '' && !el.disabled) {
-                if(/password$/i.test(option))
+                if(el.type == 'checkbox')
+                    el.setAttribute('save', el.checked);
+                else if(el.type == 'range')
+                    el.setAttribute('save', el.value),
+                    el.oninput({ target: el });
+                else if(/password$/i.test(option))
                     el.setAttribute('type', el.type = 'password');
                 else 
                     el.placeholder = `Last save: ${ el.value }`,
                     el.title = `Double-click to restore value ("${ el.value }")`,
-                    el.setAttribute('save', el.value);
+                    el.setAttribute('save', el.value),
+                    el.ondblclick = event => el.value = el.getAttribute('save');
             }
-
-            el.ondblclick = event => el.value = el.getAttribute('save');
         });
 
 		if(items.plexToken)
@@ -589,3 +595,10 @@ document
 document
     .querySelector('#version')
     .innerHTML = `Version ${ chrome.manifest.version }`;
+document
+    .querySelectorAll('[type="range"]')
+    .forEach((element, index, array) => {
+        element.nextElementSibling.value = element.value + '%';
+
+        element.oninput = (event, self) => (self = event.target).nextElementSibling.value = self.value + '%';
+    });

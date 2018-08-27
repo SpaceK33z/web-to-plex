@@ -189,7 +189,7 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
         .replace(/[\u2019\u201b]/g, "'")
         .replace(/[\u201c\u201d]/g, '"')
         .replace(/[^\u0000-\u00ff]+/g, '');
-    year = year? (year + '').replace(/\D+/g, ''): load(title) || year;
+    year = year? (year + '').replace(/\D+/g, ''): load(`${title}.${rqut}`) || year;
 
     function plus(string) { return string.replace(/\s+/g, '+') }
 
@@ -237,14 +237,36 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
 
     terminal.log('Search results', { title, year, url, json });
 
-    if('results' in json) {
+    if('results' in json)
         json = json.results;
-    }
 
     if(json instanceof Array) {
         let b = { release_date: '', year: '' },
             t = (s = "") => s.toLowerCase(),
-            c = (s = "") => t(s).replace(/\&/g, 'and').replace(/\W+/g, '');
+            c = (s = "") => t(s).replace(/\&/g, 'and').replace(/\W+/g, ''),
+            k = (s = "") => {
+
+                let r = [
+                    [/\s*\b(show|series|a([st]|nd?|cross|fter|lthough)?|b(e(cause|fore|tween)|ut|y)|during|from|in(to)?|[io][fn]|[fn]?or|the|[st]o|through|under|with(out)?|yet)\b\s*/gi, ''],
+                    // try replacing common words, e.g. Conjunctions, "Show," "Series," etc.
+                    [/\s+/g, '|']
+                ];
+
+                for(let i = 0; i < r.length; i++) {
+                    if(/^([\(\|\)]+)?$/.test(s)) return "";
+
+                    s = s.replace(r[i][0], r[i][1]);
+                }
+
+                return c(s);
+            },
+            R = (s = "", S = "", n = !0) => {
+                let score = 100 * ((S.match(RegExp(`\\b(${k(s)})\\b`, 'i')) || [null]).length / (S.split(' ').length || 1)),
+                    passing = config.UseLooseScore | 0;
+
+                return (S != '' && score >= passing) || (n? R(S, s, !n): n);
+            },
+            en = /^en(glish)?$/i;
 
         // Find an exact match: Title (Year) | #IMDbID
         let index, found, $data, lastscore;
@@ -252,13 +274,19 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
             $data = json[index];
 
             //api.tvmaze.com/
-            if('externals' in $data)
-                found = (IMDbID == $data.externals.imdb || (t($data.name) === t(title) && year == $data.premiered.slice(0, 4)))?
+            if(('externals' in $data || 'show' in $data) && $data.premiered)
+                found = (IMDbID == ($data = $data.show || $data).externals.imdb || t($data.name) === t(title) && year == $data.premiered.slice(0, 4))?
                     $data:
                 found;
             //api.themoviedb.org/ \local
-            else if('movie_results' in $data || 'tv_results' in $data)
+            else if(('movie_results' in $data || 'tv_results' in $data || 'results' in $data) && $data.release_date)
                 found = (DATA => {
+                    if(DATA.results)
+                        if(rqut == 'tmdb')
+                            DATA.movie_results = DATA.results;
+                        else
+                            DATA.tv_results = DATA.results;
+
                     for(let i = 0, f = !1, o = DATA.movie_results, l = o.length | 0; i < l; i++)
                         f = (t(o.title) === t(title) && o.release_date.slice(0, 4) == year);
 
@@ -268,15 +296,17 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
                     return f? o: f;
                 })($data);
             //api.themoviedb.org/ \remote
-            else if(('original_name' in $data || 'original_title' in $data) && 'release_date' in $data)
-                found = (TMDbID == $data.id || (t($data.original_name) === t(title) || t($data.original_title) === t(title) || t($data.name) === t(title)) && year == ($data || b).release_date.slice(0, 4))?
+            else if(('original_name' in $data || 'original_title' in $data) && $data.release_date)
+                found = (TMDbID == $data.id || (t($data.original_name || $data.original_title) === t(title) || t($data.name) === t(title)) && year == ($data || b).release_date.slice(0, 4))?
                     $data:
                 found;
             //theimdbapi.org/
-            else
+            else if($data.release_date)
                 found = (t($data.title) === t(title) && year == ($data.url || $data || b).release_date.slice(0, 4))?
                     $data:
                 found;
+
+//            terminal.log(`Strict Matching: ${ !!found }`, !!found? found: null);
         }
 
         // Find a close match: Title
@@ -284,19 +314,25 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
             $data = json[index];
 
             //api.tvmaze.com/
-            if('externals' in $data)
+            if('externals' in $data || 'show' in $data)
                 found =
                     // ignore language barriers
-                    (c($data.name) == c(title))?
+                    (c(($data = $data.show || $data).name) == c(title))?
                         $data:
                     // trust the api matching
-                    ($data.score >= lastscore)?
-                        (lastscore = $data.score, $data):
+                    ($data.score > lastscore)?
+                        (lastscore = $data.score || $data.vote_count, $data):
                     found;
             //api.themoviedb.org/ \local
-            else if('movie_results' in $data || 'tv_results' in $data)
+            else if('movie_results' in $data || 'tv_results' in $data || 'results' in $data)
                 found = (DATA => {
                     let i, f, o, l;
+
+                    if(DATA.results)
+                        if(rqut == 'tmdb')
+                            DATA.movie_results = DATA.results;
+                        else
+                            DATA.tv_results = DATA.results;
 
                     for(i = 0, f = !1, o = DATA.movie_results, l = o.length | 0; i < l; i++)
                         f = (c(o.title) == c(title));
@@ -307,15 +343,68 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
                     return f? o: f;
                 })($data);
             //api.themoviedb.org/ \remote
-            else if('original_name' in $data || 'original_title' in $data)
-                found = (c($data.original_name) == c(title) || c($data.original_title) == c(title) || c($data.name) == c(title))?
+            else if('original_name' in $data || 'original_title' in $data || 'name' in $data)
+                found = (c($data.original_name || $data.original_title || $data.name) == c(title))?
                     $data:
                 found;
             //theimdbapi.org/
-            else if(/english/i.test($data.language))
+            else if(en.test($data.language))
                 found = (c($data.title) == c(title))?
                     $data:
                 found;
+
+//            terminal.log(`Title Matching: ${ !!found }`, !!found? found: null);
+        }
+
+        // Find an OK match: Title ~ Title
+        // The examples below are correct
+        // GOOD, found: VRV's "Bakemonogatari" vs. TVDb's "Monogatari Series"
+            // /\b(monogatari)\b/i.test('bakemonogatari') === true
+            // this is what this option is for
+        // OK, found: "The Title of This is Bad" vs. "The Title of This is OK" (this is semi-errornous)
+            // /\b(title|this|bad)\b/i.test('title this ok') === true
+            // this may be a possible match, but it may also be an error: 'title' and 'this'
+        // BAD, not found: "Gun Show Showdown" vs. "Gundarr"
+            // /\b(gun|showdown)\b/i.test('gundarr') === false
+            // this should not match; the '\b' (border between \w and \W) keeps them from matching
+        for(index = 0; config.UseLoose && index < json.length && (!found || lastscore > 0); index++) {
+            $data = json[index];
+
+            //api.tvmaze.com/
+            if('externals' in $data || 'show' in $data)
+                found =
+                    // ignore language barriers
+                    (R(($data = $data.show || $data).name, title))?
+                        $data:
+                    // trust the api matching
+                    ($data.score > lastscore)?
+                        (lastscore = $data.score, $data):
+                    found;
+            //api.themoviedb.org/ \local
+            else if('movie_results' in $data || 'tv_results' in $data)
+                found = (DATA => {
+                    let i, f, o, l;
+
+                    for(i = 0, f = !1, o = DATA.movie_results, l = o.length | 0; i < l; i++)
+                        f = R(o.title, title);
+
+                    for(i = (+f * l), o = (f? o: DATA.tv_results), l = (f? l: o.length | 0); i < l; i++)
+                        f = R(o.name, title);
+
+                    return f? o: f;
+                })($data);
+            //api.themoviedb.org/ \remote
+            else if('original_name' in $data || 'original_title' in $data)
+                found = (R($data.original_name, title) || R($data.original_title, title) || R($data.name, title))?
+                    $data:
+                found;
+            //theimdbapi.org/
+            else if(en.test($data.language))
+                found = (R($data.title, title))?
+                    $data:
+                found;
+
+//            terminal.log(`Loose Matching: ${ !!found }`, !!found? found: null);
         }
 
         json = found;
@@ -329,7 +418,7 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
     let ei = 'tt-';
 
     //api.tvmaze.com/
-    if('externals' in json)
+    if('externals' in (json = json.show || json))
         data = {
             imdb: IMDbID || json.externals.imdb || ei,
             tmdb: TMDbID || json.externals.themoviedb | 0,
@@ -381,7 +470,7 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
 
     save(savename, data); // e.g. "Coco (0)" on Netflix before correction / no repeat searches
     save(savename = `${title} (${year}).${rqut}`, data); // e.g. "Coco (2017)" on Netflix after correction / no repeat searches
-    save(title, year);
+    save(`${title}.${rqut}`, year);
 
     terminal.log(`Saved as "${ savename }"`, data);
 
@@ -857,7 +946,7 @@ String.prototype.toCaps = String.prototype.toCaps || function toCaps(all) {
      */
     let array = this.toLowerCase(),
         titles = /(?!^|an?|the)\b(a([st]|nd?|cross|fter|lthough)?|b(e(cause|fore|tween)|ut|y)|during|from|in(to)?|[io][fn]|[fn]?or|the|[st]o|through|under|with(out)?|yet)(?!\s*$)\b/gi,
-        exceptions = /([\:\|\.\!\?\"\(]\s*[a-z]|\b[^aeiou\d\W]+\b)/gi;
+        exceptions = /([\:\|\.\!\?\"\(]\s*[a-z]|(?![\'\-\+])\b[^aeiouy\d\W]+\b)/gi;
 
     array = array.split(/\s+/);
 

@@ -229,9 +229,19 @@
   - variables, most notably `options.watcherURL` would persist after being removed
 - Updated the manifest's description
 
-## v3.1.0.0 / unreleased
+## v3.1.0.0 / SpaceK33z@11a23e7f565981bbbcedc7037c840fbcbfeed2f6
 
 - **Added Netflix support**
 - Made changes to the `String..toCaps` method
 - Made searches better via `/utils.js`
   - replaced some non-latin characters (i.e. the curly apostrophe) with an acceptable counter-part (a "normal" apostrophe)
+
+## v3.1.1.0 / unreleased
+
+- **Added the "Use Loose" (RegExp) option (enabled by default)**
+  - this allows the plugin to use a RegExp of the title to find possible matches
+- Removed some unimportant code (debugging)
+- Fixed file naming for the "Save As..." feature
+- Fixed searching error in `/utils.js`
+  - The strict matching for searches was incorrectly implemented
+- Added more GUI elements
