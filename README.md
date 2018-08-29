@@ -4,7 +4,7 @@
 
 This browser extension searches your [Plex Media Server (PMS)](https://www.plex.tv/downloads/) for matching media on sites like [IMDb](https://imdb.com), letting you immediately open the movie or TV show in Plex, if it is available. If the item isn't found on your PMS, then a download button is added instead.
 
-Optionally, you can configure [Sonarr](https://sonarr.tv/) (TV Shows), [Radarr](https://radarr.video/) (Movies), and/or [CouchPotato](https://couchpota.to/) (Both) in the extension's options. After that, you can immediately add a TV show or movie to CouchPotato/Sonarr/Radarr with one click, right from your favorite site.
+Optionally, you can configure [Sonarr](https://sonarr.tv/) (TV Shows), [Radarr](https://radarr.video/) (Movies), [Watcher 3](https://nosmokingbandit.github.io/), and/or [CouchPotato](https://couchpota.to/) (Both) in the extension's options. After that, you can immediately add a TV show or movie to CouchPotato/Sonarr/Radarr with one click, right from your favorite site.
 
 ![Examples](example.png)
 
@@ -18,16 +18,29 @@ Getting the repo ready for a pull request.
 
 ## Features:
 
-- Can save media directly from noted sites (file downloads)
+- Can save media directly from noted sites (file downloads/magnet URLs)
+  - Right-click | Web to Plex | Save as "Show/Movie (Year)"
 - Can push requests to your chosen NZB manager
+  - [Radarr](https://radarr.video/)
+  - [Sonarr](https://sonarr.tv/)
+  - [CouchPotato](https://couchpota.to/)
+  - [Watcher 3](https://nosmokingbandit.github.io/) ("Watcher, version 3")
 - Offers search options via right-click (context menu)
+  - Right-click | Web to Plex | Find "Show/Movie (Year)"
 - Offers a Plex-like GUI
-- Offers a status via the browser badge (orange meaning "available/found," grey meaning "unavailable/not found")
+  - Settings page
+  - Pop-up page
+- Offers a status via the browser badge
+  - Orange: item is available/found
+  - Grey: item is unavailable/not found
 - Offers an easy login feature
-	- Offers an API login feature
-- Offers a Plex URL feature (i.e. you can specify `localhost:32400` as your Plex URL)
+  - Offers an API login feature
+- Offers a "Direct Plex URL" feature
+  - i.e. you can specify `localhost:32400` as your Plex URL to avoid bandwidth usage for Plex requests
 
 ## Supported sites: *Site (button location)*
+
+*Given in order of completion*
 
 1.  [Movieo](http://movieo.me/) ([button location](button-locations/movieo.png))
 2.  [IMDb](http://imdb.com/) ([button location](button-locations/imdb.png))
