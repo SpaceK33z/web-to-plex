@@ -10,7 +10,7 @@ function isShowPage() {
 }
 
 function isDash() {
-    return /^\/(dashboard|calendars|search|(?:movies|shows)\/(?:trending|popular|watched|collected|anticipated|boxoffice)|$)/i.test(window.location.pathname);
+    return /^\/(dashboard|calendars|people|search|(?:movies|shows)\/(?:trending|popular|watched|collected|anticipated|boxoffice)|$)/i.test(window.location.pathname);
 }
 
 function getIMDbID() {

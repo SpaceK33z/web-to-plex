@@ -247,7 +247,7 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
             k = (s = "") => {
 
                 let r = [
-                    [/\s*\b(show|series|a([st]|nd?|cross|fter|lthough)?|b(e(cause|fore|tween)|ut|y)|during|from|in(to)?|[io][fn]|[fn]?or|the|[st]o|through|under|with(out)?|yet)\b\s*/gi, ''],
+                    [/(?!^\s*)\b(show|series|a([st]|nd?|cross|fter|lthough)?|b(e(cause|fore|tween)|ut|y)|during|from|in(to)?|[io][fn]|[fn]?or|the|[st]o|through|under|with(out)?|yet)\b\s*/gi, ''],
                     // try replacing common words, e.g. Conjunctions, "Show," "Series," etc.
                     [/\s+/g, '|']
                 ];
@@ -356,7 +356,7 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
 //            terminal.log(`Title Matching: ${ !!found }`, !!found? found: null);
         }
 
-        // Find an OK match: Title ~ Title
+        // Find an OK match (Loose Searching): Title ~ Title
         // The examples below are correct
         // GOOD, found: VRV's "Bakemonogatari" vs. TVDb's "Monogatari Series"
             // /\b(monogatari)\b/i.test('bakemonogatari') === true
@@ -938,15 +938,16 @@ function getPlexMediaURL(PlexUIID, key) {
     return `${ config.plexURL.replace(config.server.id, PlexUIID) }details?key=${encodeURIComponent( key )}`;
 }
 
-String.prototype.toCaps = String.prototype.toCaps || function toCaps(all) {
+String.prototype.toCaps = function toCaps(all) {
     /** Titling Caplitalization
      * Articles: a, an, & the
      * Conjunctions: and, but, for, nor, or, so, & yet
      * Prepositions: across, after, although, at, because, before, between, by, during, from, if, in, into, of, on, to, through, under, with, & without
      */
     let array = this.toLowerCase(),
-        titles = /(?!^|an?|the)\b(a([st]|nd?|cross|fter|lthough)?|b(e(cause|fore|tween)|ut|y)|during|from|in(to)?|[io][fn]|[fn]?or|the|[st]o|through|under|with(out)?|yet)(?!\s*$)\b/gi,
-        exceptions = /([\:\|\.\!\?\"\(]\s*[a-z]|(?![\'\-\+])\b[^aeiouy\d\W]+\b)/gi;
+        titles = /(?!^|(?:an?|the)\s+)\b(a([st]|nd?|cross|fter|lthough)?|b(e(cause|fore|tween)|ut|y)|during|from|in(to)?|[io][fn]|[fn]?or|the|[st]o|through|under|with(out)?|yet)(?!\s*$)\b/gi,
+        cap_exceptions = /([\|\"\(]\s*[a-z]|[\:\.\!\?]\s+[a-z]|(?:[^\'\-\+]\b)[^aeiouy\d\W]+\b)/gi,
+        all_exceptions = /\b((?:ww)?(?:m+[dclxvi]*|d+[clxvi]*|c+[lxvi]*|l+[xvi]*|x+[vi]*|v+i*|i+))\b/gi;
 
     array = array.split(/\s+/);
 
@@ -961,7 +962,10 @@ String.prototype.toCaps = String.prototype.toCaps || function toCaps(all) {
     string = string.join(' ');
 
     if(!all)
-        string = string.replace(titles, ($0, $1, $$, $_) => $1.toLowerCase()).replace(exceptions, ($0, $1, $$, $_) => $1.toUpperCase());
+        string = string
+          .replace(titles, ($0, $1, $$, $_) => $1.toLowerCase())
+          .replace(cap_exceptions, ($0, $1, $$, $_) => $1.toUpperCase())
+          .replace(all_exceptions, ($0, $1, $$, $_) => $1.toUpperCase());
 
     return string;
 };
