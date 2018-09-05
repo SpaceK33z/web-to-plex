@@ -1,11 +1,11 @@
 /* global findPlexMedia, parseOptions, modifyPlexButton */
 function isMovie() {
-	let tag = document.querySelector('meta[property="og:type"]');
+	let tag = $$('meta[property="og:type"]');
 	return tag && tag.content === 'video.movie';
 }
 
 function isShow() {
-	let tag = document.querySelector('meta[property="og:type"]');
+	let tag = $$('meta[property="og:type"]');
 	return tag && tag.content === 'video.tv_show';
 }
 
@@ -14,11 +14,13 @@ function isList() {
 }
 
 function getIMDbID() {
-	let tag = document.querySelector('meta[property="pageId"]');
+	let tag = $$('meta[property="pageId"]');
 	return tag ? tag.content : undefined;
 }
 
-let IMDbID = getIMDbID();
+let $$ = (selector, index = 0) => document.queryBy(selector)[index],
+    IMDbID = getIMDbID(),
+    usa = /\b(USA?|United\s+States)\b/i;
 
 function cleanYear(year) {
 	// The year can contain `()`, so we need to strip it out.
@@ -28,7 +30,7 @@ function cleanYear(year) {
 function renderPlexButton($parent) {
 	if (!$parent) return;
 
-	let existingButton = document.querySelector('a.web-to-plex-button');
+	let existingButton = $$('a.web-to-plex-button');
 	if (existingButton)
 		existingButton.remove();
 
@@ -42,45 +44,68 @@ function renderPlexButton($parent) {
 	return el;
 }
 
-function initPlexMovie() {
-	let $parent = document.querySelector('.plot_summary'),
-        $button = renderPlexButton($parent);
+async function initPlexMovie() {
+	let $parent = $$('.plot_summary'),
+        $button = renderPlexButton($parent),
+        type = 'movie';
 
 	if (!$button)
 		return;
 
-	let $title = document.querySelector('.title_wrapper h1'),
-	    $year = document.querySelector('.title_wrapper #titleYear'),
+	let $title = $$('.originalTitle, .title_wrapper h1'),
+        $altname = $$('.title_wrapper h1'),
+        $date = $$('.title_wrapper [href*="/releaseinfo"]'),
+	    $year = $$('.title_wrapper #titleYear'),
 	// TODO: Hmm there should be a less risky way...
         title = $title.childNodes[0].textContent.trim(),
+        altname = ($altname == $title? null: $altname.childNodes[0].textContent.trim()),
+        country = $date.innerText.replace(/[^]+\((\w+)\)[^]*?$/, '$1'),
         year = cleanYear($year.textContent);
+    title = usa.test(country)? title: altname;
 
-	findPlexMedia({ type: 'movie', title, year, button: $button, IMDbID });
-}
-
-async function initPlexShow() {
-	let $parent = document.querySelector('.plot_summary'),
-        $button = renderPlexButton($parent);
-
-	if (!$button)
-		return;
-  
-	let $title = document.querySelector('.title_wrapper h1'),
-        date = document.querySelector('title').textContent,
-        dateMatch = date.match(/Series\s+(\d{4})/);
-
-	if (!$title || !dateMatch)
-		return modifyPlexButton($button, 'error', `Could not extract ${ !$title? 'title': 'year' } from IMDb`);
-
-	let title = $title.textContent.trim(),
-        year = dateMatch[1],
-        Db = await getIDs({ title, year, type: 'show', IMDbID }),
+    let Db = await getIDs({ title, year, type, IMDbID }),
         TMDbID = Db.tmdb,
         TVDbID = Db.tvdb;
 
     IMDbID = IMDbID || Db.imdb;
+    title = Db.title;
+    year = Db.year;
 
-	findPlexMedia({ type: 'show', title, year, button: $button, IMDbID, TMDbID, TVDbID });
+	findPlexMedia({ type, title, year, button: $button, IMDbID, TMDbID, TVDbID });
+}
+
+async function initPlexShow() {
+	let $parent = $$('.plot_summary'),
+        $button = renderPlexButton($parent),
+        type = 'show';
+
+	if (!$button)
+		return;
+  
+	let $title = $$('.originalTitle, .title_wrapper h1'),
+        $altname = $$('.title_wrapper h1'),
+        $date = $$('.title_wrapper [href*="/releaseinfo"]'),
+        date = $$('title').textContent,
+        dateMatch = date.match(/Series\s+(\d{4})/);
+
+	if (!($title || $altname) || !dateMatch)
+		return modifyPlexButton($button, 'error', `Could not extract ${ !($title || $altname)? 'title': 'year' } from IMDb`);
+
+	let title = $title.textContent.trim(),
+        altname = ($altname == $title? null: $altname.childNodes[0].textContent.trim()),
+        country = $date.innerText.replace(/[^]+\((\w+)\)[^]*?$/, '$1'),
+        year = dateMatch[1];
+    title = usa.test(country)? title: altname;
+
+    let Db = await getIDs({ title, year, type, IMDbID }),
+        TMDbID = Db.tmdb,
+        TVDbID = Db.tvdb;
+
+    IMDbID = IMDbID || Db.imdb;
+    title = Db.title;
+    year = Db.year;
+
+	findPlexMedia({ type, title, year, button: $button, IMDbID, TMDbID, TVDbID });
 }
 
 function addInListItem(el) {

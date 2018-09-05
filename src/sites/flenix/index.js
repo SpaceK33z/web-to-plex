@@ -5,7 +5,7 @@ function isMoviePage() {
 }
 
 function isMoviePageReady() {
-	return !!document.querySelector('iframe[title*="Disqus"]');
+	return !!document.querySelector('#videoplayer video').getAttribute('onplay') != '';
 }
 
 function init() {

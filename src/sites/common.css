@@ -10,7 +10,7 @@
 	left: 50%;
 	margin-left: -175px;
 	width: 350px;
-	background: #21262e;
+	background: #fd6a00;
 	color: #fff;
 	font-size: 20px;
 	padding: 10px;
@@ -20,5 +20,5 @@
 }
 
 .web-to-plex-warning {
-	background: #fd6a00;
+	background: #fd2a00;
 }

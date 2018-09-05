@@ -184,7 +184,7 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
     /(movie|film)/i.test(rqut)?
         'tmdb':
     rqut || '*';
-    title = (title? title.replace(/\s*[\:,]\s*Season\s+\d+.*$/i, '').toCaps(): title)
+    title = (title? title.replace(/\s*[\:,]\s*Season\s+\d+.*$/i, '').toCaps(): "")
         .replace(/\u201a/g, ',')
         .replace(/[\u2019\u201b]/g, "'")
         .replace(/[\u201c\u201d]/g, '"')
@@ -209,6 +209,8 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
         (rqut == 'tmdb' || (rqut == '*' && !mid && title && year) || apit == 'movie')?
             (apit && apid)?
                 `https://api.themoviedb.org/3/${ apit }/${ apid }?api_key=${ api.tmdb }`:
+            (iid)?
+                `https://api.themoviedb.org/3/find/${ iid || mid || tid }?api_key=${ api.tmdb }&external_source=${ iid? 'imdb': mid? 'tmdb': 'tvdb' }_id`:
             `https://api.themoviedb.org/3/search/${ apit }?api_key=${ api.tmdb }&query=${ encodeURI(title) }${ year? '&year=' + year: '' }`:
         (rqut == 'tvdb' || (rqut == '*' && !tid && title) || apid)?
             (apid)?
@@ -274,8 +276,8 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
             $data = json[index];
 
             //api.tvmaze.com/
-            if(('externals' in $data || 'show' in $data) && $data.premiered)
-                found = (IMDbID == ($data = $data.show || $data).externals.imdb || t($data.name) === t(title) && year == $data.premiered.slice(0, 4))?
+            if(('externals' in ($data = $data.show || $data) || 'show' in $data) && $data.premiered)
+                found = (iid == $data.externals.imdb || t($data.name) == t(title) && year == $data.premiered.slice(0, 4))?
                     $data:
                 found;
             //api.themoviedb.org/ \local
@@ -287,17 +289,19 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
                         else
                             DATA.tv_results = DATA.results;
 
-                    for(let i = 0, f = !1, o = DATA.movie_results, l = o.length | 0; i < l; i++)
+                    let i, f, o, l;
+
+                    for(i = 0, f = !1, o = DATA.movie_results, l = o.length | 0; i < l; i++)
                         f = (t(o.title) === t(title) && o.release_date.slice(0, 4) == year);
 
                     for(i = (+f * l), o = (f? o: DATA.tv_results), l = (f? l: o.length | 0); i < l; i++)
                         f = (t(o.name) === t(title) && o.first_air_date.slice(0, 4) == year);
 
-                    return f? o: f;
+                    return f? o: f = !!iid;
                 })($data);
             //api.themoviedb.org/ \remote
             else if(('original_name' in $data || 'original_title' in $data) && $data.release_date)
-                found = (TMDbID == $data.id || (t($data.original_name || $data.original_title) === t(title) || t($data.name) === t(title)) && year == ($data || b).release_date.slice(0, 4))?
+                found = (tid == $data.id || (t($data.original_name || $data.original_title) == t(title) || t($data.name) == t(title)) && year == ($data || b).release_date.slice(0, 4))?
                     $data:
                 found;
             //theimdbapi.org/
@@ -314,10 +318,10 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
             $data = json[index];
 
             //api.tvmaze.com/
-            if('externals' in $data || 'show' in $data)
+            if('externals' in ($data = $data.show || $data) || 'show' in $data)
                 found =
                     // ignore language barriers
-                    (c(($data = $data.show || $data).name) == c(title))?
+                    (c($data.name) == c(title))?
                         $data:
                     // trust the api matching
                     ($data.score > lastscore)?
@@ -371,10 +375,10 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
             $data = json[index];
 
             //api.tvmaze.com/
-            if('externals' in $data || 'show' in $data)
+            if('externals' in ($data = $data.show || $data) || 'show' in $data)
                 found =
                     // ignore language barriers
-                    (R(($data = $data.show || $data).name, title))?
+                    (R($data.name, title))?
                         $data:
                     // trust the api matching
                     ($data.score > lastscore)?
@@ -415,7 +419,14 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
     else if(!json)
         json = {};
 
-    let ei = 'tt-';
+    let ei = 'tt-',
+        mr = 'movie_results',
+        tr = 'tv_results';
+
+    json = mr in json? json[mr].length > json[tr].length? json[mr]: json[tr]: json;
+
+    if(json instanceof Array)
+        json = json[0];
 
     //api.tvmaze.com/
     if('externals' in (json = json.show || json))
@@ -423,42 +434,42 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
             imdb: IMDbID || json.externals.imdb || ei,
             tmdb: TMDbID || json.externals.themoviedb | 0,
             tvdb: TVDbID || json.externals.thetvdb | 0,
-            title,
+            title: json.name || title,
             year: ((json.premiered || json.first_aired_date || year) + '').slice(0, 4)
         };
     //api.themoviedb.org/
-    else if('imdb_id' in json || 'original_name' in json || 'original_title' in json)
+    else if('imdb_id' in (json = mr in json? json[mr].length > json[tr].length? json[mr]: json[tr]: json) || 'original_name' in json || 'original_title' in json)
         data = {
-            imdb: IMDbID || json.imdb_id || ei,
-            tmdb: TMDbID || json.id | 0,
-            tvdb: TVDbID || json.tvdb | 0,
-            title,
+            imdb: iid || json.imdb_id || ei,
+            tmdb: mid || json.id | 0,
+            tvdb: tid || json.tvdb | 0,
+            title: json.title || json.name || title,
             year: ((json.release_date || json.first_air_date || year) + '').slice(0, 4)
         };
     //omdbapi.com/
     else if('imdbID' in json)
         data = {
-            imdb: IMDbID || json.imdbID || ei,
-            tmdb: TMDbID || json.tmdbID | 0,
-            tvdb: TVDbID || json.tvdbID | 0,
-            title,
+            imdb: iid || json.imdbID || ei,
+            tmdb: mid || json.tmdbID | 0,
+            tvdb: tid || json.tvdbID | 0,
+            title: json.Title || json.Name || title,
             year: json.Year || year
         };
     //theapache64.com/movie_db/
     else if('data' in json)
         data = {
-            imdb: IMDbID || json.data.imdb_id || ei,
-            tmdb: TMDbID || json.data.tmdb_id | 0,
-            tvdb: TVDbID || json.data.tvdb_id | 0,
-            title,
+            imdb: iid || json.data.imdb_id || ei,
+            tmdb: mid || json.data.tmdb_id | 0,
+            tvdb: tid || json.data.tvdb_id | 0,
+            title: json.data.name || json.data.title || title,
             year: json.data.year || year
         };
     //theimdbapi.org/
     else
         data = {
-            imdb: IMDbID || json.imdb || ei,
-            tmdb: TMDbID || json.id | 0,
-            tvdb: TVDbID || json.tvdb | 0,
+            imdb: iid || json.imdb || ei,
+            tmdb: mid || json.id | 0,
+            tvdb: tid || json.tvdb | 0,
             title,
             year
         };
@@ -735,7 +746,7 @@ function modifyPlexButton(el, action, title, options) {
 
                 /* Flenix */
                 case 'flenix':
-                    el.href = '#';
+                    el.href = `#${ options.IMDbID }-${ options.TMDbID }-${ options.TVDbID }`;
                     el[txt] = 'Save #0/0';
                     el.classList.add('web-to-plex-button--downloader');
 
@@ -851,7 +862,7 @@ function modifyPlexButton(el, action, title, options) {
                 xhr.send(data);
             }
         } else {
-            el.href = '#';
+            el.href = `#${ options.IMDbID }-${ options.TMDbID }-${ options.TVDbID }`;
             el[txt] = `Get this ${ty.toCaps()}`;
             el.classList.add('web-to-plex-button--downloader');
             el.addEventListener('click', e => {
@@ -946,7 +957,7 @@ String.prototype.toCaps = function toCaps(all) {
      */
     let array = this.toLowerCase(),
         titles = /(?!^|(?:an?|the)\s+)\b(a([st]|nd?|cross|fter|lthough)?|b(e(cause|fore|tween)|ut|y)|during|from|in(to)?|[io][fn]|[fn]?or|the|[st]o|through|under|with(out)?|yet)(?!\s*$)\b/gi,
-        cap_exceptions = /([\|\"\(]\s*[a-z]|[\:\.\!\?]\s+[a-z]|(?:[^\'\-\+]\b)[^aeiouy\d\W]+\b)/gi,
+        cap_exceptions = /([\|\"\(]\s*[a-z]|[\:\.\!\?]\s+[a-z]|(?:^\b|[^\'\-\+]\b)[^aeiouy\d\W]+\b)/gi,
         all_exceptions = /\b((?:ww)?(?:m+[dclxvi]*|d+[clxvi]*|c+[lxvi]*|l+[xvi]*|x+[vi]*|v+i*|i+))\b/gi;
 
     array = array.split(/\s+/);
@@ -969,3 +980,80 @@ String.prototype.toCaps = function toCaps(all) {
 
     return string;
 };
+
+
+/* SortBy.js */
+/** Usage + Example
+ // document.queryBy( selectors )...
+
+ let index = 0;
+ // the order given is the order handled
+ document.queryBy("div:last-child, div:nth-child(2), div:first-child")
+   .forEach((element, index, array) => element.innerHTML = index + 1);
+
+ // output w/sortBySelector:
+ <div>3</div>
+ <div>2</div>
+ <div>1</div> <!-- handles the last div first, like the selector -->
+
+ // output w/o sortBySelector:
+ <div>1</div>
+ <div>2</div>
+ <div>3</div>
+ */
+
+(function($) {
+  $.queryBy = function(selectors) {
+    let copy = array => [].slice.call(array),
+        query = selector => $.querySelectorAll(selector),
+        matched = copy(query(selectors));
+
+    // Get rid of enclosing syntaxes: [...] and (...)
+    let regexp = /(\([^\(\)]+?\)|\[[^\[\]]+?\])/,
+        pulled = [],
+        media = [],
+        index = 0;
+
+    for(; regexp.test(selectors);)
+      selectors = selectors.replace(regexp, function($0, $1, $$, $_) {
+        return '--' + pulled.push($1) + '\b';
+      });
+
+    let order = selectors.split(','),
+        dummy = copy(order),
+        output = [],
+        length = dummy.length;
+
+    // Replace those syntaxes (they were ignored)
+    order = [];
+    regexp = /--(\d+)[\b]/;
+    for(; index < length; index++)
+      order.push(dummy[index].replace(regexp, function($0, $1, $$, $_) {
+        return pulled[+$1 - 1];
+      }));
+
+    // Make sure to put the elements in order
+    for(index = 0, length = order.length; index < length; index++)
+      media.push(query(order[index]));
+
+    // Create a continuous array from the sub-arrays
+    for(index = 1, length = media.length; index < length; index++)
+      media.splice(0, 1, copy(media[0]).concat( copy(media[index]) ));
+    media = media[0];
+
+    // Replace only indexes (keep '.selector', etc.)
+    for(var property in output)
+      if(/^\d+$/.test(property))
+        try {
+          delete output[property];
+        } catch(error) {
+          output[property] = undefined;
+        }
+
+    // Overwrite those indexes with the appropiate element
+    for(index = 0, length = media.length; index < length; index++)
+      output[index] = media[index];
+
+    return output;
+  };
+})(document);

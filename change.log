@@ -6,15 +6,27 @@
 
 - [x] Use the "download" API to save files (i.e. Flenix's "Save As" option for non-Flenix domains)
   - v3.0.1.0
+- [ ] Use Radarr and/or Sonarr's searching feature (if installed)?
+  - see [Radarr's Lookup API](https://github.com/Radarr/Radarr/wiki/API:Movie-Lookup)
+  - see [Sonarr's Lookup API](https://github.com/Sonarr/Sonarr/wiki/Series-Lookup)
+  - Caveats / Conflicts with Trakt's "to do"s
+      - **All [branding requirements](https://trakt.tv/branding) must be followed.**
+      - **Trakt data cannot be used in apps or websites that promote copyright infringement or piracy.**
+      - **Use only [documented API methods](https://trakt.docs.apiary.io/) and please don't scrape the website for information.**<sup>?</sup>
+- [ ] Create the "Auto Manage" feature
+  - use the user's manager settings for file renaming (vs. sending a secondary prompt)
+  - no documented API for such an action...
 - Close issues:
-  - [ ] #13
-  - [ ] #14
+  - [x] #13
+  - [x] #14
   - [ ] #21
-  - [ ] #25
+  - [x] #25
   - [x] #53
+  - [x] #57
 - Revisit issues:
   - [x] #17
   - [ ] #16
+  - [x] #24
 
 # CHANGELOG (Oldest to Newest)
 
@@ -196,7 +208,7 @@
     - the last button was ugly and discolored; plus Flenix added more buttons, so I just left the top button
 - Changed Trakt's button location
 - **Added support for Watcher 3 (Movie NZB Manager)**
-    - See issue #24
+    - see issue #24
 - **Added support for Trakt's "Watch Now" links**
   - see issue #25
 
@@ -243,11 +255,27 @@
 - Removed some unimportant code (debugging)
 - Fixed file naming for the "Save As..." feature
 - Fixed searching error in `/utils.js`
-  - The strict matching for searches was incorrectly implemented
-- Added more GUI elements
+  - the strict matching for searches was incorrectly implemented
 
-## v3.1.1.1 / unreleased
+## v3.1.1.1 / SpaceK33z@a0161c220ff4ce5d82456f2eca74f0cdc265839e
 
 - Fixed `String..toCaps` in `/utils.js`
 - Added `/people` to Trakt's "Watch Now" link feature
   - v3.0.0.0
+
+## v3.1.2.0 / unreleased
+
+- Fixed `String..toCaps` in `/utils.js`
+- Fixed Flenix's `isMoviePageReady():boolean`
+- Fixed #57
+    - changed IMDb to use the found year instead of the "release year", e.g. "Del Playa (2017 - USA)" v. "Del Playa (2015)" (same movie, different year)
+- Made minor bug changes to `/utils.js`
+    - if a title wasn't passed to `findPlexMedia` the script would continue and fail
+- Added `queryBy` to `/utils.js`
+    - use as `document.queryBy(selectors:string)`
+    - returns an `Array` that is in the same order as the selectors
+    - e.g. `document = html { head, body { script } }`
+```javascript
+    document.queryBy('body, script, head');          // => [<body>, <script>, <head>]
+    document.querySelectorAll('body, script, head'); // => [<head>, <body>, <script>]
+```
