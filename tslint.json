@@ -1,6 +1,0 @@
-{
-	"extends": "@volst/tslint-config",
-	"jsRules": {
-		"deprecation": true
-	}
-}

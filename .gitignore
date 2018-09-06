@@ -2,4 +2,3 @@ node_modules/
 pkg*.zip
 build/
 env
-.rpt2_cache

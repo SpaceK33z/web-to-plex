@@ -1,0 +1,9 @@
+@@||127.0.0.1:32400/$document
+@@||localhost:8989/$document
+@@||localhost:7878/$document
+@@||localhost:7070/$document
+@@||localhost:8686/$document
+metacritic.*##div[id*="muccuzs"]
+flenix.*##.trailer_frame~div
+flenix.*##body>script~div[id]
+flenix.*##body>div[id]:last-child

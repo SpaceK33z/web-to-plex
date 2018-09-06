@@ -3,150 +3,723 @@
 <head>
 	<title>Web To Plex Options</title>
 	<style>
+        html, body {
+            height: 100%;
+        }
+
 		body {
-			padding: 0 .8rem;
-			width: 580px;
+            background: url(../img/noise.png) fixed, url(../img/256.png) no-repeat fixed center, #3f4245 !important;
+			color: #333 !important;
+            font-family: Open Sans Regular, Helvetica Neue, Helvetica, Arial, sans-serif, system;
+            font-size: 18px !important;
+			padding: 1em;
+			width: 90vw;
+            flex-grow: 1;
+            padding: 25px;
+            overflow: auto;
+            position: absolute;
 		}
 
-		p {
-			font-family: system, sans-serif;
-			font-size: .8rem;
-			line-height: 1.8em;
-			color: #333;
-		}
+        a {
+            color: #cc7b19 !important;
+            text-decoration: none !important;
+        }
 
-		details {
-			margin-bottom: .8rem;
-			margin-left: 1.2rem;
-		}
+        h1 {
+            position: sticky;
+            top: 0;
+        }
 
-		summary {
-			margin-left: -1.2rem;
-		}
+        section {
+            display: block !important;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+        }
 
-		summary:hover {
-			color: #f45a26;
-			cursor: pointer;
-		}
+        label {
+            color: #eee !important;
+            font-weight: 400 !important;
+            display: inline-block;
+            margin-bottom: 5px;
+        }
 
-		input {
-			width: 250px;
-		}
+        input[type="text"], input[type="password"], select {
+            width: 30vw !important;
+            line-height: 1.5em !important;
+            transition: background 0.2s;
+            display: block !important;
+            height: 38px !important;
+            padding: 6px 12px !important;
+            font-size: 16px !important;
+            color: #eee !important;
+            vertical-align: middle;
+            background: rgba(255, 255, 255, 0.25) !important;
+            border: 3px solid rgba(0, 0, 0, 0) !important;
+            border-radius: 3px !important;
+            font-family: inherit;
+            margin: 0;
+        }
+
+        div:not(body > div) {
+            color: rgba(255, 255, 255, 0.45) !important;
+            display: block;
+            margin-top: 5px !important;
+            margin-bottom: 10px !important;
+            box-sizing: border-box;
+            font-size: 14px !important;
+            z-index: 18 !important;
+        }
+
+        button {
+            padding: 10px 18px !important;
+            font-size: 16px !important;
+            line-height: 1.33 !important;
+            border-radius: 3px;
+            font-family: inherit;
+            text-transform: uppercase;
+            border: 0;
+            box-shadow: none !important;
+            position: relative;
+            overflow: hidden;
+            color: #fff !important;
+            background: #cc7b19 !important;
+            margin-bottom: 0;
+            font-weight: 400 !important;
+            vertical-align: middle;
+            cursor: pointer !important;
+            white-space: nowrap;
+            user-select: none;
+        }
+
+        [id$="_test"] {
+            background: #cc7b19 !important;
+            margin-bottom: 2px;
+            padding: 10px 8px 10px 10px !important;
+        }
+
+        [id$="_status"] {
+            padding: 0 6px !important;
+            font-size: 16px !important;
+            border-radius: 3px;
+            font-family: monospace, sans-serif, sans, arial;
+            border: 0;
+            box-shadow: none !important;
+            color: #fff !important;
+            background: #666 !important;
+            border-radius: 4px;
+        }
+
+        [id$="_status"].false {
+            background: #cc1b19 !important;
+        }
+
+        [id$="_status"].true {
+            background: #7bcc19 !important;
+        }
+
+        [id$="token"], [data-option$="Token"], [data-option$="API"] {
+            font-family: monospace, consolas, sans-serif, sans serif, sans, arial;
+        }
+
+        [id$="-token"]:not(:placeholder-shown), [data-option$="-Token"]:not(:placeholder-shown), [data-option$="-API"]:not(:placeholder-shown) {
+            text-transform: uppercase;
+        }
+
+        em {
+            color: #cc7b19 !important;
+        }
+
+        select {
+            margin-left: 10px !important;
+            font-size: 16px !important;
+            line-height: inherit;
+            text-transform: none;
+        }
+
+        #status {
+            margin: 0 20px;
+            color: #999 !important;
+            box-sizing: border-box;
+        }
+
+        [type="password"] ~ .hidden-help {
+            display: none;
+        }
+
+        article {
+            color: #999;
+            background: rgba(0, 0, 0, 0.15) !important;
+            width: 35vw !important;
+            position: relative !important;
+            padding: 15px !important;
+        }
+
+        summary, option {
+            margin-bottom: 20px !important;
+            padding-left: 0;
+            list-style: none !important;
+            margin-top: 0 !important;
+            color: #999;
+            cursor: pointer;
+        }
+
+        option {
+            background: url(../img/noise.png), #3f4245 !important;
+        }
+
+        details:last-child > summary {
+            margin-bottom: 0 !important;
+        }
+
+        details[open] > summary, h1, h2, h3 ,h4, h5, h6 {
+            color: #cc7b19 !important;
+        }
+
+        body::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        body::-webkit-scrollbar-thumb {
+            min-height: 50px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid rgba(0, 0, 0, 0);
+            border-radius: 8px;
+            background-clip: padding-box;
+        }
+
+        body::-webkit-scrollbar-track {
+            background: url(../img/noise.png) repeat, #3f4245 !important;
+        }
+
+        input::placeholder, input:placeholder {
+            color: #999;
+        }
+
+        /* bbodine @CodePen - https://codepen.io/bbodine1/pen/novBm */
+        .checkbox {
+          width: 80px;
+          height: 26px;
+          background: #000;
+          margin: 15px 0;
+          position: relative;
+          border-radius: 50px;
+          box-shadow: inset 0px 1px 1px rgba(0, 0, 0, 0.5), 0px 1px 0px rgba(255, 255, 255, 0.2);
+        }
+
+        .checkbox:after {
+          content: 'OFF';
+          color: #666;
+          position: absolute;
+          right: 10px;
+          z-index: 0;
+          font: 12px/26px Arial, sans-serif;
+          font-weight: bold;
+          text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.15);
+        }
+
+        .checkbox:before {
+          content: 'ON';
+          color: #cc7b19;
+          position: absolute;
+          left: 10px;
+          z-index: 0;
+          font: 12px/26px Arial, sans-serif;
+          font-weight: bold;
+        }
+
+        .checkbox label {
+          display: block;
+          width: 34px;
+          height: 20px;
+          cursor: pointer;
+          position: absolute;
+          top: 3px;
+          left: 3px;
+          z-index: 1;
+          background: #cc7b19;
+          border-radius: 50px;
+          transition: all 0.4s ease;
+          box-shadow: 0px 2px 5px 0px rgba(0, 0, 0, 0.3);
+        }
+
+        .checkbox input[type=checkbox] {
+          visibility: hidden;
+        }
+
+        .checkbox input[type=checkbox]:checked + label {
+          left: 43px;
+        }
+
+        input[type="range"] {
+            appearance: none;
+            -webkit-appearance: none;
+
+            background: #0004;
+            outline: none;
+
+            height: 5px!important;
+            width: 83%!important;
+        }
+
+        input[type="range"] + output {
+            display: inline-block;
+            position: relative;
+            width: 7%!important;
+            color: #cc7b19;
+            line-height: 20px;
+            text-align: center;
+            border-radius: 3px;
+            background: #000;
+            padding: 5px 10px;
+            margin-left: 8px;
+            vertical-align: sub;
+        }
+
+        input[type="range"] + output:after {
+            position: absolute;
+            top: 8px;
+            left: -7px;
+            width: 0;
+            height: 0;
+            border-top: 7px solid transparent;
+            border-right: 7px solid #000;
+            border-bottom: 7px solid transparent;
+            content: '';
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            -webkit-appearance: none;
+
+            background: #cc7b19;
+            border: 1px solid #cc7b19;
+            border-radius: 100%;
+            cursor: pointer;
+
+            height: 32px;
+            width: 32px;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            background: #cc7b19;
+            border: 1px solid #cc7b19;
+            border-radius: 100%;
+            cursor: pointer;
+
+            height: 32px;
+            width: 32px;
+        }
+
+        #version {
+            color: #fff;
+
+            position: fixed;
+            right: 0;
+            top: calc(100vh - 20px);
+        }
+
+        [disabled] {
+            cursor: not-allowed!important;
+            color: #909090EE!important;
+        }
+
+        ::-webkit-input-placeholder {
+            color: #999;
+        }
+
+        ::-moz-placeholder {
+            color: #999;
+        }
+
+        :-ms-input-placeholder {
+            color: #999;
+        }
+
+        :-moz-placeholder {
+            color: #999;
+        }
 	</style>
 </head>
 
 <body>
-	<details open="open">
-		<summary>Plex settings</summary>
-		<div id="plex_unauthenticated">
-			<p>The Plex username and password are never stored; it is only used to generate a token.</p>
-			<p>
-				Plex username:
-				<input type="text" id="plex_username">
-			</p>
-			<p>
-				Plex password:
-				<input type="password" id="plex_password"><br>
-			</p>
-			<p>
-				<button type="button" id="plex_login">Login</button>
-				<span id="plex_login_status"></span>
-			</p>
-		</div>
-		<div id="plex_authenticated" style="display: none">
-			<p><button type="button" id="plex_logout">Logout</button></p>
-			<p>
-				Plex token:
-				<input type="text" id="plex_token" data-option="plexToken" disabled><br>
-			</p>
-			<p>
-				Select server:
-				<select id="plex_servers">
-					<option value="">Click "Login" above</option>
-				</select>
-			</p>
-		</div>
-	</details>
-	<details>
-		<summary>CouchPotato settings</summary>
+<!--
 
-		<p>
-			CouchPotato URL <em>(optional)</em>:
-			<input type="text" data-option="couchpotatoUrlRoot"><br>
-			<strong>Example:</strong> https://example.com/couchpotato or http://192.168.1.100:5050 (no trailing slash!)
-		</p>
+Layout of code (Jade/Pug)
 
-		<p>
-			CouchPotato API key <em>(optional)</em>:
-			<input type="text" data-option="couchpotatoToken"><br>
-			In CouchPotato, go to Settings, click on "Show advanced" and copy paste the value next to "Api Key".
-			<strong>Example:</strong> aa756d33242f6g8ffbca2b3963586f21
-		</p>
+div
+    article
+        details
+            summary
+                | Title
+            h2
+                | Sub-Title
+            section
+                label
+                    | Description
+                div
+                    | Help text
 
-		<p>
-			CouchPotato basic auth username <em>(optional)</em>:
-			<input type="text" data-option="couchpotatoBasicAuthUsername"><br>
-			If you password-protected your CouchPotato install, enter the username here.
-		</p>
+-->
+<div>
+    <h1>Plex Settings</h1>
 
-		<p>
-			CouchPotato basic auth password <em>(optional)</em>:
-			<input type="text" data-option="couchpotatoBasicAuthPassword"><br>
-			If you password-protected your CouchPotato install, enter the password here.
-		</p>
-	</details>
+	<article>
+        <details>
+            <summary>Login</summary>
 
-	<details>
-		<summary>Radarr settings</summary>
+            <h2>Login Settings</h2>
+            <section>
+                <label>Login using your Plex token</label>
+                <input type="text" id="plex_token" data-option="plexToken" placeholder="Enter your Plex token"/>
+                <div>
+                    How to find your <a href="https://support.plex.tv/hc/en-us/articles/204059436-Finding-your-account-token-X-Plex-Token" title="How to find your token?" target="_blank">Plex Token</a>.
+                </div>
+            </section>
 
-		<p>
-			Radarr URL:
-			<input type="text" data-option="radarrUrlRoot"><br>
-			<strong>Example:</strong> https://example.com/radarr or http://192.168.1.100:7878 (no trailing slash!)
-		</p>
+            <h3 style="width: 35%; text-align: center;"><em>&mdash; OR &mdash;</em></h3>
 
-		<p>
-			Radarr API key:
-			<input type="text" data-option="radarrToken"><br>
-			In Radarr, go to Settings, click on tab General, click on "Show advanced" and copy paste the value next to "API Key".
-			<strong>Example:</strong> aa756d33242f6g8ffbca2b3963586f21
-		</p>
+            <section>
+                <label>Login using your Plex credentials</label>
+                <input type="text" id="plex_username" style="border-bottom-left-radius: 0 !important; border-bottom-right-radius: 0 !important;" placeholder="Enter your Plex username"/>
+                <input type="text" id="plex_password" style="border-top-left-radius: 0 !important; border-top-right-radius: 0 !important;" placeholder="Enter your Plex password"/>
+                <div>
+                    Your Plex username and password are never stored, only your <a href="https://support.plex.tv/hc/en-us/articles/204059436-Finding-your-account-token-X-Plex-Token" title="How to find your token?" target="_blank">Plex Token</a>.
+                </div>
+            </section>
 
-		<p>
-			Radarr basic auth username <em>(optional)</em>:
-			<input type="text" data-option="radarrBasicAuthUsername"><br>
-			If you password-protected your Radarr install, enter the username here.
-		</p>
+            <section>
+                <button type="button" id="plex_test">Test <span id="plex_test_status">?</span></button>
+            </section>
+            <section>
+                <label>Select a server</label>
+                <select id="plex_servers">
+                    <option value="">Press "Test [?]" first</option>
+                </select>
+            </section>
+        </details>
 
-		<p>
-			Radarr basic auth password <em>(optional)</em>:
-			<input type="text" data-option="radarrBasicAuthPassword"><br>
-			If you password-protected your Radarr install, enter the password here.
-		</p>
+        <details>
+            <summary>Advance</summary>
 
-		<p>
-			<button type="button" id="radarr_test">Test Radarr</button>
-			<span id="radarr_test_status"></span>
-		</p>
-		<p>
-			Select quality profile:
-			<select data-option="radarrQualityProfileId">
-				<option value="">Click "Test" above</option>
-			</select>
-		</p>
-		<p>
-			Select storage path:
-			<select data-option="radarrStoragePath">
-				<option value="">Click "Test" above</option>
-			</select>
-		</p>
-	</details>
+            <h2>Server Options</h2>
+            <section>
+                <label>Server URL</label>
+                <input type="text" data-option="plexURL" placeholder="Enter your Plex URL (for direct access)"/>
+                <div>
+                    Use this to communicate directly with your Plex server.<br/>
+                    Such as <em>http://localhost:32400</em> or <em>http://192.168.1.100:32400</em>
+                </div>
+            </section>
+        </details>
+    </article>
+</div>
 
-	<p>
+<div>
+	<h1>Manager Settings</h1>
+
+    <article>
+        <details>
+            <summary>Watcher (Movies)</summary>
+
+            <h2>Connection Settings</h2>
+            <section>
+                <label>Watcher URL</label>
+                <input type="text" data-option="watcherURLRoot" placeholder="What's your Watcher URL?"/>
+                <div>
+                    Such as <em>https://example.com/watcher</em> or <em>http://192.168.1.100:9090</em>
+                </div>
+            </section>
+
+            <section>
+                <label>Watcher API Key</label>
+                <input type="text" data-option="watcherToken" placeholder="What's your Watcher API key?"/>
+                <div>
+                    1. Go to Watcher | Settings | Server<br/>
+                    2. Copy/Paste the "API Key."<br/>
+                    Such as <em>aa756d33242f6g8ffbca2b3963586f21</em>
+                </div>
+            </section>
+
+            <h3>Login <em>(optional, saved)</em></h3>
+            <section>
+                <label>Username</label>
+                <input type="text" data-option="watcherBasicAuthUsername" placeholder="Enter your Watcher username"/>
+                <div>Only use this if you setup a Watcher username.</div>
+            </section>
+            <section>
+                <label>Password</label>
+                <input type="text" data-option="watcherBasicAuthPassword" placeholder="Enter your Watcher password"/>
+                <div>Only use this if you setup a Watcher password.</div>
+                <div class="hidden-help">Your password will be hidden once saved.</div>
+            </section>
+
+            <section>
+                <button type="button" id="watcher_test">Test <span id="watcher_test_status">?</span></button>
+            </section>
+
+            <section>
+                <label>Watcher Storage Path</label>
+                <input type="text" disabled="true" data-option="watcherStoragePath" placeholder="Can only be changed via Watcher's settings"/>
+            </section>
+            <section>
+                <label>Quality Profile</label>
+                <select data-option="watcherQualityProfileId">
+                    <option value="">Press "Test [?]" first</option>
+                </select>
+            </section>
+        </details>
+
+        <details>
+            <summary>Radarr (Movies)</summary>
+
+            <h2>Connection Settings</h2>
+            <section>
+                <label>Radarr URL</label>
+                <input type="text" data-option="radarrURLRoot" placeholder="What's your Radarr URL?"/>
+                <div>
+                    Such as <em>https://example.com/radarr</em> or <em>http://192.168.1.100:7878</em>
+                </div>
+            </section>
+
+            <section>
+                <label>Radarr API Key</label>
+                <input type="text" data-option="radarrToken" placeholder="What's your Radarr API key?"/>
+                <div>
+                    1. Go to Radarr | Settings | General<br/>
+                    2. Click on "Show advanced," then copy/paste the "API Key."<br/>
+                    Such as <em>aa756d33242f6g8ffbca2b3963586f21</em>
+                </div>
+            </section>
+
+            <h3>Login <em>(optional, saved)</em></h3>
+            <section>
+                <label>Username</label>
+                <input type="text" data-option="radarrBasicAuthUsername" placeholder="Enter your Radarr username"/>
+                <div>Only use this if you setup a Radarr username.</div>
+            </section>
+            <section>
+                <label>Password</label>
+                <input type="text" data-option="radarrBasicAuthPassword" placeholder="Enter your Radarr password"/>
+                <div>Only use this if you setup a Radarr password.</div>
+                <div class="hidden-help">Your password will be hidden once saved.</div>
+            </section>
+
+            <section>
+                <button type="button" id="radarr_test">Test <span id="radarr_test_status">?</span></button>
+            </section>
+
+            <section>
+                <label>Radarr Storage Path</label>
+                <select type="text" data-option="radarrStoragePath">
+                    <option value="">Press "Test [?]" first</option>
+                </select>
+                <div>
+                    This should be the same path (verbatim) used in Radarr.
+                </div>
+            </section>
+            <section>
+                <label>Quality Profile</label>
+                <select data-option="radarrQualityProfileId">
+                    <option value="">Press "Test [?]" first</option>
+                </select>
+            </section>
+        </details>
+
+        <details>
+            <summary>Sonarr (TV Shows)</summary>
+
+            <h2>Connection Settings</h2>
+            <section>
+                <label>Sonarr URL</label>
+                <input type="text" data-option="sonarrURLRoot" placeholder="What's your Sonarr URL?"/>
+                <div>
+                    Such as <em>https://example.com/sonarr</em> or <em>http://192.168.1.100:8989</em>
+                </div>
+            </section>
+
+            <section>
+                <label>Sonarr API Key</label>
+                <input type="text" data-option="sonarrToken" placeholder="What's your Sonarr API key?"/>
+                <div>
+                    1. Go to Sonarr | Settings | General<br/>
+                    2. Click on "Show advanced," then copy/paste the "API Key."<br/>
+                    Such as <em>aa756d33242f6g8ffbca2b3963586f21</em>
+                </div>
+            </section>
+
+            <h3>Login <em>(optional, saved)</em></h3>
+            <section>
+                <label>Username</label>
+                <input type="text" data-option="sonarrBasicAuthUsername" placeholder="Enter your Sonarr username"/>
+                <div>Only use this if you setup a Sonarr username.</div>
+            </section>
+            <section>
+                <label>Password</label>
+                <input type="text" data-option="sonarrBasicAuthPassword" placeholder="Enter your Sonarr password"/>
+                <div>Only use this if you setup a Sonarr password.</div>
+                <div class="hidden-help">Your password will be hidden once saved.</div>
+            </section>
+
+            <section>
+                <button type="button" id="sonarr_test">Test <span id="sonarr_test_status">?</span></button>
+            </section>
+
+            <section>
+                <label>Sonarr Storage Path</label>
+                <select type="text" data-option="sonarrStoragePath">
+                    <option value="">Press "Test [?]" first</option>
+                </select>
+                <div>
+                    This should be the same path (verbatim) used in Sonarr.
+                </div>
+            </section>
+            <section>
+                <label>Quality Profile</label>
+                <select data-option="sonarrQualityProfileId">
+                    <option value="">Press "Test [?]" first</option>
+                </select>
+            </section>
+        </details>
+
+        <details>
+            <summary>CouchPotato (Movies/TV Shows)</summary>
+
+            <h2>Connection Settings</h2>
+            <section>
+                <label>CouchPotato URL</label>
+                <input type="text" data-option="couchpotatoURLRoot" placeholder="What's your CouchPotato URL?"/>
+                <div>
+                    Such as <em>https://example.com/couchpotato</em> or <em>http://192.168.1.100:5050</em>
+                </div>
+            </section>
+
+            <section>
+                <label>CouchPotato API Key</label>
+                <input type="text" data-option="couchpotatoToken" placeholder="What's your CouchPotato API key?"/>
+                <div>
+                    1. Go to CouchPotato | Settings<br/>
+                    2. Copy/Paste the "API Key."<br/>
+                    Such as <em>aa756d33242f6g8ffbca2b3963586f21</em>
+                </div>
+            </section>
+
+            <h3>Login <em>(optional, saved)</em></h3>
+            <section>
+                <label>Username</label>
+                <input type="text" data-option="couchpotatoBasicAuthUsername" placeholder="Enter your CouchPotato username"/>
+                <div>Only use this if you setup a CouchPotato username.</div>
+            </section>
+            <section>
+                <label>Password</label>
+                <input type="text" data-option="couchpotatoBasicAuthPassword" placeholder="Enter your CouchPotato password"/>
+                <div>Only use this if you setup a CouchPotato password.</div>
+                <div class="hidden-help">Your password will be hidden once saved.</div>
+            </section>
+
+            <section>
+                <button type="button" id="couchpotato_test">Test <span id="couchpotato_test_status">?</span></button>
+            </section>
+            <section>
+                <label>Quality Profile</label>
+                <select data-option="couchpotatoQualityProfileId">
+                    <option value="">Press "Test [?]" first</option>
+                </select>
+            </section>
+        </details>
+    </article>
+</div>
+<div>
+    <h1>Other Settings</h1>
+
+    <article>
+        <details>
+            <summary>Advance Settings</summary>
+
+            <h2>Search Options</h2>
+            <section>
+                <h3>Loose Searching</h3>
+                <div>
+                    Allows the plugin to search for non-English titles using pattern matching (as a last resort).<br>
+                    Higer sensitivity means more strict searches.
+                </div>
+                <br>
+                <label>Enable Feature</label>
+                <div class="checkbox">
+                    <input id="use-loose" type="checkbox" data-option="UseLoose" checked="true"/>
+                    <label for="use-loose"></label>
+                </div>
+                <label>Searching Sensitivity</label>
+                <br>
+                <input type="range" data-option="UseLooseScore" min="0" max="100" step="5" value="40"/>
+                <output type="text" value="40%"></output>
+            </section>
+
+            <h2>Extra API Keys</h2>
+            <section>
+                <label>OMDb</label>
+                <input type="text" data-option="OMDbAPI" placeholder="Enter your OMDb API Key"/>
+                <div>
+                    You can <a href="https://www.omdbapi.com/apikey.aspx" target="_blank">sign up</a> for an API key, or have OMDb used as a last resort.
+                </div>
+            </section>
+
+            <section>
+                <label>TMDb</label>
+                <input type="text" data-option="TMDbAPI" placeholder="Enter your TMDb API Key"/>
+                <div>
+                    You can <a href="https://developers.themoviedb.org/3/" target="_blank">learn more</a> on how to obtain an API key.
+                </div>
+            </section>
+        </details>
+    </article>
+
+    <article>
+        <details>
+            <summary>Managers</summary>
+
+            <h2>External Links</h2>
+            <section>
+                <label>Watcher's Website</label>
+                <div>
+                    Download, and/or find more information for <a href="https://nosmokingbandit.github.io/" target="_blank">Watcher</a>.
+                </div>
+            </section>
+
+            <section>
+                <label>Radarr's Website</label>
+                <div>
+                    Download, and/or find more information for <a href="http://radarr.video/" target="_blank">Radarr</a>.
+                </div>
+            </section>
+
+            <section>
+                <label>Sonarr's Website</label>
+                <div>
+                    Download, and/or find more information for <a href="https://sonarr.tv/" target="_blank">Sonarr</a>.
+                </div>
+            </section>
+
+            <section>
+                <label>CouchPotato's Website</label>
+                <div>
+                    Download, and/or find more information for <a href="https://couchpota.to/" target="_blank">CouchPotato</a>.
+                </div>
+            </section>
+        </details>
+    </article>
+</div>
+
+    <br>
+
+	<section>
 		<button id="save">Save</button>
-	</p>
-	<span id="status"></span>
+        <span id="status"></span>
+	</section>
 
+    <footer id="version"></footer>
+
+	<script src="lodash.min.js"></script>
+	<script src="xml.js"></script>
 	<script src="index.js"></script>
 </body>
 </html>

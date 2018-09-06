@@ -1,0 +1,10 @@
+{
+	"extends": "@volst",
+	"root": true,
+	"rules": {
+		"no-use-before-define": 0
+	},
+	"globals": {
+		"chrome": true
+	}
+}
