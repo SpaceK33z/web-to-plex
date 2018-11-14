@@ -7,48 +7,28 @@ function init() {
 }
 
 function initPlexThingy() {
-	let $button = renderPlexButton();
-	if (!$button)
-		return;
+	let button = renderPlexButton();
+
+	if (!button)
+		return /* Fatal Error: Fail Silently */;
 
 	let $title = document.querySelector('.headline-1[itemprop="name"]'),
-        $date = document.querySelector('small[itemprop="datePublished"]');
+        $date = document.querySelector('small[itemprop="datePublished"]'),
+        $image = document.querySelector('.image');
 
 	if (!$title || !$date)
 		return modifyPlexButton(
-			$button,
+			button,
 			'error',
 			'Could not extract title or year from Movieo'
 		);
 
 	let title = $title.textContent.trim(),
         year = $date.textContent.trim(),
+        image = $image.src,
         IMDbID = getIMDbID();
 
-	findPlexMedia({ title, year, button: $button, type: 'movie', IMDbID });
-}
-
-function renderPlexButton() {
-	let $actions = document.querySelector('.js-watch-panel .services');
-	if (!$actions)
-		return;
-
-	let parentEl = document.createElement('p'),
-        el = document.createElement('a'),
-        ch = document.createElement('span');
-
-    ch.classList.add('icon', '-web-to-plex');
-    ch.setAttribute('style', `background: url("${ chrome.extension.getURL('img/16.png') }") no-repeat !important`);
-
-    el.textContent = 'Web to Plex';
-    el.title = 'Loading...';
-	el.classList.add('label', 'web-to-plex-button');
-
-    parentEl.appendChild(ch);
-    parentEl.appendChild(el);
-	$actions.appendChild(parentEl);
-
-	return el;
+	findPlexMedia({ title, year, button, type: 'movie', IMDbID });
 }
 
 function getIMDbID() {

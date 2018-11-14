@@ -407,7 +407,7 @@ div
                 <input type="text" data-option="plexURL" placeholder="Enter your Plex URL (for direct access)"/>
                 <div>
                     Use this to communicate directly with your Plex server.<br/>
-                    Such as <em>http://localhost:32400</em> or <em>http://192.168.1.100:32400</em>
+                    Such as <em>http://localhost:32400/web</em> or <em>http://192.168.1.100:32400/desktop</em>
                 </div>
             </section>
         </details>
@@ -418,7 +418,7 @@ div
 	<h1>Manager Settings</h1>
 
     <article>
-        <details>
+        <details id="watcher">
             <summary>Watcher (Movies)</summary>
 
             <h2>Connection Settings</h2>
@@ -469,7 +469,7 @@ div
             </section>
         </details>
 
-        <details>
+        <details id="radarr">
             <summary>Radarr (Movies)</summary>
 
             <h2>Connection Settings</h2>
@@ -525,7 +525,7 @@ div
             </section>
         </details>
 
-        <details>
+        <details id="sonarr">
             <summary>Sonarr (TV Shows)</summary>
 
             <h2>Connection Settings</h2>
@@ -581,7 +581,7 @@ div
             </section>
         </details>
 
-        <details>
+        <details id="couchpotato">
             <summary>CouchPotato (Movies/TV Shows)</summary>
 
             <h2>Connection Settings</h2>
@@ -617,11 +617,11 @@ div
             </section>
 
             <section>
-                <button type="button" id="couchpotato_test">Test <span id="couchpotato_test_status">?</span></button>
+                <button type="button" id="couchpotato_test" disabled>Test <span id="couchpotato_test_status">?</span></button>
             </section>
             <section>
                 <label>Quality Profile</label>
-                <select data-option="couchpotatoQualityProfileId">
+                <select data-option="couchpotatoQualityProfileId" disabled>
                     <option value="">Press "Test [?]" first</option>
                 </select>
             </section>

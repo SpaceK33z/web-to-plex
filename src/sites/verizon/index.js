@@ -20,32 +20,13 @@ function init() {
 	}
 }
 
-function renderPlexButton() {
-	let $actions = document.querySelector('.container .content-holder, .detail .fl');
-	if (!$actions)
-		return;
-
-	let existingButton = $actions.querySelector('a.web-to-plex-button');
-	if (existingButton)
-		return;
-
-	let el = document.createElement('a');
-
-    el.textContent = 'Web to Plex';
-    el.title = 'Loading...';
-	el.classList.add('web-to-plex-button', 'button', 'btn', 'detail-btn');
-	$actions.appendChild(el);
-
-	return el;
-}
-
 async function initPlexThingy(type) {
-	let $button = renderPlexButton();
+	let button = renderPlexButton();
 
-	if (!$button)
-		return;
+	if (!button)
+		return /* Fatal Error: Fail Silently */;
 
-    let $title, $year;
+    let $title, $year, $image = document.querySelector('.cover img');
 
     if(isOnDemand()) {
         if(isMoviePage()) {
@@ -65,10 +46,11 @@ async function initPlexThingy(type) {
     }
 
 	if (!$title || !$year)
-		return modifyPlexButton($button, 'error', `Could not extract ${ !$title? 'title': 'year' } from Verizon`);
+		return modifyPlexButton(button, 'error', `Could not extract ${ !$title? 'title': 'year' } from Verizon`);
 
 	let title = $title.textContent.trim(),
-        year = $year.textContent.slice(0, 4).trim();
+        year = $year.textContent.slice(0, 4).trim(),
+        image = $image.src;
 
     let Db = await getIDs({ title, year, type }),
         IMDbID = Db.imdb,
@@ -78,7 +60,7 @@ async function initPlexThingy(type) {
     title = Db.title;
     year = Db.year;
 
-	findPlexMedia({ type, title, year, button: $button, IMDbID, TMDbID, TVDbID });
+	findPlexMedia({ type, title, year, image, button, IMDbID, TMDbID, TVDbID });
 }
 
 parseOptions().then(() => {

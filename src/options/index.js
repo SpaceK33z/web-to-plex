@@ -152,11 +152,8 @@ function performPlexTest(ServerID) {
 		PlexServers = servers || [];
         teststatus.textContent = '!';
 
-		if(!servers) {
-            teststatus.classList = false;
-
-            return;
-        }
+		if(!servers)
+            return teststatus.classList = false;
 
 		__save__.disabled = false;
         teststatus.classList = true;
@@ -208,6 +205,9 @@ function getOptionValues() {
 }
 
 function getWatcher(options, api = "getconfig") {
+    if(!options.watcherToken)
+        return;
+
 	let headers = {
 		'Accept': 'application/json',
 		'Content-Type': 'application/json',
@@ -217,56 +217,73 @@ function getWatcher(options, api = "getconfig") {
 	if(options.watcherBasicAuthUsername)
 		headers.Authorization = `Basic ${ btoa(`${ options.watcherBasicAuthUsername }:${ options.watcherBasicAuthPassword }`) }`;
 
-    options.watcherURLRoot = options.watcherURLRoot.replace(/^(?!^https?:)/, 'http://').replace(/\/+$/, '');
-
-	return fetch(`${ options.watcherURLRoot }/api/?apikey=${ options.watcherToken }&mode=${ api }&quality=${ options.watcherQualityProfileId || 'Default' }`, { headers })
-		.then(response => response.json())
-		.catch(error => {
-			return terminal.error('Watcher failed to connect with error:', error),
+    return fetch(`${ options.watcherURLRoot }/api/?apikey=${ options.watcherToken }&mode=${ api }&quality=${ options.watcherQualityProfileId || 'Default' }`, { headers })
+        .then(response => response.json())
+        .catch(error => {
+            return terminal.error('Watcher failed to connect with error:', error),
               [];
-		});
+        });
 }
 
-function performWatcherTest(QualityProfileID = 'Default') {
+function performWatcherTest(QualityProfileID = 'Default', refreshing = false) {
 	let options = getOptionValues(),
         teststatus = $$('#watcher_test_status'),
-        storagepath = __watcher_storagePath__;
+        storagepath = __watcher_storagePath__,
+        quality = __watcher_qualityProfile__,
+        url;
 
-	__watcher_qualityProfile__.innerHTML = '';
+	quality.innerHTML = '';
 	teststatus.textContent = '?';
     storagepath.value = '[Empty]';
+    options.watcherURLRoot = url = options.watcherURLRoot.replace(/^(\:\d+)/, 'localhost$1').replace(/^(?!^http(s)?:)/, 'http$1://').replace(/\/+$/, '');
 
-    getWatcher(options, 'getconfig').then(config => {
-        let names = config.config.Quality.Profiles,
-            path = config.config.Postprocessing.moverpath,
-            profiles = [];
+    let Get = () =>
+        getWatcher(options, 'getconfig').then(config => {
+            let names = config.config.Quality.Profiles,
+                path = config.config.Postprocessing.moverpath,
+                syntax = path.replace(/\/([\w\s\/\\\{\}]+)$/, '$1'),
+                profiles = [];
 
-        for(let name in names)
-            profiles.push({
-                id: name,
-                name
+            path = path.replace(syntax, '');
+
+            for(let name in names)
+                profiles.push({
+                    id: name,
+                    name
+                });
+
+            teststatus.textContent = '!';
+            teststatus.classList = !!profiles.length;
+
+            profiles.forEach(profile => {
+                let option = document.createElement('option');
+
+                option.value = profile.id;
+                option.textContent = profile.name;
+                quality.appendChild(option);
             });
 
-		teststatus.textContent = '!';
-        teststatus.classList = !!profiles.length;
+            // Because the <select> was reset, the original value is lost.
+            if(QualityProfileID)
+                quality.value = QualityProfileID;
 
-		profiles.forEach(profile => {
-			let option = document.createElement('option');
+            storagepath.value = path || '[Empty]';
+        });
 
-			option.value = profile.id;
-			option.textContent = profile.name;
-			__watcher_qualityProfile__.appendChild(option);
-		});
-
-		// Because the <select> was reset, the original value is lost.
-		if(QualityProfileID)
-			__watcher_qualityProfile__.value = QualityProfileID;
-
-        storagepath.value = path || '[Empty]';
-	});
+    if(refreshing)
+        Get();
+    else if(url && url.length)
+        requestURLPermissions(url + '/*', allowed =>
+            (allowed)?
+                Get():
+            terminal.error('The user refused permission to access Watcher')
+        );
 }
 
 function getRadarr(options, api = "profile") {
+    if(!options.radarrToken)
+        return;
+
 	let headers = {
 		'Accept': 'application/json',
 		'Content-Type': 'application/json',
@@ -276,8 +293,6 @@ function getRadarr(options, api = "profile") {
 	if(options.radarrBasicAuthUsername)
 		headers.Authorization = `Basic ${ btoa(`${ options.radarrBasicAuthUsername }:${ options.radarrBasicAuthPassword }`) }`;
 
-    options.radarrURLRoot = options.radarrURLRoot.replace(/^(?!^https?:)/, 'http://').replace(/\/+$/, '');
-
 	return fetch(`${ options.radarrURLRoot }/api/${ api }`, { headers })
 		.then(response => response.json())
 		.catch(error => {
@@ -286,48 +301,65 @@ function getRadarr(options, api = "profile") {
 		});
 }
 
-function performRadarrTest(QualityProfileID, StoragePath) {
+function performRadarrTest(QualityProfileID, StoragePath, refreshing = false) {
 	let options = getOptionValues(),
         teststatus = $$('#radarr_test_status'),
-        storagepath = __radarr_storagePath__;
+        storagepath = __radarr_storagePath__,
+        quality = __radarr_qualityProfile__,
+        url;
 
-	__radarr_qualityProfile__.innerHTML = '';
+	quality.innerHTML = '';
 	teststatus.textContent = '?';
     storagepath.textContent = '';
+    options.radarrURLRoot = url = options.radarrURLRoot.replace(/^(\:\d+)/, 'localhost$1').replace(/^(?!^http(s)?:)/, 'http$1://').replace(/\/+$/, '');
 
-	getRadarr(options, 'profile').then(profiles => {
-		teststatus.textContent = '!';
-        teststatus.classList = !!profiles.length;
+    let Get = () => {
+        getRadarr(options, 'profile').then(profiles => {
+            teststatus.textContent = '!';
+            teststatus.classList = !!profiles.length;
 
-		profiles.forEach(profile => {
-			let option = document.createElement('option');
+            profiles.forEach(profile => {
+                let option = document.createElement('option');
 
-			option.value = profile.id;
-			option.textContent = profile.name;
-			__radarr_qualityProfile__.appendChild(option);
-		});
+                option.value = profile.id;
+                option.textContent = profile.name;
+                quality.appendChild(option);
+            });
 
-		// Because the <select> was reset, the original value is lost.
-		if(QualityProfileID)
-			__radarr_qualityProfile__.value = QualityProfileID;
-	});
+            // Because the <select> was reset, the original value is lost.
+            if(QualityProfileID)
+                quality.value = QualityProfileID;
+        });
 
-    getRadarr(options, 'rootfolder').then(storagepaths => {
-		storagepaths.forEach(path => {
-			let option = document.createElement('option');
+        getRadarr(options, 'rootfolder').then(storagepaths => {
+            storagepaths.forEach(path => {
+                let option = document.createElement('option');
 
-			option.value = path.path;
-			option.textContent = path.path;
-			__radarr_storagePath__.appendChild(option);
-		});
+                option.value = path.path;
+                option.textContent = path.path;
+                storagepath.appendChild(option);
+            });
 
-		// Because the <select> was reset, the original value is lost.
-		if(StoragePath)
-			__radarr_storagePath__.value = StoragePath;
-    });
+            // Because the <select> was reset, the original value is lost.
+            if(StoragePath)
+                storagepath.value = StoragePath;
+        });
+    };
+
+    if(refreshing)
+        Get();
+    else if(url && url.length)
+        requestURLPermissions(url + '/*', allowed =>
+            (allowed)?
+                Get():
+            terminal.error('The user refused permission to access Radarr')
+        );
 }
 
 function getSonarr(options, api = "profile") {
+    if(!options.sonarrToken)
+        return;
+
 	let headers = {
 		'Accept': 'application/json',
 		'Content-Type': 'application/json',
@@ -337,8 +369,6 @@ function getSonarr(options, api = "profile") {
 	if(options.sonarrBasicAuthUsername)
 		headers.Authorization = `Basic ${ btoa(`${ options.sonarrBasicAuthUsername }:${ options.sonarrBasicAuthPassword }`) }`;
 
-    options.sonarrURLRoot = options.sonarrURLRoot.replace(/^(?!^https?:)/, 'http://').replace(/\/+$/, '');
-
 	return fetch(`${ options.sonarrURLRoot }/api/${ api }`, { headers })
 		.then(response => response.json())
 		.catch(error => {
@@ -347,44 +377,58 @@ function getSonarr(options, api = "profile") {
 		});
 }
 
-function performSonarrTest(QualityProfileID, StoragePath) {
+function performSonarrTest(QualityProfileID, StoragePath, refreshing = false) {
 	let options = getOptionValues(),
         teststatus = $$('#sonarr_test_status'),
-        storagepath = __sonarr_storagePath__;
+        storagepath = __sonarr_storagePath__,
+        quality = __sonarr_qualityProfile__,
+        url;
 
-	__sonarr_qualityProfile__.innerHTML = '';
+	quality.innerHTML = '';
 	teststatus.textContent = '?';
     storagepath.textContent = '';
+    options.sonarrURLRoot = url = options.sonarrURLRoot.replace(/^(\:\d+)/, 'localhost$1').replace(/^(?!^http(s)?:)/, 'http$1://').replace(/\/+$/, '');
 
-	getSonarr(options, 'profile').then(profiles => {
-		teststatus.textContent = '!';
-        teststatus.classList = !!profiles.length;
+    let Get = () => {
+        getSonarr(options, 'profile').then(profiles => {
+            teststatus.textContent = '!';
+            teststatus.classList = !!profiles.length;
 
-		profiles.forEach(profile => {
-			let option = document.createElement('option');
-			option.value = profile.id;
-			option.textContent = profile.name;
-			__sonarr_qualityProfile__.appendChild(option);
-		});
+            profiles.forEach(profile => {
+                let option = document.createElement('option');
+                option.value = profile.id;
+                option.textContent = profile.name;
+                quality.appendChild(option);
+            });
 
-		// Because the <select> was reset, the original value is lost.
-		if(QualityProfileID)
-			__sonarr_qualityProfile__.value = QualityProfileID;
-	});
+            // Because the <select> was reset, the original value is lost.
+            if(QualityProfileID)
+                quality.value = QualityProfileID;
+        });
 
-    getSonarr(options, 'rootfolder').then(storagepaths => {
-		storagepaths.forEach(path => {
-			let option = document.createElement('option');
+        getSonarr(options, 'rootfolder').then(storagepaths => {
+            storagepaths.forEach(path => {
+                let option = document.createElement('option');
 
-			option.value = path.path;
-			option.textContent = path.path;
-			__sonarr_storagePath__.appendChild(option);
-		});
+                option.value = path.path;
+                option.textContent = path.path;
+                storagepath.appendChild(option);
+            });
 
-		// Because the <select> was reset, the original value is lost.
-		if(StoragePath)
-			__sonarr_storagePath__.value = StoragePath;
-    });
+            // Because the <select> was reset, the original value is lost.
+            if(StoragePath)
+                storagepath.value = StoragePath;
+        });
+    };
+
+    if(refreshing)
+        Get();
+    else if(url && url.length)
+        requestURLPermissions(url + '/*', allowed =>
+            (allowed)?
+                Get():
+            terminal.error('The user refused permission to access Sonarr')
+        );
 }
 
 function saveOptions() {
@@ -448,21 +492,21 @@ function saveOptions() {
         storage.set({ ClientID });
     }
 
-    options.plexURL = options.plexURLRoot = (options.plexURL || "")
+    options.plexURL = options.plexURLRoot = (options.plexURL || "https://app.plex.tv/")
         .replace(/([^\\\/])$/, endingSlash)
-        .replace(/^(?!^https?:\/\/)(.+)/, 'http://$1');
+        .replace(/^(?!^http(s)?:\/\/)(.+)/, 'http$1://$2');
 
     options.watcherURLRoot = (options.watcherURLRoot || "")
         .replace(/([^\\\/])$/, endingSlash)
-        .replace(/^(?!^https?:\/\/)(.+)/, 'http://$1');
+        .replace(/^(?!^http(s)?:\/\/)(.+)/, 'http$1://$2');
 
     options.radarrURLRoot = (options.radarrURLRoot || "")
         .replace(/([^\\\/])$/, endingSlash)
-        .replace(/^(?!^https?:\/\/)(.+)/, 'http://$1');
+        .replace(/^(?!^http(s)?:\/\/)(.+)/, 'http$1://$2');
 
     options.sonarrURLRoot = (options.sonarrURLRoot || "")
         .replace(/([^\\\/])$/, endingSlash)
-        .replace(/^(?!^https?:\/\/)(.+)/, 'http://$1');
+        .replace(/^(?!^http(s)?:\/\/)(.+)/, 'http$1://$2');
 
     options.radarrStoragePath = options.radarrStoragePath
         .replace(/([^\\\/])$/, endingSlash);
@@ -472,18 +516,6 @@ function saveOptions() {
 
     for(let index = 0, array = 'plex watcher radarr sonarr couchpotato'.split(' '), item = save('URLs', array); index < array.length; index++)
         save(`${ item = array[index] }.url`, options[`${ item }URLRoot`]);
-
-	function requestURLPermissions(url) {
-        if(!url) return;
-
-		// TODO: FireFox doesn't have support for chrome.permissions API.
-		if(chrome.permissions) {
-			// When asking permissions the URL needs to have a trailing slash.
-			chrome.permissions.request({
-				origins: [`${ url }`]
-			});
-        }
-	}
 
 	// Dynamically asking permissions
 	requestURLPermissions(options.couchpotatoURLRoot);
@@ -520,6 +552,17 @@ function saveOptions() {
 	});
 }
 
+function requestURLPermissions(url, callback) {
+    if(!url || /https?\:\/\*/.test(url))
+        return;
+
+    // TODO: FireFox doesn't have support for chrome.permissions API.
+    if(chrome.permissions) {
+        // When asking permissions the URL needs to have a trailing slash.
+        chrome.permissions.request({ origins: [`${ url }`] }, callback);
+    }
+}
+
 // Restores select box and checkbox state using the preferences
 // stored in chrome.storage.*
 function restoreOptions() {
@@ -553,11 +596,11 @@ function restoreOptions() {
 		if(items.plexToken)
 			performPlexTest(items.servers ? items.servers[0].id : null);
         if(items.watcherURLRoot)
-			performWatcherTest(items.watcherQualityProfileId);
+			performWatcherTest(items.watcherQualityProfileId, true);
         if(items.radarrURLRoot)
-			performRadarrTest(items.radarrQualityProfileId, items.radarrStoragePath);
+			performRadarrTest(items.radarrQualityProfileId, items.radarrStoragePath, true);
         if(items.sonarrURLRoot)
-			performSonarrTest(items.sonarrQualityProfileId, items.sonarrStoragePath);
+			performSonarrTest(items.sonarrQualityProfileId, items.sonarrStoragePath, true);
 	}
 
 	storage.get(null, items => {
@@ -569,6 +612,8 @@ function restoreOptions() {
 			setOptions(items);
 	});
 }
+
+let empty = () => {};
 
 document.addEventListener('DOMContentLoaded', restoreOptions);
 __save__.addEventListener('click', saveOptions);
@@ -583,15 +628,10 @@ document
         else
             performPlexLogin();
     });
-document
-	.querySelector('#watcher_test')
-	.addEventListener('click', performWatcherTest);
-document
-	.querySelector('#radarr_test')
-	.addEventListener('click', performRadarrTest);
-document
-	.querySelector('#sonarr_test')
-	.addEventListener('click', performSonarrTest);
+document.querySelectorAll('#watcher, #watcher_test').forEach(element => element.addEventListener('click', event => (typeof event.target.getAttribute('open') == 'string'? performWatcherTest: empty)()));
+document.querySelectorAll('#radarr, #radarr_test').forEach(element => element.addEventListener('click', event => (typeof event.target.getAttribute('open') == 'string'? performRadarrTest: empty)()));
+document.querySelectorAll('#sonarr, #sonarr_test').forEach(element => element.addEventListener('click', event => (typeof event.target.getAttribute('open') == 'string'? performSonarrTest: empty)()));
+
 document
     .querySelector('#version')
     .innerHTML = `Version ${ chrome.manifest.version }`;

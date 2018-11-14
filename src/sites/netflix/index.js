@@ -15,39 +15,11 @@ function isShow() {
 
 let $$ = selector => document.querySelector(selector);
 
-function renderPlexButton($parent) {
-	if (!$parent) return;
-
-	let existingButton = $$('a.web-to-plex-button');
-	if (existingButton)
-		existingButton.remove();
-
-	let el = document.createElement('a'),
-        ch = document.createElement('img'),
-        gc = document.createElement('span');
-
-    el.setAttribute('class', 'web-to-plex-button touchable PlayerControls--control-element nfp-button-control default-control-button button-nfplayerFullscreen PlayerControls--control-element--with-label');
-    el.setAttribute('role', 'button');
-    ch.src = chrome.extension.getURL('img/o48.png');
-    ch.height = ch.width = 28;
-    gc.classList.add('PlayerControls__button-label');
-    gc.textContent = 'Web to Plex';
-
-    el.appendChild(ch);
-    el.appendChild(gc);
-
-    $parent.insertBefore(el, $parent.lastChild);
-
-	return el;
-}
-
 async function initPlexThingy(type) {
-	let $button = renderPlexButton($$('[class$="button-control-row"]'));
+	let button = renderPlexButton();
 
-	if (!$button)
-		return;
-
-    terminal.log(type);
+	if (!button)
+		return /* Fatal Error: Fail Silently */;
 
 	let $title = $$('.video-title h4'),
         title = $title.innerText.replace(/^\s+|\s+$/g, '').toCaps() || sessionStorage.getItem(`last-${type}-title`),
@@ -62,7 +34,7 @@ async function initPlexThingy(type) {
 
     sessionStorage.setItem(`last-${type}-title`, title);
 
-	findPlexMedia({ type, title, year, button: $button, IMDbID, TMDbID, TVDbID, txt: 'title', hov: 'null' });
+	findPlexMedia({ type, title, year, button, IMDbID, TMDbID, TVDbID });
 }
 
 (window.onlocationchange = () =>

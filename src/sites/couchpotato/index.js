@@ -15,12 +15,14 @@ function isShow() {
 }
 
 function initPlexThingy(type) {
-	let $button = renderPlexButton();
-	if (!$button)
-		return;
+	let button = renderPlexButton();
+
+	if (!button)
+		return /* Fatal Error: Fail Silently */;
 
 	let $title = document.querySelector('[itemprop="description"]'),
-        $date = $title.previousElementSibling;
+        $date = $title.previousElementSibling,
+        $image = document.querySelector('img[src*="wp-content"]');
 
 	if (!$title || !$date)
 		return modifyPlexButton(
@@ -31,32 +33,10 @@ function initPlexThingy(type) {
 
 	let title = $title.textContent.trim(),
         year = $date.textContent.trim(),
+        image = $image.src,
         IMDbID = getIMDbID();
 
-	findPlexMedia({ title, year, button: $button, type, IMDbID });
-}
-
-function renderPlexButton() {
-	let $actions = document.querySelector('[href*="imdb.com/title/tt"]').parentElement;
-	if (!$actions)
-		return;
-
-	let pa = document.createElement('span'),
-        el = document.createElement('a'),
-        ch = document.createElement('img');
-
-    ch.setAttribute('src', chrome.extension.getURL('img/16.png'));
-    pa.classList.add('web-to-plex--container');
-
-    el.textContent = 'W2P';
-    el.title = 'Loading...';
-	el.classList.add('web-to-plex-button');
-
-    pa.appendChild(ch);
-	pa.appendChild(el);
-    $actions.appendChild(pa);
-
-	return el;
+	findPlexMedia({ title, year, image, button, type, IMDbID });
 }
 
 function getIMDbID() {

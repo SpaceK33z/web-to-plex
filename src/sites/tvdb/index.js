@@ -24,21 +24,24 @@ parseOptions().then(() => {
 });
 
 function initPlexThingy() {
-	let $button = renderPlexButton();
-	if (!$button)
-		return;
+	let button = renderPlexButton();
 
-	let $title = document.querySelector('#series_title');
+	if (!button)
+		return /* Fatal Error: Fail Silently */;
+
+	let $title = document.querySelector('#series_title'),
+        $image = document.querySelector('img[src*="/posters/"]');
 
 	if (!$title)
 		return modifyPlexButton(
-			$button,
+			button,
 			'error',
 			 `Could not extract title from TheTVDb`
 		),
           null;
 
 	let title = $title.innerText.trim(),
+        image = $image.src,
         d = '<!---->', o = {},
 	    Db = document.querySelector('#series_basic_info')
             .textContent
@@ -56,34 +59,5 @@ function initPlexThingy() {
                 o[n] = /,/.test(v)? v.split(/\s*,\s*/): v;
             });
 
-	findPlexMedia({ title, year: ((o.first_aired || YEAR) + "").slice(0, 4), button: $button, type: 'show', IMDbID: o.imdb, TVDbID: o.thetvdb });
-}
-
-function renderPlexButton() {
-	// The "download" button
-	let $actions = document.querySelector(
-            '#series_basic_info > ul'
-    );
-
-	if (!$actions)
-		return;
-
-	let $existingButton = document.querySelector('a.web-to-plex-button');
-	if ($existingButton)
-		$existingButton.remove();
-
-    let pa = document.createElement('li'),
-        el = document.createElement('strong'),
-        ch = document.createElement('a');
-
-    pa.classList.add('web-to-plex-wrapper', 'list-group-item', 'clearfix');
-    pa.appendChild(el);
-    el.appendChild(ch);
-    ch.classList.add('web-to-plex-button');
-    ch.textContent = 'Web to Plex';
-    ch.title = 'Loading...';
-
-    $actions.insertBefore(pa, $actions.firstChild);
-
-	return ch;
+	findPlexMedia({ title, year: ((o.first_aired || YEAR) + "").slice(0, 4), image, button, type: 'show', IMDbID: o.imdb, TVDbID: o.thetvdb });
 }

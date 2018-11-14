@@ -1,53 +1,64 @@
 /* global chrome */
 let external = {},
     parentItem,
+    saveItem,
     terminal =
-//                { error: m => m, info: m => m, log: m => m, warn: m => m } ||
+//                { error: m => m, info: m => m, log: m => m, warn: m => m, group: m => m, groupEnd: m => m } ||
                 console;
 
-let date = new Date(),
-    YEAR = date.getFullYear(),
+let date  = (new Date),
+    YEAR  = date.getFullYear(),
     MONTH = date.getMonth() + 1,
-    DATE = date.getDate();
+    DATE  = date.getDate();
 
+// Create a Crypto-Key
+// new Key(number:integer, string) -> string
 class Key {
     constructor(length = 8, symbol = '') {
         let values = [];
 
         window.crypto.getRandomValues(new Uint32Array(16)).forEach((value, index, array) => values.push(value.toString(36)));
 
-        return this.value = values.join(symbol);
+        return this.length = length, this.value = values.join(symbol);
     }
 
-    rehash(length) {
-        return this.value = new Key(length);
+    rehash(length, symbol) {
+        if(length)
+            /* Do nothing */;
+        else
+            length = this.length;
+
+        return this.value = new Key(length, symbol);
     }
 }
 
-// Session key
-let SessionKey = new Key(16);
+// Session instances
+let SessionKey = new Key(16), // create a session key
+    SessionState = false;     // has this been run already?
 
-// Object{username, password} => Object
-function generateHeaders(auth) {
+// Generate request headers (for fetches)
+// generateHeaders({username, password}) -> object
+function generateHeaders(credentials) {
     let headers = { Accept: 'application/json' };
 
-    if (!auth)
+    if (!credentials)
         return headers;
 
     return {
-        Authorization: `Basic ${ btoa(`${ auth.username }:${ auth.password }`) }`,
+        Authorization: `Basic ${ btoa(`${ credentials.username }:${ credentials.password }`) }`,
         ...headers
     };
 }
 
-// Object{MovieOrShowID, MovieOrShowTitle, MovieOrShowType, MovieOrShowIDProvider, MovieOrShowYear, LinkURL, FileType} => undefined
+// Change the badge status
+// changeStatus({MovieOrShowID, MovieOrShowTitle, MovieOrShowType, MovieOrShowIDProvider, MovieOrShowYear, LinkURL, FileType}) -> undefined
 function changeStatus({ id, tt, ty, pv, yr, ur = '', ft = '' }) {
 
     let tl = tt.replace(/\-/g, ' ').replace(/[\s\:]{2,}/g, ' - ').replace(/[^\w\s\-\']+/g, ''),
     // File friendly title
         st = tt.replace(/[\-\s]+/g, '-').replace(/[^\w\-]+/g, ''),
     // Search friendly title
-        xx = /[it]m/i.test(pv)? 'FX': 'GG';
+        xx = /[it]m/i.test(pv)? 'GX': 'GG';
 
     id = (id && !/^tt-?$/i.test(id)? id: '') + '';
     id = id.replace(/^.*\b(tt\d+)\b.*$/, '$1').replace(/^.*\bid=(\d+)\b.*$/, '$1').replace(/^.*(?:movie|tv|(?:tv-?)?(?:shows?|series|episodes?))\/(\d+).*$/, '$1');
@@ -77,7 +88,7 @@ function changeStatus({ id, tt, ty, pv, yr, ur = '', ft = '' }) {
         });
 
     chrome.contextMenus.update('W2P-XX', {
-        title: `Find on ${ (xx == 'FX'? 'Flenix': 'Google') }`,
+        title: `Find on ${ (xx == 'GX'? 'GoStream': 'Google') }`,
         checked: false
     });
 }
@@ -104,6 +115,7 @@ function addCouchpotato(request, sendResponse) {
 		headers: generateHeaders(request.basicAuth)
 	})
 		.then(response => response.json())
+        .catch(error => sendResponse({ error: 'Item not found', location: 'addCouchpotato => fetch.then.catch', silent: true }))
 		.then(response => {
 			sendResponse({ success: response.success });
 		})
@@ -124,6 +136,7 @@ function addWatcher(request, sendResponse) {
 
     fetch(debug.url = `${ request.url }?apikey=${ request.token }&mode=addmovie&${ query }=${ id }`)
         .then(response => response.json())
+        .catch(error => sendResponse({ error: 'Movie not found', location: 'addWatcher => fetch.then.catch', silent: true }))
         .then(response => {
             if((response.response + "") == "true")
                 return sendResponse({
@@ -153,6 +166,7 @@ function addRadarr(request, sendResponse) {
 
     fetch(debug.url = `${ request.url }lookup/${ query }=${ id }&apikey=${ request.token }`)
         .then(response => response.json())
+        .catch(error => sendResponse({ error: 'Movie not found', location: 'addRadarr => fetch.then.catch', silent: true }))
         .then(data => {
             let body,
                 props = {
@@ -239,6 +253,7 @@ function addSonarr(request, sendResponse) {
 
     fetch(debug.url = `${ request.url }lookup?apikey=${ request.token }&term=${ query }`)
         .then(response => response.json())
+        .catch(error => sendResponse({ error: 'TV Show not found', location: 'addSonarr => fetch.then.catch', silent: true }))
         .then(data => {
             if (!data instanceof Array || !data.length) {
                 throw new Error('TV Show not found');
@@ -441,15 +456,15 @@ chrome.contextMenus.onClicked.addListener((item) => {
             `thetvdb.com/search?q=${ p(tl) }`;
             break;
         case 'xx':
-            url = external.X == 'FX'?
-                `flenix.tv/?do=search&story=${ p(tt) }&min_year=${ yr || 1990 }&filter=true&max_year=${ yr }&min_imdb=0&max_imdb=10&cat=1&order=date&g-recaptcha-response=${ SessionKey.value }`:
+            url = external.X == 'GX'?
+                `gostream.site/?s=${ p(tl) }`:
             `google.com/search?q="${ p(tl, ' ') } ${ yr }"+${ pv }db`;
             break;
         case 'dl':
             dnl = true;
             url = external.U;
             break;
-        default: return;
+        default: return; break;
     }
 
     if(!dnl)
@@ -474,7 +489,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         ft = id.tail || '';
     id = id[pv + 'ID'] || id[pv.toLowerCase() + 'Id'];
 
-    changeStatus({ id, tt, yr, ty, pv, ur, ft });
+    if(tt && yr && ty)
+        changeStatus({ id, tt, yr, ty, pv, ur, ft });
 
     try {
         switch (request.type) {
@@ -512,31 +528,36 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     }
 });
 
-parentItem = chrome.contextMenus.create({
-    id: 'W2P',
-    title: 'Web to Plex'
-});
+if(SessionState === false) {
+    SessionState = true;
 
-saveItem = chrome.contextMenus.create({
-    id: 'W2P-DL',
-    title: 'Nothing to Save'
-});
+    parentItem = chrome.contextMenus.create({
+        id: 'W2P',
+        title: 'Web to Plex'
+    });
 
-// Standard search engines
-for(let array = 'IM TM TV'.split(' '), DL = {}, length = array.length, index = 0, item; index < length; index++)
+    saveItem = chrome.contextMenus.create({
+        id: 'W2P-DL',
+        title: 'Nothing to Save'
+    });
+
+    // Standard search engines
+    for(let array = 'IM TM TV'.split(' '), DL = {}, length = array.length, index = 0, item; index < length; index++)
+        chrome.contextMenus.create({
+            id: 'W2P-' + (item = array[index]),
+            parentId: parentItem,
+            title: `Using ${ item }Db`,
+            type: 'checkbox',
+            checked: true // implement a way to use the checkboxes?
+        });
+
+    // Non-standard search engines
     chrome.contextMenus.create({
-        id: 'W2P-' + (item = array[index]),
+        id: 'W2P-XX',
         parentId: parentItem,
-        title: `Using ${ item }Db`,
+        title: `Using best guess`,
         type: 'checkbox',
         checked: true // implement a way to use the checkboxes?
     });
 
-// Non-standard search engines
-chrome.contextMenus.create({
-    id: 'W2P-XX',
-    parentId: parentItem,
-    title: `Using best guess`,
-    type: 'checkbox',
-    checked: true // implement a way to use the checkboxes?
-});
+}

@@ -36,51 +36,28 @@ parseOptions().then(() => {
 });
 
 function initPlexThingy() {
-	let $button = renderPlexButton();
-	if (!$button)
-		return;
+	let button = renderPlexButton();
 
-	let $title = document.getElementById('doc_title'),
-        $date = document.querySelector('meta[itemprop="datePublished"]');
+	if (!button)
+		return /* Fatal Error: Fail Silently */;
+
+	let $title = document.querySelector('#doc_title'),
+        $date = document.querySelector('meta[itemprop="datePublished"]'),
+        $image = document.querySelector('img.poster');
 
 	if (!$title || !$date)
 		return modifyPlexButton(
-			$button,
+			button,
 			'error',
 			 `Could not extract ${ !$title? 'title': 'year' } from Movieo`
 		);
 
 	let title = $title.dataset.title.trim(),
         year = $date.content.slice(0, 4),
+        image = $image.src,
         IMDbID = getIMDbID();
 
-	findPlexMedia({ title, year, button: $button, type: 'movie', IMDbID });
-}
-
-function renderPlexButton() {
-	// The button text in the "Comments" button takes too much place, so we hide it.
-	// It's very clear that it's about comments even without the text.
-	let $commentText = document.querySelector(
-		'.mid-top-actions .comments-link .txt'
-	);
-	if ($commentText)
-		$commentText.remove();
-
-	let $actions = document.querySelector('.mid-top-actions');
-	if (!$actions)
-		return;
-
-	let $existingEl = document.querySelector('a.web-to-plex-button');
-	if ($existingEl)
-		$existingEl.remove();
-
-	let el = document.createElement('a');
-    el.textContent = 'Web to Plex';
-    el.title = 'Loading...';
-	el.classList.add('button', 'comments-link', 'web-to-plex-button');
-
-	$actions.appendChild(el);
-	return el;
+	findPlexMedia({ title, year, button, image, type: 'movie', IMDbID });
 }
 
 function getIMDbID() {

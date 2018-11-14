@@ -15,22 +15,25 @@ function isShowPage() {
 }
 
 async function initPlexThingy(type) {
-	let $button = renderPlexButton();
-	if (!$button)
-		return;
+	let button = renderPlexButton();
+
+	if (!button)
+		return /* Fatal Error: Fail Silently */;
 
 	let $title = document.querySelector('.product_page_title > *, .product_title'),
-        $date = document.querySelector('.product_page_title > .release_year, .product_data .release_data');
+        $date = document.querySelector('.product_page_title > .release_year, .product_data .release_data'),
+        $image = document.querySelector('.summary_img');
 
 	if (!$title || !$date)
 		return console.log('failed'), modifyPlexButton(
-			$button,
+			button,
 			'error',
 			 `Could not extract ${ !$title? 'title': 'year' } from Metacritic`
 		);
 
 	let title = $title.textContent.replace(/\s+/g, ' ').trim(),
-        year = $date.textContent.replace(/\s+/g, ' ').replace(/.*(\d{4}).*$/, '$1').trim();
+        year = $date.textContent.replace(/\s+/g, ' ').replace(/.*(\d{4}).*$/, '$1').trim(),
+        image = $image.src;
 
     let Db = await getIDs({ title, year, type }),
         IMDbID = Db.imdb,
@@ -42,25 +45,7 @@ async function initPlexThingy(type) {
 
     type = type === 'tv'? 'show': type;
 
-	findPlexMedia({ title, year, button: $button, type, IMDbID, TMDbID, TVDbID, txt: 'title', hov: 'null' });
-}
-
-function renderPlexButton() {
-	let $actions = document.querySelector('#mantle_skin .sharing, #main .sharing');
-	if (!$actions)
-		return;
-
-	let el = document.createElement('a'),
-        ch = document.createElement('span');
-
-    ch.classList.add('fa', 'fa-fw', 'fa-arrow-down');
-
-    el.classList.add('web-to-plex-button');
-    el.title = 'Web to Plex';
-    el.appendChild(ch);
-	$actions.appendChild(el);
-
-	return el;
+	findPlexMedia({ title, year, button, type, IMDbID, TMDbID, TVDbID });
 }
 
 parseOptions().then(() => {

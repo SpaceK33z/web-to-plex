@@ -265,12 +265,25 @@
 
 ## v3.1.2.0 / unreleased
 
+- Complete overhaul of button UI
+    - Instead of individual buttons and locations, there is a single location (bottom left)
+    - The button can be right-clicked (contextmenu) for more options
+- Added new icons to reflect above-mentioned changes
 - Fixed `String..toCaps` in `/utils.js`
 - Fixed Flenix's `isMoviePageReady():boolean`
 - Fixed #57
     - changed IMDb to use the found year instead of the "release year", e.g. "Del Playa (2017 - USA)" v. "Del Playa (2015)" (same movie, different year)
 - Made minor bug changes to `/utils.js`
     - if a title wasn't passed to `findPlexMedia` the script would continue and fail
+- Removed `/adblockplus.txt`
+- Fixed a bug in `/manifest.json`
+    - The entry for 'VRV' was missing the `/sites/common.css` link
+- Suppressed minor errors in `/utils.js`
+    - When a movie/show isn't found (given a blank page), then fire a silent error event
+- Added `furnish` to `/utils.js`
+    - use as `document.furnish(element:string, ?attributes:object, ...children:Element)`
+    - returns an `Element` with the declared attributes, and children
+    - e.g. `div = document.furnish('div#id.class[attr]', { onclick: () => {} }, document.furnish('a[href]'))`
 - Added `queryBy` to `/utils.js`
     - use as `document.queryBy(selectors:string)`
     - returns an `Array` that is in the same order as the selectors
@@ -279,3 +292,8 @@
     document.queryBy('body, script, head');          // => [<body>, <script>, <head>]
     document.querySelectorAll('body, script, head'); // => [<head>, <body>, <script>]
 ```
+
+
+## TODO
+
+- Add [The Shana Project](http://www.shanaproject.com/)?

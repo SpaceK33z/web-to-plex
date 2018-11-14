@@ -25,16 +25,18 @@ parseOptions().then(() => {
 });
 
 async function initPlexThingy() {
-	let $button = renderPlexButton();
-	if (!$button)
-		return;
+	let button = renderPlexButton();
 
-	let $title = document.querySelector('[class^="series"] .title, .series'),
-        $year = document.querySelector('.additional-information-item');
+	if (!button)
+		return /* Fatal Error: Fail Silently */;
+
+	let $title = document.querySelector('.series, [class*="video"] .title, [class*="series"] .title'),
+        $year = document.querySelector('.additional-information-item'),
+        $image = document.querySelector('[class*="poster"][class*="wrapper"] img');
 
 	if (!$title)
 		return modifyPlexButton(
-			$button,
+			button,
 			'error',
 			 `Could not extract title from VRV`
 		),
@@ -42,6 +44,7 @@ async function initPlexThingy() {
 
 	let title = $title.innerText.replace(/(unrated|mature|tv-?\d{1,2})\s*$/i, '').trim(),
         year = $year? $year.textContent.replace(/.+(\d{4}).*/, '$1').trim(): 0,
+        image = $image.src,
 	    Db = await getIDs({ title, year, APIType: 'tv' }),
         IMDbID = Db.imdb,
         TMDbID = Db.tmdb,
@@ -50,29 +53,5 @@ async function initPlexThingy() {
     title = Db.title;
     year = Db.year;
 
-	findPlexMedia({ title, year, button: $button, type: 'show', IMDbID, TMDbID, TVDbID });
-}
-
-function renderPlexButton() {
-	// The "download" button
-	let $actions = document.querySelector(
-            '.action-buttons'
-    );
-
-	if (!$actions)
-		return;
-
-	let $existingButton = document.querySelector('a.web-to-plex-button');
-	if ($existingButton)
-		$existingButton.remove();
-
-    let el = document.createElement('a');
-
-    el.classList.add('web-to-plex-button', 'action-button', 'h-button');
-    el.textContent = 'Web to Plex';
-    el.title = 'Loading...';
-
-    $actions.appendChild(el);
-
-	return el;
+	findPlexMedia({ title, year, image, button, type: 'show', IMDbID, TMDbID, TVDbID });
 }

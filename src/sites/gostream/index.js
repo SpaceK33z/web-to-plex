@@ -1,11 +1,12 @@
 /* global parseOptions, modifyPlexButton, findPlexMedia */
 function isMoviePage() {
 	// An example movie page: /movies/3030-the-1517-to-paris.html
-	return /\/(movies?|views?)\//.test(window.location.pathname);
+	return /\/(?!genre|most-viewed|top-imdb|contact)\b/.test(window.location.pathname);
 }
 
 function isMoviePageReady() {
-	return !!document.querySelector('#videoplayer video').getAttribute('onplay') != '';
+    let e = document.querySelector('.movieplay iframe, .desc iframe');
+	return !!e && e.src != '' && document.readyState == 'complete';
 }
 
 function init() {
@@ -24,32 +25,30 @@ parseOptions().then(() => {
 });
 
 async function initPlexThingy() {
+
 	let button = renderPlexButton();
-
 	if (!button)
-		return /* Fatal Error: Fail Silently */;
+		return /* an error occurred, fail silently */;
 
-	let $title = document.querySelector('#dle-content .about > h1'),
-        $date = document.querySelector('.features > .reset:nth-child(2) a');
+	let $title = document.querySelector('[itemprop="name"]:not(meta)'),
+        $year = document.querySelector('.mvic-desc [href*="year/"]'),
+        $image, start = +(new Date);
 
-	if (!$title || !$date)
+    wait(() => (+(new Date) - start > 10000) || ($image = document.querySelector('.hiddenz, [itemprop="image"]')));
+
+	if (!$title || !$year)
 		return modifyPlexButton(
 			button,
 			'error',
-			'Could not extract title or year from Flenix'
+			'Could not extract title or year from GoStream'
 		),
           null;
 
-    let meta = {
-        method: 'POST',
-        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-        mode: 'no-cors'
-    };
-
 	let title = $title.innerText.trim(),
-	    year = $date.innerText,
+	    year = $year.innerText.trim(),
+        image = $image.src,
         type = 'movie';
-    
+
     let Db = await getIDs({ title, year, type }),
         IMDbID = Db.imdb,
         TMDbID = Db.tmdb,
@@ -58,5 +57,5 @@ async function initPlexThingy() {
     title = Db.title;
     year = Db.year;
 
-	findPlexMedia({ title, year, button, IMDbID, TMDbID, TVDbID, type, remote: '/engine/ajax/get.php', locale: 'flenix' });
+	findPlexMedia({ title, year, image, button, IMDbID, TMDbID, TVDbID, type });
 }
