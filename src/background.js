@@ -489,7 +489,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         ft = id.tail || '';
     id = id[pv + 'ID'] || id[pv.toLowerCase() + 'Id'];
 
-    if(tt && yr && ty)
+    if(tt && yr && ty || request.type == 'SEARCH_FOR')
         changeStatus({ id, tt, yr, ty, pv, ur, ft });
 
     try {

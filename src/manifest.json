@@ -23,7 +23,7 @@
 	},
 
 	"content_scripts": [
-		{
+        {
 			"matches": ["*://*.movieo.me/*"],
 			"js": ["history-hack.js", "utils.js", "sites/movieo/index.js"],
 			"css": ["sites/movieo/index.css", "sites/common.css"]
@@ -147,5 +147,5 @@
 		"http://*/",
 		"https://*/"
 	],
-    "web_accessible_resources": ["img/16.png", "img/48.png", "img/_16.png", "img/_48.png", "img/o16.png", "img/o48.png", "img/close.16.png", "img/close.48.png", "img/plexit.16.png", "img/plexit.48.png", "img/hide.16.png", "img/hide.48.png", "img/reload.16.png", "img/show.48.png", "img/show.16.png", "img/reload.48.png", "img/settings.16.png", "img/settings.48.png", "img/noise.png", "img/null.png"]
+    "web_accessible_resources": ["img/*"]
 }

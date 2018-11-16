@@ -2,27 +2,41 @@ function isMovie() {
     return document.querySelector('#media_result_group');
 }
 
-function init() {
-    if(isMovie())
-        initPlexThingy();
+function isShow() {
+    return document.queryBy('[href*="thetvdb.com/"][href*="id="], [href*="thetvdb.com/series/"], [href*="themoviedb.org/tv/"], [href*="imdb.com/title/tt"][href$="externalsites"]').first;
 }
 
-async function initPlexThingy() {
-    let button = renderPlexButton(), type = 'movie';
+function init() {
+    if(isMovie() || isShow())
+        initPlexThingy(isMovie()? 'movie': 'show');
+}
+
+async function initPlexThingy(type) {
+    let button = renderPlexButton();
     if(!button)
         return /* Fail silently */;
 
-    let $title = document.querySelector('.kno-ecr-pt'),
-        $date  = document.querySelector('.kno-fb-ctx:not([data-local-attribute]) span'),
+    let $title, $date, $image;
+
+    if(type == 'movie') {
+        $title = document.querySelector('.kno-ecr-pt');
+        $date  = document.querySelector('.kno-fb-ctx:not([data-local-attribute]) span');
         $image = document.querySelector('#media_result_group img');
+    } else {
+        $title = isShow().querySelector('*');
+        $date = { textContent: '' };
+        $image = { src: '' };
+    }
 
     if(!$title || !$date)
         return modifyPlexButton(button, 'error', 'Could not extract title or year from Google');
 
     let date = $date.textContent.replace(/(\d{4})/),
         year = +RegExp.$1,
-        title = $title.textContent.trim(),
+        title = $title.textContent.replace((type == 'movie'? /^(.+)$/: /(.+)(?:(?:\:\s*series\s+info|\-\s*all\s+episodes|\-\s*season).+)$/i), '$1').trim(),
         image = $image.src;
+
+    year = year > 999? year: 0;
 
     let IMDbID = getIMDbID(),
         Db = await getIDs({ title, year, type, IMDbID }),

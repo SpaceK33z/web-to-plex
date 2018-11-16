@@ -263,7 +263,7 @@
 - Added `/people` to Trakt's "Watch Now" link feature
   - v3.0.0.0
 
-## v3.1.2.0 / unreleased
+## v4.0.0.0 / unreleased
 
 - Complete overhaul of button UI
     - Instead of individual buttons and locations, there is a single location (bottom left)
@@ -280,6 +280,7 @@
     - The entry for 'VRV' was missing the `/sites/common.css` link
 - Suppressed minor errors in `/utils.js`
     - When a movie/show isn't found (given a blank page), then fire a silent error event
+- Fixed the searching algorithm in `/utils.js`
 - Added `furnish` to `/utils.js`
     - use as `document.furnish(element:string, ?attributes:object, ...children:Element)`
     - returns an `Element` with the declared attributes, and children
@@ -292,7 +293,6 @@
     document.queryBy('body, script, head');          // => [<body>, <script>, <head>]
     document.querySelectorAll('body, script, head'); // => [<head>, <body>, <script>]
 ```
-
 
 ## TODO
 

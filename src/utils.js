@@ -16,47 +16,86 @@ let YEAR = date.getFullYear(),
     MONTH = date.getMonth() + 1,
     DATE = date.getDate();
 
+let getURL = url => chrome.extension.getURL(url);
+
 let IMG_URL = {
-    'i16': chrome.extension.getURL('img/16.png'),
-    'i48': chrome.extension.getURL('img/48.png'),
-    '_16': chrome.extension.getURL('img/_16.png'),
-    '_48': chrome.extension.getURL('img/_48.png'),
-    'o16': chrome.extension.getURL('img/o16.png'),
-    'o48': chrome.extension.getURL('img/o48.png'),
-    'h16': chrome.extension.getURL('img/hide.16.png'),
-    'h48': chrome.extension.getURL('img/hide.48.png'),
-    'j16': chrome.extension.getURL('img/show.16.png'),
-    'j48': chrome.extension.getURL('img/show.48.png'),
-    'p16': chrome.extension.getURL('img/plexit.16.png'),
-    'p48': chrome.extension.getURL('img/plexit.48.png'),
-    'r16': chrome.extension.getURL('img/reload.16.png'),
-    'r48': chrome.extension.getURL('img/reload.48.png'),
-    'x16': chrome.extension.getURL('img/close.16.png'),
-    'x48': chrome.extension.getURL('img/close.48.png'),
-    's16': chrome.extension.getURL('img/settings.16.png'),
-    's48': chrome.extension.getURL('img/settings.48.png'),
-    'noi': chrome.extension.getURL('img/noise.png'),
-    'nil': chrome.extension.getURL('img/null.png'),
+    'i16': getURL('img/16.png'),
+    'i48': getURL('img/48.png'),
+    '_16': getURL('img/_16.png'),
+    '_48': getURL('img/_48.png'),
+    'o16': getURL('img/o16.png'),
+    'o48': getURL('img/o48.png'),
+    'h16': getURL('img/hide.16.png'),
+    'h48': getURL('img/hide.48.png'),
+    'j16': getURL('img/show.16.png'),
+    'j48': getURL('img/show.48.png'),
+    'p16': getURL('img/plexit.16.png'),
+    'p48': getURL('img/plexit.48.png'),
+    'r16': getURL('img/reload.16.png'),
+    'r48': getURL('img/reload.48.png'),
+    'x16': getURL('img/close.16.png'),
+    'x48': getURL('img/close.48.png'),
+    's16': getURL('img/settings.16.png'),
+    's48': getURL('img/settings.48.png'),
+    'noi': getURL('img/noise.png'),
+    'nil': getURL('img/null.png'),
 }
+
+let locationchangecallbacks = [];
 
 function watchlocationchange() {
     watchlocationchange.pathname = watchlocationchange.pathname || location.pathname;
 
     if (watchlocationchange.pathname != location.pathname) {
         watchlocationchange.pathname = location.pathname;
-        if(window.onlocationchange)
-            return window.onlocationchange(new Event('locationchange', { bubbles: true }));
+
+        for(let index = 0, length = locationchangecallbacks.length; index < length; index++)
+            locationchangecallbacks[index](new Event('locationchange', { bubbles: true }));
     }
 }
 
+Object.defineProperty(window, 'onlocationchange', {
+    set: callback => locationchangecallbacks.push(callback)
+});
+
 setInterval(watchlocationchange, 1000); // at least 1s is needed to properly fire the event ._.
 
-function load(name) {
-    return JSON.parse((sessionStorage || localStorage).getItem('Web-to-Plex@' + name));
+const storage = chrome.storage.sync || chrome.storage.local;
+
+async function load(name = '') {
+    if(!name) return;
+
+    name = 'Cache-Data/' + btoa(name.toLowerCase().replace(/\s+/g, ''));
+
+    return new Promise((resolve, reject) => {
+        function LOAD(DISK) {
+            let data = JSON.parse(DISK[name] || null);
+
+            return resolve(data);
+        }
+
+        storage.get(null, DISK => {
+            if (chrome.runtime.lastError)
+                chrome.storage.local.get(null, LOAD);
+            else
+                LOAD(DISK);
+        });
+    });
 }
 
-function save(name, data) {
-    return (sessionStorage || localStorage).setItem('Web-to-Plex@' + name, JSON.stringify(data));
+async function save(name = '', data) {
+    if(!name) return;
+
+    name = 'Cache-Data/' + btoa(name.toLowerCase().replace(/\s+/g, ''));
+    data = JSON.stringify(data);
+
+    await storage.set({[name]: data}, () => data);
+
+    return name;
+}
+
+async function kill(name) {
+  return storage.remove([name]);
 }
 
 function sendUpdate(type, options = {}) {
@@ -69,7 +108,6 @@ function sendUpdate(type, options = {}) {
 }
 
 function $getOptions() {
-    const storage = chrome.storage.sync || chrome.storage.local;
 
     return new Promise((resolve, reject) => {
         function handleOptions(options) {
@@ -212,12 +250,16 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
         .replace(/[\u2019\u201b]/g, "'")
         .replace(/[\u201c\u201d]/g, '"')
         .replace(/[^\u0000-\u00ff]+/g, '');
-    year = year? (year + '').replace(/\D+/g, ''): load(`${title}.${rqut}`) || year;
+    year = year? (year + '').replace(/\D+/g, ''): await load(`${title}.${rqut}`) || year;
 
     function plus(string) { return string.replace(/\s+/g, '+') }
 
-    let savename = `${title} (${year}).${rqut}`,
-        local = load(savename);
+    let local, savename;
+
+    if(year) {
+        savename = `${title} (${year}).${rqut}`,
+        local = await load(savename);
+    }
 
     if(local) {
         terminal.log('[LOCAL] Search results', local);
@@ -295,7 +337,7 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
 
         // Find an exact match: Title (Year) | #IMDbID
         let index, found, $data, lastscore;
-        for(index = 0, found = false, $data, lastscore = 0; index < json.length && !found; index++) {
+        for(index = 0, found = false, $data, lastscore = 0; (title && year) && index < json.length && !found; index++) {
             $data = json[index];
 
             //api.tvmaze.com/
@@ -337,7 +379,7 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
         }
 
         // Find a close match: Title
-        for(index = 0; index < json.length && (!found || lastscore > 0); index++) {
+        for(index = 0; title && index < json.length && (!found || lastscore > 0); index++) {
             $data = json[index];
 
             //api.tvmaze.com/
@@ -394,14 +436,14 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
         // BAD, not found: "Gun Show Showdown" vs. "Gundarr"
             // /\b(gun|showdown)\b/i.test('gundarr') === false
             // this should not match; the '\b' (border between \w and \W) keeps them from matching
-        for(index = 0; config.UseLoose && index < json.length && (!found || lastscore > 0); index++) {
+        for(index = 0; config.UseLoose && title && index < json.length && (!found || lastscore > 0); index++) {
             $data = json[index];
 
             //api.tvmaze.com/
             if('externals' in ($data = $data.show || $data) || 'show' in $data)
                 found =
                     // ignore language barriers
-                    (R($data.name, title))?
+                    (R($data.name, title) || terminal.log('Matching:', [$data.name, title], R($data.name, title)))?
                         $data:
                     // trust the api matching
                     ($data.score > lastscore)?
@@ -503,11 +545,16 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
     year = +((data.year + '').slice(0, 4)) || 0;
     data.year = year;
 
-    terminal.log('Best match', { title, year, data, type, rqut, score: json.score | 0 });
+    let best = { title, year, data, type, rqut, score: json.score | 0 };
+
+    terminal.log('Best match', best);
+
+    if(best.data.imdb == ei && best.data.tmdb == 0 && best.data.tvdb == 0)
+        return terminal.log(`No information was found for "${ title } (${ year })"`), {};
 
     save(savename, data); // e.g. "Coco (0)" on Netflix before correction / no repeat searches
-    save(savename = `${title} (${year}).${rqut}`, data); // e.g. "Coco (2017)" on Netflix after correction / no repeat searches
-    save(`${title}.${rqut}`, year);
+    save(savename = `${title} (${year}).${rqut}`.toLowerCase(), data); // e.g. "Coco (2017)" on Netflix after correction / no repeat searches
+    save(`${title}.${rqut}`.toLowerCase(), year);
 
     terminal.log(`Saved as "${ savename }"`, data);
 
@@ -986,8 +1033,13 @@ function modifyPlexButton(button, action, title, options = {}) {
                 xhr.send(data);
             }
         } else {
-            element.href = `#${ options.IMDbID || 'tt' }-${ options.TMDbID | 0 }-${ options.TVDbID | 0 }`;
-            element.setAttribute(hov, `Get this ${ty.toCaps()}`);
+            let url = `#${ options.IMDbID || 'tt' }-${ options.TMDbID | 0 }-${ options.TVDbID | 0 }`;
+
+            /* Failed */
+            if(/#tt-+0-0/i.test(url))
+                return modifyPlexButton(button, 'notfound', title, options);
+
+            element.href = url;
             button.classList.add('wtp--download');
             element.addEventListener('click', e => {
                 let tv = /tv[\s-]?|shows?|series/i;
@@ -1005,13 +1057,15 @@ function modifyPlexButton(button, action, title, options = {}) {
             });
         }
 
-        element.setAttribute(hov, `Add "${options.title} (${options.year})" | ${ty + (options.fileonly? ` - No ${ty} ID`: '')}`);
+        element.setAttribute(hov, `Add "${options.title.toCaps()}${options.year? ` (${options.year})`: ''}" | ${ty + (options.fileonly? ` - No ${ty} ID`: '')}`);
         element.style.removeProperty('display');
     } else if (action == 'notfound' || action == 'error' || empty) {
         element.removeAttribute('href');
-        element.setAttribute(hov, `${ty} was not found`);
+        element.setAttribute(hov, `"${ options.title.toCaps() }" (${ ty }) was not found`);
         button.classList.remove('wtp--found');
         button.classList.add('wtp--error');
+
+        sendUpdate('SEARCH_FOR', { ...options });
     }
 
     element.id = options? `${options.IMDbID || 'tt'}-${options.TMDbID | 0}-${options.TVDbID | 0}`: 'tt-0-0';
@@ -1158,7 +1212,7 @@ String.prototype.toCaps = function toCaps(all) {
             query = (SELECTORS, CONTAINER = container) => CONTAINER.querySelectorAll(SELECTORS);
 
         // Get rid of enclosing syntaxes: [...] and (...)
-        let regexp = /(\([^\(\)]+?\)|\[[^\[\]]+?\])/,
+        let regexp = /(\([^\(\)]+?\)|\[[^\[\]]+?\])/g,
             pulled = [],
             media  = [],
             index, length;
@@ -1166,9 +1220,7 @@ String.prototype.toCaps = function toCaps(all) {
         // The index shouldn't be longer than the length of the selector's string
         // Keep this to prevent infinite loops
         for(index = 0, length = selectors.length; index++ < length && regexp.test(selectors);)
-          selectors = selectors.replace(regexp, function($0, $1, $$, $_) {
-            return '--' + pulled.push($1) + '\b';
-          });
+          selectors = selectors.replace(regexp, ($0, $1, $$, $_) => '\b--' + pulled.push($1) + '\b');
 
         let order       = selectors.split(','),
             dummy       = copy(order),
@@ -1176,10 +1228,8 @@ String.prototype.toCaps = function toCaps(all) {
             generations = 0;
 
         // Replace those syntaxes (they were ignored)
-        for(index = 0, length = dummy.length, order = [], regexp = /--(\d+)[\b]/; index < length; index++)
-          order.push(dummy[index].replace(regexp, function($0, $1, $$, $_) {
-            return pulled[+$1 - 1];
-          }));
+        for(index = 0, length = dummy.length, order = [], regexp = /[\b]--(\d+)[\b]/g; index < length; index++)
+          order.push(dummy[index].replace(regexp, ($0, $1, $$, $_) => pulled[+$1 - 1]));
 
         // Make sure to put the elements in order
         // Handle the :parent (pseudo) selector
@@ -1220,6 +1270,19 @@ String.prototype.toCaps = function toCaps(all) {
         for(index = 0, length = output.length, media = []; index < length; index++)
           if(!~media.indexOf(output[index]))
             media.push(output[index]);
+
+        let properties = { writable: false, enumerable: false, configurable: false };
+
+        Object.defineProperties(media, {
+            first: {
+                value: media[0],
+                ...properties
+            },
+            last: {
+                value: media[media.length - 1],
+                ...properties
+            }
+        });
 
         return media;
     };

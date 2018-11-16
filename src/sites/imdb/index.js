@@ -113,6 +113,10 @@ function addInListItem(el) {
         year = cleanYear($date.textContent),
         IMDbID = $IMDbID.dataset.tconst;
 
+    save(`${title} (${year}).imdb`, { title, year, imdb: IMDbID });
+    save(`${title}.imdb`, +year);
+    terminal.log(`Saved as "${title} (${year}).imdb"`);
+
 	findPlexMedia({ type, title, year, button, IMDbID });
 }
 

@@ -43,6 +43,10 @@ async function initPlexThingy(type) {
     title = Db.title;
     year = Db.year;
 
+    save(`${title} (${year}).tmdb`, Db);
+    save(`${title}.tmdb`, +year);
+    terminal.log(`Saved as "${title} (${year}).tmdb"`);
+
     type = type === 'tv'? 'show': type;
 
 	findPlexMedia({ title, year, button, type, IMDbID, TMDbID, TVDbID });
