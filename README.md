@@ -69,8 +69,8 @@ This is the BETA (testing) version, please visit [Web to Plex](https://github.co
 19. [Rotten Tomatoes](https://www.rottentomatoes.com/)
 20. [ShowRSS](https://showrss.info/)<sup>1</sup> (button isn't meant to appear)
 21. [Netflix](https://netflix.com/)<sup>3</sup>
-22. [Toloka](https://toloka.to/)
-23. [Shana Project](https://www.shanaproject.com/)
+22. [Toloka](https://toloka.to/)<sup>6</sup>
+23. [Shana Project](https://www.shanaproject.com/)<sup>6</sup>
 
 *Notes*
 
