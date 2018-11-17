@@ -115,7 +115,7 @@
 	],
 
 	"background": {
-		"scripts": ["background.js"],
+		"scripts": ["background.js", "plugn.js"],
 		"persistent": true
 	},
 
@@ -139,9 +139,11 @@
 		"storage",
         "downloads",
         "contextMenus",
-//      "http://localhost/*",
-//      "https://localhost/*",
-		"https://*.plex.direct/*"
+        "http://localhost/*",
+        "https://localhost/*",
+		"https://*.plex.direct/*",
+        "http://ephellon.github.io/web.to.plex/*",
+        "https://ephellon.github.io/web.to.plex/*"
 	],
 	"optional_permissions": [
 		"http://*/",

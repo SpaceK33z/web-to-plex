@@ -59,7 +59,11 @@ const storage = (chrome.storage.sync || chrome.storage.local),
             'OMDbAPI',
             'TMDbAPI',
             'UseLoose',
-            'UseLooseScore'
+            'UseLooseScore',
+
+            // Plugins - End of file, before "let empty = ..."
+            'plugin_toloka',
+            'plugin_shana_project',
       ];
 
 let PlexServers = [],
@@ -579,7 +583,7 @@ function restoreOptions() {
 
             if(el.value !== '' && !el.disabled) {
                 if(el.type == 'checkbox')
-                    el.setAttribute('save', el.checked);
+                    el.setAttribute('save', el.checked == 'true');
                 else if(el.type == 'range')
                     el.setAttribute('save', el.value),
                     el.oninput({ target: el });
@@ -612,6 +616,61 @@ function restoreOptions() {
 			setOptions(items);
 	});
 }
+
+// Plugins and their links
+let plugins = {
+    'Toloka': 'https://toloka.to/',
+    'Shana Project': 'https://www.shanaproject.com/',
+    // Dont' forget to add to the __options__ object!
+}, array = [], sites = {}, pluginElement = document.querySelector('#plugins');
+
+for(let plugin in plugins)
+    array.push(plugin);
+array = array.sort();
+
+for(let index = 0, length = array.length; pluginElement && index < length; index++) {
+    let title = array[index],
+        name  = 'plugin_' + title.toLowerCase().replace(/\s+/g, '_'),
+        url   = new URL(plugins[title]),
+        js    = name.replace(/^plugin_/i, ''),
+        o     = url.origin,
+        r     = url.host.replace(/^(ww\w\.)/, '');
+
+    sites[r] = o;
+
+    pluginElement.innerHTML +=
+`
+<h3>${ title }</h3>
+<div class="checkbox">
+    <input id="${ name }" type="checkbox" data-option="${ name }" pid="${ r }" js="${ js }">
+    <label for="${ name }"></label>
+</div>
+<div>
+    Allows the plugin to run on <a href="${ url.href }" title="${ o }" target="_blank">${ r }</a>
+</div>
+
+<hr>
+`;
+}
+
+save('optional.sites', sites);
+
+document.querySelectorAll('[id^="plugin_"]')
+    .forEach(element => element.addEventListener('click', event => {
+        let self = event.target,
+            pid = self.getAttribute('pid'),
+            js = self.getAttribute('js');
+
+        if(self.checked) {
+            requestURLPermissions(sites[pid].replace(/\/\/(ww\w+\.)?/, '//*.').replace(/\/?$/, '/*'));
+            save(`permission:${ pid }`, true);
+            save(`script:${ pid }`, js);
+        } else {
+            save(`permission:${ pid }`, false);
+            save(`script:${ pid }`, null);
+        }
+    })
+);
 
 let empty = () => {};
 

@@ -349,6 +349,9 @@ function $searchPlex(connection, headers, options) {
         url = `${ connection.uri }/hubs/search`,
         field = options.field || 'title';
 
+    if(!options.title)
+        return {};
+
     if(type === 'tv')
         type = 'show';
 
@@ -477,7 +480,7 @@ chrome.contextMenus.onClicked.addListener((item) => {
         });
 });
 
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((request, sender, callback) => {
     terminal.log('From:', sender);
 
     let id = (request? request.options || request: {}),
@@ -495,22 +498,22 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     try {
         switch (request.type) {
             case 'SEARCH_PLEX':
-                searchPlex(request, sendResponse);
+                searchPlex(request, callback);
                 return true;
             case 'VIEW_COUCHPOTATO':
-                viewCouchPotato(request, sendResponse);
+                viewCouchPotato(request, callback);
                 return true;
             case 'ADD_COUCHPOTATO':
-                addCouchpotato(request, sendResponse);
+                addCouchpotato(request, callback);
                 return true;
             case 'ADD_RADARR':
-                addRadarr(request, sendResponse);
+                addRadarr(request, callback);
                 return true;
             case 'ADD_SONARR':
-                addSonarr(request, sendResponse);
+                addSonarr(request, callback);
                 return true;
             case 'ADD_WATCHER':
-                addWatcher(request, sendResponse);
+                addWatcher(request, callback);
                 return true;
             case 'OPEN_OPTIONS':
                 chrome.runtime.openOptionsPage();
@@ -521,10 +524,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 });
                 return true;
             default:
+//                terminal.warn(`Unknown event [${ request.type }]`);
                 return false;
         }   
     } catch (error) {
-        return sendResonpse(String(error));
+        return callback(String(error));
     }
 });
 

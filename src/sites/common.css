@@ -33,6 +33,10 @@
     position: relative!important;
 }
 
+.web-to-plex-button * {
+    border: none!important;
+}
+
 .web-to-plex-button {
     background-color: #3F4245!important;
     border: none;

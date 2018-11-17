@@ -39,18 +39,22 @@ let IMG_URL = {
     's48': getURL('img/settings.48.png'),
     'noi': getURL('img/noise.png'),
     'nil': getURL('img/null.png'),
-}
+};
 
 let locationchangecallbacks = [];
 
-function watchlocationchange() {
-    watchlocationchange.pathname = watchlocationchange.pathname || location.pathname;
+function watchlocationchange(subject) {
+    watchlocationchange[subject] = watchlocationchange[subject] || location[subject];
 
-    if (watchlocationchange.pathname != location.pathname) {
-        watchlocationchange.pathname = location.pathname;
+    if (watchlocationchange[subject] != location[subject]) {
+        watchlocationchange[subject] = location[subject];
 
-        for(let index = 0, length = locationchangecallbacks.length; index < length; index++)
-            locationchangecallbacks[index](new Event('locationchange', { bubbles: true }));
+        for(let index = 0, length = locationchangecallbacks.length, callback; index < length; index++) {
+            callback = locationchangecallbacks[index];
+
+            if(callback && typeof callback == 'function')
+                callback(new Event('locationchange', { bubbles: true }));
+        }
     }
 }
 
@@ -58,7 +62,7 @@ Object.defineProperty(window, 'onlocationchange', {
     set: callback => locationchangecallbacks.push(callback)
 });
 
-setInterval(watchlocationchange, 1000); // at least 1s is needed to properly fire the event ._.
+setInterval(() => watchlocationchange('pathname'), 1000); // at least 1s is needed to properly fire the event ._.
 
 const storage = chrome.storage.sync || chrome.storage.local;
 
@@ -817,7 +821,7 @@ function renderPlexButton(persistent) {
                     onclick: event => {
                         let self = event.target, parent = button;
 
-                        (function(d){var s=d.createElement('script');s.type='text/javascript';s.src='//ephellon.github.io/plex.it.js';var h=d.getElementsByTagName('head')[0];h.appendChild(s);}(document));
+                        (d=>{let s=d.createElement('script'),h=d.querySelector('head');s.type='text/javascript';s.src='//ephellon.github.io/plex.it.js';h.appendChild(s)})(document);
                     }
                 },
                 furnish('img[alt=Favorite]', { src: IMG_URL.p48, onclick: event => event.target.parentElement.click() }) // <img/>
@@ -1153,6 +1157,37 @@ function getPlexMediaRequest(options) {
 function getPlexMediaURL(PlexUIID, key) {
     return config.plexURL.replace(RegExp(`\/(${ config.server.id })?$`), '#!/server/' + PlexUIID) + `/details?key=${encodeURIComponent( key )}`;
 }
+
+/* Listen for Plugin events */
+chrome.runtime.onMessage.addListener(async(request, sender) => {
+    terminal.log(`Plugin event [${ request.plugin }]:`, request);
+
+    switch(request.type) {
+        case 'POPULATE':
+            let button = renderPlexButton(), data = request.data;
+
+            if(!button)
+                return terminal.warn(`The button failed to render. ${ request.name } @ instance ${ request.instance }`);
+            if(!data.title || !data.type)
+                return terminal.error(`Can't parse missing information. ${ request.name } @ instance ${ request.instance }`);
+
+            let { image, type, title, year } = data;
+            let Db = await getIDs(data);
+
+            let IMDbID = Db.imdb,
+                TMDbID = Db.tmdb,
+                TVDbID = Db.tvdb;
+
+            title = title || Db.title;
+            year = +(year || Db.year || 0);
+
+            findPlexMedia({ type, title, year, image, button, IMDbID, TMDbID, TVDbID });
+            return true;
+        default:
+//            terminal.warn(`Unknown event [${ request.type }]`);
+            return false;
+    }
+});
 
 String.prototype.toCaps = function toCaps(all) {
     /** Titling Caplitalization

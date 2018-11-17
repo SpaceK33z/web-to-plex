@@ -30,6 +30,13 @@
             top: 0;
         }
 
+        hr {
+            border: 1px solid #6668;
+        }
+        hr:last-child {
+            display: none;
+        }
+
         section {
             display: block !important;
             margin-bottom: 20px;
@@ -347,6 +354,8 @@
 Layout of code (Jade/Pug)
 
 div
+    h1
+        | Setting Name
     article
         details
             summary
@@ -356,6 +365,7 @@ div
             section
                 label
                     | Description
+                ...
                 div
                     | Help text
 
@@ -633,13 +643,23 @@ div
 
     <article>
         <details>
+            <summary>Extra Sites</summary>
+
+            <section id="plugins">
+                <!-- Filled in via the index.js script -->
+            </section>
+        </details>
+    </article>
+
+    <article>
+        <details>
             <summary>Advance Settings</summary>
 
             <h2>Search Options</h2>
             <section>
                 <h3>Loose Searching</h3>
                 <div>
-                    Allows the plugin to search for non-English titles using pattern matching (as a last resort).<br>
+                    Allows the extension to search for non-English titles using pattern matching (as a last resort).<br>
                     Higer sensitivity means more strict searches.
                 </div>
                 <br>

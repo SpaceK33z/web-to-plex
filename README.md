@@ -51,8 +51,8 @@ This is the BETA (testing) version, please visit [Web to Plex](https://github.co
 2.  [IMDb](http://imdb.com/)
 3.  [Trakt.tv](https://trakt.tv/)
 4.  [Letterboxd](https://letterboxd.com/)
-5.  [Flenix](https://flenix.co/)<sup>1/5</sup> (no longer supported)
-    - Replaced with #22 (GoStream)
+5.  [GoStream](https://gostream.site/)
+    - Replaced Flenix
 6.  [TV Maze](http://www.tvmaze.com/)
 7.  [The TVDb](https://www.thetvdb.com/)
 8.  [The MovieDb](https://www.themoviedb.org/)
@@ -69,7 +69,8 @@ This is the BETA (testing) version, please visit [Web to Plex](https://github.co
 19. [Rotten Tomatoes](https://www.rottentomatoes.com/)
 20. [ShowRSS](https://showrss.info/)<sup>1</sup> (button isn't meant to appear)
 21. [Netflix](https://netflix.com/)<sup>3</sup>
-22. [GoStream](https://gostream.site/)
+22. [Toloka](https://toloka.to/)
+23. [Shana Project](https://www.shanaproject.com/)
 
 *Notes*
 
@@ -78,6 +79,7 @@ This is the BETA (testing) version, please visit [Web to Plex](https://github.co
 - `3` *This site doesn't allow media browsing, or requires a subscription beforehand.*
 - `4` *This site is network intensive (loads slowly). Be patient.*
 - `5` *This site is known to update frequently, support may change without notice.*
+- `6` *This site is only supported via a plugin (enabled in the settings)*
 
 ## In Progress sites (adding support):
 
@@ -85,7 +87,7 @@ This is the BETA (testing) version, please visit [Web to Plex](https://github.co
 
 ## En Progress sites (may add support):
 
-- [Shana Project](http://shanaproject.com/)
+- Nothing here... for now
 
 ## Installing Web to Plex
 

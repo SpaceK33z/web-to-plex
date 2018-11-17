@@ -281,6 +281,9 @@
 - Suppressed minor errors in `/utils.js`
     - When a movie/show isn't found (given a blank page), then fire a silent error event
 - Fixed the searching algorithm in `/utils.js`
+- Added the Plugin feature
+    - added support for [Toloka](https://toloka.to/)
+    - added support for [Shana Project](https://www.shanaproject.com/)
 - Added `furnish` to `/utils.js`
     - use as `document.furnish(element:string, ?attributes:object, ...children:Element)`
     - returns an `Element` with the declared attributes, and children
@@ -293,7 +296,3 @@
     document.queryBy('body, script, head');          // => [<body>, <script>, <head>]
     document.querySelectorAll('body, script, head'); // => [<head>, <body>, <script>]
 ```
-
-## TODO
-
-- Add [The Shana Project](http://www.shanaproject.com/)?
