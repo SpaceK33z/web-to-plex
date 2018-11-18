@@ -34,19 +34,21 @@ async function initPlexThingy() {
         $year = document.querySelector('.mvic-desc [href*="year/"]'),
         $image, start = +(new Date);
 
-    wait(() => (+(new Date) - start > 10000) || ($image = document.querySelector('.hiddenz, [itemprop="image"]')));
+    wait(() => (+(new Date) - start > 5000) || ($image = document.querySelector('.hiddenz, [itemprop="image"]')));
 
-	if (!$title || !$year)
+	if (!$title)
 		return modifyPlexButton(
 			button,
 			'error',
-			'Could not extract title or year from GoStream'
+			'Could not extract title from GoStream'
 		),
           null;
 
+    new Notification('update', 'Use the Openload (OL) server to download');
+
 	let title = $title.innerText.trim(),
-	    year = $year.innerText.trim(),
-        image = $image.src,
+	    year = ($year? $year.innerText.trim(): 0),
+        image = ($image? $image.src: null),
         type = 'movie';
 
     let Db = await getIDs({ title, year, type }),

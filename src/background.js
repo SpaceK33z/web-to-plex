@@ -37,58 +37,60 @@ let SessionKey = new Key(16), // create a session key
     SessionState = false;     // has this been run already?
 
 // Generate request headers (for fetches)
-// generateHeaders({username, password}) -> object
-function generateHeaders(credentials) {
-    let headers = { Accept: 'application/json' };
+// new Headers({username, password}) -> object
+class Headers {
+    constructor({ username = '', password = '' }) {
+        let headers = { Accept: 'application/json' };
 
-    if (!credentials)
-        return headers;
+        if (!username && !password)
+            return headers;
 
-    return {
-        Authorization: `Basic ${ btoa(`${ credentials.username }:${ credentials.password }`) }`,
-        ...headers
-    };
+        return {
+            Authorization: `Basic ${ btoa(`${ username }:${ password }`) }`,
+            ...headers
+        };
+    }
 }
 
 // Change the badge status
-// changeStatus({MovieOrShowID, MovieOrShowTitle, MovieOrShowType, MovieOrShowIDProvider, MovieOrShowYear, LinkURL, FileType}) -> undefined
-function changeStatus({ id, tt, ty, pv, yr, ur = '', ft = '' }) {
+// ChangeStatus({MovieOrShowID, MovieOrShowTitle, MovieOrShowType, MovieOrShowIDProvider, MovieOrShowYear, LinkURL, FileType}) -> undefined
+function ChangeStatus({ ITEM_ID, ITEM_TITLE, ITEM_TYPE, ID_PROVIDER, ITEM_YEAR, ITEM_URL = '', FILE_TYPE = '', FILE_PATH }) {
 
-    let tl = tt.replace(/\-/g, ' ').replace(/[\s\:]{2,}/g, ' - ').replace(/[^\w\s\-\']+/g, ''),
+    let FILE_TITLE = ITEM_TITLE.replace(/\-/g, ' ').replace(/[\s\:]{2,}/g, ' - ').replace(/[^\w\s\-\']+/g, ''),
     // File friendly title
-        st = tt.replace(/[\-\s]+/g, '-').replace(/[^\w\-]+/g, ''),
+        SEARCH_TITLE = ITEM_TITLE.replace(/[\-\s]+/g, '-').replace(/[^\w\-]+/g, ''),
     // Search friendly title
-        xx = /[it]m/i.test(pv)? 'GX': 'GG';
+        SEARCH_PROVIDER = /[it]m/i.test(ID_PROVIDER)? 'GX': 'GG';
 
-    id = (id && !/^tt-?$/i.test(id)? id: '') + '';
-    id = id.replace(/^.*\b(tt\d+)\b.*$/, '$1').replace(/^.*\bid=(\d+)\b.*$/, '$1').replace(/^.*(?:movie|tv|(?:tv-?)?(?:shows?|series|episodes?))\/(\d+).*$/, '$1');
+    ITEM_ID = (ITEM_ID && !/^tt-?$/i.test(ITEM_ID)? ITEM_ID: '') + '';
+    ITEM_ID = ITEM_ID.replace(/^.*\b(tt\d+)\b.*$/, '$1').replace(/^.*\bid=(\d+)\b.*$/, '$1').replace(/^.*(?:movie|tv|(?:tv-?)?(?:shows?|series|episodes?))\/(\d+).*$/, '$1');
 
-    external = { ...external, F: tl, P: pv, Q: id, S: tt, T: st, U: ur, V: ty, X: xx, Y: yr, Z: ft };
+    external = { ...external, ID_PROVIDER, ITEM_ID, ITEM_TITLE, ITEM_YEAR, ITEM_URL, ITEM_TYPE, SEARCH_PROVIDER, SEARCH_TITLE, FILE_PATH, FILE_TITLE, FILE_TYPE };
 
     chrome.browserAction.setBadgeText({
-        text: pv
+        text: ID_PROVIDER
     });
 
     chrome.browserAction.setBadgeBackgroundColor({
-       color: (id? '#f45a26': '#666666')
+       color: (ITEM_ID? '#f45a26': '#666666')
     });
 
     chrome.contextMenus.update('W2P', {
-        title: `Find "${ tt } (${ yr || YEAR })"`
+        title: `Find "${ ITEM_TITLE } (${ ITEM_YEAR || YEAR })"`
     });
 
     for(let array = 'IM TM TV'.split(' '), length = array.length, index = 0, item; index < length; index++)
         chrome.contextMenus.update('W2P-' + (item = array[index]), {
             title: (
-                ((pv == (item += 'Db')) && id)?
-                    `Open in ${ item } (${ (+id? '#': '') + id })`:
+                ((ID_PROVIDER == (item += 'Db')) && ITEM_ID)?
+                    `Open in ${ item } (${ (+ITEM_ID? '#': '') + ITEM_ID })`:
                 `Find in ${ item }`
             ),
             checked: false
         });
 
     chrome.contextMenus.update('W2P-XX', {
-        title: `Find on ${ (xx == 'GX'? 'GoStream': 'Google') }`,
+        title: `Find on ${ (SEARCH_PROVIDER == 'GX'? 'GoStream': 'Google') }`,
         checked: false
     });
 }
@@ -99,7 +101,7 @@ function changeStatus({ id, tt, ty, pv, yr, ur = '', ft = '' }) {
 // HTTP servers. Unfortunately, many people use CouchPotato over HTTP.
 function viewCouchPotato(request, sendResponse) {
 	fetch(`${ request.url }?id=${ request.imdbId }`, {
-		headers: generateHeaders(request.basicAuth)
+		headers: new Headers(request.basicAuth)
 	})
 		.then(response => response.json())
 		.then(json => {
@@ -112,7 +114,7 @@ function viewCouchPotato(request, sendResponse) {
 
 function addCouchpotato(request, sendResponse) {
 	fetch(`${ request.url }?identifier=${ request.imdbId }`, {
-		headers: generateHeaders(request.basicAuth)
+		headers: new Headers(request.basicAuth)
 	})
 		.then(response => response.json())
         .catch(error => sendResponse({ error: 'Item not found', location: 'addCouchpotato => fetch.then.catch', silent: true }))
@@ -128,7 +130,7 @@ function addWatcher(request, sendResponse) {
     let headers = {
             'Content-Type': 'application/json',
             'X-Api-Key': request.token,
-            ...generateHeaders(request.basicAuth)
+            ...(new Headers(request.basicAuth))
         },
         id = (/^(tt-?)?$/.test(request.imdbId)? request.tmdbId: request.imdbId),
         query = (/^tt-?\d+$/i.test(id)? 'imdbid': /^\d+$/.test(id)? 'tmdbid': (id = encodeURI(`${request.title} ${request.year}`), 'term')),
@@ -158,7 +160,7 @@ function addRadarr(request, sendResponse) {
     let headers = {
             'Content-Type': 'application/json',
             'X-Api-Key': request.token,
-            ...generateHeaders(request.basicAuth)
+            ...(new Headers(request.basicAuth))
         },
         id = (/^(tt-?)?$/.test(request.imdbId)? request.tmdbId: request.imdbId),
         query = (/^tt-?\d+$/i.test(id)? 'imdb?imdbid': /^\d+$/.test(id)? 'tmdb?tmdbid': (id = encodeURI(`${request.title} ${request.year}`), 'term')),
@@ -245,7 +247,7 @@ function addSonarr(request, sendResponse) {
     let headers = {
             'Content-Type': 'application/json',
             'X-Api-Key': request.token,
-            ...generateHeaders(request.basicAuth)
+            ...(new Headers(request.basicAuth))
         },
         id = request.tvdbId,
         query = encodeURIComponent(`tvdb:${ id }`),
@@ -428,18 +430,18 @@ async function searchPlex(request, sendResponse) {
 // Instead of having an object returned (for the context-menu)
 // You have to make API calls on ALL clicks...
 
-chrome.contextMenus.onClicked.addListener((item) => {
+chrome.contextMenus.onClicked.addListener(item => {
     if(!/^W2P/i.test(item.menuItemId)) return;
 
     let url = "", dnl = false,
         db = item.menuItemId.slice(-2).toLowerCase(),
-        pv = external.P.slice(0, 2).toLowerCase(),
-        qu = external.Q,
-        tl = external.T,
-        yr = external.Y,
-        tt = external.S,
-        lt = external.F,
-        ft = external.Z,
+        pv = external.ID_PROVIDER.slice(0, 2).toLowerCase(),
+        qu = external.ITEM_ID,
+        tl = external.SEARCH_TITLE,
+        yr = external.ITEM_YEAR,
+        tt = external.ITEM_TITLE,
+        lt = external.FILE_TITLE,
+        ft = external.FILE_TYPE,
         p = (s, r = '+') => s.replace(/-/g, r);
 
     switch(db) {
@@ -450,7 +452,7 @@ chrome.contextMenus.onClicked.addListener((item) => {
             break;
         case 'tm':
             url = (qu && pv == 'tm')?
-                `themoviedb.org/${ external.V == 'show'? 'tv': 'movie' }/${ qu }`:
+                `themoviedb.org/${ external.ITEM_TYPE == 'show'? 'tv': 'movie' }/${ qu }`:
             `themoviedb.org/search?query=${ tl }`;
             break;
         case 'tv':
@@ -459,20 +461,20 @@ chrome.contextMenus.onClicked.addListener((item) => {
             `thetvdb.com/search?q=${ p(tl) }`;
             break;
         case 'xx':
-            url = external.X == 'GX'?
+            url = external.SEARCH_PROVIDER == 'GX'?
                 `gostream.site/?s=${ p(tl) }`:
             `google.com/search?q="${ p(tl, ' ') } ${ yr }"+${ pv }db`;
             break;
         case 'dl':
             dnl = true;
-            url = external.U;
+            url = external.ITEM_URL;
             break;
         default: return; break;
     }
 
     if(!dnl)
         window.open(`https://${ url }`, '_blank');
-    else
+    else if (chrome.runtime.lastError || dnl)
         chrome.downloads.download({
           url,
           filename: `${ lt } (${ yr }).${ ft }`,
@@ -483,17 +485,18 @@ chrome.contextMenus.onClicked.addListener((item) => {
 chrome.runtime.onMessage.addListener((request, sender, callback) => {
     terminal.log('From:', sender);
 
-    let id = (request? request.options || request: {}),
-        tt = id.title,
-        yr = id.year,
-        ty = id.type,
-        pv = (id.TVDbID || id.tvdbId? 'TVDb': id.TMDbID || id.tmdbId? 'TMDb': 'IMDb'),
-        ur = id.href || '',
-        ft = id.tail || '';
-    id = id[pv + 'ID'] || id[pv.toLowerCase() + 'Id'];
+    let item = (request? request.options || request: {}),
+        ITEM_TITLE = item.title,
+        ITEM_YEAR = item.year,
+        ITEM_TYPE = item.type,
+        ID_PROVIDER = (i=>{for(let p in i)if(/^TVDb/i.test(p)&&i[p])return'TVDb';else if(/^TMDb/i.test(p)&&i[p])return'TMDb';return'IMDb'})(item),
+        ITEM_URL = item.href || '',
+        FILE_TYPE = item.tail || 'mp4',
+        FILE_PATH = item.path || '',
+        ITEM_ID = ((i, I)=>{for(let p in i)if(RegExp('^'+I,'i').test(p))return i[p]})(item, ID_PROVIDER);
 
-    if(tt && yr && ty || request.type == 'SEARCH_FOR')
-        changeStatus({ id, tt, yr, ty, pv, ur, ft });
+    if(ITEM_TITLE && ITEM_YEAR && ITEM_TYPE || request.type == 'SEARCH_FOR')
+        ChangeStatus({ ITEM_ID, ITEM_TITLE, ITEM_TYPE, ID_PROVIDER, ITEM_YEAR, ITEM_URL, FILE_TYPE, FILE_PATH });
 
     try {
         switch (request.type) {
@@ -520,7 +523,14 @@ chrome.runtime.onMessage.addListener((request, sender, callback) => {
                 return true;
             case 'SAVE_AS':
                 chrome.contextMenus.update('W2P-DL', {
-                    title: `Save as "${ tt } (${ yr })"`
+                    title: `Save as "${ ITEM_TITLE } (${ ITEM_YEAR })"`
+                });
+                return true;
+            case 'DOWNLOAD_FILE':
+                chrome.downloads.download({
+                  url: item.href,
+                  filename: `${ external.FILE_PATH }${ external.FILE_TITLE } (${ external.ITEM_YEAR }).${ external.FILE_TYPE }`,
+                  saveAs: true
                 });
                 return true;
             default:

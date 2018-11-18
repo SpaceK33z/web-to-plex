@@ -59,6 +59,7 @@ This is the BETA (testing) version, please visit [Web to Plex](https://github.co
 9.  [VRV](https://vrv.co/)<sup>2</sup>
 10. [Hulu](https://hulu.com/)<sup>2/3/4</sup>
 11. [Google Play Store](https://play.google.com/store/movies/)
+    - Also runs on Google search results
 12. [iTunes](https://itunes.apple.com/)<sup>3/5</sup>
 13. [Metacritic](http://www.metacritic.com/)<sup>4</sup>
 14. [Fandango](https://www.fandango.com/)

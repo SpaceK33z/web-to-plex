@@ -28,6 +28,11 @@
 	background: #FF2A2A;
 }
 
+/* Web to Plex update notifications */
+.web-to-plex-notification.update {
+    background: #2A2AFF;
+}
+
 /* Web to Plex buttons */
 .web-to-plex-button [module] {
     position: relative!important;

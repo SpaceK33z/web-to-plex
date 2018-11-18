@@ -19,7 +19,7 @@
 - Close issues:
   - [x] #13
   - [x] #14
-  - [ ] #21
+  - [x] #21
   - [x] #25
   - [x] #53
   - [x] #57
@@ -265,12 +265,14 @@
 
 ## v4.0.0.0 / unreleased
 
-- Complete overhaul of button UI
+- **Complete overhaul of button UI/UX**
     - Instead of individual buttons and locations, there is a single location (bottom left)
-    - The button can be right-clicked (contextmenu) for more options
+    - ~~The button can be right-clicked (contextmenu) for more options~~
+      - Created an options icon instead
 - Added new icons to reflect above-mentioned changes
 - Fixed `String..toCaps` in `/utils.js`
-- Fixed Flenix's `isMoviePageReady():boolean`
+- **Removed Flenix**
+  - ~~Fixed Flenix's `isMoviePageReady():boolean`~~
 - Fixed #57
     - changed IMDb to use the found year instead of the "release year", e.g. "Del Playa (2017 - USA)" v. "Del Playa (2015)" (same movie, different year)
 - Made minor bug changes to `/utils.js`
@@ -281,9 +283,11 @@
 - Suppressed minor errors in `/utils.js`
     - When a movie/show isn't found (given a blank page), then fire a silent error event
 - Fixed the searching algorithm in `/utils.js`
-- Added the Plugin feature
-    - added support for [Toloka](https://toloka.to/)
+- **Added the Plugin feature** (due to #37)
+    - added support for [Toloka](https://toloka.to/) ("merged" #37)
     - added support for [Shana Project](https://www.shanaproject.com/)
+- Changed the `showNotification` function into the `Notification` class
+- **Updated the download feature**
 - Added `furnish` to `/utils.js`
     - use as `document.furnish(element:string, ?attributes:object, ...children:Element)`
     - returns an `Element` with the declared attributes, and children

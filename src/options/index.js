@@ -1,26 +1,26 @@
 /* global parseXML */
 /* Notes:
-    #1: See <https://github.com/SpaceK33z/web-to-plex/commit/db01d1a83d32e4d73f2ea671f634e6cc5b4c0fe7>
-    #2: See <https://github.com/SpaceK33z/web-to-plex/commit/27506b9a4c12496bd7aad6ee09deb8a5b9418cac>
-    #3: See <https://github.com/SpaceK33z/web-to-plex/issues/21>
+    #1: See https://github.com/SpaceK33z/web-to-plex/commit/db01d1a83d32e4d73f2ea671f634e6cc5b4c0fe7
+    #2: See https://github.com/SpaceK33z/web-to-plex/commit/27506b9a4c12496bd7aad6ee09deb8a5b9418cac
+    #3: See https://github.com/SpaceK33z/web-to-plex/issues/21
 */
 
 // FireFox doesn't support sync storage.
 const storage = (chrome.storage.sync || chrome.storage.local),
-      $$ = selector => document.querySelector(selector),
+      $$ = (selector, all) => (all? document.querySelectorAll(selector): document.querySelector(selector)),
       __servers__ = $$('#plex_servers'),
       __watcher_qualityProfile__ = $$(
           `[data-option="watcherQualityProfileId"]`
       ),
       __watcher_storagePath__ = $$(
-            `[data-option="watcherStoragePath"]`
+          `[data-option="watcherStoragePath"]`
       ),
       __radarr_qualityProfile__ = $$(
           `[data-option="radarrQualityProfileId"]`
       ),
       /* See #2 */
       __radarr_storagePath__ = $$(
-            `[data-option="radarrStoragePath"]`
+          `[data-option="radarrStoragePath"]`
       ),
       __sonarr_qualityProfile__ = $$(
           `[data-option="sonarrQualityProfileId"]`
@@ -56,6 +56,8 @@ const storage = (chrome.storage.sync || chrome.storage.local),
             'sonarrBasicAuthPassword',
             'sonarrStoragePath',
             'sonarrQualityProfileId',
+
+            // Advance Settings
             'OMDbAPI',
             'TMDbAPI',
             'UseLoose',
@@ -557,7 +559,7 @@ function saveOptions() {
 }
 
 function requestURLPermissions(url, callback) {
-    if(!url || /https?\:\/\*/.test(url))
+    if(!url || /https?\:\/\/\*/.test(url))
         return;
 
     // TODO: FireFox doesn't have support for chrome.permissions API.
@@ -621,8 +623,9 @@ function restoreOptions() {
 let plugins = {
     'Toloka': 'https://toloka.to/',
     'Shana Project': 'https://www.shanaproject.com/',
-    // Dont' forget to add to the __options__ object!
-}, array = [], sites = {}, pluginElement = document.querySelector('#plugins');
+
+    // Dont' forget to add to the __options__ array!
+}, array = [], sites = {}, pluginElement = $$('#plugins');
 
 for(let plugin in plugins)
     array.push(plugin);
@@ -655,7 +658,7 @@ for(let index = 0, length = array.length; pluginElement && index < length; index
 
 save('optional.sites', sites);
 
-document.querySelectorAll('[id^="plugin_"]')
+$$('[id^="plugin_"]', true)
     .forEach(element => element.addEventListener('click', event => {
         let self = event.target,
             pid = self.getAttribute('pid'),
@@ -677,8 +680,7 @@ let empty = () => {};
 document.addEventListener('DOMContentLoaded', restoreOptions);
 __save__.addEventListener('click', saveOptions);
 
-document
-	.querySelector('#plex_test')
+$$('#plex_test')
 	.addEventListener('click', event => {
         let t = $$('#plex_token');
 
@@ -687,15 +689,13 @@ document
         else
             performPlexLogin();
     });
-document.querySelectorAll('#watcher, #watcher_test').forEach(element => element.addEventListener('click', event => (typeof event.target.getAttribute('open') == 'string'? performWatcherTest: empty)()));
-document.querySelectorAll('#radarr, #radarr_test').forEach(element => element.addEventListener('click', event => (typeof event.target.getAttribute('open') == 'string'? performRadarrTest: empty)()));
-document.querySelectorAll('#sonarr, #sonarr_test').forEach(element => element.addEventListener('click', event => (typeof event.target.getAttribute('open') == 'string'? performSonarrTest: empty)()));
+$$('#watcher, #watcher_test', true).forEach(element => element.addEventListener('click', event => (typeof event.target.getAttribute('open') == 'string'? performWatcherTest: empty)()));
+$$('#radarr, #radarr_test', true).forEach(element => element.addEventListener('click', event => (typeof event.target.getAttribute('open') == 'string'? performRadarrTest: empty)()));
+$$('#sonarr, #sonarr_test', true).forEach(element => element.addEventListener('click', event => (typeof event.target.getAttribute('open') == 'string'? performSonarrTest: empty)()));
 
-document
-    .querySelector('#version')
+$$('#version')
     .innerHTML = `Version ${ chrome.manifest.version }`;
-document
-    .querySelectorAll('[type="range"]')
+$$('[type="range"]', true)
     .forEach((element, index, array) => {
         element.nextElementSibling.value = element.value + '%';
 

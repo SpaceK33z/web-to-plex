@@ -23,6 +23,14 @@
 	},
 
 	"content_scripts": [
+        // Allows media downloads
+        {
+            "matches": ["*://*.openload.co/*", "*://*.openload.com/*", "*://*.oload.fun/*"],
+            "js": ["download/oload.js"],
+            "all_frames": true
+        },
+
+        // The sites
         {
 			"matches": ["*://*.movieo.me/*"],
 			"js": ["history-hack.js", "utils.js", "sites/movieo/index.js"],
