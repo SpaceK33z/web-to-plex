@@ -62,6 +62,7 @@ const storage = (chrome.storage.sync || chrome.storage.local),
             'TMDbAPI',
             'UseLoose',
             'UseLooseScore',
+            'ManagerSearch',
 
             // Plugins - End of file, before "let empty = ..."
             'plugin_toloka',

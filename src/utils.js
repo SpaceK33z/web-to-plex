@@ -238,7 +238,8 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
         mid = TMDbID || null,
         tid = TVDbID || null,
         rqut = apit,
-        cors = 'https://cors-anywhere.herokuapp.com/';
+        cors = 'https://cors-anywhere.herokuapp.com/',
+        manable = config.ManagerSearch && !rerun;
 
     type = type || null;
     meta = { ...meta, mode: 'no-cors' };
@@ -255,7 +256,7 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
         .replace(/[^\u0000-\u00ff]+/g, '');
     year = year? (year + '').replace(/\D+/g, ''): await load(`${title}.${rqut}`) || year;
 
-    function plus(string) { return string.replace(/\s+/g, '+') }
+    function plus(string, character = '+') { return string.replace(/\s+/g, character) }
 
     let local, savename;
 
@@ -270,6 +271,10 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
     }
 
     let url =
+        (manable && (config.radarrURLRoot || config.sonarrURLRoot))?
+            (config.radarrURLRoot && (rqut == 'imdb' || rqut == 'tmdb'))?
+                `${ config.radarrURLRoot }api/movie/lookup?term=${ plus(title, '%20') }&apikey=${ config.radarrToken }`:
+            `${ config.sonarrURLRoot }api/series/lookup?term=${ plus(title, '%20') }&apikey=${ config.sonarrToken }`:
         (rqut == 'imdb' || (rqut == '*' && !iid && title) || (rqut == 'tvdb' && !iid && title && rerun))?
             (year)?
                 `https://www.omdbapi.com/?t=${ plus(title) }&y=${ year }&apikey=${ api.omdb }`:
@@ -343,8 +348,16 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
         for(index = 0, found = false, $data, lastscore = 0; (title && year) && index < json.length && !found; index++) {
             $data = json[index];
 
+            let altt = $data.alternativeTitles,
+                $alt = (altt && altt.length? altt.filter(v => t(v) == t(title))[0]: null);
+
+            // Radarr & Sonarr
+            if(manable)
+                found = ((t($data.title) == t(title) || $alt) && +year === +$data.year)?
+                    $alt || $data:
+                found;
             //api.tvmaze.com/
-            if(('externals' in ($data = $data.show || $data) || 'show' in $data) && $data.premiered)
+            else if(('externals' in ($data = $data.show || $data) || 'show' in $data) && $data.premiered)
                 found = (iid == $data.externals.imdb || t($data.name) == t(title) && year == $data.premiered.slice(0, 4))?
                     $data:
                 found;
@@ -385,8 +398,16 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
         for(index = 0; title && index < json.length && (!found || lastscore > 0); index++) {
             $data = json[index];
 
+            let altt = $data.alternativeTitles,
+                $alt = (altt && altt.length? altt.filter(v => c(v) == c(title)): null);
+
+            // Radarr & Sonarr
+            if(manable)
+                found = (c($data.title) == c(title) || $alt)?
+                    $alt || $data:
+                found;
             //api.tvmaze.com/
-            if('externals' in ($data = $data.show || $data) || 'show' in $data)
+            else if('externals' in ($data = $data.show || $data) || 'show' in $data)
                 found =
                     // ignore language barriers
                     (c($data.name) == c(title))?
@@ -442,8 +463,16 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
         for(index = 0; config.UseLoose && title && index < json.length && (!found || lastscore > 0); index++) {
             $data = json[index];
 
+            let altt = $data.alternativeTitles,
+                $alt = (altt && altt.length? altt.filter(v => R(v, title)): null);
+
+            // Radarr & Sonarr
+            if(manable)
+                found = (R($data.name, title) || $alt)?
+                    $alt || $data:
+                found;
             //api.tvmaze.com/
-            if('externals' in ($data = $data.show || $data) || 'show' in $data)
+            else if('externals' in ($data = $data.show || $data) || 'show' in $data)
                 found =
                     // ignore language barriers
                     (R($data.name, title) || terminal.log('Matching:', [$data.name, title], R($data.name, title)))?
@@ -499,8 +528,17 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
     if(!json)
         json = {};
 
+    // Radarr & Sonarr
+    if(manable)
+        data = {
+            imdb: IMDbID || json.imdbId || ei,
+            tmdb: TMDbID || json.tmdbId | 0,
+            tvdb: TVDbID || json.tvdbId | 0,
+            title: json.title || title,
+            year: +(json.year || year)
+        };
     //api.tvmaze.com/
-    if('externals' in (json = json.show || json))
+    else if('externals' in (json = json.show || json))
         data = {
             imdb: IMDbID || json.externals.imdb || ei,
             tmdb: TMDbID || json.externals.themoviedb | 0,
@@ -899,6 +937,7 @@ function modifyPlexButton(button, action, title, options = {}) {
 
     let ty = 'Item', txt = 'title', hov = 'tooltip',
         em = /^(tt-?|0)?$/i,
+        tv = /tv[\s-]?|shows?|series/i,
         empty = (em.test(options.IMDbID) && em.test(options.TMDbID) && em.test(options.TVDbID));
 
     if(options) {
@@ -937,7 +976,7 @@ function modifyPlexButton(button, action, title, options = {}) {
                     e.preventDefault();
 
                     sendUpdate('DOWNLOAD_FILE', { ...options, button, href, path });
-                    new Notification('update', 'Opening prompt...');
+                    new Notification('update', 'Opening prompt (may take a while)...');
                 });
 
                 element.setAttribute(hov, `Download "${options.title.toCaps()}${options.year? ` (${options.year})`: ''}" | ${ty + (options.fileonly? ` - No ${ty} ID`: '')}`);
@@ -956,8 +995,6 @@ function modifyPlexButton(button, action, title, options = {}) {
                 element.href = url;
                 button.classList.add('wtp--download');
                 element.addEventListener('click', element.ON_CLICK = e => {
-                    let tv = /tv[\s-]?|shows?|series/i;
-
                     e.preventDefault();
                     if (config.watcherURL && !tv.test(options.type)) {
                         pushWatcherRequest(options);
@@ -1130,7 +1167,8 @@ top.addEventListener('message', request => {
                 return false;
         }
     } catch(error) {
-        terminal.log('Failed to retrieve message:', error);
+        new Notification('error', `Unable to use downloader: ${ String(error) }`);
+        throw error
     }
 });
 

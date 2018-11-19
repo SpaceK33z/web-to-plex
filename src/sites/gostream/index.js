@@ -44,7 +44,7 @@ async function initPlexThingy() {
 		),
           null;
 
-    new Notification('update', 'Use the Openload (OL) server to download');
+    new Notification('update', 'Select the Openload (OL) server to download');
 
 	let title = $title.innerText.trim(),
 	    year = ($year? $year.innerText.trim(): 0),

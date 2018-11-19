@@ -30,6 +30,10 @@
             top: 0;
         }
 
+        h2 {
+            text-align: center;
+        }
+
         hr {
             border: 1px solid #6668;
         }
@@ -643,27 +647,16 @@ div
 
     <article>
         <details>
-            <summary>Extra Sites</summary>
+            <summary>Advance Settings</summary>
 
+            <h2>Extra Sites</h2>
             <section id="plugins">
                 <!-- Filled in via the index.js script -->
             </section>
-        </details>
-    </article>
-
-    <article>
-        <details>
-            <summary>Advance Settings</summary>
-
+            <hr>
             <h2>Search Options</h2>
             <section>
                 <h3>Loose Searching</h3>
-                <div>
-                    Allows the extension to search for non-English titles using pattern matching (as a last resort).<br>
-                    Higer sensitivity means more strict searches.
-                </div>
-                <br>
-                <label>Enable Feature</label>
                 <div class="checkbox">
                     <input id="use-loose" type="checkbox" data-option="UseLoose" checked="true"/>
                     <label for="use-loose"></label>
@@ -672,9 +665,25 @@ div
                 <br>
                 <input type="range" data-option="UseLooseScore" min="0" max="100" step="5" value="40"/>
                 <output type="text" value="40%"></output>
+                <div>
+                    Allows the extension to search for non-English titles using pattern matching (as a last resort).<br>
+                    Higer sensitivity means more strict searches.
+                </div>
             </section>
 
-            <h2>Extra API Keys</h2>
+            <section>
+                <h3>Manager Searching</h3>
+                <div class="checkbox">
+                    <input id="manager-search" type="checkbox" data-option="ManagerSearch"/>
+                    <label for="manager-search"></label>
+                </div>
+                <div>
+                    Allows the extension to use your manager(s) to find media.<br>
+                    Currently supports: Radarr, and Sonarr.
+                </div>
+            </section>
+            <hr>
+            <h2>API Keys</h2>
             <section>
                 <label>OMDb</label>
                 <input type="text" data-option="OMDbAPI" placeholder="Enter your OMDb API Key"/>

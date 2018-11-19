@@ -6,7 +6,7 @@
 
 - [x] Use the "download" API to save files (i.e. Flenix's "Save As" option for non-Flenix domains)
   - v3.0.1.0
-- [ ] Use Radarr and/or Sonarr's searching feature (if installed)?
+- [x] Use Radarr and/or Sonarr's searching feature (if installed)?
   - see [Radarr's Lookup API](https://github.com/Radarr/Radarr/wiki/API:Movie-Lookup)
   - see [Sonarr's Lookup API](https://github.com/Sonarr/Sonarr/wiki/Series-Lookup)
   - Caveats / Conflicts with Trakt's "to do"s
@@ -288,6 +288,9 @@
     - added support for [Shana Project](https://www.shanaproject.com/)
 - Changed the `showNotification` function into the `Notification` class
 - **Updated the download feature**
+- **Added managers as searchable sources**
+    - Added Radarr
+    - Added Sonarr
 - Added `furnish` to `/utils.js`
     - use as `document.furnish(element:string, ?attributes:object, ...children:Element)`
     - returns an `Element` with the declared attributes, and children

@@ -442,6 +442,7 @@ chrome.contextMenus.onClicked.addListener(item => {
         tt = external.ITEM_TITLE,
         lt = external.FILE_TITLE,
         ft = external.FILE_TYPE,
+        fp = external.FILE_PATH,
         p = (s, r = '+') => s.replace(/-/g, r);
 
     switch(db) {
@@ -474,12 +475,19 @@ chrome.contextMenus.onClicked.addListener(item => {
 
     if(!dnl)
         window.open(`https://${ url }`, '_blank');
-    else if (chrome.runtime.lastError || dnl)
-        chrome.downloads.download({
-          url,
-          filename: `${ lt } (${ yr }).${ ft }`,
-          saveAs: true
-        });
+    else if (dnl)
+        try {
+            chrome.downloads.download({
+              url: item.href,
+              filename: `${ fp }${ lt } (${ yr }).${ ft }`,
+              saveAs: true
+            });
+        } catch(error) {
+            chrome.downloads.download({
+              url: item.href,
+              saveAs: true
+            });
+        }
 });
 
 chrome.runtime.onMessage.addListener((request, sender, callback) => {
@@ -491,7 +499,7 @@ chrome.runtime.onMessage.addListener((request, sender, callback) => {
         ITEM_TYPE = item.type,
         ID_PROVIDER = (i=>{for(let p in i)if(/^TVDb/i.test(p)&&i[p])return'TVDb';else if(/^TMDb/i.test(p)&&i[p])return'TMDb';return'IMDb'})(item),
         ITEM_URL = item.href || '',
-        FILE_TYPE = item.tail || 'mp4',
+        FILE_TYPE = (item.tail || 'mp4').toUpperCase(),
         FILE_PATH = item.path || '',
         ITEM_ID = ((i, I)=>{for(let p in i)if(RegExp('^'+I,'i').test(p))return i[p]})(item, ID_PROVIDER);
 
@@ -523,14 +531,25 @@ chrome.runtime.onMessage.addListener((request, sender, callback) => {
                 return true;
             case 'SAVE_AS':
                 chrome.contextMenus.update('W2P-DL', {
-                    title: `Save as "${ ITEM_TITLE } (${ ITEM_YEAR })"`
+                    title: `Save as "${ ITEM_TITLE } (${ ITEM_YEAR })" (${ FILE_TYPE })`
                 });
                 return true;
             case 'DOWNLOAD_FILE':
+
+                let FILE_TITLE = ITEM_TITLE.replace(/\-/g, ' ').replace(/[\s\:]{2,}/g, ' - ').replace(/[^\w\s\-\']+/g, '');
+
                 chrome.downloads.download({
-                  url: item.href,
-                  filename: `${ external.FILE_PATH }${ external.FILE_TITLE } (${ external.ITEM_YEAR }).${ external.FILE_TYPE }`,
-                  saveAs: true
+                    url: item.href,
+                    filename: `${ FILE_PATH }${ FILE_TITLE } (${ ITEM_YEAR })`,
+                    saveAs: true
+                }, id => {
+                    // Error Occured
+                   if(id == undefined || id == null)
+                       chrome.downloads.download({
+                        url: item.href,
+                        filename: `${ FILE_TITLE } (${ ITEM_YEAR })`,
+                        saveAs: true
+                    }); 
                 });
                 return true;
             default:
@@ -575,3 +594,6 @@ if(SessionState === false) {
     });
 
 }
+
+if(chrome.runtime.lastError)
+    /* Attempt Error Suppression */;
