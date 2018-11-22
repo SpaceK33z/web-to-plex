@@ -285,9 +285,16 @@
 - Fixed the searching algorithm in `/utils.js`
 - **Added the Plugin feature** (due to #37)
     - added support for [Toloka](https://toloka.to/) ("merged" #37)
-    - added support for [Shana Project](https://www.shanaproject.com/)
+    - added support for [Shana Project](http://www.shanaproject.com/)
+    - added support for [My Anime List](https://myanimelist.com/)
 - Changed the `showNotification` function into the `Notification` class
 - **Updated the download feature**
+- **Added the list downloading feature**
+    - IMDb
+    - Letterboxd
+- Made errors more descriptive
+    - /utils.js
+    - /background.js
 - **Added managers as searchable sources**
     - Added Radarr
     - Added Sonarr

@@ -66,7 +66,8 @@ const storage = (chrome.storage.sync || chrome.storage.local),
 
             // Plugins - End of file, before "let empty = ..."
             'plugin_toloka',
-            'plugin_shana_project',
+            'plugin_shanaproject',
+            'plugin_myanimelist',
       ];
 
 let PlexServers = [],
@@ -624,6 +625,7 @@ function restoreOptions() {
 let plugins = {
     'Toloka': 'https://toloka.to/',
     'Shana Project': 'https://www.shanaproject.com/',
+    'My Anime List': 'https://myanimelist.net/',
 
     // Dont' forget to add to the __options__ array!
 }, array = [], sites = {}, pluginElement = $$('#plugins');
@@ -634,11 +636,11 @@ array = array.sort();
 
 for(let index = 0, length = array.length; pluginElement && index < length; index++) {
     let title = array[index],
-        name  = 'plugin_' + title.toLowerCase().replace(/\s+/g, '_'),
+        name  = 'plugin_' + title.toLowerCase().replace(/\s+/g, ''),
         url   = new URL(plugins[title]),
         js    = name.replace(/^plugin_/i, ''),
         o     = url.origin,
-        r     = url.host.replace(/^(ww\w\.)/, '');
+        r     = url.host.replace(/^(ww\w+\.)/, '');
 
     sites[r] = o;
 
@@ -650,7 +652,7 @@ for(let index = 0, length = array.length; pluginElement && index < length; index
     <label for="${ name }"></label>
 </div>
 <div>
-    Allows the plugin to run on <a href="${ url.href }" title="${ o }" target="_blank">${ r }</a>
+    Allows the ${ title } plugin to run on <a href="${ url.href }" title="${ o }" target="_blank">${ r }</a>
 </div>
 
 <hr>
@@ -666,9 +668,11 @@ $$('[id^="plugin_"]', true)
             js = self.getAttribute('js');
 
         if(self.checked) {
-            requestURLPermissions(sites[pid].replace(/\/\/(ww\w+\.)?/, '//*.').replace(/\/?$/, '/*'));
-            save(`permission:${ pid }`, true);
-            save(`script:${ pid }`, js);
+            terminal.log(pid, sites[pid])
+            requestURLPermissions(sites[pid].replace(/https?:\/\/(ww\w+\.)?/i, '*://*.').replace(/\/?$/, '/*'), granted => {
+                save(`permission:${ pid }`, granted);
+                save(`script:${ pid }`, granted? js: null);
+            });
         } else {
             save(`permission:${ pid }`, false);
             save(`script:${ pid }`, null);

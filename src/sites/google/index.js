@@ -1,5 +1,5 @@
 function isMovie() {
-    return document.querySelector('#media_result_group');
+    return document.querySelector('#media_result_group, [href*="themoviedb.org/tv/"], [href*="imdb.com/title/tt"]');
 }
 
 function isShow() {
@@ -12,14 +12,15 @@ function init() {
 }
 
 async function initPlexThingy(type) {
+    let $title, $type, $date, $image;
+
     let button = renderPlexButton();
     if(!button)
         return /* Fail silently */;
 
-    let $title, $date, $image;
-
     if(type == 'movie') {
         $title = document.querySelector('.kno-ecr-pt');
+        $type  = document.querySelector('.kno-ecr-pt + *'); // in case a tv show is incorrectly identified
         $date  = document.querySelector('.kno-fb-ctx:not([data-local-attribute]) span');
         $image = document.querySelector('#media_result_group img');
     } else {
@@ -30,6 +31,16 @@ async function initPlexThingy(type) {
 
     if(!$title || !$date)
         return modifyPlexButton(button, 'error', 'Could not extract title or year from Google');
+
+    if($type) {
+        type = $type.textContent;
+
+        type = /\b(tv|show|series)\b/i.test(type)? 'show': /\b(movie|film|cinema|(?:\d+h\s+)?\d+m)\b/i.test(type)? 'movie': 'error';
+        $date = type == 'show'? document.querySelector('.kno-fv'): $date;
+    }
+
+    if(type == 'error')
+        return;
 
     let date = $date.textContent.replace(/(\d{4})/),
         year = +RegExp.$1,

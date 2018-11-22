@@ -51,7 +51,7 @@ This is the BETA (testing) version, please visit [Web to Plex](https://github.co
 2.  [IMDb](http://imdb.com/)
 3.  [Trakt.tv](https://trakt.tv/)
 4.  [Letterboxd](https://letterboxd.com/)
-5.  [GoStream](https://gostream.site/)
+5.  [GoStream](https://gostream.site/)<sup>1</sup>
     - Replaced Flenix
 6.  [TV Maze](http://www.tvmaze.com/)
 7.  [The TVDb](https://www.thetvdb.com/)
@@ -72,6 +72,7 @@ This is the BETA (testing) version, please visit [Web to Plex](https://github.co
 21. [Netflix](https://netflix.com/)<sup>3</sup>
 22. [Toloka](https://toloka.to/)<sup>6</sup>
 23. [Shana Project](https://www.shanaproject.com/)<sup>6</sup>
+24. [My Anime List](https://myanimelist.com/)<sup>6</sup>
 
 *Notes*
 

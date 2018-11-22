@@ -11,6 +11,9 @@ let date  = (new Date),
     MONTH = date.getMonth() + 1,
     DATE  = date.getDate();
 
+// returns the proper CORS mode of the URL
+let cors = url => ((/^(https|sftp)\b/i.test(url) || /\:(443|22)\b/? '': 'no-') + 'cors');
+
 // Create a Crypto-Key
 // new Key(number:integer, string) -> string
 class Key {
@@ -39,21 +42,21 @@ let SessionKey = new Key(16), // create a session key
 // Generate request headers (for fetches)
 // new Headers({username, password}) -> object
 class Headers {
-    constructor({ username = '', password = '' }) {
+    constructor(Authorization) {
         let headers = { Accept: 'application/json' };
 
-        if (!username && !password)
+        if (!Authorization)
             return headers;
 
         return {
-            Authorization: `Basic ${ btoa(`${ username }:${ password }`) }`,
+            Authorization: `Basic ${ btoa(`${ Authorization.username }:${ Authorization.password }`) }`,
             ...headers
         };
     }
 }
 
 // Change the badge status
-// ChangeStatus({MovieOrShowID, MovieOrShowTitle, MovieOrShowType, MovieOrShowIDProvider, MovieOrShowYear, LinkURL, FileType}) -> undefined
+// ChangeStatus({ MovieOrShowID, MovieOrShowTitle, MovieOrShowType, MovieOrShowIDProvider, MovieOrShowYear, LinkURL, FileType, FilePath }) -> undefined
 function ChangeStatus({ ITEM_ID, ITEM_TITLE, ITEM_TYPE, ID_PROVIDER, ITEM_YEAR, ITEM_URL = '', FILE_TYPE = '', FILE_PATH }) {
 
     let FILE_TITLE = ITEM_TITLE.replace(/\-/g, ' ').replace(/[\s\:]{2,}/g, ' - ').replace(/[^\w\s\-\']+/g, ''),
@@ -101,29 +104,31 @@ function ChangeStatus({ ITEM_ID, ITEM_TITLE, ITEM_TYPE, ID_PROVIDER, ITEM_YEAR, 
 // HTTP servers. Unfortunately, many people use CouchPotato over HTTP.
 function viewCouchPotato(request, sendResponse) {
 	fetch(`${ request.url }?id=${ request.imdbId }`, {
-		headers: new Headers(request.basicAuth)
+		headers: new Headers(request.basicAuth),
+        mode: cors(request.url)
 	})
-		.then(response => response.json())
-		.then(json => {
-			sendResponse({ success, status: success ? json.media.status : null });
-		})
-		.catch(error => {
-			sendResponse({ error: String(error), location: 'viewCouchPotato' });
-		});
+    .then(response => response.json())
+    .then(json => {
+        sendResponse({ success, status: (success? json.media.status: null) });
+    })
+    .catch(error => {
+        sendResponse({ error: String(error), location: 'viewCouchPotato' });
+    });
 }
 
 function addCouchpotato(request, sendResponse) {
 	fetch(`${ request.url }?identifier=${ request.imdbId }`, {
-		headers: new Headers(request.basicAuth)
+		headers: new Headers(request.basicAuth),
+        mode: cors(request.url)
 	})
-		.then(response => response.json())
-        .catch(error => sendResponse({ error: 'Item not found', location: 'addCouchpotato => fetch.then.catch', silent: true }))
-		.then(response => {
-			sendResponse({ success: response.success });
-		})
-		.catch(error => {
-			sendResponse({ error: String(error) , location: 'addCouchPotato'});
-		});
+    .then(response => response.json())
+    .catch(error => sendResponse({ error: 'Item not found', location: 'addCouchpotato => fetch.then.catch', silent: true }))
+    .then(response => {
+        sendResponse({ success: response.success });
+    })
+    .catch(error => {
+        sendResponse({ error: String(error) , location: 'addCouchPotato'});
+    });
 }
 
 function addWatcher(request, sendResponse) {
@@ -133,8 +138,13 @@ function addWatcher(request, sendResponse) {
             ...(new Headers(request.basicAuth))
         },
         id = (/^(tt-?)?$/.test(request.imdbId)? request.tmdbId: request.imdbId),
+            // if the IMDbID is empty, jump to the TMDbID
         query = (/^tt-?\d+$/i.test(id)? 'imdbid': /^\d+$/.test(id)? 'tmdbid': (id = encodeURI(`${request.title} ${request.year}`), 'term')),
+            // if the IMDbID is empty, use "&tmdbid={ id }"
+            // if the IMDbID isn't empty, use "&imdbid={ id }"
+            // otherwise, use "&term={ title } { year }"
         debug = { headers, query, request };
+            // setup a stack trace for debugging
 
     fetch(debug.url = `${ request.url }?apikey=${ request.token }&mode=addmovie&${ query }=${ id }`)
         .then(response => response.json())
@@ -163,18 +173,24 @@ function addRadarr(request, sendResponse) {
             ...(new Headers(request.basicAuth))
         },
         id = (/^(tt-?)?$/.test(request.imdbId)? request.tmdbId: request.imdbId),
+            // if the IMDbID is empty, jump to the TMDbID
         query = (/^tt-?\d+$/i.test(id)? 'imdb?imdbid': /^\d+$/.test(id)? 'tmdb?tmdbid': (id = encodeURI(`${request.title} ${request.year}`), 'term')),
+            // if the IMDbID is empty, use "/tmdb?tmdbid={ id }"
+            // if the IMDbID isn't empty, use "/imdb?imdbid={ id }"
+            // otherwise, use "&term={ title } { year }"
         debug = { headers, query, request };
+            // setup a stack trace for debugging
 
     fetch(debug.url = `${ request.url }lookup/${ query }=${ id }&apikey=${ request.token }`)
         .then(response => response.json())
         .catch(error => sendResponse({ error: 'Movie not found', location: 'addRadarr => fetch.then.catch', silent: true }))
         .then(data => {
             let body,
+                // Monitor, search, and download movie ASAP
                 props = {
                     monitored: true,
                     minimumAvailability: 'preDB',
-                    qualityProfileId: request.QualityProfileId,
+                    qualityProfileId: request.QualityID,
                     rootFolderPath: request.StoragePath,
                     addOptions: {
                         searchForMovie: true
@@ -204,9 +220,9 @@ function addRadarr(request, sendResponse) {
             return debug.body = body;
         })
         .then(body => {
-            return fetch(`${ request.url }?apikey=${ request.token }`, debug.request = {
+            return fetch(`${ request.url }?apikey=${ request.token }`, debug.requestHeaders = {
                 method: 'POST',
-                mode: 'no-cors',
+                mode: cors(request.url),
                 body: JSON.stringify(body),
                 headers
             });
@@ -252,20 +268,21 @@ function addSonarr(request, sendResponse) {
         id = request.tvdbId,
         query = encodeURIComponent(`tvdb:${ id }`),
         debug = { headers, query, request };
+            // setup stack trace for debugging
 
     fetch(debug.url = `${ request.url }lookup?apikey=${ request.token }&term=${ query }`)
         .then(response => response.json())
         .catch(error => sendResponse({ error: 'TV Show not found', location: 'addSonarr => fetch.then.catch', silent: true }))
         .then(data => {
-            if (!data instanceof Array || !data.length) {
+            if (!data instanceof Array || !data.length)
                 throw new Error('TV Show not found');
-            }
 
+            // Monitor, search, and download series ASAP
             let body = {
                 ...data[0],
                 monitored: true,
                 minimumAvailability: 'preDB',
-                qualityProfileId: request.QualityProfileId,
+                qualityProfileId: request.QualityID,
                 rootFolderPath: request.StoragePath,
                 addOptions: {
                     searchForMissingEpisodes: true
@@ -281,9 +298,9 @@ function addSonarr(request, sendResponse) {
             return debug.body = body;
         })
         .then(body => {
-            return fetch(`${ request.url }?apikey=${ request.token }`, debug.request = {
+            return fetch(`${ request.url }?apikey=${ request.token }`, debug.requestHeaders = {
                 method: 'POST',
-                mode: 'no-cors',
+                mode: cors(request.url),
                 body: JSON.stringify(body),
                 headers
             });
@@ -429,7 +446,6 @@ async function searchPlex(request, sendResponse) {
 // Chrome is f**king retarted...
 // Instead of having an object returned (for the context-menu)
 // You have to make API calls on ALL clicks...
-
 chrome.contextMenus.onClicked.addListener(item => {
     if(!/^W2P/i.test(item.menuItemId)) return;
 
@@ -476,18 +492,18 @@ chrome.contextMenus.onClicked.addListener(item => {
     if(!dnl)
         window.open(`https://${ url }`, '_blank');
     else if (dnl)
-        try {
-            chrome.downloads.download({
-              url: item.href,
-              filename: `${ fp }${ lt } (${ yr }).${ ft }`,
-              saveAs: true
-            });
-        } catch(error) {
-            chrome.downloads.download({
-              url: item.href,
-              saveAs: true
-            });
-        }
+        // try/catch won't work here, so use the first download's callback as an error catcher
+        chrome.downloads.download({
+          url: item.href,
+          filename: `${ fp }${ lt } (${ yr }).${ ft }`,
+          saveAs: true
+        }, id => {
+            if(id == undefined || id == null)
+                chrome.downloads.download({
+                  url: item.href,
+                  saveAs: true
+                });
+        });
 });
 
 chrome.runtime.onMessage.addListener((request, sender, callback) => {
@@ -538,9 +554,10 @@ chrome.runtime.onMessage.addListener((request, sender, callback) => {
 
                 let FILE_TITLE = ITEM_TITLE.replace(/\-/g, ' ').replace(/[\s\:]{2,}/g, ' - ').replace(/[^\w\s\-\']+/g, '');
 
+                // no try/catch, use callback for that
                 chrome.downloads.download({
                     url: item.href,
-                    filename: `${ FILE_PATH }${ FILE_TITLE } (${ ITEM_YEAR })`,
+                    filename: `${ FILE_TITLE } (${ ITEM_YEAR }).${ FILE_TYPE }`,
                     saveAs: true
                 }, id => {
                     // Error Occured
@@ -561,6 +578,8 @@ chrome.runtime.onMessage.addListener((request, sender, callback) => {
     }
 });
 
+// If background.js is already running, ignore the new state
+// otherwise, use the following to start up
 if(SessionState === false) {
     SessionState = true;
 

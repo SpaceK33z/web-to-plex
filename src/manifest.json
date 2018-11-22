@@ -44,7 +44,7 @@
 			"js": ["history-hack.js", "utils.js", "sites/trakt/index.js"],
 			"css": ["sites/trakt/index.css", "sites/common.css"]
 		},{
-			"matches": ["*://*.letterboxd.com/film/*"],
+			"matches": ["*://*.letterboxd.com/*"],
 			"js": ["utils.js", "sites/letterboxd/index.js"],
 			"css": ["sites/letterboxd/index.css", "sites/common.css"]
 		},{
@@ -154,8 +154,7 @@
         "https://ephellon.github.io/web.to.plex/*"
 	],
 	"optional_permissions": [
-		"http://*/",
-		"https://*/"
+		"<all_urls>"
 	],
     "web_accessible_resources": ["img/*"]
 }

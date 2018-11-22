@@ -7,7 +7,7 @@ document.body.onload = event => {
 
     if(video) {
         try {
-            top.postMessage({ href: `https://oload.fun/stream/${ video.textContent }?mime=true`, tail: 'mp4', type: 'SEND_VIDEO_LINK' }, '*');
+            top.postMessage({ href: `https://oload.fun/stream/${ video.textContent }?mime=true`, tail: 'mp4', type: 'SEND_VIDEO_LINK', from: 'oload' }, '*');
         } catch(error) {
             terminal.log('Failed to post message:', error);
         }

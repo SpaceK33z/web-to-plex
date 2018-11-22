@@ -24,7 +24,7 @@ let $$ = (selector, index = 0) => document.queryBy(selector)[index],
 
 function cleanYear(year) {
 	// The year can contain `()`, so we need to strip it out.
-	return parseInt(year.trim().replace(/^\(|\)$/g, ''));
+	return year.replace(/^\(|\)$/g, '').trim();
 }
 
 async function initPlexMovie() {
@@ -44,7 +44,7 @@ async function initPlexMovie() {
         title = $title.childNodes[0].textContent.trim(),
         altname = ($altname == $title? title: $altname.childNodes[0].textContent.trim()),
         country = $date.innerText.replace(/[^]+\((\w+)\)[^]*?$/, '$1'),
-        year = cleanYear($year.textContent),
+        year = +cleanYear($year.textContent),
         image = $image.src;
     title = usa.test(country)? title: altname;
 
@@ -80,7 +80,7 @@ async function initPlexShow() {
 	let title = $title.textContent.trim(),
         altname = ($altname == $title? title: $altname.childNodes[0].textContent.trim()),
         country = $date.innerText.replace(/[^]+\((\w+)\)[^]*?$/, '$1'),
-        year = dateMatch[1],
+        year = parseInt(dateMatch[1]),
         image = $image.src;
     title = usa.test(country)? title: altname;
 
@@ -95,35 +95,61 @@ async function initPlexShow() {
 	findPlexMedia({ type, title, year, button, IMDbID, TMDbID, TVDbID });
 }
 
-function addInListItem(el) {
-	let button = renderPlexButton();
+async function addInListItem(element) {
+	let $title = element.querySelector('.col-title a'),
+        $date = element.querySelector('.col-title a + *'),
+        $image = element.querySelector('img.loadlate, img[data-tconst]'),
+        $IMDbID = $title;
+
+	if (!$title || !$date)
+		return;
+
+	let title = $title.textContent.trim(),
+        year = cleanYear($date.textContent),
+        image = $image.src,
+        IMDbID = $IMDbID.href.replace(/.*\/(tt\d+)\b.*$/, '$1'),
+        type = (/[\-\u2013]$/.test(year) ? 'show' : 'movie');
+    year = parseInt(year);
+
+    let Db = await getIDs({ type, title, year, IMDbID }),
+        TMDbID = Db.tmdb,
+        TVDbID = Db.tvdb;
+
+    title = title || Db.title;
+    year = year || Db.year;
+
+    save(`${title} (${year}).imdb`, { type, title, year, imdb: IMDbID, tmdb: TMDbID, tvdb: TVDbID });
+    save(`${title}.imdb`, +year);
+    terminal.log(`Saved as "${title} (${year}).imdb"`);
+
+	return { type, title, year, image, IMDbID, TMDbID, TVDbID };
+}
+
+function initList() {
+	let $listItems = document.querySelectorAll('#main .lister-item'),
+        button = renderPlexButton(),
+        options = [], length = $listItems.length - 1;
+
+    if (!/&mode=simple/i.test(location.search))
+        return location.search = location.search.replace(/&mode=\w+/, '&mode=simple');
 
 	if (!button)
 		return /* Fatal Error: Fail Silently */;
 
-	let $IMDbID = el.querySelector('.wlb_lite'),
-        $title = el.querySelector('.info b a'),
-        $date = el.querySelector('.info .year_type');
+	$listItems.forEach(async(element, index, array) => {
+        let option = await addInListItem(element);
 
-	if (!$IMDbID || !$title || !$date)
-		return modifyPlexButton(button, 'error', 'Could not extract title or year'), showNotification('warning', 'Failed to process list');
+        if(option)
+            options.push(option);
 
-	let type = ($date.textContent.includes('TV Series') ? 'show' : 'movie'),
-        title = $title.textContent.trim(),
-        year = cleanYear($date.textContent),
-        IMDbID = $IMDbID.dataset.tconst;
-
-    save(`${title} (${year}).imdb`, { title, year, imdb: IMDbID });
-    save(`${title}.imdb`, +year);
-    terminal.log(`Saved as "${title} (${year}).imdb"`);
-
-	findPlexMedia({ type, title, year, button, IMDbID });
-}
-
-function initList() {
-	let $listItems = document.querySelectorAll('#main [class*="list"][class*="item"]');
-
-	$listItems.forEach(addInListItem);
+        if(index == length)
+            setTimeout(() => {
+                if (!options.length)
+                    new Notification('error', 'Failed to process list');
+                else
+                    squabblePlex(options, button);
+            }, 50);
+    });
 }
 
 let init = () => {
@@ -134,7 +160,7 @@ let init = () => {
             else if (isShow())
                 await initPlexShow();
             else
-                initList();
+                await initList();
         });
     }
 }

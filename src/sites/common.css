@@ -23,14 +23,14 @@
 	z-index: 999999;
 }
 
-/* Web to Plex warning notifications */
-.web-to-plex-notification.warning {
-	background: #FF2A2A;
-}
-
 /* Web to Plex update notifications */
 .web-to-plex-notification.update {
-    background: #2A2AFF;
+    background: #2A2AFF!important;
+}
+
+/* Web to Plex warning notifications */
+.web-to-plex-notification.warning {
+	background: #FF2A2A!important;
 }
 
 /* Web to Plex buttons */
