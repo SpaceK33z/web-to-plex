@@ -7,10 +7,13 @@ function wait(on, then) {
         setTimeout(() => wait(on, then), 50);
 }
 
+let NO_DEBUGGER = false;
+
 let date = (new Date),
     terminal =
-//                { error: m => m, info: m => m, log: m => m, warn: m => m, group: m=> m, groupEnd: m => m } ||
-                console;
+        NO_DEBUGGER?
+            { error: m => m, info: m => m, log: m => m, warn: m => m, group: m => m, groupEnd: m => m }:
+        console;
 
 let YEAR = date.getFullYear(),
     MONTH = date.getMonth() + 1,
@@ -1007,6 +1010,9 @@ function modifyPlexButton(button, action, title, options = {}) {
         button.classList.add(saved_options.length? 'wtp--download': 'wtp--error');
     } else {
     /* Handle a single item */
+        
+        if(!options || !options.type || !options.title) return;
+
         let empty = (em.test(options.IMDbID) && em.test(options.TMDbID) && em.test(options.TVDbID)),
             nice_title = `${options.title.toCaps()}${options.year? ` (${options.year})`: ''}`;
 

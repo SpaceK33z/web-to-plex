@@ -1,6 +1,9 @@
+let NO_DEBUGGER = false;
+
 let terminal =
-//                { error: m => m, info: m => m, log: m => m, warn: m => m, group: m=> m, groupEnd: m => m } ||
-                console;
+    NO_DEBUGGER?
+        { error: m => m, info: m => m, log: m => m, warn: m => m, group: m => m, groupEnd: m => m }:
+    console;
 
 document.body.onload = event => {
     let video = document.querySelector('div > p + p');

@@ -36,7 +36,7 @@ async function initPlexThingy(type) {
         type = $type.textContent;
 
         type = /\b(tv|show|series)\b/i.test(type)? 'show': /\b(movie|film|cinema|(?:\d+h\s+)?\d+m)\b/i.test(type)? 'movie': 'error';
-        $date = type == 'show'? document.querySelector('.kno-fv'): $date;
+        $date = (type == 'show'? document.querySelector('.kno-fv') || $date: $date) || { textContent: '' };
     }
 
     if(type == 'error')
@@ -44,7 +44,7 @@ async function initPlexThingy(type) {
 
     let date = $date.textContent.replace(/(\d{4})/),
         year = +RegExp.$1,
-        title = $title.textContent.replace((type == 'movie'? /^(.+)$/: /(.+)(?:(?:\:\s*series\s+info|\-\s*all\s+episodes|\-\s*season).+)$/i), '$1').trim(),
+        title = $title.textContent.replace((type == 'movie'? /^(.+)$/: /(.+)(?:(?:\:\s*series\s+info|\-\s*(?:all\s+episodes|season)).+)$/i), '$1').trim(),
         image = $image.src;
 
     year = year > 999? year: 0;

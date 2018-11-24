@@ -5,6 +5,8 @@
     #3: See https://github.com/SpaceK33z/web-to-plex/issues/21
 */
 
+let NO_DEBUGGER = false;
+
 // FireFox doesn't support sync storage.
 const storage = (chrome.storage.sync || chrome.storage.local),
       $$ = (selector, all) => (all? document.querySelectorAll(selector): document.querySelector(selector)),
@@ -75,8 +77,9 @@ let PlexServers = [],
     ClientID = null,
     manifest = chrome.runtime.getManifest(),
     terminal = // See #3
-//                { error: m => m, info: m => m, log: m => m, warn: m => m } ||
-                console;
+        NO_DEBUGGER?
+            { error: m => m, info: m => m, log: m => m, warn: m => m, group: m => m, groupEnd: m => m }:
+        console;
 
 chrome.manifest = chrome.runtime.getManifest();
 
@@ -561,6 +564,14 @@ function saveOptions() {
 }
 
 function requestURLPermissions(url, callback) {
+    if(url && callback)
+        return callback(true);
+    else if(url)
+        return true;
+    else
+        return false;
+
+    /* Obsolete code, but may be useful later? */
     if(!url || /https?\:\/\/\*/.test(url))
         return;
 
@@ -694,9 +705,9 @@ $$('#plex_test')
         else
             performPlexLogin();
     });
-$$('#watcher, #watcher_test', true).forEach(element => element.addEventListener('click', event => (typeof event.target.getAttribute('open') == 'string'? performWatcherTest: empty)()));
-$$('#radarr, #radarr_test', true).forEach(element => element.addEventListener('click', event => (typeof event.target.getAttribute('open') == 'string'? performRadarrTest: empty)()));
-$$('#sonarr, #sonarr_test', true).forEach(element => element.addEventListener('click', event => (typeof event.target.getAttribute('open') == 'string'? performSonarrTest: empty)()));
+$$('#watcher_test', true).forEach(element => element.addEventListener('click', event => performWatcherTest()));
+$$('#radarr_test', true).forEach(element => element.addEventListener('click', event => performRadarrTest()));
+$$('#sonarr_test', true).forEach(element => element.addEventListener('click', event => performSonarrTest()));
 
 $$('#version')
     .innerHTML = `Version ${ chrome.manifest.version }`;

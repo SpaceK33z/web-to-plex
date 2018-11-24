@@ -1,10 +1,13 @@
 /* global chrome */
+let NO_DEBUGGER = false;
+
 let external = {},
     parentItem,
     saveItem,
     terminal =
-//                { error: m => m, info: m => m, log: m => m, warn: m => m, group: m => m, groupEnd: m => m } ||
-                console;
+        NO_DEBUGGER?
+            { error: m => m, info: m => m, log: m => m, warn: m => m, group: m => m, groupEnd: m => m }:
+        console;
 
 let date  = (new Date),
     YEAR  = date.getFullYear(),
@@ -515,7 +518,7 @@ chrome.runtime.onMessage.addListener((request, sender, callback) => {
         ITEM_TYPE = item.type,
         ID_PROVIDER = (i=>{for(let p in i)if(/^TVDb/i.test(p)&&i[p])return'TVDb';else if(/^TMDb/i.test(p)&&i[p])return'TMDb';return'IMDb'})(item),
         ITEM_URL = item.href || '',
-        FILE_TYPE = (item.tail || 'mp4').toUpperCase(),
+        FILE_TYPE = (item.tail || 'mp4'),
         FILE_PATH = item.path || '',
         ITEM_ID = ((i, I)=>{for(let p in i)if(RegExp('^'+I,'i').test(p))return i[p]})(item, ID_PROVIDER);
 

@@ -147,14 +147,7 @@
 		"storage",
         "downloads",
         "contextMenus",
-        "http://localhost/*",
-        "https://localhost/*",
-		"https://*.plex.direct/*",
-        "http://ephellon.github.io/web.to.plex/*",
-        "https://ephellon.github.io/web.to.plex/*"
-	],
-	"optional_permissions": [
-		"<all_urls>"
+        "<all_urls>"
 	],
     "web_accessible_resources": ["img/*"]
 }

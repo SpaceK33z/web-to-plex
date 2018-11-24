@@ -1,7 +1,12 @@
 /* Plugn.js (Plugin) - Web to Plex */
 /* global config */
 
-let logger = /* { error: m => m, info: m => m, log: m => m, warn: m => m, group: m=> m, groupEnd: m => m } || */ console;
+let KILL_DEBUGGER = false;
+
+let logger =
+    KILL_DEBUGGER?
+        { error: m => m, info: m => m, log: m => m, warn: m => m, group: m => m, groupEnd: m => m }:
+    console;
 
 function load(name) {
     return JSON.parse(localStorage.getItem(btoa(name)));
