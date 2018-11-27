@@ -261,6 +261,14 @@
           left: 43px;
         }
 
+        [white] {
+            color: #fff!important;
+        }
+
+        [orange] {
+            color: #cc7b19!important;
+        }
+
         input[type="range"] {
             appearance: none;
             -webkit-appearance: none;
@@ -398,6 +406,8 @@ div
                 <input type="text" id="plex_password" style="border-top-left-radius: 0 !important; border-top-right-radius: 0 !important;" placeholder="Enter your Plex password"/>
                 <div>
                     Your Plex username and password are never stored, only your <a href="https://support.plex.tv/hc/en-us/articles/204059436-Finding-your-account-token-X-Plex-Token" title="How to find your token?" target="_blank">Plex Token</a>.
+                    <br>
+                    Your username and password are used in order to get a token from Plex itself.
                 </div>
             </section>
 
@@ -454,17 +464,20 @@ div
                 </div>
             </section>
 
-            <h3>Login <em>(optional, saved)</em></h3>
+            <h3>Login <em>(saved)</em></h3>
             <section>
                 <label>Username</label>
                 <input type="text" data-option="watcherBasicAuthUsername" placeholder="Enter your Watcher username"/>
                 <div>Only use this if you setup a Watcher username.</div>
+                
             </section>
             <section>
                 <label>Password</label>
                 <input type="text" data-option="watcherBasicAuthPassword" placeholder="Enter your Watcher password"/>
                 <div>Only use this if you setup a Watcher password.</div>
                 <div class="hidden-help">Your password will be hidden once saved.</div>
+                <br>
+                <div>This information will be used for <a href="https://wikipedia.org/wiki/Basic_access_authentication" target="_blank">Basic Access Authentication</a> only. This will allow the extension to ask Watcher for your list of films, or to add to your list of films.</div>
             </section>
 
             <section>
@@ -505,7 +518,7 @@ div
                 </div>
             </section>
 
-            <h3>Login <em>(optional, saved)</em></h3>
+            <h3>Login <em>(saved)</em></h3>
             <section>
                 <label>Username</label>
                 <input type="text" data-option="radarrBasicAuthUsername" placeholder="Enter your Radarr username"/>
@@ -516,6 +529,8 @@ div
                 <input type="text" data-option="radarrBasicAuthPassword" placeholder="Enter your Radarr password"/>
                 <div>Only use this if you setup a Radarr password.</div>
                 <div class="hidden-help">Your password will be hidden once saved.</div>
+                <br>
+                <div>This information will be used for <a href="https://wikipedia.org/wiki/Basic_access_authentication" target="_blank">Basic Access Authentication</a> only. This will allow the extension to ask Radarr for your list of films, or to add to your list of films.</div>
             </section>
 
             <section>
@@ -561,7 +576,7 @@ div
                 </div>
             </section>
 
-            <h3>Login <em>(optional, saved)</em></h3>
+            <h3>Login <em>(saved)</em></h3>
             <section>
                 <label>Username</label>
                 <input type="text" data-option="sonarrBasicAuthUsername" placeholder="Enter your Sonarr username"/>
@@ -572,6 +587,8 @@ div
                 <input type="text" data-option="sonarrBasicAuthPassword" placeholder="Enter your Sonarr password"/>
                 <div>Only use this if you setup a Sonarr password.</div>
                 <div class="hidden-help">Your password will be hidden once saved.</div>
+                <br>
+                <div>This information will be used for <a href="https://wikipedia.org/wiki/Basic_access_authentication" target="_blank">Basic Access Authentication</a> only. This will allow the extension to ask Sonarr for your list of shows, or to add to your list of shows.</div>
             </section>
 
             <section>
@@ -617,7 +634,7 @@ div
                 </div>
             </section>
 
-            <h3>Login <em>(optional, saved)</em></h3>
+            <h3>Login <em>(saved)</em></h3>
             <section>
                 <label>Username</label>
                 <input type="text" data-option="couchpotatoBasicAuthUsername" placeholder="Enter your CouchPotato username"/>
@@ -631,6 +648,11 @@ div
             </section>
 
             <section>
+                <div>This information will be used for <a href="https://wikipedia.org/wiki/Basic_access_authentication" target="_blank">Basic Access Authentication</a> only. This will allow the extension to ask Couchpotato for your list of videos, or to add to your list of videos.</div>
+            </section>
+<!--
+
+            <section>
                 <button type="button" id="couchpotato_test" disabled>Test <span id="couchpotato_test_status">?</span></button>
             </section>
             <section>
@@ -639,6 +661,7 @@ div
                     <option value="">Press "Test [?]" first</option>
                 </select>
             </section>
+-->
         </details>
     </article>
 </div>
@@ -707,6 +730,14 @@ div
             <summary>Managers</summary>
 
             <h2>External Links</h2>
+            <section>
+                <label>Web to Plex Links</label>
+                <ul>
+                    <li>Browse the <a href="https://github.com/SpaceK33z/web-to-plex/wiki" target="_blank">Web to Plex Wiki</a> for help setting up.</li>
+                    <li><a href="https://github.com/SpaceK33z/web-to-plex/issues" target="_blank">Browse issues</a> if you're having trouble.</li>
+                </ul>
+            </section>
+
             <section>
                 <label>Watcher's Website</label>
                 <div>

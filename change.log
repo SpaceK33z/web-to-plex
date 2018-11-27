@@ -310,3 +310,8 @@
     document.queryBy('body, script, head');          // => [<body>, <script>, <head>]
     document.querySelectorAll('body, script, head'); // => [<head>, <body>, <script>]
 ```
+- Fixed the "issues" url in the README
+- Fixed the placeholders on the options page to be more descriptive
+- Removed the test button on the options page for Couchpotato (unused)
+- Added links to the Web to Plex GitHub page in the options page
+- Redid the Web to Plex Wiki

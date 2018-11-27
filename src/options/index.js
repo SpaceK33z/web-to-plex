@@ -39,7 +39,7 @@ const storage = (chrome.storage.sync || chrome.storage.local),
             'couchpotatoToken',
             'couchpotatoBasicAuthUsername',
             'couchpotatoBasicAuthPassword',
-            'couchpotatoQualityProfileId',
+//          'couchpotatoQualityProfileId',
             'watcherURLRoot',
             'watcherToken',
             'watcherBasicAuthUsername',
@@ -164,7 +164,7 @@ function performPlexTest(ServerID) {
         teststatus.textContent = '!';
 
 		if(!servers)
-            return teststatus.classList = false;
+            return teststatus.title = 'Failed to communicate with Plex', teststatus.classList = false;
 
 		__save__.disabled = false;
         teststatus.classList = true;
@@ -206,10 +206,12 @@ function getOptionValues() {
 			`[data-option="${ option }"]`
 		);
 
-        if(element.type == 'checkbox')
-            options[option] = element.checked;
-        else if(element)
-            options[option] = element.value;
+        if(element) {
+            if(element.type == 'checkbox')
+                options[option] = element.checked;
+            else
+                options[option] = element.value;
+        }
 	});
 
 	return options;
@@ -231,7 +233,7 @@ function getWatcher(options, api = "getconfig") {
     return fetch(`${ options.watcherURLRoot }/api/?apikey=${ options.watcherToken }&mode=${ api }&quality=${ options.watcherQualityProfileId || 'Default' }`, { headers })
         .then(response => response.json())
         .catch(error => {
-            return terminal.error('Watcher failed to connect with error:', error),
+            return terminal.error('Watcher failed to connect with error:' + String(error)),
               [];
         });
 }
@@ -265,6 +267,9 @@ function performWatcherTest(QualityProfileID = 'Default', refreshing = false) {
 
             teststatus.textContent = '!';
             teststatus.classList = !!profiles.length;
+
+            if(!profiles.length)
+                teststatus.title = 'Failed to communicate with Watcher';
 
             profiles.forEach(profile => {
                 let option = document.createElement('option');
@@ -307,7 +312,7 @@ function getRadarr(options, api = "profile") {
 	return fetch(`${ options.radarrURLRoot }/api/${ api }`, { headers })
 		.then(response => response.json())
 		.catch(error => {
-			return terminal.error('Radarr failed to connect with error:', error),
+			return terminal.error('Radarr failed to connect with error:' + String(error)),
               [];
 		});
 }
@@ -328,6 +333,9 @@ function performRadarrTest(QualityProfileID, StoragePath, refreshing = false) {
         getRadarr(options, 'profile').then(profiles => {
             teststatus.textContent = '!';
             teststatus.classList = !!profiles.length;
+
+            if(!profiles.length)
+                teststatus.title = 'Failed to communicate with Radarr';
 
             profiles.forEach(profile => {
                 let option = document.createElement('option');
@@ -383,7 +391,7 @@ function getSonarr(options, api = "profile") {
 	return fetch(`${ options.sonarrURLRoot }/api/${ api }`, { headers })
 		.then(response => response.json())
 		.catch(error => {
-			return terminal.error('Sonarr failed to connect with error:', error),
+			return terminal.error('Sonarr failed to connect with error:' + String(error)),
               [];
 		});
 }
@@ -404,6 +412,9 @@ function performSonarrTest(QualityProfileID, StoragePath, refreshing = false) {
         getSonarr(options, 'profile').then(profiles => {
             teststatus.textContent = '!';
             teststatus.classList = !!profiles.length;
+
+            if(!profiles.length)
+                teststatus.title = 'Failed to communicate with Sonarr';
 
             profiles.forEach(profile => {
                 let option = document.createElement('option');

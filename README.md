@@ -107,6 +107,6 @@ This is the BETA (testing) version, please visit [Web to Plex](https://github.co
 
 ## Issues & Contributions
 
-If you have any problem with the extension, please don't hesitate to [submit an issue](https://github.com/Ephellon/web-to-plex/issues/new).
+If you have any problem with the extension, please don't hesitate to [submit an issue](https://github.com/SpaceK33z/web-to-plex/issues/new).
 
 All contributions are welcome.
