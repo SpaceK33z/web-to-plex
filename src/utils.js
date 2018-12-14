@@ -138,7 +138,7 @@ function $getOptions() {
                 };
 
             options.plexURL = o.plexURL?
-                `${ o.plexURL }web/#!/server/${ o.server.id }/`:
+                `${ o.plexURL }web#!/server/${ o.server.id }/`:
             `https://app.plex.tv/web/app#!/server/${ o.server.id }/`;
 
             if (o.couchpotatoBasicAuthUsername)
@@ -166,28 +166,34 @@ function $getOptions() {
                     password: o.sonarrBasicAuthPassword
                 };
 
+            if (o.ombiURLRoot && o.ombiToken) {
+                o.ombiURL = o.ombiURLRoot;
+            } else {
+                delete o.ombiURL; // prevent variable ghosting
+            }
+
             if (o.couchpotatoURLRoot && o.couchpotatoToken) {
                 o.couchpotatoURL = `${ items.couchpotatoURLRoot }/api/${encodeURIComponent(o.couchpotatoToken)}`;
             } else {
-                o.couchpotatoURL = ""; // prevent variable ghosting
+                delete o.couchpotatoURL; // prevent variable ghosting
             }
 
             if (o.watcherURLRoot && o.watcherToken) {
                 o.watcherURL = o.watcherURLRoot;
             } else {
-                o.watcherURL = ""; // prevent variable ghosting
+                delete o.watcherURL; // prevent variable ghosting
             }
 
             if (o.radarrURLRoot && o.radarrToken) {
                 o.radarrURL = o.radarrURLRoot;
             } else {
-                o.radarrURL = ""; // prevent variable ghosting
+                delete o.radarrURL; // prevent variable ghosting
             }
 
             if (o.sonarrURLRoot && o.sonarrToken) {
                 o.sonarrURL = o.sonarrURLRoot;
             } else {
-                o.sonarrURL = ""; // prevent variable ghosting
+                delete o.sonarrURL; // prevent variable ghosting
             }
 
             resolve(o);
@@ -235,7 +241,8 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
         promise, // query promise
         api = {
             tmdb: config.TMDbAPI || 'bcb95f026f9a01ffa707fcff71900e94',
-            omdb: config.OMDbAPI || 'PlzBanMe'
+            omdb: config.OMDbAPI || 'PlzBanMe',
+            ombi: config.ombiToken,
         },
         apit = APIType || type, // api type (depends on "rqut")
         apid = APIID || null, // api id
@@ -259,14 +266,18 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
         .replace(/[\u2019\u201b]/g, "'") // fancy apostrophe
         .replace(/[\u201c\u201d]/g, '"') // fancy quotation marks
         .replace(/[^\u0000-\u00ff]+/g, ''); // only accept UTF-8 characters
-    year = year? (year + '').replace(/\D+/g, ''): await load(`${title}.${rqut}`) || year;
+    year = year? (year + '').replace(/\D+/g, ''): year;
 
     let plus = (string, character = '+') => string.replace(/\s+/g, character);
 
     let local, savename;
 
     if(year) {
-        savename = `${title} (${year}).${rqut}`,
+        savename = `${title.toLowerCase()} (${year}).${rqut}`,
+        local = await load(savename);
+    } else {
+        year = await load(`${title}.${rqut}`) || year;
+        `${title.toLowerCase()} (${year}).${rqut}`;
         local = await load(savename);
     }
 
@@ -277,11 +288,21 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
 
     /* the rest of this function is a beautiful mess that will need to be dealt with later... but it works */
     let url =
+        (manable && config.ombiURLRoot)?
+            `${ config.ombiURLRoot }api/v1/Search/${ (rqut == 'imdb' || rqut == 'tmdb' || apit == 'movie')? 'movie': 'tv' }/${ plus(title, '%20') }/?apikey=${ api.ombi }`:
         (manable && (config.radarrURLRoot || config.sonarrURLRoot))?
             (config.radarrURLRoot && (rqut == 'imdb' || rqut == 'tmdb'))?
+                (mid)?
+                    `${ config.radarrURLRoot }api/movie/lookup/tmdb?tmdbId=${ mid }&apikey=${ config.radarrToken }`:
+                (iid)?
+                    `${ config.radarrURLRoot }api/movie/lookup/imdb?imdbId=${ iid }&apikey=${ config.radarrToken }`:
                 `${ config.radarrURLRoot }api/movie/lookup?term=${ plus(title, '%20') }&apikey=${ config.radarrToken }`:
+            (tid)?
+                `${ config.sonarrURLRoot }api/series/lookup?term=tvdb:${ tid }&apikey=${ config.sonarrToken }`:
             `${ config.sonarrURLRoot }api/series/lookup?term=${ plus(title, '%20') }&apikey=${ config.sonarrToken }`:
         (rqut == 'imdb' || (rqut == '*' && !iid && title) || (rqut == 'tvdb' && !iid && title && rerun))?
+            (iid)?
+                `https://www.omdbapi.com/?i=${ iid }&apikey=${ api.omdb }`:
             (year)?
                 `https://www.omdbapi.com/?t=${ plus(title) }&y=${ year }&apikey=${ api.omdb }`:
             `https://www.omdbapi.com/?t=${ plus(title) }&apikey=${ api.omdb }`:
@@ -291,9 +312,11 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
             (iid)?
                 `https://api.themoviedb.org/3/find/${ iid || mid || tid }?api_key=${ api.tmdb }&external_source=${ iid? 'imdb': mid? 'tmdb': 'tvdb' }_id`:
             `https://api.themoviedb.org/3/search/${ apit }?api_key=${ api.tmdb }&query=${ encodeURI(title) }${ year? '&year=' + year: '' }`:
-        (rqut == 'tvdb' || (rqut == '*' && !tid && title) || apid)?
-            (apid)?
-                `https://api.tvmaze.com/shows/${ apid }`:
+        (rqut == 'tvdb' || (rqut == '*' && !tid && title) || (apid == tid))?
+            (tid)?
+                `https://api.tvmaze.com/shows/?thetvdb=${ tid }`:
+            (iid)?
+                `https://api.tvmaze.com/shows/?imdb=${ iid }`:
             `https://api.tvmaze.com/search/shows?q=${ encodeURI(title) }`:
         (title)?
             (apit && year)?
@@ -534,12 +557,12 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
     if(!json)
         json = {};
 
-    // Radarr & Sonarr
+    // Ombi, Radarr and Sonarr
     if(manable)
         data = {
             imdb: IMDbID || json.imdbId || ei,
-            tmdb: TMDbID || json.tmdbId | 0,
-            tvdb: TVDbID || json.tvdbId | 0,
+            tmdb: TMDbID || json.tmdbId || json.theMovieDbId | 0,
+            tvdb: TVDbID || json.tvdbId || json.theTvDbId    | 0,
             title: json.title || title,
             year: +(json.year || year)
         };
@@ -600,8 +623,8 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
         return terminal.log(`No information was found for "${ title } (${ year })"`), {};
 
     save(savename, data); // e.g. "Coco (0)" on Netflix before correction / no repeat searches
-    save(savename = `${title} (${year}).${rqut}`.toLowerCase(), data); // e.g. "Coco (2017)" on Netflix after correction / no repeat searches
-    save(`${title}.${rqut}`.toLowerCase(), year);
+    save(savename = `${title.toLowerCase()} (${year}).${rqut}`.toLowerCase(), data); // e.g. "Coco (2017)" on Netflix after correction / no repeat searches
+    save(`${title.toLowerCase()}.${rqut}`.toLowerCase(), year);
 
     terminal.log(`Saved as "${ savename }"`, data);
 
@@ -614,33 +637,44 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
 // anything else for state will show as orange
 class Notification {
     constructor(state, text, timeout = 7000, callback) {
-        let notifications = (Notification.notifications = Notification.notifications || []),
-            last = notifications.pop();
+        let queue = (Notification.queue = Notification.queue || { list: [] }),
+            last = queue.list[queue.list.length - 1];
 
-        if (last)
-            clearTimeout(last);
+        if (last && last.done === false)
+            return (last => setTimeout(() => new Notification(state, text, timeout, callback), +(new Date) - last.start))(last);
 
         callback = callback || (() => {});
 
-        let existingElement = document.querySelector('.web-to-plex-notification');
-        if (existingElement)
-            return setTimeout(() => (existingElement.remove(), new Notification(state, text, timeout, callback)), timeout);
+        let element = document.createElement('div');
 
-        let element = document.furnish('div.web-to-plex-notification', {
-            onclick: event => {
-                let self = event.target;
+        element.classList.add('web-to-plex-notification', state);
+        element.addEventListener('onclick', element.onclick = event => {
+            let notification = Notification.queue[event.target.id],
+                element = notification.element;
 
-                clearTimeout(self.id);
-                self.remove();
-                return callback();
-            }
+            notification.done = true;
+            Notification.queue.list.splice(notification.index, 1);
+            clearTimeout(notification.job);
+            element.remove();
+
+            return notification.callback();
         });
 
-        element.classList.add(state);
-        element.textContent = text;
-        notifications.push(element.id = setTimeout(() => element.remove(), timeout));
+        element.innerHTML = text;
+        queue[element.id = +(new Date)] = {
+            start: +element.id,
+            stop:  +element.id + timeout,
+            span:  +timeout,
+            done:  false,
+            index: queue.list.length,
+            job:   setTimeout(() => element.onclick({ target: element }), timeout),
+            callback, element
+        };
+        queue.list.push(queue[element.id]);
 
         document.body.appendChild(element);
+
+        return queue[element.id];
     }
 }
 
@@ -675,15 +709,60 @@ function $pushAddToCouchpotato(options) {
 				return;
 			}
 			new Notification(
-				'info',
+				'warning',
 				`Movie is already in CouchPotato (status: ${response.status})`
 			);
 		}
 	);
 }
 
-// TV Shows
+// Movies/TV Shows
+function pushOmbiRequest(options) {
+    new Notification('info', `Adding "${ options.title }" to Ombi`, 3000);
+
+    if ((!options.IMDbID && !options.TMDbID) && !options.TVDbID) {
+        return new Notification(
+            'warning',
+            'Stopped adding to Ombi: No content ID'
+        );
+    }
+
+    let contentType = (/movies?|film/i.test(options.type)? 'movie': 'tv');
+
+    chrome.runtime.sendMessage({
+            type: 'ADD_OMBI',
+            url: `${ config.ombiURL }api/v1/Request/${ contentType }`,
+            token: config.ombiToken,
+            title: options.title,
+            year: options.year,
+            imdbId: options.IMDbID,
+            tmdbId: options.TMDbID,
+            tvdbId: options.TVDbID,
+            contentType,
+        },
+        response => {
+            terminal.log('Pushing to Ombi', response);
+
+            if (response && response.error) {
+                return new Notification('warning', 'Could not add to Ombi: ' + response.error) ||
+                    (!response.silent && terminal.error('Error adding to Ombi: ' + String(response.error), response.location, response.debug));
+            } else if (response && response.success) {
+                let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-{2,}/g, '-').toLowerCase();
+
+                terminal.log('Successfully pushed');
+                new Notification('update', `Added ${ (contentType == 'tv'? 'TV show': 'movie') } to Ombi`, 7000, () => window.open(config.ombiURL, '_blank'));
+            } else {
+                new Notification('warning', 'Could not add to Ombi: Unknown Error') ||
+                (!response.silent && terminal.error('Error adding to Ombi: ' + String(response)));
+            }
+        }
+    );
+}
+
+// Movies/TV Shows
 function pushCouchPotatoRequest(options) {
+    new Notification('info', `Adding "${ options.title }" to CouchPotato`, 3000);
+
 	chrome.runtime.sendMessage(
 		{
 			type: 'ADD_COUCHPOTATO',
@@ -705,7 +784,7 @@ function pushCouchPotatoRequest(options) {
 			}
 			if (response.success) {
                 terminal.log('Successfully pushed');
-				new Notification('info', 'Added movie to CouchPotato');
+				new Notification('update', 'Added movie to CouchPotato');
 			} else {
 				new Notification('warning', 'Could not add to CouchPotato');
 			}
@@ -715,6 +794,8 @@ function pushCouchPotatoRequest(options) {
 
 // Movies
 function pushWatcherRequest(options) {
+    new Notification('info', `Adding "${ options.title }" to Watcher`, 3000);
+
     if (!options.IMDbID && !options.TMDbID) {
         return new Notification(
             'warning',
@@ -734,7 +815,7 @@ function pushWatcherRequest(options) {
             tmdbId: options.TMDbID,
         },
         response => {
-        terminal.log('Pushing to Watcher', response);
+            terminal.log('Pushing to Watcher', response);
 
             if (response && response.error) {
                 return new Notification('warning', 'Could not add to Watcher: ' + response.error) ||
@@ -744,7 +825,7 @@ function pushWatcherRequest(options) {
                     TMDbID = options.TMDbID || response.tmdbId;
 
                 terminal.log('Successfully pushed');
-                new Notification('info', 'Added movie to Watcher', 7000, () => window.open(`${config.watcherURL}library/status${TMDbID? `#${title}-${TMDbID}`: '' }`, '_blank'));
+                new Notification('update', 'Added movie to Watcher', 7000, () => window.open(`${config.watcherURL}library/status${TMDbID? `#${title}-${TMDbID}`: '' }`, '_blank'));
             } else {
                 new Notification('warning', 'Could not add to Watcher: Unknown Error') ||
                 (!response.silent && terminal.error('Error adding to Watcher: ' + String(response)));
@@ -755,6 +836,8 @@ function pushWatcherRequest(options) {
 
 // Movies
 function pushRadarrRequest(options) {
+    new Notification('info', `Adding "${ options.title }" to Radarr`, 3000);
+
     if (!options.IMDbID && !options.TMDbID) {
         return new Notification(
             'warning',
@@ -775,7 +858,7 @@ function pushRadarrRequest(options) {
             tmdbId: options.TMDbID,
         },
         response => {
-        terminal.log('Pushing to Radarr', response);
+            terminal.log('Pushing to Radarr', response);
 
             if (response && response.error) {
                 return new Notification('warning', 'Could not add to Radarr: ' + response.error) ||
@@ -785,7 +868,7 @@ function pushRadarrRequest(options) {
                     TMDbID = options.TMDbID || response.tmdbId;
 
                 terminal.log('Successfully pushed');
-                new Notification('info', 'Added movie to Radarr', 7000, () => window.open(`${config.radarrURL}${TMDbID? `movies/${title}-${TMDbID}`: '' }`, '_blank'));
+                new Notification('update', 'Added movie to Radarr', 7000, () => window.open(`${config.radarrURL}${TMDbID? `movies/${title}-${TMDbID}`: '' }`, '_blank'));
             } else {
                 new Notification('warning', 'Could not add to Radarr: Unknown Error') ||
                 (!response.silent && terminal.error('Error adding to Radarr: ' + String(response)));
@@ -796,6 +879,8 @@ function pushRadarrRequest(options) {
 
 // TV Shows
 function pushSonarrRequest(options) {
+    new Notification('info', `Adding "${ options.title }" to Sonarr`, 3000);
+
     if (!options.TVDbID || options.TVDbID == "") {
         return new Notification(
             'warning',
@@ -815,7 +900,7 @@ function pushSonarrRequest(options) {
             tvdbId: options.TVDbID,
         },
         response => {
-        terminal.log('Pushing to Sonarr', response);
+            terminal.log('Pushing to Sonarr', response);
 
             if (response && response.error) {
                 return new Notification('warning', 'Could not add to Sonarr: ' + response.error) ||
@@ -824,7 +909,7 @@ function pushSonarrRequest(options) {
                 let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-{2,}/g, '-').toLowerCase();
 
                 terminal.log('Successfully pushed');
-                new Notification('info', 'Added series to Sonarr', 7000, () => window.open(`${config.sonarrURL}series/${title}`, '_blank'));
+                new Notification('update', 'Added series to Sonarr', 7000, () => window.open(`${config.sonarrURL}series/${title}`, '_blank'));
             } else {
                 new Notification('warning', 'Could not add to Sonarr: Unknown Error') ||
                 (!response.silent && terminal.error('Error adding to Sonarr: ' + String(response)));
@@ -833,11 +918,14 @@ function pushSonarrRequest(options) {
     );
 }
 
+// make the button
 function renderPlexButton(persistent) {
 	let existingButtons = document.querySelectorAll('.web-to-plex-button');
 
-	if (existingButtons && persistent)
-		return document.querySelector('.web-to-plex-button');
+	if (existingButtons.length && !persistent)
+		[].slice.call(existingButtons).forEach(button => button.remove());
+    else if(persistent)
+        return existingButtons[0];
 
     // <button>
     let button =
@@ -948,6 +1036,8 @@ function modifyPlexButton(button, action, title, options = {}) {
         button = element.parentElement;
     };
 
+    sendUpdate('SEARCH_FOR', { ...options, button });
+
     /* Handle a list of items */
     if(multiple) {
         options = [].slice.call(options);
@@ -989,7 +1079,9 @@ function modifyPlexButton(button, action, title, options = {}) {
                 option = options[index];
 
                 try {
-                    if (config.watcherURL && !tv.test(option.type))
+                    if(config.ombiURL)
+                        pushOmbiRequest(option);
+                    else if (config.watcherURL && !tv.test(option.type))
                         pushWatcherRequest(option);
                     else if (config.radarrURL && !tv.test(option.type))
                         pushRadarrRequest(option);
@@ -1033,7 +1125,9 @@ function modifyPlexButton(button, action, title, options = {}) {
                 case 'oload':
                     let href = options.href, path = '';
 
-                    if (config.watcherURL && !tv.test(options.type)) {
+                    if (config.ombiURL) {
+                        path = '';
+                    } else if (config.watcherURL && !tv.test(options.type)) {
                         path = '';
                     } else if (config.radarrURL && !tv.test(options.type)) {
                         path = config.radarrStoragePath;
@@ -1071,7 +1165,9 @@ function modifyPlexButton(button, action, title, options = {}) {
                     button.classList.add('wtp--download');
                     element.addEventListener('click', element.ON_CLICK = e => {
                         e.preventDefault();
-                        if (config.watcherURL && !tv.test(options.type)) {
+                        if (config.ombiURL) {
+                            pushOmbiRequest(options);
+                        } else if (config.watcherURL && !tv.test(options.type)) {
                             pushWatcherRequest(options);
                         } else if (config.radarrURL && !tv.test(options.type)) {
                             pushRadarrRequest(options);
@@ -1097,9 +1193,6 @@ function modifyPlexButton(button, action, title, options = {}) {
 
             button.classList.remove('wtp--found');
             button.classList.add('wtp--error');
-
-            if(!empty)
-                sendUpdate('SEARCH_FOR', { ...options, button });
         }
 
         element.id = options? `${options.IMDbID || 'tt'}-${options.TMDbID | 0}-${options.TVDbID | 0}`: 'tt--0-0';   
@@ -1133,7 +1226,7 @@ async function squabblePlex(options, button) {
                                 if (found) {
                                     // ignore found items, we only want new items
                                 } else {
-                                    let available = (config.watcherURL || config.radarrURL || config.sonarrURL || config.couchpotatoURL),
+                                    let available = (config.ombiURL || config.watcherURL || config.radarrURL || config.sonarrURL || config.couchpotatoURL),
                                         action = (available ? 'downloader' : 'notfound'),
                                         title = available ?
                                             'Not on Plex (download available)':
@@ -1204,7 +1297,7 @@ function findPlexMedia(options) {
                                     po.remove();
                                 options.button.querySelector('ul').insertBefore(pi, op);
                             } else {
-                                let available = (config.watcherURL || config.radarrURL || config.sonarrURL || config.couchpotatoURL),
+                                let available = (config.ombiURL || config.watcherURL || config.radarrURL || config.sonarrURL || config.couchpotatoURL),
                                     action = (available ? 'downloader' : 'notfound'),
                                     title = available ?
                                         'Not on Plex (download available)':
@@ -1217,7 +1310,8 @@ function findPlexMedia(options) {
 
                                 if(po = options.button.querySelector('#plexit'))
                                     po.remove();
-                                options.button.querySelector('ul').insertBefore(pi, op);
+                                if(!!~[].slice.call(options.button.querySelector('ul').children).indexOf(op))
+                                    options.button.querySelector('ul').insertBefore(pi, op);
                             }
                         });
                 }
@@ -1251,7 +1345,7 @@ function getPlexMediaRequest(options) {
 }
 
 function getPlexMediaURL(PlexUIID, key) {
-    return config.plexURL.replace(RegExp(`\/(${ config.server.id })?$`), '#!/server/' + PlexUIID) + `/details?key=${encodeURIComponent( key )}`;
+    return config.plexURL.replace(RegExp(`\/(${ config.server.id })?$`), `/web#!/server/` + PlexUIID) + `/details?key=${encodeURIComponent( key )}`;
 }
 
 /* Listen for Plugin events */

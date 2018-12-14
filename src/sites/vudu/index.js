@@ -38,7 +38,7 @@ async function initPlexThingy(type) {
 
 	let title = $title.textContent.replace(/\((\d{4})\)/, '').trim(),
         year = $date? $date.textContent.split(/\s*\|\s*/): RegExp.$1,
-        image = $image.src;
+        image = ($image || {}).src;
 
     year = +year[year.length - 1].slice(0, 4);
     year |= 0;

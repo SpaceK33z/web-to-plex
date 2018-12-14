@@ -22,7 +22,7 @@ async function initPlexThingy(type) {
 
         title = $title.textContent;
         year = +$year.textContent;
-        image = $image.src;
+        image = ($image || {}).src;
     } else {
         let meta = [$$('h1[itemprop="name"], h1'), $$('.release-date > *:last-child'), $$('[class*="product"] ~ * picture img')];
 

@@ -45,7 +45,7 @@ async function initPlexThingy(type) {
     let date = $date.textContent.replace(/(\d{4})/),
         year = +RegExp.$1,
         title = $title.textContent.replace((type == 'movie'? /^(.+)$/: /(.+)(?:(?:\:\s*series\s+info|\-\s*(?:all\s+episodes|season)).+)$/i), '$1').trim(),
-        image = $image.src;
+        image = ($image || {}).src;
 
     year = year > 999? year: 0;
 

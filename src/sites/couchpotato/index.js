@@ -1,7 +1,7 @@
 /* global wait, modifyPlexButton, parseOptions, findPlexMedia */
 function init() {
 	wait(
-		() => document.querySelector('.media-body .clearfix').children.length > 1,
+		() => document.querySelector('.media-body .clearfix') && document.querySelector('.media-body .clearfix').children.length > 1,
 		() => initPlexThingy(isMovie()? 'movie': 'show')
 	);
 }
@@ -33,7 +33,7 @@ function initPlexThingy(type) {
 
 	let title = $title.textContent.trim(),
         year = $date.textContent.trim(),
-        image = $image.src,
+        image = ($image || {}).src,
         IMDbID = getIMDbID();
 
 	findPlexMedia({ title, year, image, button, type, IMDbID });

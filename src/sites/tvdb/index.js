@@ -42,7 +42,7 @@ function initPlexThingy() {
 
 	let title = $title.innerText.trim(),
         year,
-        image = $image.src,
+        image = ($image || {}).src,
         d = '<!---->', o = {},
 	    Db = document.querySelector('#series_basic_info')
             .textContent
@@ -62,9 +62,11 @@ function initPlexThingy() {
 
     year = ((o.first_aired || YEAR) + "").slice(0, 4);
 
-    save(`${title} (${year}).tvdb`, { title, year, tvdb: o.thetvdb, imdb: o.imdb });
-    save(`${title}.tvdb`, +year);
-    terminal.log(`Saved as "${title} (${year}).tvdb"`);
+    let savename = title.toLowerCase();
+
+    save(`${savename} (${year}).tvdb`, { title, year, tvdb: o.thetvdb, imdb: o.imdb });
+    save(`${savename}.tvdb`, +year);
+    terminal.log(`Saved as "${savename} (${year}).tvdb"`);
 
 	findPlexMedia({ title, year, image, button, type: 'show', IMDbID: o.imdb, TVDbID: o.thetvdb });
 }

@@ -50,7 +50,7 @@ async function initPlexThingy(type) {
 
 	let title = $title.textContent.trim(),
         year = $year.textContent.slice(0, 4).trim(),
-        image = $image.src;
+        image = ($image || {}).src;
 
     let Db = await getIDs({ title, year, type }),
         IMDbID = Db.imdb,

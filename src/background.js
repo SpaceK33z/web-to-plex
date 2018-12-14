@@ -340,6 +340,67 @@ function addSonarr(request, sendResponse) {
         });
 }
 
+function addOmbi(request, sendResponse) {
+    let headers = {
+            'Content-Type': 'application/json',
+            'ApiKey': request.token,
+            ...(new Headers)
+        },
+        type = request.contentType,
+        id = (type == 'movie'? request.tmdbId: request.tvdbId),
+        body = ({ [type == 'movie'? 'theMovieDbId': 'theTvDbId']: id }),
+        debug = { headers, request };
+            // setup stack trace for debugging
+
+    if(request.contentType == 'movie' && (id || null) === null)
+        sendResponse({ error: 'Invalid TMDbID', location: 'addOmbi => if', silent: true });
+    else if((id || null) === null)
+        sendResponse({ error: 'Invalid TVDbID', location: 'addOmbi => else if', silent: true });
+
+    fetch(debug.url = request.url, {
+            method: 'POST',
+            mode: cors(request.url),
+            body: JSON.stringify(body),
+            headers
+        })
+        .catch(error => sendResponse({ error: `${ type } not found`, location: 'addOmbi => fetch.then.catch', silent: true }))
+        .then(response => response.text())
+        .then(data => {
+            debug.data =
+            data = JSON.parse(data);
+
+            if (data && data.isError) {
+                if(/already +been +requested/i.test(data.errorMessage))
+                    sendResponse({
+                        success: 'Already requested on Ombi'
+                    });
+                else
+                    sendResponse({
+                        error: data.errorMessage,
+                        location: `addOmbi => fetch("${ request.url }", { headers }).then(data => { if })`,
+                        debug
+                    });
+            } else if (data && data.path) {
+                sendResponse({
+                    success: 'Added to Ombi'
+                });
+            } else {
+                sendResponse({
+                    error: 'Unknown error',
+                    location: `addOmbi => fetch("${ request.url }", { headers }).then(data => { else })`,
+                    debug
+                });
+            }
+        })
+        .catch(error => {
+            sendResponse({
+                error: String(error),
+                location: `addOmbi => fetch("${ request.url }", { headers }).catch(error => { sendResponse })`,
+                debug
+            });
+        });
+}
+
 // Unfortunately the native Promise.race does not work as you would suspect.
 // If one promise (Plex request) fails, we still want the other requests to continue racing.
 // See https://www.jcore.com/2016/12/18/promise-me-you-wont-use-promise-race/ for an explanation
@@ -510,7 +571,7 @@ chrome.contextMenus.onClicked.addListener(item => {
 });
 
 chrome.runtime.onMessage.addListener((request, sender, callback) => {
-    terminal.log('From:', sender);
+    terminal.log('From: ' + sender);
 
     let item = (request? request.options || request: {}),
         ITEM_TITLE = item.title,
@@ -521,9 +582,6 @@ chrome.runtime.onMessage.addListener((request, sender, callback) => {
         FILE_TYPE = (item.tail || 'mp4'),
         FILE_PATH = item.path || '',
         ITEM_ID = ((i, I)=>{for(let p in i)if(RegExp('^'+I,'i').test(p))return i[p]})(item, ID_PROVIDER);
-
-    if(ITEM_TITLE && ITEM_YEAR && ITEM_TYPE || request.type == 'SEARCH_FOR')
-        ChangeStatus({ ITEM_ID, ITEM_TITLE, ITEM_TYPE, ID_PROVIDER, ITEM_YEAR, ITEM_URL, FILE_TYPE, FILE_PATH });
 
     try {
         switch (request.type) {
@@ -545,8 +603,15 @@ chrome.runtime.onMessage.addListener((request, sender, callback) => {
             case 'ADD_WATCHER':
                 addWatcher(request, callback);
                 return true;
+            case 'ADD_OMBI':
+                addOmbi(request, callback);
+                return true;
             case 'OPEN_OPTIONS':
                 chrome.runtime.openOptionsPage();
+                return true;
+            case 'SEARCH_FOR':
+                if(ITEM_TITLE && ITEM_TYPE)
+                    ChangeStatus({ ITEM_ID, ITEM_TITLE, ITEM_TYPE, ID_PROVIDER, ITEM_YEAR, ITEM_URL, FILE_TYPE, FILE_PATH });
                 return true;
             case 'SAVE_AS':
                 chrome.contextMenus.update('W2P-DL', {
@@ -573,7 +638,7 @@ chrome.runtime.onMessage.addListener((request, sender, callback) => {
                 });
                 return true;
             default:
-//                terminal.warn(`Unknown event [${ request.type }]`);
+                terminal.warn(`Unknown event [${ request.type }]`);
                 return false;
         }   
     } catch (error) {

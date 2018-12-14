@@ -45,7 +45,7 @@ async function initPlexMovie() {
         altname = ($altname == $title? title: $altname.childNodes[0].textContent.trim()),
         country = $date.innerText.replace(/[^]+\((\w+)\)[^]*?$/, '$1'),
         year = +cleanYear($year.textContent),
-        image = $image.src;
+        image = ($image || {}).src;
     title = usa.test(country)? title: altname;
 
     let Db = await getIDs({ title, year, type, IMDbID }),
@@ -71,7 +71,7 @@ async function initPlexShow() {
         $altname = $$('.title_wrapper h1'),
         $date = $$('.title_wrapper [href*="/releaseinfo"]'),
         date = $$('title').textContent,
-        dateMatch = date.match(/Series\s+(\d{4})/i),
+        dateMatch = date.match(/Series\s*\(?(\d{4})(?:[^\)]+\))?/i),
         $image = $$('img[alt$="poster" i]');
 
 	if (!($title || $altname) || !dateMatch)
@@ -81,7 +81,7 @@ async function initPlexShow() {
         altname = ($altname == $title? title: $altname.childNodes[0].textContent.trim()),
         country = $date.innerText.replace(/[^]+\((\w+)\)[^]*?$/, '$1'),
         year = parseInt(dateMatch[1]),
-        image = $image.src;
+        image = ($image || {}).src;
     title = usa.test(country)? title: altname;
 
     let Db = await getIDs({ title, year, type, IMDbID }),
@@ -91,6 +91,12 @@ async function initPlexShow() {
     IMDbID = IMDbID || Db.imdb;
     title = Db.title;
     year = Db.year;
+
+    let savename = title.toLowerCase();
+
+    save(`${savename} (${year}).imdb`, { type, title, year, imdb: IMDbID, tmdb: TMDbID, tvdb: TVDbID });
+    save(`${savename}.imdb`, +year);
+    terminal.log(`Saved as "${savename} (${year}).imdb"`);
 
 	findPlexMedia({ type, title, year, button, IMDbID, TMDbID, TVDbID });
 }
@@ -118,9 +124,11 @@ async function addInListItem(element) {
     title = title || Db.title;
     year = year || Db.year;
 
-    save(`${title} (${year}).imdb`, { type, title, year, imdb: IMDbID, tmdb: TMDbID, tvdb: TVDbID });
-    save(`${title}.imdb`, +year);
-    terminal.log(`Saved as "${title} (${year}).imdb"`);
+    let savename = title.toLowerCase();
+
+    save(`${savename} (${year}).imdb`, { type, title, year, imdb: IMDbID, tmdb: TMDbID, tvdb: TVDbID });
+    save(`${savename}.imdb`, +year);
+    terminal.log(`Saved as "${savename} (${year}).imdb"`);
 
 	return { type, title, year, image, IMDbID, TMDbID, TVDbID };
 }

@@ -44,7 +44,7 @@ async function initPlexThingy() {
 
 	let title = $title.innerText.replace(/(unrated|mature|tv-?\d{1,2})\s*$/i, '').trim(),
         year = $year? $year.textContent.replace(/.+(\d{4}).*/, '$1').trim(): 0,
-        image = $image.src,
+        image = ($image || {}).src,
 	    Db = await getIDs({ title, year, APIType: 'tv' }),
         IMDbID = Db.imdb,
         TMDbID = Db.tmdb,

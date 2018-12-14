@@ -23,6 +23,11 @@
 	z-index: 999999;
 }
 
+/* Web to Plex general information notifications */
+.web-to-plex-notification.info {
+    background: #666!important;
+}
+
 /* Web to Plex update notifications */
 .web-to-plex-notification.update {
     background: #2A2AFF!important;

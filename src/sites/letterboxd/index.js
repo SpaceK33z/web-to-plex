@@ -32,7 +32,7 @@ function initPlexThingy() {
 
 	let title = $title.textContent.trim(),
         year = $date.textContent.trim(),
-        image = $image.src,
+        image = ($image || {}).src,
         IMDbID = getIMDbID();
 
 	findPlexMedia({ title, year, button, type: 'movie', IMDbID });

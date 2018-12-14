@@ -67,7 +67,7 @@ async function initPlexThingy(type) {
 
 	let title = $title.textContent.replace(/(.+)(\d{4}).*?$/, '$1').replace(/\s*\:\s*Season.*$/i, '').trim(),
         year = +(RegExp.$2 || $year.textContent).trim(),
-        image = $image.src,
+        image = ($image || {}).src,
         IMDbID = getIMDbID(),
         TMDbID = getTMDbID(),
         TVDbID = getTVDbID(),

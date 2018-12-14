@@ -33,6 +33,7 @@ async function initPlexThingy(type) {
 
 	let title = $title.textContent.trim(),
         year = $date.textContent.trim(),
+        image = ($image || {}).src,
         apid = window.location.pathname.replace(/\/(?:movie|tv)\/(\d+).*/, '$1');
 
     let Db = await getIDs({ title, year, TMDbID: apid, APIType: type, APIID: apid }),
@@ -43,13 +44,15 @@ async function initPlexThingy(type) {
     title = Db.title;
     year = Db.year;
 
-    save(`${title} (${year}).tmdb`, Db);
-    save(`${title}.tmdb`, +year);
-    terminal.log(`Saved as "${title} (${year}).tmdb"`);
+    let savename = title.toLowerCase();
+
+    save(`${savename} (${year}).tmdb`, Db);
+    save(`${savename}.tmdb`, +year);
+    terminal.log(`Saved as "${savename} (${year}).tmdb"`);
 
     type = type === 'tv'? 'show': type;
 
-	findPlexMedia({ title, year, button, type, IMDbID, TMDbID, TVDbID });
+	findPlexMedia({ title, year, image, button, type, IMDbID, TMDbID, TVDbID });
 }
 
 parseOptions().then(() => {
