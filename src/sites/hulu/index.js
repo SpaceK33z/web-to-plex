@@ -13,43 +13,11 @@ function isShow() {
 
 let $$ = selector => document.querySelector(selector);
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 async function initPlexThingy(type) {
 	let button = renderPlexButton();
 
 	if (!button)
 		return /* Fatal Error: Fail Silently */;
-=======
-=======
->>>>>>> SpaceK33z/master
-function renderPlexButton($parent) {
-	if (!$parent) return;
-
-	let existingButton = $$('a.web-to-plex-button');
-	if (existingButton)
-		existingButton.remove();
-
-	let el = document.createElement('a');
-
-    el.classList.add('Nav__item', 'web-to-plex-button');
-
-    el.innerHTML = `<img src="${ chrome.extension.getURL('img/o48.png') }"/>`;
-    el.title = 'Loading...';
-
-	$parent.insertBefore(el, $parent.lastChild);
-	return el;
-}
-
-async function initPlexThingy(type) {
-	let $button = renderPlexButton($$('#content .Nav .Nav__container'));
-
-	if (!$button)
-		return;
-<<<<<<< HEAD
->>>>>>> Upgrade to v4 (rebased) (#55)
-=======
->>>>>>> SpaceK33z/master
 
 	let $title = $$('#content [class$="__name"]'),
         $year = $$('#content [class$="__meta"] [class$="segment"]:last-child'),
@@ -63,15 +31,7 @@ async function initPlexThingy(type) {
     title = Db.title;
     year = Db.year;
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 	findPlexMedia({ type, title, year, button, IMDbID, TMDbID, TVDbID });
-=======
-	findPlexMedia({ type, title, year, button: $button, IMDbID, TMDbID, TVDbID, txt: 'title', hov: 'null' });
->>>>>>> Upgrade to v4 (rebased) (#55)
-=======
-	findPlexMedia({ type, title, year, button: $button, IMDbID, TMDbID, TVDbID, txt: 'title', hov: 'null' });
->>>>>>> SpaceK33z/master
 }
 
 (window.onlocationchange = () =>

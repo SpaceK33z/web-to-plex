@@ -24,8 +24,6 @@ parseOptions().then(() => {
 });
 
 function initPlexThingy() {
-<<<<<<< HEAD
-<<<<<<< HEAD
 	let button = renderPlexButton();
 
 	if (!button)
@@ -37,36 +35,14 @@ function initPlexThingy() {
 	if (!$title)
 		return modifyPlexButton(
 			button,
-=======
-=======
->>>>>>> SpaceK33z/master
-	let $button = renderPlexButton();
-	if (!$button)
-		return;
-
-	let $title = document.querySelector('#series_title');
-
-	if (!$title)
-		return modifyPlexButton(
-			$button,
-<<<<<<< HEAD
->>>>>>> Upgrade to v4 (rebased) (#55)
-=======
->>>>>>> SpaceK33z/master
 			'error',
 			 `Could not extract title from TheTVDb`
 		),
           null;
 
 	let title = $title.innerText.trim(),
-<<<<<<< HEAD
-<<<<<<< HEAD
         year,
         image = ($image || {}).src,
-=======
->>>>>>> Upgrade to v4 (rebased) (#55)
-=======
->>>>>>> SpaceK33z/master
         d = '<!---->', o = {},
 	    Db = document.querySelector('#series_basic_info')
             .textContent
@@ -84,8 +60,6 @@ function initPlexThingy() {
                 o[n] = /,/.test(v)? v.split(/\s*,\s*/): v;
             });
 
-<<<<<<< HEAD
-<<<<<<< HEAD
     year = ((o.first_aired || YEAR) + "").slice(0, 4);
 
     let savename = title.toLowerCase();
@@ -95,41 +69,4 @@ function initPlexThingy() {
     terminal.log(`Saved as "${savename} (${year}).tvdb"`);
 
 	findPlexMedia({ title, year, image, button, type: 'show', IMDbID: o.imdb, TVDbID: o.thetvdb });
-=======
-=======
->>>>>>> SpaceK33z/master
-	findPlexMedia({ title, year: ((o.first_aired || YEAR) + "").slice(0, 4), button: $button, type: 'show', IMDbID: o.imdb, TVDbID: o.thetvdb });
-}
-
-function renderPlexButton() {
-	// The "download" button
-	let $actions = document.querySelector(
-            '#series_basic_info > ul'
-    );
-
-	if (!$actions)
-		return;
-
-	let $existingButton = document.querySelector('a.web-to-plex-button');
-	if ($existingButton)
-		$existingButton.remove();
-
-    let pa = document.createElement('li'),
-        el = document.createElement('strong'),
-        ch = document.createElement('a');
-
-    pa.classList.add('web-to-plex-wrapper', 'list-group-item', 'clearfix');
-    pa.appendChild(el);
-    el.appendChild(ch);
-    ch.classList.add('web-to-plex-button');
-    ch.textContent = 'Web to Plex';
-    ch.title = 'Loading...';
-
-    $actions.insertBefore(pa, $actions.firstChild);
-
-	return ch;
-<<<<<<< HEAD
->>>>>>> Upgrade to v4 (rebased) (#55)
-=======
->>>>>>> SpaceK33z/master
 }

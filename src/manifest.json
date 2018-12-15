@@ -6,15 +6,7 @@
     "homepage_url": "https://github.com/Ephellon/web-to-plex/",
 
 	"manifest_version": 2,
-<<<<<<< HEAD
-<<<<<<< HEAD
     "version": "4.0",
-=======
-    "version": "3.1.2.0",
->>>>>>> Upgrade to v4 (rebased) (#55)
-=======
-    "version": "3.1.2.0",
->>>>>>> SpaceK33z/master
 // Firefox Support =>
 //    "applications": {
 //        "gecko": {
@@ -31,7 +23,6 @@
 	},
 
 	"content_scripts": [
-<<<<<<< HEAD
         // Allows media downloads
         {
             "matches": ["*://*.openload.co/*", "*://*.openload.com/*", "*://*.oload.fun/*"],
@@ -41,12 +32,6 @@
 
         // The sites
         {
-=======
-		{
-<<<<<<< HEAD
->>>>>>> Upgrade to v4 (rebased) (#55)
-=======
->>>>>>> SpaceK33z/master
 			"matches": ["*://*.movieo.me/*"],
 			"js": ["history-hack.js", "utils.js", "sites/movieo/index.js"],
 			"css": ["sites/movieo/index.css", "sites/common.css"]
@@ -59,15 +44,7 @@
 			"js": ["history-hack.js", "utils.js", "sites/trakt/index.js"],
 			"css": ["sites/trakt/index.css", "sites/common.css"]
 		},{
-<<<<<<< HEAD
-<<<<<<< HEAD
 			"matches": ["*://*.letterboxd.com/*"],
-=======
-			"matches": ["*://*.letterboxd.com/film/*"],
->>>>>>> Upgrade to v4 (rebased) (#55)
-=======
-			"matches": ["*://*.letterboxd.com/film/*"],
->>>>>>> SpaceK33z/master
 			"js": ["utils.js", "sites/letterboxd/index.js"],
 			"css": ["sites/letterboxd/index.css", "sites/common.css"]
 		},{
@@ -89,32 +66,14 @@
 		},{
 			"matches": ["*://*.vrv.co/*"],
 			"js": ["utils.js", "sites/vrv/index.js"],
-<<<<<<< HEAD
-<<<<<<< HEAD
 			"css": ["sites/vrv/index.css", "sites/common.css"]
-=======
-			"css": ["sites/vrv/index.css"]
->>>>>>> Upgrade to v4 (rebased) (#55)
-=======
-			"css": ["sites/vrv/index.css"]
->>>>>>> SpaceK33z/master
 		},{
 			"matches": ["*://*.hulu.com/*"],
 			"js": ["utils.js", "sites/hulu/index.js"],
 			"css": ["sites/hulu/index.css", "sites/common.css"]
 		},{
-<<<<<<< HEAD
-<<<<<<< HEAD
 			"matches": ["*://play.google.com/store/*"],
 			"js": ["utils.js", "sites/google/play.js"],
-=======
-			"matches": ["*://*.google.com/store/*"],
-			"js": ["utils.js", "sites/google/index.js"],
->>>>>>> Upgrade to v4 (rebased) (#55)
-=======
-			"matches": ["*://*.google.com/store/*"],
-			"js": ["utils.js", "sites/google/index.js"],
->>>>>>> SpaceK33z/master
 			"css": ["sites/google/index.css", "sites/common.css"]
 		},{
 			"matches": ["*://*.apple.com/*"],
@@ -152,8 +111,6 @@
 			"matches": ["*://*.netflix.com/watch/*"],
 			"js": ["utils.js", "sites/netflix/index.js"],
 			"css": ["sites/netflix/index.css", "sites/common.css"]
-<<<<<<< HEAD
-<<<<<<< HEAD
 		},{
             "matches": ["*://*.gostream.site/*"],
             "js": ["utils.js", "sites/gostream/index.js"],
@@ -166,21 +123,12 @@
 			"matches": ["*://www.youtube.com/*"],
 			"js": ["utils.js", "sites/youtube/index.js"],
 			"css": ["sites/youtube/index.css", "sites/common.css"]
-=======
->>>>>>> Upgrade to v4 (rebased) (#55)
-=======
->>>>>>> SpaceK33z/master
 		}
 	],
 
 	"background": {
-<<<<<<< HEAD
 		"scripts": ["background.js", "plugn.js"],
 		"persistent": true
-=======
-		"scripts": ["background.js"],
-		"persistent": false
->>>>>>> Upgrade to v4 (rebased) (#55)
 	},
 
 	"options_page": "options/index.html",
@@ -203,23 +151,7 @@
 		"storage",
         "downloads",
         "contextMenus",
-<<<<<<< HEAD
-<<<<<<< HEAD
         "<all_urls>"
 	],
     "web_accessible_resources": ["img/*"]
-=======
-=======
->>>>>>> SpaceK33z/master
-		"https://*.plex.direct/*"
-	],
-	"optional_permissions": [
-		"http://*/",
-		"https://*/"
-	],
-    "web_accessible_resources": ["img/16.png", "img/48.png", "img/_16.png", "img/_48.png", "img/o16.png", "img/o48.png"]
-<<<<<<< HEAD
->>>>>>> Upgrade to v4 (rebased) (#55)
-=======
->>>>>>> SpaceK33z/master
 }

@@ -24,38 +24,17 @@ parseOptions().then(() => {
 });
 
 async function initPlexThingy() {
-<<<<<<< HEAD
-<<<<<<< HEAD
 	let button = renderPlexButton();
 
 	if (!button)
 		return /* Fatal Error: Fail Silently */;
-=======
-=======
->>>>>>> SpaceK33z/master
-
-	let $button = renderPlexButton();
-	if (!$button)
-		return;
-<<<<<<< HEAD
->>>>>>> Upgrade to v4 (rebased) (#55)
-=======
->>>>>>> SpaceK33z/master
 
 	let $title = document.querySelector('#dle-content .about > h1'),
         $date = document.querySelector('.features > .reset:nth-child(2) a');
 
 	if (!$title || !$date)
 		return modifyPlexButton(
-<<<<<<< HEAD
-<<<<<<< HEAD
 			button,
-=======
-			$button,
->>>>>>> Upgrade to v4 (rebased) (#55)
-=======
-			$button,
->>>>>>> SpaceK33z/master
 			'error',
 			'Could not extract title or year from Flenix'
 		),
@@ -79,49 +58,5 @@ async function initPlexThingy() {
     title = Db.title;
     year = Db.year;
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 	findPlexMedia({ title, year, button, IMDbID, TMDbID, TVDbID, type, remote: '/engine/ajax/get.php', locale: 'flenix' });
-=======
-=======
->>>>>>> SpaceK33z/master
-	findPlexMedia({ title, year, button: $button, IMDbID, TMDbID, TVDbID, type, remote: '/engine/ajax/get.php', locale: 'flenix' });
-}
-
-function renderPlexButton() {
-	// The "download" buttons
-	let $downloadButtons = document.querySelectorAll(
-		'#dle-content > .header_tabs > ul > li:last-child'
-	),
-        $actions = document.querySelectorAll(
-            '#dle-content > .header_tabs > ul'
-    );
-
-	if (!$actions)
-		return;
-
-	let $existingButton = document.querySelectorAll('a.web-to-plex-button');
-	if ($existingButton)
-		$existingButton.forEach(e => e.remove());
-
-    let els = [];
-	$actions.forEach((e, i) => {
-        let pa = document.createElement('li'),
-            el = document.createElement('a'),
-            li = /^[ou]l$/i.test(e.tagName);
-
-        pa.classList.add('web-to-plex-wrapper');
-        el.textContent = 'Web to Plex';
-        el.title = 'Loading...';
-	    el.classList.add((li? 'flatButton': 'roundButton'), 'web-to-plex-button');
-        e.appendChild(li? (pa.appendChild(el), pa): el);
-
-        return els.push(el);
-    });
-
-	return els;
-<<<<<<< HEAD
->>>>>>> Upgrade to v4 (rebased) (#55)
-=======
->>>>>>> SpaceK33z/master
 }

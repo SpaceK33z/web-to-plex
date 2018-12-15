@@ -1,6 +1,4 @@
 /* global wait, modifyPlexButton, parseOptions, findPlexMedia */
-<<<<<<< HEAD
-<<<<<<< HEAD
 function isList() {
 	return /\/list\//i.test(window.location.pathname);
 }
@@ -28,76 +26,16 @@ function initPlexThingy() {
 	if (!$title || !$date)
 		return modifyPlexButton(
 			button,
-=======
-=======
->>>>>>> SpaceK33z/master
-function init() {
-	wait(
-		() => document.querySelector('.js-watch-panel'),
-		initPlexThingy
-	);
-}
-
-function initPlexThingy() {
-	let $button = renderPlexButton();
-	if (!$button)
-		return;
-
-	let $title = document.querySelector('.headline-1[itemprop="name"]'),
-        $date = document.querySelector('small[itemprop="datePublished"]');
-
-	if (!$title || !$date)
-		return modifyPlexButton(
-			$button,
-<<<<<<< HEAD
->>>>>>> Upgrade to v4 (rebased) (#55)
-=======
->>>>>>> SpaceK33z/master
 			'error',
 			'Could not extract title or year from Movieo'
 		);
 
 	let title = $title.textContent.trim(),
         year = $date.textContent.trim(),
-<<<<<<< HEAD
-<<<<<<< HEAD
         image = ($image || {}).src,
         IMDbID = getIMDbID();
 
 	findPlexMedia({ title, year, button, type: 'movie', IMDbID });
-=======
-=======
->>>>>>> SpaceK33z/master
-        IMDbID = getIMDbID();
-
-	findPlexMedia({ title, year, button: $button, type: 'movie', IMDbID });
-}
-
-function renderPlexButton() {
-	let $actions = document.querySelector('.js-watch-panel .services');
-	if (!$actions)
-		return;
-
-	let parentEl = document.createElement('p'),
-        el = document.createElement('a'),
-        ch = document.createElement('span');
-
-    ch.classList.add('icon', '-web-to-plex');
-    ch.setAttribute('style', `background: url("${ chrome.extension.getURL('img/16.png') }") no-repeat !important`);
-
-    el.textContent = 'Web to Plex';
-    el.title = 'Loading...';
-	el.classList.add('label', 'web-to-plex-button');
-
-    parentEl.appendChild(ch);
-    parentEl.appendChild(el);
-	$actions.appendChild(parentEl);
-
-	return el;
-<<<<<<< HEAD
->>>>>>> Upgrade to v4 (rebased) (#55)
-=======
->>>>>>> SpaceK33z/master
 }
 
 function getIMDbID() {
@@ -110,8 +48,6 @@ function getIMDbID() {
 	}
 }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 async function addInListItem(element) {
 	let $title = element.querySelector('.frame-title'),
         $image = element.querySelector('img');
@@ -161,13 +97,3 @@ function initList() {
 }
 
 parseOptions().then(init);
-=======
-parseOptions().then(() => {
-	init();
-});
->>>>>>> Upgrade to v4 (rebased) (#55)
-=======
-parseOptions().then(() => {
-	init();
-});
->>>>>>> SpaceK33z/master

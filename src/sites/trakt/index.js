@@ -52,8 +52,6 @@ function init() {
 	}
 }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 async function initPlexThingy(type) {
 	let button = renderPlexButton();
 
@@ -92,57 +90,6 @@ async function initPlexThingy(type) {
         save(`${title} (${year}).imdb`, { title, year, imdb: o.im });
         save(`${title}.imdb`, year);
     }
-=======
-=======
->>>>>>> SpaceK33z/master
-function renderPlexButton() {
-	let $actions = $$('#info-wrapper .action-buttons');
-	if (!$actions)
-		return;
-
-	let existingButton = $actions.querySelector('a.web-to-plex-button');
-	if (existingButton)
-		return;
-
-	let pa = document.createElement('a'),
-        ma = document.createElement('div'),
-        ch = document.createElement('div'),
-        el = document.createElement('div');
-
-	pa.classList.add('btn', 'btn-block', 'btn-summary', 'btn-w2p');
-    ma.classList.add('fa', 'fa-fw', 'fa-download');
-    ch.classList.add('text');
-    el.textContent = 'Web to Plex';
-    el.classList.add('web-to-plex-button', 'main-info');
-    pa.appendChild(ma);
-    pa.appendChild(ch);
-    ch.appendChild(el);
-	$actions.insertBefore(pa, $actions.childNodes[3]);
-
-	return pa;
-}
-
-async function initPlexThingy(type) {
-	let $button = renderPlexButton();
-
-	if (!$button)
-		return;
-
-	let $title = $$('.mobile-title'),
-        $year = $$('.mobile-title .year');
-
-	if (!$title || !$year)
-		return modifyPlexButton($button, 'error',  `Could not extract ${ !$title? 'title': 'year' } from Trakt`);
-
-	let title = $title.textContent.replace(/(.+)(\d{4}).*?$/, '$1').replace(/\s*\:\s*Season.*$/i, '').trim(),
-        year = (RegExp.$2 || $year.textContent).trim(),
-        IMDbID = getIMDbID(),
-        TMDbID = getTMDbID(),
-        TVDbID = getTVDbID();
-<<<<<<< HEAD
->>>>>>> Upgrade to v4 (rebased) (#55)
-=======
->>>>>>> SpaceK33z/master
 
     if((!IMDbID && !TMDbID) || !TVDbID) {
         let Db = await getIDs({ title, year, type, IMDbID, TMDbID, TVDbID });
@@ -154,15 +101,7 @@ async function initPlexThingy(type) {
         year = Db.year;
     }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 	findPlexMedia({ type, title, year, image, button, IMDbID, TMDbID, TVDbID });
-=======
-	findPlexMedia({ type, title, year, button: $button, IMDbID, TMDbID, TVDbID, txt: 'title', hov: 'null' });
->>>>>>> Upgrade to v4 (rebased) (#55)
-=======
-	findPlexMedia({ type, title, year, button: $button, IMDbID, TMDbID, TVDbID, txt: 'title', hov: 'null' });
->>>>>>> SpaceK33z/master
 }
 
 async function initDash() {
@@ -180,13 +119,7 @@ async function initDash() {
                 return setTimeout( () => element.onclick(event, true), 5 );
 
             let title = $$("#watch-now-content h3").innerText.replace(/^\s*where\s+to\s+watch\s*/i, ''),
-<<<<<<< HEAD
-<<<<<<< HEAD
                 image = $$('.poster img.real[alt="poster" i]'),
-=======
->>>>>>> Upgrade to v4 (rebased) (#55)
-=======
->>>>>>> SpaceK33z/master
                 type = 'show',
                 year = YEAR,
                 button = $$(".w2p-channel");
@@ -203,21 +136,9 @@ async function initDash() {
 `
 <div class="title">ondemand</div>
 <div class="section">
-<<<<<<< HEAD
-<<<<<<< HEAD
     <a class="w2p-channel w2p-action" href="#" title>
       <div class="icon btn-amazon">
         <img class="lazy" src="${ IMG_URL._48 }" style="height: 45px; width: auto;" alt="Plugin">
-=======
-    <a class="w2p-channel web-to-plex-button" href="#" title>
-      <div class="icon btn-amazon">
-        <img class="lazy" src="${ chrome.extension.getURL('img/_48.png') }" style="height: 45px; width: auto;" alt="Plugin">
->>>>>>> Upgrade to v4 (rebased) (#55)
-=======
-    <a class="w2p-channel web-to-plex-button" href="#" title>
-      <div class="icon btn-amazon">
-        <img class="lazy" src="${ chrome.extension.getURL('img/_48.png') }" style="height: 45px; width: auto;" alt="Plugin">
->>>>>>> SpaceK33z/master
       </div>
       <div class="price">Free</div>
     </a>

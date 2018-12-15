@@ -25,8 +25,6 @@ parseOptions().then(() => {
 });
 
 async function initPlexThingy() {
-<<<<<<< HEAD
-<<<<<<< HEAD
 	let button = renderPlexButton();
 
 	if (!button)
@@ -39,23 +37,6 @@ async function initPlexThingy() {
 	if (!$title)
 		return modifyPlexButton(
 			button,
-=======
-=======
->>>>>>> SpaceK33z/master
-	let $button = renderPlexButton();
-	if (!$button)
-		return;
-
-	let $title = document.querySelector('[class^="series"] .title, .series'),
-        $year = document.querySelector('.additional-information-item');
-
-	if (!$title)
-		return modifyPlexButton(
-			$button,
-<<<<<<< HEAD
->>>>>>> Upgrade to v4 (rebased) (#55)
-=======
->>>>>>> SpaceK33z/master
 			'error',
 			 `Could not extract title from VRV`
 		),
@@ -63,58 +44,14 @@ async function initPlexThingy() {
 
 	let title = $title.innerText.replace(/(unrated|mature|tv-?\d{1,2})\s*$/i, '').trim(),
         year = $year? $year.textContent.replace(/.+(\d{4}).*/, '$1').trim(): 0,
-<<<<<<< HEAD
-<<<<<<< HEAD
         image = ($image || {}).src,
-=======
->>>>>>> Upgrade to v4 (rebased) (#55)
-=======
->>>>>>> SpaceK33z/master
 	    Db = await getIDs({ title, year, APIType: 'tv' }),
         IMDbID = Db.imdb,
         TMDbID = Db.tmdb,
         TVDbID = Db.tvdb;
 
-<<<<<<< HEAD
-<<<<<<< HEAD
     title = title || Db.title;
     year = year || Db.year;
 
 	findPlexMedia({ title, year, image, button, type: 'show', IMDbID, TMDbID, TVDbID });
 }
-=======
-=======
->>>>>>> SpaceK33z/master
-    title = Db.title;
-    year = Db.year;
-
-	findPlexMedia({ title, year, button: $button, type: 'show', IMDbID, TMDbID, TVDbID });
-}
-
-function renderPlexButton() {
-	// The "download" button
-	let $actions = document.querySelector(
-            '.action-buttons'
-    );
-
-	if (!$actions)
-		return;
-
-	let $existingButton = document.querySelector('a.web-to-plex-button');
-	if ($existingButton)
-		$existingButton.remove();
-
-    let el = document.createElement('a');
-
-    el.classList.add('web-to-plex-button', 'action-button', 'h-button');
-    el.textContent = 'Web to Plex';
-    el.title = 'Loading...';
-
-    $actions.appendChild(el);
-
-	return el;
-}
-<<<<<<< HEAD
->>>>>>> Upgrade to v4 (rebased) (#55)
-=======
->>>>>>> SpaceK33z/master

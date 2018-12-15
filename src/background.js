@@ -1,6 +1,4 @@
 /* global chrome */
-<<<<<<< HEAD
-<<<<<<< HEAD
 let NO_DEBUGGER = false;
 
 let external = {},
@@ -21,32 +19,12 @@ let cors = url => ((/^(https|sftp)\b/i.test(url) || /\:(443|22)\b/? '': 'no-') +
 
 // Create a Crypto-Key
 // new Key(number:integer, string) -> string
-=======
-=======
->>>>>>> SpaceK33z/master
-let external = {},
-    parentItem,
-    terminal =
-//                { error: m => m, info: m => m, log: m => m, warn: m => m } ||
-                console;
-
-let date = new Date(),
-    YEAR = date.getFullYear(),
-    MONTH = date.getMonth() + 1,
-    DATE = date.getDate();
-
-<<<<<<< HEAD
->>>>>>> Upgrade to v4 (rebased) (#55)
-=======
->>>>>>> SpaceK33z/master
 class Key {
     constructor(length = 8, symbol = '') {
         let values = [];
 
         window.crypto.getRandomValues(new Uint32Array(16)).forEach((value, index, array) => values.push(value.toString(36)));
 
-<<<<<<< HEAD
-<<<<<<< HEAD
         return this.length = length, this.value = values.join(symbol);
     }
 
@@ -105,93 +83,20 @@ function ChangeStatus({ ITEM_ID, ITEM_TITLE, ITEM_TYPE, ID_PROVIDER, ITEM_YEAR, 
 
     chrome.contextMenus.update('W2P', {
         title: `Find "${ ITEM_TITLE } (${ ITEM_YEAR || YEAR })"`
-=======
-=======
->>>>>>> SpaceK33z/master
-        return this.value = values.join(symbol);
-    }
-
-    rehash(length) {
-        return this.value = new Key(length);
-    }
-}
-
-// Session key
-let SessionKey = new Key(16);
-
-// Object{username, password} => Object
-function generateHeaders(auth) {
-    let headers = { Accept: 'application/json' };
-
-    if (!auth)
-        return headers;
-
-    return {
-        Authorization: `Basic ${ btoa(`${ auth.username }:${ auth.password }`) }`,
-        ...headers
-    };
-}
-
-// Object{MovieOrShowID, MovieOrShowTitle, MovieOrShowType, MovieOrShowIDProvider, MovieOrShowYear, LinkURL, FileType} => undefined
-function changeStatus({ id, tt, ty, pv, yr, ur = '', ft = '' }) {
-
-    let tl = tt.replace(/\-/g, ' ').replace(/[\s\:]{2,}/g, ' - ').replace(/[^\w\s\-\']+/g, ''),
-    // File friendly title
-        st = tt.replace(/[\-\s]+/g, '-').replace(/[^\w\-]+/g, ''),
-    // Search friendly title
-        xx = /[it]m/i.test(pv)? 'FX': 'GG';
-
-    id = (id && !/^tt-?$/i.test(id)? id: '') + '';
-    id = id.replace(/^.*\b(tt\d+)\b.*$/, '$1').replace(/^.*\bid=(\d+)\b.*$/, '$1').replace(/^.*(?:movie|tv|(?:tv-?)?(?:shows?|series|episodes?))\/(\d+).*$/, '$1');
-
-    external = { ...external, F: tl, P: pv, Q: id, S: tt, T: st, U: ur, V: ty, X: xx, Y: yr, Z: ft };
-
-    chrome.browserAction.setBadgeText({
-        text: pv
-    });
-
-    chrome.browserAction.setBadgeBackgroundColor({
-       color: (id? '#f45a26': '#666666')
-    });
-
-    chrome.contextMenus.update('W2P', {
-        title: `Find "${ tt } (${ yr || YEAR })"`
-<<<<<<< HEAD
->>>>>>> Upgrade to v4 (rebased) (#55)
-=======
->>>>>>> SpaceK33z/master
     });
 
     for(let array = 'IM TM TV'.split(' '), length = array.length, index = 0, item; index < length; index++)
         chrome.contextMenus.update('W2P-' + (item = array[index]), {
             title: (
-<<<<<<< HEAD
-<<<<<<< HEAD
                 ((ID_PROVIDER == (item += 'Db')) && ITEM_ID)?
                     `Open in ${ item } (${ (+ITEM_ID? '#': '') + ITEM_ID })`:
-=======
-                ((pv == (item += 'Db')) && id)?
-                    `Open in ${ item } (${ (+id? '#': '') + id })`:
->>>>>>> Upgrade to v4 (rebased) (#55)
-=======
-                ((pv == (item += 'Db')) && id)?
-                    `Open in ${ item } (${ (+id? '#': '') + id })`:
->>>>>>> SpaceK33z/master
                 `Find in ${ item }`
             ),
             checked: false
         });
 
     chrome.contextMenus.update('W2P-XX', {
-<<<<<<< HEAD
-<<<<<<< HEAD
         title: `Find on ${ (SEARCH_PROVIDER == 'GX'? 'GoStream': 'Google') }`,
-=======
-        title: `Find on ${ (xx == 'FX'? 'Flenix': 'Google') }`,
->>>>>>> Upgrade to v4 (rebased) (#55)
-=======
-        title: `Find on ${ (xx == 'FX'? 'Flenix': 'Google') }`,
->>>>>>> SpaceK33z/master
         checked: false
     });
 }
@@ -202,8 +107,6 @@ function changeStatus({ id, tt, ty, pv, yr, ur = '', ft = '' }) {
 // HTTP servers. Unfortunately, many people use CouchPotato over HTTP.
 function viewCouchPotato(request, sendResponse) {
 	fetch(`${ request.url }?id=${ request.imdbId }`, {
-<<<<<<< HEAD
-<<<<<<< HEAD
 		headers: new Headers(request.basicAuth),
         mode: cors(request.url)
 	})
@@ -214,28 +117,10 @@ function viewCouchPotato(request, sendResponse) {
     .catch(error => {
         sendResponse({ error: String(error), location: 'viewCouchPotato' });
     });
-=======
-=======
->>>>>>> SpaceK33z/master
-		headers: generateHeaders(request.basicAuth)
-	})
-		.then(response => response.json())
-		.then(json => {
-			sendResponse({ success, status: success ? json.media.status : null });
-		})
-		.catch(error => {
-			sendResponse({ error: String(error), location: 'viewCouchPotato' });
-		});
-<<<<<<< HEAD
->>>>>>> Upgrade to v4 (rebased) (#55)
-=======
->>>>>>> SpaceK33z/master
 }
 
 function addCouchpotato(request, sendResponse) {
 	fetch(`${ request.url }?identifier=${ request.imdbId }`, {
-<<<<<<< HEAD
-<<<<<<< HEAD
 		headers: new Headers(request.basicAuth),
         mode: cors(request.url)
 	})
@@ -247,30 +132,12 @@ function addCouchpotato(request, sendResponse) {
     .catch(error => {
         sendResponse({ error: String(error) , location: 'addCouchPotato'});
     });
-=======
-=======
->>>>>>> SpaceK33z/master
-		headers: generateHeaders(request.basicAuth)
-	})
-		.then(response => response.json())
-		.then(response => {
-			sendResponse({ success: response.success });
-		})
-		.catch(error => {
-			sendResponse({ error: String(error) , location: 'addCouchPotato'});
-		});
-<<<<<<< HEAD
->>>>>>> Upgrade to v4 (rebased) (#55)
-=======
->>>>>>> SpaceK33z/master
 }
 
 function addWatcher(request, sendResponse) {
     let headers = {
             'Content-Type': 'application/json',
             'X-Api-Key': request.token,
-<<<<<<< HEAD
-<<<<<<< HEAD
             ...(new Headers(request.basicAuth))
         },
         id = (/^(tt-?)?$/.test(request.imdbId)? request.tmdbId: request.imdbId),
@@ -285,21 +152,6 @@ function addWatcher(request, sendResponse) {
     fetch(debug.url = `${ request.url }?apikey=${ request.token }&mode=addmovie&${ query }=${ id }`)
         .then(response => response.json())
         .catch(error => sendResponse({ error: 'Movie not found', location: 'addWatcher => fetch.then.catch', silent: true }))
-=======
-=======
->>>>>>> SpaceK33z/master
-            ...generateHeaders(request.basicAuth)
-        },
-        id = (/^(tt-?)?$/.test(request.imdbId)? request.tmdbId: request.imdbId),
-        query = (/^tt-?\d+$/i.test(id)? 'imdbid': /^\d+$/.test(id)? 'tmdbid': (id = encodeURI(`${request.title} ${request.year}`), 'term')),
-        debug = { headers, query, request };
-
-    fetch(debug.url = `${ request.url }?apikey=${ request.token }&mode=addmovie&${ query }=${ id }`)
-        .then(response => response.json())
-<<<<<<< HEAD
->>>>>>> Upgrade to v4 (rebased) (#55)
-=======
->>>>>>> SpaceK33z/master
         .then(response => {
             if((response.response + "") == "true")
                 return sendResponse({
@@ -321,8 +173,6 @@ function addRadarr(request, sendResponse) {
     let headers = {
             'Content-Type': 'application/json',
             'X-Api-Key': request.token,
-<<<<<<< HEAD
-<<<<<<< HEAD
             ...(new Headers(request.basicAuth))
         },
         id = (/^(tt-?)?$/.test(request.imdbId)? request.tmdbId: request.imdbId),
@@ -344,27 +194,6 @@ function addRadarr(request, sendResponse) {
                     monitored: true,
                     minimumAvailability: 'preDB',
                     qualityProfileId: request.QualityID,
-=======
-=======
->>>>>>> SpaceK33z/master
-            ...generateHeaders(request.basicAuth)
-        },
-        id = (/^(tt-?)?$/.test(request.imdbId)? request.tmdbId: request.imdbId),
-        query = (/^tt-?\d+$/i.test(id)? 'imdb?imdbid': /^\d+$/.test(id)? 'tmdb?tmdbid': (id = encodeURI(`${request.title} ${request.year}`), 'term')),
-        debug = { headers, query, request };
-
-    fetch(debug.url = `${ request.url }lookup/${ query }=${ id }&apikey=${ request.token }`)
-        .then(response => response.json())
-        .then(data => {
-            let body,
-                props = {
-                    monitored: true,
-                    minimumAvailability: 'preDB',
-                    qualityProfileId: request.QualityProfileId,
-<<<<<<< HEAD
->>>>>>> Upgrade to v4 (rebased) (#55)
-=======
->>>>>>> SpaceK33z/master
                     rootFolderPath: request.StoragePath,
                     addOptions: {
                         searchForMovie: true
@@ -394,21 +223,9 @@ function addRadarr(request, sendResponse) {
             return debug.body = body;
         })
         .then(body => {
-<<<<<<< HEAD
-<<<<<<< HEAD
             return fetch(`${ request.url }?apikey=${ request.token }`, debug.requestHeaders = {
                 method: 'POST',
                 mode: cors(request.url),
-=======
-            return fetch(`${ request.url }?apikey=${ request.token }`, debug.request = {
-                method: 'POST',
-                mode: 'no-cors',
->>>>>>> Upgrade to v4 (rebased) (#55)
-=======
-            return fetch(`${ request.url }?apikey=${ request.token }`, debug.request = {
-                method: 'POST',
-                mode: 'no-cors',
->>>>>>> SpaceK33z/master
                 body: JSON.stringify(body),
                 headers
             });
@@ -449,21 +266,11 @@ function addSonarr(request, sendResponse) {
     let headers = {
             'Content-Type': 'application/json',
             'X-Api-Key': request.token,
-<<<<<<< HEAD
-<<<<<<< HEAD
             ...(new Headers(request.basicAuth))
-=======
-            ...generateHeaders(request.basicAuth)
->>>>>>> Upgrade to v4 (rebased) (#55)
-=======
-            ...generateHeaders(request.basicAuth)
->>>>>>> SpaceK33z/master
         },
         id = request.tvdbId,
         query = encodeURIComponent(`tvdb:${ id }`),
         debug = { headers, query, request };
-<<<<<<< HEAD
-<<<<<<< HEAD
             // setup stack trace for debugging
 
     fetch(debug.url = `${ request.url }lookup?apikey=${ request.token }&term=${ query }`)
@@ -474,34 +281,11 @@ function addSonarr(request, sendResponse) {
                 throw new Error('TV Show not found');
 
             // Monitor, search, and download series ASAP
-=======
-=======
->>>>>>> SpaceK33z/master
-
-    fetch(debug.url = `${ request.url }lookup?apikey=${ request.token }&term=${ query }`)
-        .then(response => response.json())
-        .then(data => {
-            if (!data instanceof Array || !data.length) {
-                throw new Error('TV Show not found');
-            }
-
-<<<<<<< HEAD
->>>>>>> Upgrade to v4 (rebased) (#55)
-=======
->>>>>>> SpaceK33z/master
             let body = {
                 ...data[0],
                 monitored: true,
                 minimumAvailability: 'preDB',
-<<<<<<< HEAD
-<<<<<<< HEAD
                 qualityProfileId: request.QualityID,
-=======
-                qualityProfileId: request.QualityProfileId,
->>>>>>> Upgrade to v4 (rebased) (#55)
-=======
-                qualityProfileId: request.QualityProfileId,
->>>>>>> SpaceK33z/master
                 rootFolderPath: request.StoragePath,
                 addOptions: {
                     searchForMissingEpisodes: true
@@ -517,21 +301,9 @@ function addSonarr(request, sendResponse) {
             return debug.body = body;
         })
         .then(body => {
-<<<<<<< HEAD
-<<<<<<< HEAD
             return fetch(`${ request.url }?apikey=${ request.token }`, debug.requestHeaders = {
                 method: 'POST',
                 mode: cors(request.url),
-=======
-            return fetch(`${ request.url }?apikey=${ request.token }`, debug.request = {
-                method: 'POST',
-                mode: 'no-cors',
->>>>>>> Upgrade to v4 (rebased) (#55)
-=======
-            return fetch(`${ request.url }?apikey=${ request.token }`, debug.request = {
-                method: 'POST',
-                mode: 'no-cors',
->>>>>>> SpaceK33z/master
                 body: JSON.stringify(body),
                 headers
             });
@@ -568,8 +340,6 @@ function addSonarr(request, sendResponse) {
         });
 }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 function addOmbi(request, sendResponse) {
     let headers = {
             'Content-Type': 'application/json',
@@ -631,10 +401,6 @@ function addOmbi(request, sendResponse) {
         });
 }
 
-=======
->>>>>>> Upgrade to v4 (rebased) (#55)
-=======
->>>>>>> SpaceK33z/master
 // Unfortunately the native Promise.race does not work as you would suspect.
 // If one promise (Plex request) fails, we still want the other requests to continue racing.
 // See https://www.jcore.com/2016/12/18/promise-me-you-wont-use-promise-race/ for an explanation
@@ -666,15 +432,9 @@ function $searchPlex(connection, headers, options) {
         url = `${ connection.uri }/hubs/search`,
         field = options.field || 'title';
 
-<<<<<<< HEAD
-<<<<<<< HEAD
     if(!options.title)
         return {};
 
-=======
->>>>>>> Upgrade to v4 (rebased) (#55)
-=======
->>>>>>> SpaceK33z/master
     if(type === 'tv')
         type = 'show';
 
@@ -750,23 +510,11 @@ async function searchPlex(request, sendResponse) {
 // Chrome is f**king retarted...
 // Instead of having an object returned (for the context-menu)
 // You have to make API calls on ALL clicks...
-<<<<<<< HEAD
-<<<<<<< HEAD
 chrome.contextMenus.onClicked.addListener(item => {
-=======
-
-chrome.contextMenus.onClicked.addListener((item) => {
->>>>>>> Upgrade to v4 (rebased) (#55)
-=======
-
-chrome.contextMenus.onClicked.addListener((item) => {
->>>>>>> SpaceK33z/master
     if(!/^W2P/i.test(item.menuItemId)) return;
 
     let url = "", dnl = false,
         db = item.menuItemId.slice(-2).toLowerCase(),
-<<<<<<< HEAD
-<<<<<<< HEAD
         pv = external.ID_PROVIDER.slice(0, 2).toLowerCase(),
         qu = external.ITEM_ID,
         tl = external.SEARCH_TITLE,
@@ -775,20 +523,6 @@ chrome.contextMenus.onClicked.addListener((item) => {
         lt = external.FILE_TITLE,
         ft = external.FILE_TYPE,
         fp = external.FILE_PATH,
-=======
-=======
->>>>>>> SpaceK33z/master
-        pv = external.P.slice(0, 2).toLowerCase(),
-        qu = external.Q,
-        tl = external.T,
-        yr = external.Y,
-        tt = external.S,
-        lt = external.F,
-        ft = external.Z,
-<<<<<<< HEAD
->>>>>>> Upgrade to v4 (rebased) (#55)
-=======
->>>>>>> SpaceK33z/master
         p = (s, r = '+') => s.replace(/-/g, r);
 
     switch(db) {
@@ -799,15 +533,7 @@ chrome.contextMenus.onClicked.addListener((item) => {
             break;
         case 'tm':
             url = (qu && pv == 'tm')?
-<<<<<<< HEAD
-<<<<<<< HEAD
                 `themoviedb.org/${ external.ITEM_TYPE == 'show'? 'tv': 'movie' }/${ qu }`:
-=======
-                `themoviedb.org/${ external.V == 'show'? 'tv': 'movie' }/${ qu }`:
->>>>>>> Upgrade to v4 (rebased) (#55)
-=======
-                `themoviedb.org/${ external.V == 'show'? 'tv': 'movie' }/${ qu }`:
->>>>>>> SpaceK33z/master
             `themoviedb.org/search?query=${ tl }`;
             break;
         case 'tv':
@@ -816,43 +542,19 @@ chrome.contextMenus.onClicked.addListener((item) => {
             `thetvdb.com/search?q=${ p(tl) }`;
             break;
         case 'xx':
-<<<<<<< HEAD
-<<<<<<< HEAD
             url = external.SEARCH_PROVIDER == 'GX'?
                 `gostream.site/?s=${ p(tl) }`:
-=======
-            url = external.X == 'FX'?
-                `flenix.tv/?do=search&story=${ p(tt) }&min_year=${ yr || 1990 }&filter=true&max_year=${ yr }&min_imdb=0&max_imdb=10&cat=1&order=date&g-recaptcha-response=${ SessionKey.value }`:
->>>>>>> Upgrade to v4 (rebased) (#55)
-=======
-            url = external.X == 'FX'?
-                `flenix.tv/?do=search&story=${ p(tt) }&min_year=${ yr || 1990 }&filter=true&max_year=${ yr }&min_imdb=0&max_imdb=10&cat=1&order=date&g-recaptcha-response=${ SessionKey.value }`:
->>>>>>> SpaceK33z/master
             `google.com/search?q="${ p(tl, ' ') } ${ yr }"+${ pv }db`;
             break;
         case 'dl':
             dnl = true;
-<<<<<<< HEAD
-<<<<<<< HEAD
             url = external.ITEM_URL;
             break;
         default: return; break;
-=======
-            url = external.U;
-            break;
-        default: return;
->>>>>>> Upgrade to v4 (rebased) (#55)
-=======
-            url = external.U;
-            break;
-        default: return;
->>>>>>> SpaceK33z/master
     }
 
     if(!dnl)
         window.open(`https://${ url }`, '_blank');
-<<<<<<< HEAD
-<<<<<<< HEAD
     else if (dnl)
         // try/catch won't work here, so use the first download's callback as an error catcher
         chrome.downloads.download({
@@ -880,40 +582,10 @@ chrome.runtime.onMessage.addListener((request, sender, callback) => {
         FILE_TYPE = (item.tail || 'mp4'),
         FILE_PATH = item.path || '',
         ITEM_ID = ((i, I)=>{for(let p in i)if(RegExp('^'+I,'i').test(p))return i[p]})(item, ID_PROVIDER);
-=======
-=======
->>>>>>> SpaceK33z/master
-    else
-        chrome.downloads.download({
-          url,
-          filename: `${ lt } (${ yr }).${ ft }`,
-          saveAs: true
-        });
-});
-
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    terminal.log('From:', sender);
-
-    let id = (request? request.options || request: {}),
-        tt = id.title,
-        yr = id.year,
-        ty = id.type,
-        pv = (id.TVDbID || id.tvdbId? 'TVDb': id.TMDbID || id.tmdbId? 'TMDb': 'IMDb'),
-        ur = id.href || '',
-        ft = id.tail || '';
-    id = id[pv + 'ID'] || id[pv.toLowerCase() + 'Id'];
-
-    changeStatus({ id, tt, yr, ty, pv, ur, ft });
-<<<<<<< HEAD
->>>>>>> Upgrade to v4 (rebased) (#55)
-=======
->>>>>>> SpaceK33z/master
 
     try {
         switch (request.type) {
             case 'SEARCH_PLEX':
-<<<<<<< HEAD
-<<<<<<< HEAD
                 searchPlex(request, callback);
                 return true;
             case 'VIEW_COUCHPOTATO':
@@ -933,35 +605,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 return true;
             case 'ADD_OMBI':
                 addOmbi(request, callback);
-=======
-=======
->>>>>>> SpaceK33z/master
-                searchPlex(request, sendResponse);
-                return true;
-            case 'VIEW_COUCHPOTATO':
-                viewCouchPotato(request, sendResponse);
-                return true;
-            case 'ADD_COUCHPOTATO':
-                addCouchpotato(request, sendResponse);
-                return true;
-            case 'ADD_RADARR':
-                addRadarr(request, sendResponse);
-                return true;
-            case 'ADD_SONARR':
-                addSonarr(request, sendResponse);
-                return true;
-            case 'ADD_WATCHER':
-                addWatcher(request, sendResponse);
-<<<<<<< HEAD
->>>>>>> Upgrade to v4 (rebased) (#55)
-=======
->>>>>>> SpaceK33z/master
                 return true;
             case 'OPEN_OPTIONS':
                 chrome.runtime.openOptionsPage();
                 return true;
-<<<<<<< HEAD
-<<<<<<< HEAD
             case 'SEARCH_FOR':
                 if(ITEM_TITLE && ITEM_TYPE)
                     ChangeStatus({ ITEM_ID, ITEM_TITLE, ITEM_TYPE, ID_PROVIDER, ITEM_YEAR, ITEM_URL, FILE_TYPE, FILE_PATH });
@@ -1029,64 +676,11 @@ if(SessionState === false) {
         id: 'W2P-XX',
         parentId: parentItem,
         title: `Using best guess`,
-=======
-=======
->>>>>>> SpaceK33z/master
-            case 'SAVE_AS':
-                chrome.contextMenus.update('W2P-DL', {
-                    title: `Save as "${ tt } (${ yr })"`
-                });
-                return true;
-            default:
-                return false;
-        }   
-    } catch (error) {
-        return sendResonpse(String(error));
-    }
-});
-
-parentItem = chrome.contextMenus.create({
-    id: 'W2P',
-    title: 'Web to Plex'
-});
-
-saveItem = chrome.contextMenus.create({
-    id: 'W2P-DL',
-    title: 'Nothing to Save'
-});
-
-// Standard search engines
-for(let array = 'IM TM TV'.split(' '), DL = {}, length = array.length, index = 0, item; index < length; index++)
-    chrome.contextMenus.create({
-        id: 'W2P-' + (item = array[index]),
-        parentId: parentItem,
-        title: `Using ${ item }Db`,
-<<<<<<< HEAD
->>>>>>> Upgrade to v4 (rebased) (#55)
-=======
->>>>>>> SpaceK33z/master
         type: 'checkbox',
         checked: true // implement a way to use the checkboxes?
     });
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 }
 
 if(chrome.runtime.lastError)
     /* Attempt Error Suppression */;
-=======
-=======
->>>>>>> SpaceK33z/master
-// Non-standard search engines
-chrome.contextMenus.create({
-    id: 'W2P-XX',
-    parentId: parentItem,
-    title: `Using best guess`,
-    type: 'checkbox',
-    checked: true // implement a way to use the checkboxes?
-});
-<<<<<<< HEAD
->>>>>>> Upgrade to v4 (rebased) (#55)
-=======
->>>>>>> SpaceK33z/master
