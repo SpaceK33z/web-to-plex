@@ -96,7 +96,7 @@ chrome.manifest = chrome.runtime.getManifest();
 // state = "info" - grey
 // anything else for state will show as orange
 class Notification {
-    constructor(state, text, timeout = 7000, callback, autoOpen = false) {
+    constructor(state, text, timeout = 7000, callback, requiresClick = true) {
         let queue = (Notification.queue = Notification.queue || { list: [] }),
             last = queue.list[queue.list.length - 1];
 
@@ -117,7 +117,9 @@ class Notification {
             clearTimeout(notification.job);
             element.remove();
 
-            return (!event.keepClosed)? notification.callback(): null;
+            let removed = delete Notification.queue[notification.id];
+
+            return (event.requiresClick)? null: notification.callback(removed);
         });
 
         element.innerHTML = text;
@@ -127,7 +129,8 @@ class Notification {
             span:  +timeout,
             done:  false,
             index: queue.list.length,
-            job:   setTimeout(() => element.onclick({ target: element, keepClosed: !autoOpen }), timeout),
+            job:   setTimeout(() => element.onclick({ target: element, requiresClick }), timeout),
+            id:    +element.id,
             callback, element
         };
         queue.list.push(queue[element.id]);
