@@ -7,6 +7,10 @@
 
 let NO_DEBUGGER = false;
 
+if(chrome.runtime.lastError)
+    /* Always causes errors on *nix machines, so just "poke" the errors here */
+    chrome.runtime.lastError.message;
+
 // FireFox doesn't support sync storage.
 const storage = (chrome.storage.sync || chrome.storage.local),
       $$ = (selector, all) => (all? document.querySelectorAll(selector): document.querySelector(selector)),
@@ -89,9 +93,10 @@ chrome.manifest = chrome.runtime.getManifest();
 // create and/or queue a notification
 // state = "error" - red
 // state = "update" - blue
+// state = "info" - grey
 // anything else for state will show as orange
 class Notification {
-    constructor(state, text, timeout = 7000, callback) {
+    constructor(state, text, timeout = 7000, callback, autoOpen = false) {
         let queue = (Notification.queue = Notification.queue || { list: [] }),
             last = queue.list[queue.list.length - 1];
 
@@ -112,7 +117,7 @@ class Notification {
             clearTimeout(notification.job);
             element.remove();
 
-            return notification.callback();
+            return (!event.keepClosed)? notification.callback(): null;
         });
 
         element.innerHTML = text;
@@ -122,7 +127,7 @@ class Notification {
             span:  +timeout,
             done:  false,
             index: queue.list.length,
-            job:   setTimeout(() => element.onclick({ target: element }), timeout),
+            job:   setTimeout(() => element.onclick({ target: element, keepClosed: !autoOpen }), timeout),
             callback, element
         };
         queue.list.push(queue[element.id]);
@@ -819,6 +824,8 @@ function requestURLPermissions(url, callback) {
 // stored in chrome.storage.*
 function restoreOptions(OPTIONS) {
 	function setOptions(items) {
+    if(!items) return;
+
 		__options__.forEach(option => {
             let el = $$(`[data-option="${ option }"]`);
 
@@ -837,7 +844,7 @@ function restoreOptions(OPTIONS) {
                     el.oninput({ target: el });
                 else if(/password$/i.test(option))
                     el.setAttribute('type', el.type = 'password');
-                else 
+                else
                     el.placeholder = `Last save: ${ el.value }`,
                     el.title = `Double-click to restore value ("${ el.value }")`,
                     el.setAttribute('save', el.value),
@@ -857,7 +864,7 @@ function restoreOptions(OPTIONS) {
 			performSonarrTest(items.sonarrQualityProfileId, items.sonarrStoragePath, true);
 	}
 
-    
+
     if (OPTIONS && typeof OPTIONS == 'string') {
         OPTIONS = JSON.parse(OPTIONS);
 

@@ -634,9 +634,10 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
 // create and/or queue a notification
 // state = "error" - red
 // state = "update" - blue
+// state = "info" - grey
 // anything else for state will show as orange
 class Notification {
-    constructor(state, text, timeout = 7000, callback) {
+    constructor(state, text, timeout = 7000, callback, autoOpen = false) {
         let queue = (Notification.queue = Notification.queue || { list: [] }),
             last = queue.list[queue.list.length - 1];
 
@@ -657,7 +658,7 @@ class Notification {
             clearTimeout(notification.job);
             element.remove();
 
-            return notification.callback();
+            return (!event.keepClosed)? notification.callback(): null;
         });
 
         element.innerHTML = text;
@@ -667,7 +668,7 @@ class Notification {
             span:  +timeout,
             done:  false,
             index: queue.list.length,
-            job:   setTimeout(() => element.onclick({ target: element }), timeout),
+            job:   setTimeout(() => element.onclick({ target: element, keepClosed: !autoOpen }), timeout),
             callback, element
         };
         queue.list.push(queue[element.id]);
@@ -1102,7 +1103,7 @@ function modifyPlexButton(button, action, title, options = {}) {
         button.classList.add(saved_options.length? 'wtp--download': 'wtp--error');
     } else {
     /* Handle a single item */
-        
+
         if(!options || !options.type || !options.title) return;
 
         let empty = (em.test(options.IMDbID) && em.test(options.TMDbID) && em.test(options.TVDbID)),
@@ -1195,7 +1196,7 @@ function modifyPlexButton(button, action, title, options = {}) {
             button.classList.add('wtp--error');
         }
 
-        element.id = options? `${options.IMDbID || 'tt'}-${options.TMDbID | 0}-${options.TVDbID | 0}`: 'tt--0-0';   
+        element.id = options? `${options.IMDbID || 'tt'}-${options.TMDbID | 0}-${options.TVDbID | 0}`: 'tt--0-0';
     }
 }
 
