@@ -25,7 +25,7 @@
   - [x] #57
 - Revisit issues:
   - [x] #17
-  - [ ] #16
+  - [x] #16
   - [x] #24
 
 # CHANGELOG (Oldest to Newest)
@@ -188,7 +188,7 @@
 - **Removed manager requirement (Options | Managers)**
     - unintentional feature; would force the user to have at least one valid manager
 - Hid debugging information
-  - see issue [#21](https://github.com/SpaceK33z/web-to-plex/issues/21) 
+  - see issue [#21](https://github.com/SpaceK33z/web-to-plex/issues/21)
 
 ## v3.0.0.0 / [SpaceK33z@934d4c5](https://github.com/SpaceK33z/web-to-plex/commit/934d4c542df495a551769b1188b6cd049f785d18)
 
@@ -318,3 +318,4 @@
 - made messages on the options page easier to see (changed to notifications)
 - **Added Ombi support**
 - Fixed the notifications (`class Notification`)
+- **Added support for [YouTube](https://youtube.com/)**

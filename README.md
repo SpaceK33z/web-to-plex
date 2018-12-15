@@ -73,6 +73,7 @@ This is the BETA (testing) version, please visit [Web to Plex](https://github.co
 22. [Toloka](https://toloka.to/)<sup>6</sup>
 23. [Shana Project](https://www.shanaproject.com/)<sup>6</sup>
 24. [My Anime List](https://myanimelist.com/)<sup>6</sup>
+25. [YouTube](https://youtube.com/)
 
 *Notes*
 

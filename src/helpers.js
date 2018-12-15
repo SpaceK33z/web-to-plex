@@ -6,28 +6,30 @@ String.prototype.toCaps = function toCaps(all) {
      * Conjunctions: and, but, for, nor, or, so, & yet
      * Prepositions: across, after, although, at, because, before, between, by, during, from, if, in, into, of, on, to, through, under, with, & without
      */
-    let array = this.toLowerCase(),
-        titles = /(?!^|(?:an?|the)\s+)\b(a([st]|nd?|cross|fter|lthough)?|b(e(cause|fore|tween)|ut|y)|during|from|in(to)?|[io][fn]|[fn]?or|the|[st]o|through|under|with(out)?|yet)(?!\s*$)\b/gi,
-        cap_exceptions = /([\|\"\(]\s*[a-z]|[\:\.\!\?]\s+[a-z]|(?:^\b|[^\'\-\+]\b)[^aeiouy\d\W]+\b)/gi,  // Punctuation exceptions, e.g. "And not I"
-        all_exceptions = /\b((?:ww)?(?:m+[dclxvi]*|d+[clxvi]*|c+[lxvi]*|l+[xvi]*|x+[vi]*|v+i*|i+))\b/gi; // Roman Numberals
+     let array = this.toLowerCase(),
+         titles = /(?!^|(?:an?|the)\s+)\b(a([st]|nd?|cross|fter|lthough)?|b(e(cause|fore|tween)|ut|y)|during|from|in(to)?|[io][fn]|[fn]?or|the|[st]o|through|under|with(out)?|yet)(?!\s*$)\b/gi,
+         cap_exceptions = /([\|\"\(]\s*[a-z]|[\:\.\!\?]\s+[a-z]|(?:^\b|[^\'\-\+]\b)[^aeiouy\d\W]+\b)/gi, // Punctuation exceptions, e.g. "And not I"
+         all_exceptions = /\b((?:ww)?(?:m+[dclxvi]*|d+[clxvi]*|c+[lxvi]*|l+[xvi]*|x+[vi]*|v+i*|i+))\b/gi, // Roman Numberals
+         cam_exceptions = /\b((?:mr?s|[sdjm]r|mx)|(?:adm|cm?dr?|chf|c[op][lmr]|cpt|gen|lt|mjr|sgt)|doc|hon|prof)\./gi; // Titles (Most Common?)
 
-    array = array.split(/\s+/);
+     array = array.split(/\s+/);
 
-    let index, length, string, word;
-    for(index = 0, length = array.length, string = [], word; index < length; index++) {
-        word = array[index];
+     let index, length, string, word;
+     for(index = 0, length = array.length, string = [], word; index < length; index++) {
+         word = array[index];
 
-        if(word)
-            string.push( word[0].toUpperCase() + word.slice(1, word.length) );
-    }
+         if(word)
+             string.push( word[0].toUpperCase() + word.slice(1, word.length) );
+     }
 
-    string = string.join(' ');
+     string = string.join(' ');
 
-    if(!all)
-        string = string
-          .replace(titles, ($0, $1, $$, $_) => $1.toLowerCase())
-          .replace(cap_exceptions, ($0, $1, $$, $_) => $1.toUpperCase())
-          .replace(all_exceptions, ($0, $1, $$, $_) => $1.toUpperCase());
+     if(!all)
+         string = string
+           .replace(titles, ($0, $1, $$, $_) => $1.toLowerCase())
+           .replace(cap_exceptions, ($0, $1, $$, $_) => $1.toUpperCase())
+           .replace(all_exceptions, ($0, $1, $$, $_) => $1.toUpperCase())
+           .replace(cam_exceptions, ($0, $1, $$, $_) => $0[0].toUpperCase() + $0.slice(1, $0.length).toLowerCase());
 
     return string;
 };

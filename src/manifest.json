@@ -119,6 +119,10 @@
 			"matches": ["*://www.google.com/*"],
 			"js": ["utils.js", "sites/google/index.js"],
 			"css": ["sites/google/index.css", "sites/common.css"]
+		},{
+			"matches": ["*://www.youtube.com/*"],
+			"js": ["utils.js", "sites/youtube/index.js"],
+			"css": ["sites/youtube/index.css", "sites/common.css"]
 		}
 	],
 
