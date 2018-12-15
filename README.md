@@ -21,6 +21,7 @@ If you don't feel like actually downloading the movie, or want a simple watchlis
   - [Sonarr](https://sonarr.tv/)
   - [CouchPotato](https://couchpota.to/)
   - [Watcher 3](https://nosmokingbandit.github.io/) ("Watcher, version 3")
+	- [Ombi](https://ombi.io/)
 - Offers search options via right-click (context menu)
   - Right-click | Web to Plex | Find "Show/Movie (Year)"
 - Offers a Plex-like GUI
