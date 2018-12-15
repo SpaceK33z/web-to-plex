@@ -15,6 +15,7 @@ function isShowPage() {
 }
 
 async function initPlexThingy(type) {
+<<<<<<< HEAD
 	let button = renderPlexButton();
 
 	if (!button)
@@ -27,13 +28,29 @@ async function initPlexThingy(type) {
 	if (!$title || !$date)
 		return console.log('failed'), modifyPlexButton(
 			button,
+=======
+	let $button = renderPlexButton();
+	if (!$button)
+		return;
+
+	let $title = document.querySelector('.product_page_title > *, .product_title'),
+        $date = document.querySelector('.product_page_title > .release_year, .product_data .release_data');
+
+	if (!$title || !$date)
+		return console.log('failed'), modifyPlexButton(
+			$button,
+>>>>>>> Upgrade to v4 (rebased) (#55)
 			'error',
 			 `Could not extract ${ !$title? 'title': 'year' } from Metacritic`
 		);
 
 	let title = $title.textContent.replace(/\s+/g, ' ').trim(),
+<<<<<<< HEAD
         year = $date.textContent.replace(/\s+/g, ' ').replace(/.*(\d{4}).*$/, '$1').trim(),
         image = ($image || {}).src;
+=======
+        year = $date.textContent.replace(/\s+/g, ' ').replace(/.*(\d{4}).*$/, '$1').trim();
+>>>>>>> Upgrade to v4 (rebased) (#55)
 
     let Db = await getIDs({ title, year, type }),
         IMDbID = Db.imdb,
@@ -45,7 +62,29 @@ async function initPlexThingy(type) {
 
     type = type === 'tv'? 'show': type;
 
+<<<<<<< HEAD
 	findPlexMedia({ title, year, button, type, IMDbID, TMDbID, TVDbID });
+=======
+	findPlexMedia({ title, year, button: $button, type, IMDbID, TMDbID, TVDbID, txt: 'title', hov: 'null' });
+}
+
+function renderPlexButton() {
+	let $actions = document.querySelector('#mantle_skin .sharing, #main .sharing');
+	if (!$actions)
+		return;
+
+	let el = document.createElement('a'),
+        ch = document.createElement('span');
+
+    ch.classList.add('fa', 'fa-fw', 'fa-arrow-down');
+
+    el.classList.add('web-to-plex-button');
+    el.title = 'Web to Plex';
+    el.appendChild(ch);
+	$actions.appendChild(el);
+
+	return el;
+>>>>>>> Upgrade to v4 (rebased) (#55)
 }
 
 parseOptions().then(() => {

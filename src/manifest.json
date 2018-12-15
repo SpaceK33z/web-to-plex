@@ -6,7 +6,11 @@
     "homepage_url": "https://github.com/Ephellon/web-to-plex/",
 
 	"manifest_version": 2,
+<<<<<<< HEAD
     "version": "4.0",
+=======
+    "version": "3.1.2.0",
+>>>>>>> Upgrade to v4 (rebased) (#55)
 // Firefox Support =>
 //    "applications": {
 //        "gecko": {
@@ -23,6 +27,7 @@
 	},
 
 	"content_scripts": [
+<<<<<<< HEAD
         // Allows media downloads
         {
             "matches": ["*://*.openload.co/*", "*://*.openload.com/*", "*://*.oload.fun/*"],
@@ -32,6 +37,9 @@
 
         // The sites
         {
+=======
+		{
+>>>>>>> Upgrade to v4 (rebased) (#55)
 			"matches": ["*://*.movieo.me/*"],
 			"js": ["history-hack.js", "utils.js", "sites/movieo/index.js"],
 			"css": ["sites/movieo/index.css", "sites/common.css"]
@@ -44,7 +52,11 @@
 			"js": ["history-hack.js", "utils.js", "sites/trakt/index.js"],
 			"css": ["sites/trakt/index.css", "sites/common.css"]
 		},{
+<<<<<<< HEAD
 			"matches": ["*://*.letterboxd.com/*"],
+=======
+			"matches": ["*://*.letterboxd.com/film/*"],
+>>>>>>> Upgrade to v4 (rebased) (#55)
 			"js": ["utils.js", "sites/letterboxd/index.js"],
 			"css": ["sites/letterboxd/index.css", "sites/common.css"]
 		},{
@@ -66,14 +78,23 @@
 		},{
 			"matches": ["*://*.vrv.co/*"],
 			"js": ["utils.js", "sites/vrv/index.js"],
+<<<<<<< HEAD
 			"css": ["sites/vrv/index.css", "sites/common.css"]
+=======
+			"css": ["sites/vrv/index.css"]
+>>>>>>> Upgrade to v4 (rebased) (#55)
 		},{
 			"matches": ["*://*.hulu.com/*"],
 			"js": ["utils.js", "sites/hulu/index.js"],
 			"css": ["sites/hulu/index.css", "sites/common.css"]
 		},{
+<<<<<<< HEAD
 			"matches": ["*://play.google.com/store/*"],
 			"js": ["utils.js", "sites/google/play.js"],
+=======
+			"matches": ["*://*.google.com/store/*"],
+			"js": ["utils.js", "sites/google/index.js"],
+>>>>>>> Upgrade to v4 (rebased) (#55)
 			"css": ["sites/google/index.css", "sites/common.css"]
 		},{
 			"matches": ["*://*.apple.com/*"],
@@ -111,6 +132,7 @@
 			"matches": ["*://*.netflix.com/watch/*"],
 			"js": ["utils.js", "sites/netflix/index.js"],
 			"css": ["sites/netflix/index.css", "sites/common.css"]
+<<<<<<< HEAD
 		},{
             "matches": ["*://*.gostream.site/*"],
             "js": ["utils.js", "sites/gostream/index.js"],
@@ -123,12 +145,19 @@
 			"matches": ["*://www.youtube.com/*"],
 			"js": ["utils.js", "sites/youtube/index.js"],
 			"css": ["sites/youtube/index.css", "sites/common.css"]
+=======
+>>>>>>> Upgrade to v4 (rebased) (#55)
 		}
 	],
 
 	"background": {
+<<<<<<< HEAD
 		"scripts": ["background.js", "plugn.js"],
 		"persistent": true
+=======
+		"scripts": ["background.js"],
+		"persistent": false
+>>>>>>> Upgrade to v4 (rebased) (#55)
 	},
 
 	"options_page": "options/index.html",
@@ -151,7 +180,17 @@
 		"storage",
         "downloads",
         "contextMenus",
+<<<<<<< HEAD
         "<all_urls>"
 	],
     "web_accessible_resources": ["img/*"]
+=======
+		"https://*.plex.direct/*"
+	],
+	"optional_permissions": [
+		"http://*/",
+		"https://*/"
+	],
+    "web_accessible_resources": ["img/16.png", "img/48.png", "img/_16.png", "img/_48.png", "img/o16.png", "img/o48.png"]
+>>>>>>> Upgrade to v4 (rebased) (#55)
 }

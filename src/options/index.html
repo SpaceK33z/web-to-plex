@@ -30,6 +30,7 @@
             top: 0;
         }
 
+<<<<<<< HEAD
         h2 {
             text-align: center;
         }
@@ -54,6 +55,21 @@
             margin-bottom: 5px;
         }
 
+=======
+        section {
+            display: block !important;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+        }
+
+        label {
+            color: #eee !important;
+            font-weight: 400 !important;
+            display: inline-block;
+            margin-bottom: 5px;
+        }
+
+>>>>>>> Upgrade to v4 (rebased) (#55)
         input[type="text"], input[type="password"], select {
             width: 30vw !important;
             line-height: 1.5em !important;
@@ -147,6 +163,7 @@
             text-transform: none;
         }
 
+<<<<<<< HEAD
         /* notifications */
         .notification {
             background: #F45A26;
@@ -181,6 +198,12 @@
         /* Web to Plex warning notifications */
         .notification.warning {
             background: #FF2A2A!important;
+=======
+        #status {
+            margin: 0 20px;
+            color: #999 !important;
+            box-sizing: border-box;
+>>>>>>> Upgrade to v4 (rebased) (#55)
         }
 
         [type="password"] ~ .hidden-help {
@@ -238,6 +261,7 @@
 
         /* bbodine @CodePen - https://codepen.io/bbodine1/pen/novBm */
         .checkbox {
+<<<<<<< HEAD
             width: 80px;
             height: 26px;
             background: #000;
@@ -306,6 +330,59 @@
 
         [orange] {
             color: #cc7b19!important;
+=======
+          width: 80px;
+          height: 26px;
+          background: #000;
+          margin: 15px 0;
+          position: relative;
+          border-radius: 50px;
+          box-shadow: inset 0px 1px 1px rgba(0, 0, 0, 0.5), 0px 1px 0px rgba(255, 255, 255, 0.2);
+        }
+
+        .checkbox:after {
+          content: 'OFF';
+          color: #666;
+          position: absolute;
+          right: 10px;
+          z-index: 0;
+          font: 12px/26px Arial, sans-serif;
+          font-weight: bold;
+          text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.15);
+        }
+
+        .checkbox:before {
+          content: 'ON';
+          color: #cc7b19;
+          position: absolute;
+          left: 10px;
+          z-index: 0;
+          font: 12px/26px Arial, sans-serif;
+          font-weight: bold;
+        }
+
+        .checkbox label {
+          display: block;
+          width: 34px;
+          height: 20px;
+          cursor: pointer;
+          position: absolute;
+          top: 3px;
+          left: 3px;
+          z-index: 1;
+          background: #cc7b19;
+          border-radius: 50px;
+          transition: all 0.4s ease;
+          box-shadow: 0px 2px 5px 0px rgba(0, 0, 0, 0.3);
+        }
+
+        .checkbox input[type=checkbox] {
+          visibility: hidden;
+        }
+
+        .checkbox input[type=checkbox]:checked + label {
+          left: 43px;
+>>>>>>> Upgrade to v4 (rebased) (#55)
         }
 
         input[type="range"] {
@@ -405,8 +482,11 @@
 Layout of code (Jade/Pug)
 
 div
+<<<<<<< HEAD
     h1
         | Setting Name
+=======
+>>>>>>> Upgrade to v4 (rebased) (#55)
     article
         details
             summary
@@ -416,7 +496,10 @@ div
             section
                 label
                     | Description
+<<<<<<< HEAD
                 ...
+=======
+>>>>>>> Upgrade to v4 (rebased) (#55)
                 div
                     | Help text
 
@@ -430,16 +513,24 @@ div
 
             <h2>Login Settings</h2>
             <section>
+<<<<<<< HEAD
                 <label>Use your Plex token</label>
                 <input type="text" id="plex_token" data-option="plexToken" placeholder="Enter your Plex token"/>
                 <div>
                     How to find your <a href="https://support.plex.tv/hc/en-us/articles/204059436-Finding-your-account-token-X-Plex-Token" title="How to find your token?" target="_blank">Plex token</a>.
+=======
+                <label>Login using your Plex token</label>
+                <input type="text" id="plex_token" data-option="plexToken" placeholder="Enter your Plex token"/>
+                <div>
+                    How to find your <a href="https://support.plex.tv/hc/en-us/articles/204059436-Finding-your-account-token-X-Plex-Token" title="How to find your token?" target="_blank">Plex Token</a>.
+>>>>>>> Upgrade to v4 (rebased) (#55)
                 </div>
             </section>
 
             <h3 style="width: 35%; text-align: center;"><em>&mdash; OR &mdash;</em></h3>
 
             <section>
+<<<<<<< HEAD
                 <label>Login with Plex</label>
                 <input type="text" id="plex_username" style="border-bottom-left-radius: 0 !important; border-bottom-right-radius: 0 !important;" placeholder="Enter your Plex username"/>
                 <input type="password" id="plex_password" style="border-top-left-radius: 0 !important; border-top-right-radius: 0 !important;" placeholder="Enter your Plex password"/>
@@ -468,6 +559,16 @@ div
                 <br>
             </section>
 
+=======
+                <label>Login using your Plex credentials</label>
+                <input type="text" id="plex_username" style="border-bottom-left-radius: 0 !important; border-bottom-right-radius: 0 !important;" placeholder="Enter your Plex username"/>
+                <input type="text" id="plex_password" style="border-top-left-radius: 0 !important; border-top-right-radius: 0 !important;" placeholder="Enter your Plex password"/>
+                <div>
+                    Your Plex username and password are never stored, only your <a href="https://support.plex.tv/hc/en-us/articles/204059436-Finding-your-account-token-X-Plex-Token" title="How to find your token?" target="_blank">Plex Token</a>.
+                </div>
+            </section>
+
+>>>>>>> Upgrade to v4 (rebased) (#55)
             <section>
                 <button type="button" id="plex_test">Test <span id="plex_test_status">?</span></button>
             </section>
@@ -482,6 +583,7 @@ div
         <details>
             <summary>Advance</summary>
 
+<<<<<<< HEAD
             <h2>Plex Server Options</h2>
             <section>
                 <label>Plex Server URL</label>
@@ -489,6 +591,15 @@ div
                 <div>
                     Use this to communicate directly with your Plex server.<br/>
                     Such as <em>http://localhost:32400/</em> or <em>http://192.168.1.100:32400/</em>
+=======
+            <h2>Server Options</h2>
+            <section>
+                <label>Server URL</label>
+                <input type="text" data-option="plexURL" placeholder="Enter your Plex URL (for direct access)"/>
+                <div>
+                    Use this to communicate directly with your Plex server.<br/>
+                    Such as <em>http://localhost:32400</em> or <em>http://192.168.1.100:32400</em>
+>>>>>>> Upgrade to v4 (rebased) (#55)
                 </div>
             </section>
         </details>
@@ -499,6 +610,7 @@ div
 	<h1>Manager Settings</h1>
 
     <article>
+<<<<<<< HEAD
         <details id="ombi">
             <summary>Ombi (Movies/TV Shows)</summary>
 
@@ -542,6 +654,9 @@ div
         </details>
 
         <details id="watcher">
+=======
+        <details>
+>>>>>>> Upgrade to v4 (rebased) (#55)
             <summary>Watcher (Movies)</summary>
 
             <h2>Connection Settings</h2>
@@ -563,22 +678,32 @@ div
                 </div>
             </section>
 
+<<<<<<< HEAD
             <h3>Login <em>(saved)</em></h3>
             <div class="hidden-help">The default username is <em>watcher</em>. The default password is <em>rehctaw</em>.</div>
             <br>
+=======
+            <h3>Login <em>(optional, saved)</em></h3>
+>>>>>>> Upgrade to v4 (rebased) (#55)
             <section>
                 <label>Username</label>
                 <input type="text" data-option="watcherBasicAuthUsername" placeholder="Enter your Watcher username"/>
                 <div>Only use this if you setup a Watcher username.</div>
+<<<<<<< HEAD
                 
+=======
+>>>>>>> Upgrade to v4 (rebased) (#55)
             </section>
             <section>
                 <label>Password</label>
                 <input type="text" data-option="watcherBasicAuthPassword" placeholder="Enter your Watcher password"/>
                 <div>Only use this if you setup a Watcher password.</div>
                 <div class="hidden-help">Your password will be hidden once saved.</div>
+<<<<<<< HEAD
                 <br>
                 <div>This information will be used for <a href="https://wikipedia.org/wiki/Basic_access_authentication" target="_blank">Basic Access Authentication</a> only. This will allow the extension to ask Watcher for your list of films, or to add to your list of films.</div>
+=======
+>>>>>>> Upgrade to v4 (rebased) (#55)
             </section>
 
             <section>
@@ -587,7 +712,11 @@ div
 
             <section>
                 <label>Watcher Storage Path</label>
+<<<<<<< HEAD
                 <input type="text" disabled="true" data-option="watcherStoragePath" title="Can only be changed via Watcher's settings"/>
+=======
+                <input type="text" disabled="true" data-option="watcherStoragePath" placeholder="Can only be changed via Watcher's settings"/>
+>>>>>>> Upgrade to v4 (rebased) (#55)
             </section>
             <section>
                 <label>Quality Profile</label>
@@ -597,7 +726,11 @@ div
             </section>
         </details>
 
+<<<<<<< HEAD
         <details id="radarr">
+=======
+        <details>
+>>>>>>> Upgrade to v4 (rebased) (#55)
             <summary>Radarr (Movies)</summary>
 
             <h2>Connection Settings</h2>
@@ -619,7 +752,11 @@ div
                 </div>
             </section>
 
+<<<<<<< HEAD
             <h3>Login <em>(saved)</em></h3>
+=======
+            <h3>Login <em>(optional, saved)</em></h3>
+>>>>>>> Upgrade to v4 (rebased) (#55)
             <section>
                 <label>Username</label>
                 <input type="text" data-option="radarrBasicAuthUsername" placeholder="Enter your Radarr username"/>
@@ -630,8 +767,11 @@ div
                 <input type="text" data-option="radarrBasicAuthPassword" placeholder="Enter your Radarr password"/>
                 <div>Only use this if you setup a Radarr password.</div>
                 <div class="hidden-help">Your password will be hidden once saved.</div>
+<<<<<<< HEAD
                 <br>
                 <div>This information will be used for <a href="https://wikipedia.org/wiki/Basic_access_authentication" target="_blank">Basic Access Authentication</a> only. This will allow the extension to ask Radarr for your list of films, or to add to your list of films.</div>
+=======
+>>>>>>> Upgrade to v4 (rebased) (#55)
             </section>
 
             <section>
@@ -655,7 +795,11 @@ div
             </section>
         </details>
 
+<<<<<<< HEAD
         <details id="sonarr">
+=======
+        <details>
+>>>>>>> Upgrade to v4 (rebased) (#55)
             <summary>Sonarr (TV Shows)</summary>
 
             <h2>Connection Settings</h2>
@@ -677,7 +821,11 @@ div
                 </div>
             </section>
 
+<<<<<<< HEAD
             <h3>Login <em>(saved)</em></h3>
+=======
+            <h3>Login <em>(optional, saved)</em></h3>
+>>>>>>> Upgrade to v4 (rebased) (#55)
             <section>
                 <label>Username</label>
                 <input type="text" data-option="sonarrBasicAuthUsername" placeholder="Enter your Sonarr username"/>
@@ -688,8 +836,11 @@ div
                 <input type="text" data-option="sonarrBasicAuthPassword" placeholder="Enter your Sonarr password"/>
                 <div>Only use this if you setup a Sonarr password.</div>
                 <div class="hidden-help">Your password will be hidden once saved.</div>
+<<<<<<< HEAD
                 <br>
                 <div>This information will be used for <a href="https://wikipedia.org/wiki/Basic_access_authentication" target="_blank">Basic Access Authentication</a> only. This will allow the extension to ask Sonarr for your list of shows, or to add to your list of shows.</div>
+=======
+>>>>>>> Upgrade to v4 (rebased) (#55)
             </section>
 
             <section>
@@ -713,7 +864,11 @@ div
             </section>
         </details>
 
+<<<<<<< HEAD
         <details id="couchpotato">
+=======
+        <details>
+>>>>>>> Upgrade to v4 (rebased) (#55)
             <summary>CouchPotato (Movies/TV Shows)</summary>
 
             <h2>Connection Settings</h2>
@@ -735,7 +890,11 @@ div
                 </div>
             </section>
 
+<<<<<<< HEAD
             <h3>Login <em>(saved)</em></h3>
+=======
+            <h3>Login <em>(optional, saved)</em></h3>
+>>>>>>> Upgrade to v4 (rebased) (#55)
             <section>
                 <label>Username</label>
                 <input type="text" data-option="couchpotatoBasicAuthUsername" placeholder="Enter your CouchPotato username"/>
@@ -749,6 +908,7 @@ div
             </section>
 
             <section>
+<<<<<<< HEAD
                 <div>This information will be used for <a href="https://wikipedia.org/wiki/Basic_access_authentication" target="_blank">Basic Access Authentication</a> only. This will allow the extension to ask Couchpotato for your list of videos, or to add to your list of videos.</div>
             </section>
 <!--
@@ -763,6 +923,16 @@ div
                 </select>
             </section>
 -->
+=======
+                <button type="button" id="couchpotato_test">Test <span id="couchpotato_test_status">?</span></button>
+            </section>
+            <section>
+                <label>Quality Profile</label>
+                <select data-option="couchpotatoQualityProfileId">
+                    <option value="">Press "Test [?]" first</option>
+                </select>
+            </section>
+>>>>>>> Upgrade to v4 (rebased) (#55)
         </details>
     </article>
 </div>
@@ -773,6 +943,7 @@ div
         <details>
             <summary>Advance Settings</summary>
 
+<<<<<<< HEAD
             <h2>Extra Sites</h2>
             <section id="plugins">
                 <!-- Filled in via the index.js script -->
@@ -781,6 +952,17 @@ div
             <h2>Search Options</h2>
             <section>
                 <h3>Loose Searching</h3>
+=======
+            <h2>Search Options</h2>
+            <section>
+                <h3>Loose Searching</h3>
+                <div>
+                    Allows the plugin to search for non-English titles using pattern matching (as a last resort).<br>
+                    Higer sensitivity means more strict searches.
+                </div>
+                <br>
+                <label>Enable Feature</label>
+>>>>>>> Upgrade to v4 (rebased) (#55)
                 <div class="checkbox">
                     <input id="use-loose" type="checkbox" data-option="UseLoose" checked="true"/>
                     <label for="use-loose"></label>
@@ -789,6 +971,7 @@ div
                 <br>
                 <input type="range" data-option="UseLooseScore" min="0" max="100" step="5" value="40"/>
                 <output type="text" value="40%"></output>
+<<<<<<< HEAD
                 <div>
                     Allows the extension to search for non-English titles using pattern matching (as a last resort).<br>
                     Higer sensitivity means more strict searches.
@@ -808,6 +991,11 @@ div
             </section>
             <hr>
             <h2>API Keys</h2>
+=======
+            </section>
+
+            <h2>Extra API Keys</h2>
+>>>>>>> Upgrade to v4 (rebased) (#55)
             <section>
                 <label>OMDb</label>
                 <input type="text" data-option="OMDbAPI" placeholder="Enter your OMDb API Key"/>
@@ -823,6 +1011,7 @@ div
                     You can <a href="https://developers.themoviedb.org/3/" target="_blank">learn more</a> on how to obtain an API key.
                 </div>
             </section>
+<<<<<<< HEAD
             <hr>
             <h2>Data Handling</h2>
             <section>
@@ -847,11 +1036,14 @@ div
                     <strong>This action cannot be undone.</strong>
                 </div>
             </section>
+=======
+>>>>>>> Upgrade to v4 (rebased) (#55)
         </details>
     </article>
 
     <article>
         <details>
+<<<<<<< HEAD
             <summary>Help</summary>
 
             <h2>External Links</h2>
@@ -864,6 +1056,12 @@ div
             </section>
 
             <section>
+=======
+            <summary>Managers</summary>
+
+            <h2>External Links</h2>
+            <section>
+>>>>>>> Upgrade to v4 (rebased) (#55)
                 <label>Watcher's Website</label>
                 <div>
                     Download, and/or find more information for <a href="https://nosmokingbandit.github.io/" target="_blank">Watcher</a>.
@@ -890,6 +1088,7 @@ div
                     Download, and/or find more information for <a href="https://couchpota.to/" target="_blank">CouchPotato</a>.
                 </div>
             </section>
+<<<<<<< HEAD
 
             <section>
                 <label>Ombi's Website</label>
@@ -897,6 +1096,8 @@ div
                     Download, and/or find more information for <a href="https://ombi.io/" target="_blank">Ombi</a>.
                 </div>
             </section>
+=======
+>>>>>>> Upgrade to v4 (rebased) (#55)
         </details>
     </article>
 </div>
@@ -905,6 +1106,10 @@ div
 
 	<section>
 		<button id="save">Save</button>
+<<<<<<< HEAD
+=======
+        <span id="status"></span>
+>>>>>>> Upgrade to v4 (rebased) (#55)
 	</section>
 
     <footer id="version"></footer>

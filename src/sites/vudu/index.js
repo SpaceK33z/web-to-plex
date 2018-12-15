@@ -8,7 +8,11 @@ function isShow() {
 }
 
 function isPageReady() {
+<<<<<<< HEAD
     return !!document.querySelector('img[src*="poster" i]');
+=======
+    return !document.querySelector('.loadingScreenViewport');
+>>>>>>> Upgrade to v4 (rebased) (#55)
 }
 
 async function init() {
@@ -19,6 +23,7 @@ async function init() {
 		setTimeout(init, 1000);
 }
 
+<<<<<<< HEAD
 async function initPlexThingy(type) {
 	let button = renderPlexButton();
 
@@ -32,13 +37,49 @@ async function initPlexThingy(type) {
 	if (!$title)
 		return modifyPlexButton(
 			button,
+=======
+function renderPlexButton($parent) {
+	if (!$parent) return;
+
+	let existingButton = document.querySelector('a.web-to-plex-button');
+	if (existingButton)
+		existingButton.remove();
+
+	let el = document.createElement('a');
+
+    el.textContent = 'Web to Plex';
+    el.title = 'Loading...';
+	el.classList.add('web-to-plex-button');
+
+	$parent.appendChild(el);
+	return el;
+}
+
+async function initPlexThingy(type) {
+	let $parent = document.querySelector('.container .row:nth-child(3) .row > *, .container .row:nth-child(3) ~ * .row > *'),
+        $button = renderPlexButton($parent);
+
+	if (!$button)
+		return;
+
+	let $title = document.querySelector('.head-big'),
+        $date = document.querySelector('.container .row:first-child .row ~ * > .row span');
+
+	if (!$title)
+		return modifyPlexButton(
+			$button,
+>>>>>>> Upgrade to v4 (rebased) (#55)
 			'error',
 			 `Could not extract title from Vudu`
 		);
 
 	let title = $title.textContent.replace(/\((\d{4})\)/, '').trim(),
+<<<<<<< HEAD
         year = $date? $date.textContent.split(/\s*\|\s*/): RegExp.$1,
         image = ($image || {}).src;
+=======
+        year = $date? $date.textContent.split(/\s*\|\s*/): RegExp.$1;
+>>>>>>> Upgrade to v4 (rebased) (#55)
 
     year = +year[year.length - 1].slice(0, 4);
     year |= 0;
@@ -51,7 +92,13 @@ async function initPlexThingy(type) {
     title = Db.title;
     year = Db.year;
 
+<<<<<<< HEAD
 	findPlexMedia({ type, title, year, image, button, IMDbID, TMDbID, TVDbID });
+=======
+    console.log(title, year, Db);
+
+	findPlexMedia({ type, title, year, button: $button, IMDbID, TMDbID, TVDbID });
+>>>>>>> Upgrade to v4 (rebased) (#55)
 }
 
 if (isMovie() || isShow()) {

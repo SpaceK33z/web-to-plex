@@ -6,7 +6,11 @@
 
 - [x] Use the "download" API to save files (i.e. Flenix's "Save As" option for non-Flenix domains)
   - v3.0.1.0
+<<<<<<< HEAD
 - [x] Use Radarr and/or Sonarr's searching feature (if installed)?
+=======
+- [ ] Use Radarr and/or Sonarr's searching feature (if installed)?
+>>>>>>> Upgrade to v4 (rebased) (#55)
   - see [Radarr's Lookup API](https://github.com/Radarr/Radarr/wiki/API:Movie-Lookup)
   - see [Sonarr's Lookup API](https://github.com/Sonarr/Sonarr/wiki/Series-Lookup)
   - Caveats / Conflicts with Trakt's "to do"s
@@ -19,17 +23,26 @@
 - Close issues:
   - [x] #13
   - [x] #14
+<<<<<<< HEAD
   - [x] #21
+=======
+  - [ ] #21
+>>>>>>> Upgrade to v4 (rebased) (#55)
   - [x] #25
   - [x] #53
   - [x] #57
 - Revisit issues:
   - [x] #17
+<<<<<<< HEAD
   - [x] #16
+=======
+  - [ ] #16
+>>>>>>> Upgrade to v4 (rebased) (#55)
   - [x] #24
 
 # CHANGELOG (Oldest to Newest)
 
+<<<<<<< HEAD
 ### v0.1 / [SpaceK33z@9e81a0c](https://github.com/SpaceK33z/web-to-plex/commit/9e81a0cf17e165a0850cfcdfdfa0d4b674dbfb6b)
 
 - Removed CouchPotato settings as they were unused (later redacted: v0.2.2.0)
@@ -52,28 +65,65 @@
 - Restructured file layout
 
 ### v0.2.1.3 / [SpaceK33z@aa3a731](https://github.com/SpaceK33z/web-to-plex/commit/aa3a731f2ad46d5850d1574e0143f40546da7892)
+=======
+### v0.1 / SpaceK33z@9e81a0cf17e165a0850cfcdfdfa0d4b674dbfb6b
+
+- Removed CouchPotato settings as they were unused (later redacted: v0.2.2.0)
+- **Added Flenix as a supported site**
+
+### v0.2 / SpaceK33z@f3564c87241265a7913c043d0aa0e11cbff7c2c3
+
+- Fixed Flenix downloading bug
+- Updated button style (Flenix only)
+- Began versioning at 0.2
+
+### v0.2.0.1 / SpaceK33z@f3b9b52408d360e24263df1a5a22c86d6197f585
+
+- **Added the "Download File" dialog (later change to "Save File")**
+
+### v0.2.1.2 / SpaceK33z@b4c8d89e6c8fd123ff68be262ab1e2503af4ae09
+
+- Added multiple button locations to Flenix (later redacted: v3.0.0.0)
+- **Added Web to Plex logos**
+- Restructured file layout
+
+### v0.2.1.3 / SpaceK33z@aa3a731f2ad46d5850d1574e0143f40546da7892
+>>>>>>> Upgrade to v4 (rebased) (#55)
 
 - Created a Plex-like UI/UX and updated button styles
     - **includes the pop-up feature**
 
+<<<<<<< HEAD
 ### v0.2.2.0 / [SpaceK33z@f176042](https://github.com/SpaceK33z/web-to-plex/commit/f1760423aebc3ed7fee15ec0f50d96eee3be41f8)
+=======
+### v0.2.2.0 / SpaceK33z@f1760423aebc3ed7fee15ec0f50d96eee3be41f8
+>>>>>>> Upgrade to v4 (rebased) (#55)
 
 - Fixed an adding error for Radarr and Sonarr
 - Updated UI/UX
     - **Adapted the "Plex Token Login" feature**
 - Restructured code layout (camel-cased variable names, and made more readable)
 
+<<<<<<< HEAD
 ## v0.3.0.0 / [SpaceK33z@25bffc8](https://github.com/SpaceK33z/web-to-plex/commit/25bffc874cfab84d95216cda48d1e97eaa360776)
+=======
+## v0.3.0.0 / SpaceK33z@25bffc874cfab84d95216cda48d1e97eaa360776
+>>>>>>> Upgrade to v4 (rebased) (#55)
 
 - **Added TV Maze as a supported site**
 - Fixed Sonarr adding error
 - Updated site scripts
 
+<<<<<<< HEAD
 ## v0.3.0.1 / [SpaceK33z@3196f6d](https://github.com/SpaceK33z/web-to-plex/commit/3196f6dbe3a3413b1fe8a9f10a2abe563853c99d)
+=======
+## v0.3.0.1 / SpaceK33z@3196f6dbe3a3413b1fe8a9f10a2abe563853c99d
+>>>>>>> Upgrade to v4 (rebased) (#55)
 
 - Updated UX: allowed site scripts to access image files (as action buttons)
 - **Added API support for finding movie/series IDs (The Movie DB, and The TV DB)**
 
+<<<<<<< HEAD
 ## v0.3.3.0 / [SpaceK33z@dba19e0](https://github.com/SpaceK33z/web-to-plex/commit/dba19e0b27c3815c66a7f18a7b323ea39c367c64)
 
 - **Added The TV Database as a supported site, as well as: The Movie Database and VRV**
@@ -108,11 +158,48 @@
 - **Added iTunes as a supported site, as well as: Fandango, and Metacritic**
 
 ## v1.0.2.0 / [SpaceK33z@250dbbe](https://github.com/SpaceK33z/web-to-plex/commit/250dbbe02be7cd3d60ad37538bb7e63acf78bbbf)
+=======
+## v0.3.3.0 / SpaceK33z@dba19e0b27c3815c66a7f18a7b323ea39c367c64
+
+- **Added The TV Database as a supported site, as well as: The Movie Database and VRV**
+
+## v0.3.3.1 / SpaceK33z@62dbb8eab84dc0765c3f2448bfc3eb1ecbe2b63f
+
+- Fixed an adding error
+
+## v0.4.0.0 / SpaceK33z@dce5467cd396c3086a1116af4feb24053880c8fd
+
+- **Added Plex login support (username / password), see commit SpaceK33z@db01d1a83d32e4d73f2ea671f634e6cc5b4c0fe7**
+
+## v0.5.0.0 / SpaceK33z@ed1033f330782328f2884b00923f166b74808c37
+
+- **Added Hulu as a supported site, as well as: Google Play Store**
+
+## v0.5.0.2 / SpaceK33z@7bf755504a4ead8d832e88ce4272f1b896374333
+
+- **Included the "Storage Path" feature, see commit SpaceK33z@27506b9a4c12496bd7aad6ee09deb8a5b9418cac**
+
+## v0.5.1.0 / SpaceK33z@e8609920e3b2005d8979a0df16b8a309a9221a32
+
+- **Removed Firefox support**
+- Added multiple Flenix domains
+
+## v1.0.0.0 / SpaceK33z@b05ebfa7230810cb30ca39f72613b2ef7409e4f0
+
+- Restructured file layout
+
+## v1.0.1.0 / SpaceK33z@cc557ca0ab76788a0fe5286d43ade43de0de5209
+
+- **Added iTunes as a supported site, as well as: Fandango, and Metacritic**
+
+## v1.0.2.0 / SpaceK33z@250dbbe02be7cd3d60ad37538bb7e63acf78bbbf
+>>>>>>> Upgrade to v4 (rebased) (#55)
 
 - **Added Amazon as a supported site, as well as: Verizon, and Vudu**
 
 ----
 
+<<<<<<< HEAD
 ## v1.1.0.0 / [SpaceK33z@a321795](https://github.com/SpaceK33z/web-to-plex/commit/a321795c6fdf6917542d56f2a45301cd326191c6)
 
 - **Added The Movie DB as a search source for Plex, Radarr, and Sonarr**
@@ -122,22 +209,42 @@
 - Utilized the scoring feature for The TV DB
 
 ## v1.1.0.2 / [SpaceK33z@9879cf8](https://github.com/SpaceK33z/web-to-plex/commit/9879cf8c75a5688985b86be5d37460ab456f0dca)
+=======
+## v1.1.0.0 / SpaceK33z@a321795c6fdf6917542d56f2a45301cd326191c6
+
+- **Added The Movide DB as a search source for Plex, Radarr, and Sonarr**
+
+## v1.1.1.0 / SpaceK33z@93a79bdb04b0ad43c37538cc25042d9bbfefd642
+
+- Utilized the scoring feature for The TV DB
+
+## v1.1.0.2 / SpaceK33z@9879cf8c75a5688985b86be5d37460ab456f0dca
+>>>>>>> Upgrade to v4 (rebased) (#55)
 
 - Added the icon script to the pop-up feature (descriptions on-hover)
 - **Added more sites as API lookups (later revised: v1.2.1.5)**
 
+<<<<<<< HEAD
 ## v1.1.2.0 / [SpaceK33z@b3ee310](https://github.com/SpaceK33z/web-to-plex/commit/b3ee310b589a7c04cbdf3c548932a17d0fc1647a)
+=======
+## v1.1.2.0 / SpaceK33z@b3ee310b589a7c04cbdf3c548932a17d0fc1647a
+>>>>>>> Upgrade to v4 (rebased) (#55)
 
 - Added CORS for API lookup sites (Apache)
 - Fixed adding errors for Sonarr and Radarr
 
+<<<<<<< HEAD
 ## v1.2.0.0 / [SpaceK33z@fcac789](https://github.com/SpaceK33z/web-to-plex/commit/fcac789cf1eba7a4dde8288b7c0e7d55ed9ccc1b)
+=======
+## v1.2.0.0 / SpaceK33z@fcac789cf1eba7a4dde8288b7c0e7d55ed9ccc1b
+>>>>>>> Upgrade to v4 (rebased) (#55)
 
 - Added badge support to the icon
 - **Added the context menu feature (searches)**
 - Fixed styling errors
 - Fixed bugs for Flenix, Vudu, and Verizon
 
+<<<<<<< HEAD
 ## v1.2.1.0 / [SpaceK33z@afdeb40](https://github.com/SpaceK33z/web-to-plex/commit/afdeb4052ae277bc0d1d4e1f0b5bc26fb0fc3473)
 
 - **Added CouchPotato as a supported site, as well as: Rotten Tomatoes**
@@ -147,11 +254,23 @@
 - Fixed minor CouchPotato and Letterboxd bugs (no IMDb ID)
 
 ## v1.2.1.2 / [SpaceK33z@c7cac01](https://github.com/SpaceK33z/web-to-plex/commit/c7cac01aa3cd0fc25967181c1788b8b3f5d3d463)
+=======
+## v1.2.1.0 / SpaceK33z@afdeb4052ae277bc0d1d4e1f0b5bc26fb0fc3473
+
+- **Added CouchPotato as a supported site, as well as: Rotten Tomatoes**
+
+## v1.2.1.1 / SpaceK33z@6fafb8c9f2a4301926cf082537a4d26e8d549330
+
+- Fixed minor CouchPotato and Letterboxd bugs (no IMDb ID)
+
+## v1.2.1.2 / SpaceK33z@c7cac01aa3cd0fc25967181c1788b8b3f5d3d463
+>>>>>>> Upgrade to v4 (rebased) (#55)
 
 - **Added the "re-search" feature for alternative lookups**
     - if the search failed the first time, use a different site to search again
 - **Added button location images**
 
+<<<<<<< HEAD
 ## v1.2.1.3 / [SpaceK33z@4cf196f](https://github.com/SpaceK33z/web-to-plex/commit/4cf196feeac297c341bca075023b64b09c71a676)
 
 - Fixed an adding error
@@ -165,29 +284,60 @@
 - **Replaced the Apache API with the Open Movie DB**
 
 ## v1.2.1.7 / [SpaceK33z@53c8d5b](https://github.com/SpaceK33z/web-to-plex/commit/53c8d5b917f040621202e84c3ad2132c22db3e2e)
+=======
+## v1.2.1.3 / SpaceK33z@4cf196feeac297c341bca075023b64b09c71a676
+
+- Fixed an adding error
+
+## v1.2.1.4 / SpaceK33z@f705e7af667229c1eb7b29608ad6adbb28994aa4
+
+- Updated Amazon to match site changes
+
+## v1.2.1.5 / SpaceK33z@e4ae523b888b3ce35cc969a4ff62769b2599f42e
+
+- **Replaced the Apache API with the Open Movie DB**
+
+## v1.2.1.7 / SpaceK33z@53c8d5b917f040621202e84c3ad2132c22db3e2e
+>>>>>>> Upgrade to v4 (rebased) (#55)
 
 - **Added the "extra API keys" feature**
 - **Added ShowRSS as a supported site**
 - **Added the "Save Media Info" feature (to speed up repetitive searches; later revised: v1.3.0.0)**
 
+<<<<<<< HEAD
 ## v1.3.0.0 / [SpaceK33z@2aa9695](https://github.com/SpaceK33z/web-to-plex/commit/2aa9695c06decf1b783408f33f5db46cc4bd5b3b)
+=======
+## v1.3.0.0 / SpaceK33z@2aa9695c06decf1b783408f33f5db46cc4bd5b3b
+>>>>>>> Upgrade to v4 (rebased) (#55)
 
 - Began using `sessionStorage` before `localStorage` when saving media info
 - Made changes to how the plugin finds movies
 
+<<<<<<< HEAD
 ## v2.0.0.0 / [SpaceK33z@b28951d](https://github.com/SpaceK33z/web-to-plex/commit/b28951d45f17efc609f2fda5a281193e2c17b613)
 
 - **Updated code to be scope dependent**
 - **Made other changes to make the plugin P.R. ready, see issue [#53](https://github.com/SpaceK33z/web-to-plex/issues/53)**
+=======
+## v2.0.0.0 / SpaceK33z@b28951d45f17efc609f2fda5a281193e2c17b613
+
+- **Updated code to be scope dependent**
+- **Made other changes to make the plugin P.R. ready, see issue #53**
+>>>>>>> Upgrade to v4 (rebased) (#55)
 - **Added the "Plex URL" feature**
 
 ----
 
+<<<<<<< HEAD
 ## v2.0.1.0 / [SpaceK33z@817a7f3](https://github.com/SpaceK33z/web-to-plex/commit/817a7f38680a045f8c688fd357b241b3f811d36c)
+=======
+## v2.0.1.0 / SpaceK33z@817a7f38680a045f8c688fd357b241b3f811d36c
+>>>>>>> Upgrade to v4 (rebased) (#55)
 
 - **Removed manager requirement (Options | Managers)**
     - unintentional feature; would force the user to have at least one valid manager
 - Hid debugging information
+<<<<<<< HEAD
   - see issue [#21](https://github.com/SpaceK33z/web-to-plex/issues/21)
 
 ## v3.0.0.0 / [SpaceK33z@934d4c5](https://github.com/SpaceK33z/web-to-plex/commit/934d4c542df495a551769b1188b6cd049f785d18)
@@ -197,6 +347,17 @@
 - Created `/change.log`
     - used in order to keep up with version changes more easily
 - **Removed strict equality for item searches: `/utils.js`**
+=======
+  - see issue #21 
+
+## v3.0.0.0 / SpaceK33z@934d4c542df495a551769b1188b6cd049f785d18
+
+- Made numerous changes as a BETA for v4 (explained below)
+
+- Created /change.log
+    - used in order to keep up with version changes more easily
+- **Removed strict equality for item searches: /utils.js**
+>>>>>>> Upgrade to v4 (rebased) (#55)
     - equality tests for the IDs (IMDb, TVDb, & TMDb) were strict and unpredictable (Number vs. String) and was therefore "dumbed" down to reduce errors
 - Fixed The TV DB error: no air date when series' air date is the current month and year (e.g. Aug 2018 for "Insatiable")
     - the `o.first_airdate` property was undefined and would cause a Type error when the airdate was the current month and year
@@ -208,11 +369,19 @@
     - the last button was ugly and discolored; plus Flenix added more buttons, so I just left the top button
 - Changed Trakt's button location
 - **Added support for Watcher 3 (Movie NZB Manager)**
+<<<<<<< HEAD
     - see issue [#24](https://github.com/SpaceK33z/web-to-plex/issues/24)
 - **Added support for Trakt's "Watch Now" links**
   - see issue [#25](https://github.com/SpaceK33z/web-to-plex/issues/25)
 
 ## v3.0.1.0 / [SpaceK33z@62bc193](https://github.com/SpaceK33z/web-to-plex/commit/62bc193b7f24095024aeb6ec473fccfa7753e849)
+=======
+    - see issue #24
+- **Added support for Trakt's "Watch Now" links**
+  - see issue #25
+
+## v3.0.1.0 / SpaceK33z@62bc193b7f24095024aeb6ec473fccfa7753e849
+>>>>>>> Upgrade to v4 (rebased) (#55)
 
 - **Added the download API**
   - uses the download API to save files (i.e. Flenix's "Save As" option for non-Flenix domains)
@@ -220,7 +389,11 @@
 - **Added the `sendUpdate(String type[, Object options])` method to `/utils.js`**
 - Fixed Trakt's button error
 
+<<<<<<< HEAD
 ## v3.0.2.0 / [SpaceK33z@44a84c5](https://github.com/SpaceK33z/web-to-plex/commit/44a84c575c6ec8f8a0b83c95fd7c81cc41c9a35e)
+=======
+## v3.0.2.0 / SpaceK33z@44a84c575c6ec8f8a0b83c95fd7c81cc41c9a35e
+>>>>>>> Upgrade to v4 (rebased) (#55)
 
 - **Added "Best guess" searching feature (context menu)**
   - **Avoided bug: `/background.js` error: `changeStatus` was incorrectly implemented**
@@ -241,14 +414,22 @@
   - variables, most notably `options.watcherURL` would persist after being removed
 - Updated the manifest's description
 
+<<<<<<< HEAD
 ## v3.1.0.0 / [SpaceK33z@11a23e7](https://github.com/SpaceK33z/web-to-plex/commit/11a23e7f565981bbbcedc7037c840fbcbfeed2f6)
+=======
+## v3.1.0.0 / SpaceK33z@11a23e7f565981bbbcedc7037c840fbcbfeed2f6
+>>>>>>> Upgrade to v4 (rebased) (#55)
 
 - **Added Netflix support**
 - Made changes to the `String..toCaps` method
 - Made searches better via `/utils.js`
   - replaced some non-latin characters (i.e. the curly apostrophe) with an acceptable counter-part (a "normal" apostrophe)
 
+<<<<<<< HEAD
 ## v3.1.1.0 / [SpaceK33z@1c182f0](https://github.com/SpaceK33z/web-to-plex/commit/1c182f0f37ad357d3c9160f7bfc86a006914a4a9)
+=======
+## v3.1.1.0 / SpaceK33z@1c182f0f37ad357d3c9160f7bfc86a006914a4a9
+>>>>>>> Upgrade to v4 (rebased) (#55)
 
 - **Added the "Use Loose" (RegExp) option (enabled by default)**
   - this allows the plugin to use a RegExp of the title to find possible matches
@@ -257,12 +438,17 @@
 - Fixed searching error in `/utils.js`
   - the strict matching for searches was incorrectly implemented
 
+<<<<<<< HEAD
 ## v3.1.1.1 / [SpaceK33z@a0161c2](https://github.com/SpaceK33z/web-to-plex/commit/a0161c220ff4ce5d82456f2eca74f0cdc265839e)
+=======
+## v3.1.1.1 / SpaceK33z@a0161c220ff4ce5d82456f2eca74f0cdc265839e
+>>>>>>> Upgrade to v4 (rebased) (#55)
 
 - Fixed `String..toCaps` in `/utils.js`
 - Added `/people` to Trakt's "Watch Now" link feature
   - v3.0.0.0
 
+<<<<<<< HEAD
 ## v4.0.0.0 / unreleased
 
 - **Complete overhaul of button UI/UX**
@@ -302,6 +488,16 @@
     - use as `document.furnish(element:string, ?attributes:object, ...children:Element)`
     - returns an `Element` with the declared attributes, and children
     - e.g. `div = document.furnish('div#id.class[attr]', { onclick: () => {} }, document.furnish('a[href]'))`
+=======
+## v3.1.2.0 / unreleased
+
+- Fixed `String..toCaps` in `/utils.js`
+- Fixed Flenix's `isMoviePageReady():boolean`
+- Fixed #57
+    - changed IMDb to use the found year instead of the "release year", e.g. "Del Playa (2017 - USA)" v. "Del Playa (2015)" (same movie, different year)
+- Made minor bug changes to `/utils.js`
+    - if a title wasn't passed to `findPlexMedia` the script would continue and fail
+>>>>>>> Upgrade to v4 (rebased) (#55)
 - Added `queryBy` to `/utils.js`
     - use as `document.queryBy(selectors:string)`
     - returns an `Array` that is in the same order as the selectors
@@ -310,6 +506,7 @@
     document.queryBy('body, script, head');          // => [<body>, <script>, <head>]
     document.querySelectorAll('body, script, head'); // => [<head>, <body>, <script>]
 ```
+<<<<<<< HEAD
 - Fixed the "issues" url in the README
 - Fixed the placeholders on the options page to be more descriptive
 - Removed the test button on the options page for Couchpotato (unused)
@@ -319,3 +516,5 @@
 - **Added Ombi support**
 - Fixed the notifications (`class Notification`)
 - **Added support for [YouTube](https://youtube.com/)**
+=======
+>>>>>>> Upgrade to v4 (rebased) (#55)

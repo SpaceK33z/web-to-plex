@@ -1,0 +1,36 @@
+.web-to-plex-button {
+	box-shadow: inset 0 0 0 0.125rem #f45a26 !important;
+    color: #f45a26 !important;
+}
+
+.web-to-plex-button:nth-child(2) {
+    margin-left: 0.625rem;
+}
+
+.web-to-plex-button:hover {
+    background-color: #f67e56;
+	box-shadow: inset 0 0 0 0.125rem #f67e56!important;
+    color: #ffffff!important;
+}
+
+.web-to-plex-button--found {
+    background-color: #ca7c1f;
+	box-shadow: inset 0 0 0 0.125rem #ca7c1f!important;
+	color: #ffffff!important;
+}
+
+.web-to-plex-button--found:hover {
+    background-color: #f8c022;
+	box-shadow: inset 0 0 0 0.125rem #f8c022!important;
+}
+
+#tt--0-0 {
+	box-shadow: inset 0 0 0 0.125rem #666!important;
+    color: #666!important;
+}
+
+#tt--0-0:hover {
+    background-color: #888;
+	box-shadow: inset 0 0 0 0.125rem #888!important;
+    color: #666!important;
+}

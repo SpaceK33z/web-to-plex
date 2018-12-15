@@ -12,11 +12,18 @@ let table = document.body.querySelector('table'),
 if(array && array.length) {
     let strings = [],
         compiled = [],
+<<<<<<< HEAD
         object = {},
         width = 3;
 
     for(let count = 0, length = Math.ceil(array.length / width); count < length;)
         for(let index = width * count++, name, url; index < count * width; index++)
+=======
+        object = {};
+
+    for(let count = 0, length = Math.ceil(array.length / 3); count < length;)
+        for(let index = 3 * count++, name, url; index < count * 3; index++)
+>>>>>>> Upgrade to v4 (rebased) (#55)
             object[name = array[index]] = (!/^(null|undefined)?$/.test( url = load(`${ name }.url`) || '' ))?
             `            <td id="local-${ name }" local="{:name} ({:url})" name="${ name }" url="${ url.replace(/^(.*?\/\/.*?\/).*$/, '$1') }">
                 <a href="${ url }" target="_blank">
@@ -72,7 +79,11 @@ document.body.onload = function() {
                 .replace(/\{\:([\w\- ]+)\}/g, ($0, $1, $$, $_) =>
                     $1.split(' ').map($1 => parse(element.getAttribute($1), $1, element))
                 )
+<<<<<<< HEAD
                 .replace(/\^([a-z])/gi, ($0, $1, $$, $_) => $1.toUpperCase());
+=======
+                .replace(/\^([a-z])/g, ($0, $1, $$, $_) => $1.toUpperCase());
+>>>>>>> Upgrade to v4 (rebased) (#55)
         },
         selectors = [];
 
