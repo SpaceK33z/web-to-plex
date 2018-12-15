@@ -9,10 +9,14 @@ function isShow() {
 
 function isPageReady() {
 <<<<<<< HEAD
+<<<<<<< HEAD
     return !!document.querySelector('img[src*="poster" i]');
 =======
     return !document.querySelector('.loadingScreenViewport');
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+    return !document.querySelector('.loadingScreenViewport');
+>>>>>>> SpaceK33z/master
 }
 
 async function init() {
@@ -23,6 +27,7 @@ async function init() {
 		setTimeout(init, 1000);
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 async function initPlexThingy(type) {
 	let button = renderPlexButton();
@@ -38,6 +43,8 @@ async function initPlexThingy(type) {
 		return modifyPlexButton(
 			button,
 =======
+=======
+>>>>>>> SpaceK33z/master
 function renderPlexButton($parent) {
 	if (!$parent) return;
 
@@ -68,18 +75,25 @@ async function initPlexThingy(type) {
 	if (!$title)
 		return modifyPlexButton(
 			$button,
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
 			'error',
 			 `Could not extract title from Vudu`
 		);
 
 	let title = $title.textContent.replace(/\((\d{4})\)/, '').trim(),
 <<<<<<< HEAD
+<<<<<<< HEAD
         year = $date? $date.textContent.split(/\s*\|\s*/): RegExp.$1,
         image = ($image || {}).src;
 =======
         year = $date? $date.textContent.split(/\s*\|\s*/): RegExp.$1;
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+        year = $date? $date.textContent.split(/\s*\|\s*/): RegExp.$1;
+>>>>>>> SpaceK33z/master
 
     year = +year[year.length - 1].slice(0, 4);
     year |= 0;
@@ -93,12 +107,18 @@ async function initPlexThingy(type) {
     year = Db.year;
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 	findPlexMedia({ type, title, year, image, button, IMDbID, TMDbID, TVDbID });
 =======
     console.log(title, year, Db);
 
 	findPlexMedia({ type, title, year, button: $button, IMDbID, TMDbID, TVDbID });
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+    console.log(title, year, Db);
+
+	findPlexMedia({ type, title, year, button: $button, IMDbID, TMDbID, TVDbID });
+>>>>>>> SpaceK33z/master
 }
 
 if (isMovie() || isShow()) {

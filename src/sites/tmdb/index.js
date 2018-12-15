@@ -16,6 +16,7 @@ function isShowPage() {
 
 async function initPlexThingy(type) {
 <<<<<<< HEAD
+<<<<<<< HEAD
 	let button = renderPlexButton();
 
 	if (!button)
@@ -29,6 +30,8 @@ async function initPlexThingy(type) {
 		return modifyPlexButton(
 			button,
 =======
+=======
+>>>>>>> SpaceK33z/master
 	let $button = renderPlexButton();
 	if (!$button)
 		return;
@@ -39,7 +42,10 @@ async function initPlexThingy(type) {
 	if (!$title || !$date)
 		return modifyPlexButton(
 			$button,
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
 			'error',
 			 `Could not extract ${ !$title? 'title': 'year' } from TheMovieDb`
 		);
@@ -47,9 +53,12 @@ async function initPlexThingy(type) {
 	let title = $title.textContent.trim(),
         year = $date.textContent.trim(),
 <<<<<<< HEAD
+<<<<<<< HEAD
         image = ($image || {}).src,
 =======
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
         apid = window.location.pathname.replace(/\/(?:movie|tv)\/(\d+).*/, '$1');
 
     let Db = await getIDs({ title, year, TMDbID: apid, APIType: type, APIID: apid }),
@@ -61,6 +70,7 @@ async function initPlexThingy(type) {
     year = Db.year;
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     let savename = title.toLowerCase();
 
     save(`${savename} (${year}).tmdb`, Db);
@@ -71,6 +81,8 @@ async function initPlexThingy(type) {
 
 	findPlexMedia({ title, year, image, button, type, IMDbID, TMDbID, TVDbID });
 =======
+=======
+>>>>>>> SpaceK33z/master
     type = type === 'tv'? 'show': type;
 
 	findPlexMedia({ title, year, button: $button, type, IMDbID, TMDbID, TVDbID, txt: 'title', hov: 'null' });
@@ -97,7 +109,10 @@ function renderPlexButton() {
 	$actions.insertBefore(pa, $actions.lastElementChild);
 
 	return el;
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
 }
 
 parseOptions().then(() => {

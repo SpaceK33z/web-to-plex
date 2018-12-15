@@ -4,6 +4,7 @@ function isMovie() {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 async function initPlexThingy(type) {
 	let $parent = document.querySelector('.subnav ul'),
         button = renderPlexButton();
@@ -19,6 +20,8 @@ async function initPlexThingy(type) {
 		return modifyPlexButton(
 			button,
 =======
+=======
+>>>>>>> SpaceK33z/master
 function renderPlexButton($parent) {
 	if (!$parent) return;
 
@@ -53,7 +56,10 @@ async function initPlexThingy(type) {
     if (!$title || !$year)
 		return modifyPlexButton(
 			$button,
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
 			'error',
 			'Could not extract title or year from Fandango'
 		),
@@ -61,11 +67,15 @@ async function initPlexThingy(type) {
 
 	let title = $title.textContent.trim().split(/\n+/)[0].trim(),
 <<<<<<< HEAD
+<<<<<<< HEAD
         year = $year.textContent.replace(/.*(\d{4}).*/, '$1').trim(),
         image = ($image || {}).src;
 =======
         year = $year.textContent.replace(/.*(\d{4}).*/, '$1').trim();
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+        year = $year.textContent.replace(/.*(\d{4}).*/, '$1').trim();
+>>>>>>> SpaceK33z/master
 
     let Db = await getIDs({ title, year, type }),
         IMDbID = Db.imdb,
@@ -76,10 +86,14 @@ async function initPlexThingy(type) {
     year = Db.year;
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 	findPlexMedia({ type, title, year, image, button, IMDbID, TMDbID, TVDbID });
 =======
 	findPlexMedia({ type, title, year, button: $button, IMDbID, TMDbID, TVDbID });
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+	findPlexMedia({ type, title, year, button: $button, IMDbID, TMDbID, TVDbID });
+>>>>>>> SpaceK33z/master
 }
 
 if (isMovie()) {

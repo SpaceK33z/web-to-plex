@@ -1,5 +1,6 @@
 /* global wait, modifyPlexButton, parseOptions, findPlexMedia */
 <<<<<<< HEAD
+<<<<<<< HEAD
 function isList() {
 	return /\/list\//i.test(window.location.pathname);
 }
@@ -28,6 +29,8 @@ function initPlexThingy() {
 		return modifyPlexButton(
 			button,
 =======
+=======
+>>>>>>> SpaceK33z/master
 function init() {
 	wait(
 		() => document.querySelector('.js-watch-panel'),
@@ -46,7 +49,10 @@ function initPlexThingy() {
 	if (!$title || !$date)
 		return modifyPlexButton(
 			$button,
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
 			'error',
 			'Could not extract title or year from Movieo'
 		);
@@ -54,11 +60,14 @@ function initPlexThingy() {
 	let title = $title.textContent.trim(),
         year = $date.textContent.trim(),
 <<<<<<< HEAD
+<<<<<<< HEAD
         image = ($image || {}).src,
         IMDbID = getIMDbID();
 
 	findPlexMedia({ title, year, button, type: 'movie', IMDbID });
 =======
+=======
+>>>>>>> SpaceK33z/master
         IMDbID = getIMDbID();
 
 	findPlexMedia({ title, year, button: $button, type: 'movie', IMDbID });
@@ -85,7 +94,10 @@ function renderPlexButton() {
 	$actions.appendChild(parentEl);
 
 	return el;
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
 }
 
 function getIMDbID() {
@@ -98,6 +110,7 @@ function getIMDbID() {
 	}
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 async function addInListItem(element) {
 	let $title = element.querySelector('.frame-title'),
@@ -153,3 +166,8 @@ parseOptions().then(() => {
 	init();
 });
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+parseOptions().then(() => {
+	init();
+});
+>>>>>>> SpaceK33z/master

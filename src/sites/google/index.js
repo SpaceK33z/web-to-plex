@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 function isMovie() {
     return document.querySelector('#media_result_group, [href*="themoviedb.org/tv/"], [href*="imdb.com/title/tt"]');
 }
@@ -72,6 +73,8 @@ parseOptions()
         init();
     });
 =======
+=======
+>>>>>>> SpaceK33z/master
 /* global wait, modifyPlexButton, parseOptions, findPlexMedia */
 function isMoviePage() {
 	return window.location.pathname.startsWith('/store/movies/');
@@ -171,4 +174,7 @@ parseOptions().then(() => {
 	window.addEventListener('pushstate-changed', init);
 	init();
 });
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master

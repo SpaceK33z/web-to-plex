@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 /* global config */
 <<<<<<< HEAD
+<<<<<<< HEAD
 function wait(on, then) {
     if (on())
         then && then();
@@ -16,6 +17,8 @@ let date = (new Date),
             { error: m => m, info: m => m, log: m => m, warn: m => m, group: m => m, groupEnd: m => m }:
         console;
 =======
+=======
+>>>>>>> SpaceK33z/master
 function wait(check, then) {
     if (check())
         then();
@@ -27,12 +30,16 @@ let date = new Date(),
     terminal =
 //                { error: m => m, info: m => m, log: m => m, warn: m => m } ||
                 console;
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
 
 let YEAR = date.getFullYear(),
     MONTH = date.getMonth() + 1,
     DATE = date.getDate();
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 let getURL = url => chrome.extension.getURL(url);
 
@@ -124,6 +131,8 @@ async function kill(name) {
 
 // Send an update query to background.js
 =======
+=======
+>>>>>>> SpaceK33z/master
 function watchlocationchange() {
     watchlocationchange.pathname = watchlocationchange.pathname || location.pathname;
 
@@ -144,7 +153,10 @@ function save(name, data) {
     return (sessionStorage || localStorage).setItem('Web-to-Plex@' + name, JSON.stringify(data));
 }
 
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
 function sendUpdate(type, options = {}) {
     terminal.log(`Requesting update: ${ type }`, options);
 
@@ -155,6 +167,7 @@ function sendUpdate(type, options = {}) {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 // get the saved options
 function $getOptions() {
 =======
@@ -162,6 +175,11 @@ function $getOptions() {
     const storage = chrome.storage.sync || chrome.storage.local;
 
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+function $getOptions() {
+    const storage = chrome.storage.sync || chrome.storage.local;
+
+>>>>>>> SpaceK33z/master
     return new Promise((resolve, reject) => {
         function handleOptions(options) {
             if (!options.plexToken || !options.servers)
@@ -182,10 +200,14 @@ function $getOptions() {
 
             options.plexURL = o.plexURL?
 <<<<<<< HEAD
+<<<<<<< HEAD
                 `${ o.plexURL }web#!/server/${ o.server.id }/`:
 =======
                 `${ o.plexURL }web/#!/server/${ o.server.id }/`:
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+                `${ o.plexURL }web/#!/server/${ o.server.id }/`:
+>>>>>>> SpaceK33z/master
             `https://app.plex.tv/web/app#!/server/${ o.server.id }/`;
 
             if (o.couchpotatoBasicAuthUsername)
@@ -214,6 +236,7 @@ function $getOptions() {
                 };
 
 <<<<<<< HEAD
+<<<<<<< HEAD
             if (o.ombiURLRoot && o.ombiToken) {
                 o.ombiURL = o.ombiURLRoot;
             } else {
@@ -225,41 +248,57 @@ function $getOptions() {
             } else {
                 delete o.couchpotatoURL; // prevent variable ghosting
 =======
+=======
+>>>>>>> SpaceK33z/master
             if (o.couchpotatoURLRoot && o.couchpotatoToken) {
                 o.couchpotatoURL = `${ items.couchpotatoURLRoot }/api/${encodeURIComponent(o.couchpotatoToken)}`;
             } else {
                 o.couchpotatoURL = ""; // prevent variable ghosting
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
             }
 
             if (o.watcherURLRoot && o.watcherToken) {
                 o.watcherURL = o.watcherURLRoot;
             } else {
 <<<<<<< HEAD
+<<<<<<< HEAD
                 delete o.watcherURL; // prevent variable ghosting
 =======
                 o.watcherURL = ""; // prevent variable ghosting
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+                o.watcherURL = ""; // prevent variable ghosting
+>>>>>>> SpaceK33z/master
             }
 
             if (o.radarrURLRoot && o.radarrToken) {
                 o.radarrURL = o.radarrURLRoot;
             } else {
 <<<<<<< HEAD
+<<<<<<< HEAD
                 delete o.radarrURL; // prevent variable ghosting
 =======
                 o.radarrURL = ""; // prevent variable ghosting
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+                o.radarrURL = ""; // prevent variable ghosting
+>>>>>>> SpaceK33z/master
             }
 
             if (o.sonarrURLRoot && o.sonarrToken) {
                 o.sonarrURL = o.sonarrURLRoot;
             } else {
 <<<<<<< HEAD
+<<<<<<< HEAD
                 delete o.sonarrURL; // prevent variable ghosting
             }
 
 =======
+=======
+>>>>>>> SpaceK33z/master
                 o.sonarrURL = ""; // prevent variable ghosting
             }
 
@@ -268,7 +307,10 @@ function $getOptions() {
             o.sonarrStoragePath = o.sonarrStoragePath;
             o.sonarrQualityProfileId = o.sonarrQualityProfileId;
 
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
             resolve(o);
         }
 
@@ -282,9 +324,12 @@ function $getOptions() {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 // self explanatory
 =======
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
 function openOptionsPage() {
     chrome.runtime.sendMessage({
         type: 'OPEN_OPTIONS'
@@ -292,19 +337,26 @@ function openOptionsPage() {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 // self explanatory, returns an object
 =======
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
 function parseOptions() {
     return $getOptions()
         .then(
             options => (config = options),
             error => {
 <<<<<<< HEAD
+<<<<<<< HEAD
                 new Notification(
 =======
                 showNotification(
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+                showNotification(
+>>>>>>> SpaceK33z/master
                     'warning',
                     'Fill in missing Web to Plex options',
                     15000,
@@ -317,6 +369,7 @@ function parseOptions() {
 
 let config = parseOptions();
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 // fetch/search for the item's media ID(s)
 async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APIID, meta, rerun }) {
@@ -340,6 +393,8 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
     type = type || null;
     meta = { ...meta, mode: 'cors' };
 =======
+=======
+>>>>>>> SpaceK33z/master
 async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APIID, meta, rerun }) {
     let json = {},
         data = {},
@@ -358,7 +413,10 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
 
     type = type || null;
     meta = { ...meta, mode: 'no-cors' };
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
     rqut =
     /(tv|show|series)/i.test(rqut)?
         'tvdb':
@@ -366,6 +424,7 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
         'tmdb':
     rqut || '*';
     title = (title? title.replace(/\s*[\:,]\s*Season\s+\d+.*$/i, '').toCaps(): "")
+<<<<<<< HEAD
 <<<<<<< HEAD
         .replace(/\u201a/g, ',') // fancy comma
         .replace(/[\u2019\u201b]/g, "'") // fancy apostrophe
@@ -386,6 +445,8 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
         local = await load(savename);
     }
 =======
+=======
+>>>>>>> SpaceK33z/master
         .replace(/\u201a/g, ',')
         .replace(/[\u2019\u201b]/g, "'")
         .replace(/[\u201c\u201d]/g, '"')
@@ -396,13 +457,17 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
 
     let savename = `${title} (${year}).${rqut}`,
         local = load(savename);
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
 
     if(local) {
         terminal.log('[LOCAL] Search results', local);
         return local;
     }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
     /* the rest of this function is a beautiful mess that will need to be dealt with later... but it works */
     let url =
@@ -425,6 +490,10 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
     let url =
         (rqut == 'imdb' || (rqut == '*' && !iid && title) || (rqut == 'tvdb' && !iid && title && rerun))?
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+    let url =
+        (rqut == 'imdb' || (rqut == '*' && !iid && title) || (rqut == 'tvdb' && !iid && title && rerun))?
+>>>>>>> SpaceK33z/master
             (year)?
                 `https://www.omdbapi.com/?t=${ plus(title) }&y=${ year }&apikey=${ api.omdb }`:
             `https://www.omdbapi.com/?t=${ plus(title) }&apikey=${ api.omdb }`:
@@ -434,6 +503,7 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
             (iid)?
                 `https://api.themoviedb.org/3/find/${ iid || mid || tid }?api_key=${ api.tmdb }&external_source=${ iid? 'imdb': mid? 'tmdb': 'tvdb' }_id`:
             `https://api.themoviedb.org/3/search/${ apit }?api_key=${ api.tmdb }&query=${ encodeURI(title) }${ year? '&year=' + year: '' }`:
+<<<<<<< HEAD
 <<<<<<< HEAD
         (rqut == 'tvdb' || (rqut == '*' && !tid && title) || (apid == tid))?
             (tid)?
@@ -445,6 +515,11 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
             (apid)?
                 `https://api.tvmaze.com/shows/${ apid }`:
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+        (rqut == 'tvdb' || (rqut == '*' && !tid && title) || apid)?
+            (apid)?
+                `https://api.tvmaze.com/shows/${ apid }`:
+>>>>>>> SpaceK33z/master
             `https://api.tvmaze.com/search/shows?q=${ encodeURI(title) }`:
         (title)?
             (apit && year)?
@@ -503,6 +578,7 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
         // Find an exact match: Title (Year) | #IMDbID
         let index, found, $data, lastscore;
 <<<<<<< HEAD
+<<<<<<< HEAD
         for(index = 0, found = false, $data, lastscore = 0; (title && year) && index < json.length && !found; index++) {
             $data = json[index];
 
@@ -517,12 +593,17 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
             //api.tvmaze.com/
             else if(('externals' in ($data = $data.show || $data) || 'show' in $data) && $data.premiered)
 =======
+=======
+>>>>>>> SpaceK33z/master
         for(index = 0, found = false, $data, lastscore = 0; index < json.length && !found; index++) {
             $data = json[index];
 
             //api.tvmaze.com/
             if(('externals' in ($data = $data.show || $data) || 'show' in $data) && $data.premiered)
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
                 found = (iid == $data.externals.imdb || t($data.name) == t(title) && year == $data.premiered.slice(0, 4))?
                     $data:
                 found;
@@ -561,6 +642,7 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
 
         // Find a close match: Title
 <<<<<<< HEAD
+<<<<<<< HEAD
         for(index = 0; title && index < json.length && (!found || lastscore > 0); index++) {
             $data = json[index];
 
@@ -575,12 +657,17 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
             //api.tvmaze.com/
             else if('externals' in ($data = $data.show || $data) || 'show' in $data)
 =======
+=======
+>>>>>>> SpaceK33z/master
         for(index = 0; index < json.length && (!found || lastscore > 0); index++) {
             $data = json[index];
 
             //api.tvmaze.com/
             if('externals' in ($data = $data.show || $data) || 'show' in $data)
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
                 found =
                     // ignore language barriers
                     (c($data.name) == c(title))?
@@ -634,6 +721,7 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
             // /\b(gun|showdown)\b/i.test('gundarr') === false
             // this should not match; the '\b' (border between \w and \W) keeps them from matching
 <<<<<<< HEAD
+<<<<<<< HEAD
         for(index = 0; config.UseLoose && title && index < json.length && (!found || lastscore > 0); index++) {
             $data = json[index];
 
@@ -651,6 +739,8 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
                     // ignore language barriers
                     (R($data.name, title) || terminal.log('Matching:', [$data.name, title], R($data.name, title)))?
 =======
+=======
+>>>>>>> SpaceK33z/master
         for(index = 0; config.UseLoose && index < json.length && (!found || lastscore > 0); index++) {
             $data = json[index];
 
@@ -659,7 +749,10 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
                 found =
                     // ignore language barriers
                     (R($data.name, title))?
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
                         $data:
                     // trust the api matching
                     ($data.score > lastscore)?
@@ -696,6 +789,7 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
     }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     if((json === undefined || json === null || json === false) && !rerun)
         return json = getIDs({ title, year: YEAR, type, IMDbID, TMDbID, TVDbID, APIType, APIID, meta, rerun: true });
     else if((json === undefined || json === null))
@@ -704,6 +798,11 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
         return json = getIDs({ title, year: YEAR, type, IMDbID, TMDbID, TVDbID, APIType, APIID, meta, rerun: true });
     else if(!json)
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+    if(!json && !rerun)
+        return json = getIDs({ title, year: YEAR, type, IMDbID, TMDbID, TVDbID, APIType, APIID, meta, rerun: true });
+    else if(!json)
+>>>>>>> SpaceK33z/master
         json = {};
 
     let ei = 'tt-',
@@ -711,14 +810,19 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
         tr = 'tv_results';
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     json = json && mr in json? json[mr].length > json[tr].length? json[mr]: json[tr]: json;
 =======
     json = mr in json? json[mr].length > json[tr].length? json[mr]: json[tr]: json;
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+    json = mr in json? json[mr].length > json[tr].length? json[mr]: json[tr]: json;
+>>>>>>> SpaceK33z/master
 
     if(json instanceof Array)
         json = json[0];
 
+<<<<<<< HEAD
 <<<<<<< HEAD
     if(!json)
         json = {};
@@ -738,6 +842,10 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
     //api.tvmaze.com/
     if('externals' in (json = json.show || json))
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+    //api.tvmaze.com/
+    if('externals' in (json = json.show || json))
+>>>>>>> SpaceK33z/master
         data = {
             imdb: IMDbID || json.externals.imdb || ei,
             tmdb: TMDbID || json.externals.themoviedb | 0,
@@ -786,6 +894,7 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
     data.year = year;
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     let best = { title, year, data, type, rqut, score: json.score | 0 };
 
     terminal.log('Best match', best);
@@ -797,18 +906,24 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
     save(savename = `${title.toLowerCase()} (${year}).${rqut}`.toLowerCase(), data); // e.g. "Coco (2017)" on Netflix after correction / no repeat searches
     save(`${title.toLowerCase()}.${rqut}`.toLowerCase(), year);
 =======
+=======
+>>>>>>> SpaceK33z/master
     terminal.log('Best match', { title, year, data, type, rqut, score: json.score | 0 });
 
     save(savename, data); // e.g. "Coco (0)" on Netflix before correction / no repeat searches
     save(savename = `${title} (${year}).${rqut}`, data); // e.g. "Coco (2017)" on Netflix after correction / no repeat searches
     save(`${title}.${rqut}`, year);
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
 
     terminal.log(`Saved as "${ savename }"`, data);
 
     return data;
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 // create and/or queue a notification
 // state = "error" - red
@@ -860,6 +975,8 @@ class Notification {
         return queue[element.id];
     }
 =======
+=======
+>>>>>>> SpaceK33z/master
 let lastNotification = 0;
 
 function showNotification(state, text, timeout, callback) {
@@ -890,12 +1007,16 @@ function showNotification(state, text, timeout, callback) {
     el.textContent = text;
     document.body.appendChild(el);
     lastNotification = setTimeout(() => {}, timeout || 7000);
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
 }
 
 function $pushAddToCouchpotato(options) {
 	// TODO: this does not work anymore!
 	if (!options.IMDbID)
+<<<<<<< HEAD
 <<<<<<< HEAD
 		return new Notification(
 			'warning',
@@ -905,6 +1026,11 @@ function $pushAddToCouchpotato(options) {
 			'warning',
 			'Stopped adding to CouchPotato: No IMDb ID.'
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+		return showNotification(
+			'warning',
+			'Stopped adding to CouchPotato: No IMDb ID.'
+>>>>>>> SpaceK33z/master
 		);
 
 	chrome.runtime.sendMessage(
@@ -920,23 +1046,30 @@ function $pushAddToCouchpotato(options) {
 			let movieExists = response.success;
 			if (response.error) {
 <<<<<<< HEAD
+<<<<<<< HEAD
 				return new Notification(
 					'warning',
 					'CouchPotato request failed (see your console)'
 				) ||
 				(!response.silent && terminal.error('Error viewing CouchPotato: ' + String(response.error)));
 =======
+=======
+>>>>>>> SpaceK33z/master
 				return showNotification(
 					'warning',
 					'CouchPotato request failed (see your terminal)'
 				),
 				terminal.error('Error viewing CouchPotato:', response.error);
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
 			}
 			if (!movieExists) {
 				pushCouchPotatoRequest(options);
 				return;
 			}
+<<<<<<< HEAD
 <<<<<<< HEAD
 			new Notification(
 				'warning',
@@ -944,12 +1077,17 @@ function $pushAddToCouchpotato(options) {
 			showNotification(
 				'info',
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+			showNotification(
+				'info',
+>>>>>>> SpaceK33z/master
 				`Movie is already in CouchPotato (status: ${response.status})`
 			);
 		}
 	);
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 // Movies/TV Shows
 function pushOmbiRequest(options) {
@@ -1002,6 +1140,10 @@ function pushCouchPotatoRequest(options) {
 // TV Shows
 function pushCouchPotatoRequest(options) {
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+// TV Shows
+function pushCouchPotatoRequest(options) {
+>>>>>>> SpaceK33z/master
 	chrome.runtime.sendMessage(
 		{
 			type: 'ADD_COUCHPOTATO',
@@ -1016,6 +1158,7 @@ function pushCouchPotatoRequest(options) {
 
 			if (response.error) {
 <<<<<<< HEAD
+<<<<<<< HEAD
 				return new Notification(
 					'warning',
 					'Could not add to CouchPotato (see your console)'
@@ -1028,6 +1171,8 @@ function pushCouchPotatoRequest(options) {
 			} else {
 				new Notification('warning', 'Could not add to CouchPotato');
 =======
+=======
+>>>>>>> SpaceK33z/master
 				return showNotification(
 					'warning',
 					'Could not add to CouchPotato (see your terminal)'
@@ -1039,7 +1184,10 @@ function pushCouchPotatoRequest(options) {
 				showNotification('info', 'Added movie to CouchPotato');
 			} else {
 				showNotification('warning', 'Could not add to CouchPotato');
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
 			}
 		}
 	);
@@ -1047,6 +1195,7 @@ function pushCouchPotatoRequest(options) {
 
 // Movies
 function pushWatcherRequest(options) {
+<<<<<<< HEAD
 <<<<<<< HEAD
     new Notification('info', `Adding "${ options.title }" to Watcher`, 3000);
 
@@ -1056,6 +1205,10 @@ function pushWatcherRequest(options) {
     if (!options.IMDbID && !options.TMDbID) {
         return showNotification(
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+    if (!options.IMDbID && !options.TMDbID) {
+        return showNotification(
+>>>>>>> SpaceK33z/master
             'warning',
             'Stopped adding to Watcher: No IMDb/TMDb ID'
         );
@@ -1074,34 +1227,46 @@ function pushWatcherRequest(options) {
         },
         response => {
 <<<<<<< HEAD
+<<<<<<< HEAD
             terminal.log('Pushing to Watcher', response);
 
             if (response && response.error) {
                 return new Notification('warning', 'Could not add to Watcher: ' + response.error) ||
                     (!response.silent && terminal.error('Error adding to Watcher: ' + String(response.error), response.location, response.debug));
 =======
+=======
+>>>>>>> SpaceK33z/master
         terminal.log('Pushing to Watcher', response);
 
             if (response && response.error) {
                 return showNotification('warning', 'Could not add to Watcher: ' + response.error),
                     terminal.error('Error adding to Watcher:', response.error, response.location, response.debug);
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
             } else if (response && (response.success || (response.response + "") == "true")) {
                 let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-{2,}/g, '-').toLowerCase(),
                     TMDbID = options.TMDbID || response.tmdbId;
 
                 terminal.log('Successfully pushed');
 <<<<<<< HEAD
+<<<<<<< HEAD
                 new Notification('update', 'Added movie to Watcher', 7000, () => window.open(`${config.watcherURL}library/status${TMDbID? `#${title}-${TMDbID}`: '' }`, '_blank'));
             } else {
                 new Notification('warning', 'Could not add to Watcher: Unknown Error') ||
                 (!response.silent && terminal.error('Error adding to Watcher: ' + String(response)));
 =======
+=======
+>>>>>>> SpaceK33z/master
                 showNotification('info', 'Added movie to Watcher', 7000, () => window.open(`${config.watcherURL}library/status${TMDbID? `#${title}-${TMDbID}`: '' }`, '_blank'));
             } else {
                 showNotification('warning', 'Could not add to Watcher: Unknown Error'),
                 terminal.error('Error adding to Watcher:', response);
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
             }
         }
     );
@@ -1109,6 +1274,7 @@ function pushWatcherRequest(options) {
 
 // Movies
 function pushRadarrRequest(options) {
+<<<<<<< HEAD
 <<<<<<< HEAD
     new Notification('info', `Adding "${ options.title }" to Radarr`, 3000);
 
@@ -1118,6 +1284,10 @@ function pushRadarrRequest(options) {
     if (!options.IMDbID && !options.TMDbID) {
         return showNotification(
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+    if (!options.IMDbID && !options.TMDbID) {
+        return showNotification(
+>>>>>>> SpaceK33z/master
             'warning',
             'Stopped adding to Radarr: No IMDb/TMDb ID'
         );
@@ -1129,10 +1299,14 @@ function pushRadarrRequest(options) {
             token: config.radarrToken,
             StoragePath: config.radarrStoragePath,
 <<<<<<< HEAD
+<<<<<<< HEAD
             QualityID: config.radarrQualityProfileId,
 =======
             QualityProfileId: config.radarrQualityProfileId,
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+            QualityProfileId: config.radarrQualityProfileId,
+>>>>>>> SpaceK33z/master
             basicAuth: config.radarrBasicAuth,
             title: options.title,
             year: options.year,
@@ -1141,34 +1315,46 @@ function pushRadarrRequest(options) {
         },
         response => {
 <<<<<<< HEAD
+<<<<<<< HEAD
             terminal.log('Pushing to Radarr', response);
 
             if (response && response.error) {
                 return new Notification('warning', 'Could not add to Radarr: ' + response.error) ||
                     (!response.silent && terminal.error('Error adding to Radarr: ' + String(response.error), response.location, response.debug));
 =======
+=======
+>>>>>>> SpaceK33z/master
         terminal.log('Pushing to Radarr', response);
 
             if (response && response.error) {
                 return showNotification('warning', 'Could not add to Radarr: ' + response.error),
                     terminal.error('Error adding to Radarr:', response.error, response.location, response.debug);
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
             } else if (response && response.success) {
                 let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-{2,}/g, '-').toLowerCase(),
                     TMDbID = options.TMDbID || response.tmdbId;
 
                 terminal.log('Successfully pushed');
 <<<<<<< HEAD
+<<<<<<< HEAD
                 new Notification('update', 'Added movie to Radarr', 7000, () => window.open(`${config.radarrURL}${TMDbID? `movies/${title}-${TMDbID}`: '' }`, '_blank'));
             } else {
                 new Notification('warning', 'Could not add to Radarr: Unknown Error') ||
                 (!response.silent && terminal.error('Error adding to Radarr: ' + String(response)));
 =======
+=======
+>>>>>>> SpaceK33z/master
                 showNotification('info', 'Added movie to Radarr', 7000, () => window.open(`${config.radarrURL}${TMDbID? `movies/${title}-${TMDbID}`: '' }`, '_blank'));
             } else {
                 showNotification('warning', 'Could not add to Radarr: Unknown Error'),
                 terminal.error('Error adding to Radarr:', response);
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
             }
         }
     );
@@ -1176,6 +1362,7 @@ function pushRadarrRequest(options) {
 
 // TV Shows
 function pushSonarrRequest(options) {
+<<<<<<< HEAD
 <<<<<<< HEAD
     new Notification('info', `Adding "${ options.title }" to Sonarr`, 3000);
 
@@ -1185,6 +1372,10 @@ function pushSonarrRequest(options) {
     if (!options.TVDbID || options.TVDbID == "") {
         return showNotification(
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+    if (!options.TVDbID || options.TVDbID == "") {
+        return showNotification(
+>>>>>>> SpaceK33z/master
             'warning',
             'Stopped adding to Sonarr: No TVDb ID'
         );
@@ -1196,10 +1387,14 @@ function pushSonarrRequest(options) {
             token: config.sonarrToken,
             StoragePath: config.sonarrStoragePath,
 <<<<<<< HEAD
+<<<<<<< HEAD
             QualityID: config.sonarrQualityProfileId,
 =======
             QualityProfileId: config.sonarrQualityProfileId,
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+            QualityProfileId: config.sonarrQualityProfileId,
+>>>>>>> SpaceK33z/master
             basicAuth: config.sonarrBasicAuth,
             title: options.title,
             year: options.year,
@@ -1207,38 +1402,51 @@ function pushSonarrRequest(options) {
         },
         response => {
 <<<<<<< HEAD
+<<<<<<< HEAD
             terminal.log('Pushing to Sonarr', response);
 
             if (response && response.error) {
                 return new Notification('warning', 'Could not add to Sonarr: ' + response.error) ||
                     (!response.silent && terminal.error('Error adding to Sonarr: ' + String(response.error), response.location, response.debug));
 =======
+=======
+>>>>>>> SpaceK33z/master
         terminal.log('Pushing to Sonarr', response);
 
             if (response && response.error) {
                 return showNotification('warning', 'Could not add to Sonarr: ' + response.error),
                     terminal.error('Error adding to Sonarr:', response.error, response.location, response.debug);
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
             } else if (response && response.success) {
                 let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-{2,}/g, '-').toLowerCase();
 
                 terminal.log('Successfully pushed');
+<<<<<<< HEAD
 <<<<<<< HEAD
                 new Notification('update', 'Added series to Sonarr', 7000, () => window.open(`${config.sonarrURL}series/${title}`, '_blank'));
             } else {
                 new Notification('warning', 'Could not add to Sonarr: Unknown Error') ||
                 (!response.silent && terminal.error('Error adding to Sonarr: ' + String(response)));
 =======
+=======
+>>>>>>> SpaceK33z/master
                 showNotification('info', 'Added series to Sonarr', 7000, () => window.open(`${config.sonarrURL}series/${title}`, '_blank'));
             } else {
                 showNotification('warning', 'Could not add to Sonarr: Unknown Error'),
                 terminal.error('Error adding to Sonarr:', response);
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
             }
         }
     );
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 // make the button
 function renderPlexButton(persistent) {
@@ -1474,6 +1682,8 @@ function modifyPlexButton(button, action, title, options = {}) {
                     new Notification('update', `"${ nice_title }" can be downloaded`, 7000, e => element.click(e));
                     return;
 =======
+=======
+>>>>>>> SpaceK33z/master
 function modifyPlexButton(el, action, title, options) {
     if (el instanceof Array) {
         return el.forEach(e => modifyPlexButton(e, action, title, options));
@@ -1601,11 +1811,15 @@ function modifyPlexButton(el, action, title, options) {
                         sendUpdate('SAVE_AS', { ...options, href: el.href, tail: tl });
                     });
                     break;
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
 
 
                 /* Default & Error */
                 default:
+<<<<<<< HEAD
 <<<<<<< HEAD
                     let url = `#${ options.IMDbID || 'tt' }-${ options.TMDbID | 0 }-${ options.TVDbID | 0 }`;
 
@@ -1770,6 +1984,8 @@ function findPlexMedia(options) {
             })
         } catch(error) {
 =======
+=======
+>>>>>>> SpaceK33z/master
                     return modifyPlexButton(el, action, title, {
                         ...options,
                         locale: null,
@@ -1850,7 +2066,10 @@ function findPlexMedia(options) {
             }
         })
         .catch(error => {
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
             return modifyPlexButton(
                     options.button,
                     'error',
@@ -1858,12 +2077,17 @@ function findPlexMedia(options) {
                     options
                 ),
 <<<<<<< HEAD
+<<<<<<< HEAD
                 terminal.error(`Request to Plex failed: ${ String(error) }`);
         }
 =======
                 terminal.error('Request to Plex failed', error);
         });
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+                terminal.error('Request to Plex failed', error);
+        });
+>>>>>>> SpaceK33z/master
 }
 
 function getPlexMediaRequest(options) {
@@ -1875,6 +2099,7 @@ function getPlexMediaRequest(options) {
             },
             response =>
 <<<<<<< HEAD
+<<<<<<< HEAD
                 (response && response.error)?
                     reject(response.error):
                 (!response)?
@@ -1883,12 +2108,17 @@ function getPlexMediaRequest(options) {
                 (response.error)?
                     reject(response.error):
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+                (response.error)?
+                    reject(response.error):
+>>>>>>> SpaceK33z/master
                 resolve(response)
             );
         });
 }
 
 function getPlexMediaURL(PlexUIID, key) {
+<<<<<<< HEAD
 <<<<<<< HEAD
     return config.plexURL.replace(RegExp(`\/(${ config.server.id })?$`), `/web#!/server/` + PlexUIID) + `/details?key=${encodeURIComponent( key )}`;
 }
@@ -1952,6 +2182,11 @@ top.addEventListener('message', request => {
 }
 
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+    return `${ config.plexURL.replace(config.server.id, PlexUIID) }details?key=${encodeURIComponent( key )}`;
+}
+
+>>>>>>> SpaceK33z/master
 String.prototype.toCaps = function toCaps(all) {
     /** Titling Caplitalization
      * Articles: a, an, & the
@@ -1961,6 +2196,7 @@ String.prototype.toCaps = function toCaps(all) {
     let array = this.toLowerCase(),
         titles = /(?!^|(?:an?|the)\s+)\b(a([st]|nd?|cross|fter|lthough)?|b(e(cause|fore|tween)|ut|y)|during|from|in(to)?|[io][fn]|[fn]?or|the|[st]o|through|under|with(out)?|yet)(?!\s*$)\b/gi,
 <<<<<<< HEAD
+<<<<<<< HEAD
         cap_exceptions = /([\|\"\(]\s*[a-z]|[\:\.\!\?]\s+[a-z]|(?:^\b|[^\'\-\+]\b)[^aeiouy\d\W]+\b)/gi, // Punctuation exceptions, e.g. "And not I"
         all_exceptions = /\b((?:ww)?(?:m+[dclxvi]*|d+[clxvi]*|c+[lxvi]*|l+[xvi]*|x+[vi]*|v+i*|i+))\b/gi, // Roman Numberals
         cam_exceptions = /\b((?:mr?s|[sdjm]r|mx)|(?:adm|cm?dr?|chf|c[op][lmr]|cpt|gen|lt|mjr|sgt)|doc|hon|prof)\./gi; // Titles (Most Common?)
@@ -1968,6 +2204,10 @@ String.prototype.toCaps = function toCaps(all) {
         cap_exceptions = /([\|\"\(]\s*[a-z]|[\:\.\!\?]\s+[a-z]|(?:^\b|[^\'\-\+]\b)[^aeiouy\d\W]+\b)/gi,
         all_exceptions = /\b((?:ww)?(?:m+[dclxvi]*|d+[clxvi]*|c+[lxvi]*|l+[xvi]*|x+[vi]*|v+i*|i+))\b/gi;
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+        cap_exceptions = /([\|\"\(]\s*[a-z]|[\:\.\!\?]\s+[a-z]|(?:^\b|[^\'\-\+]\b)[^aeiouy\d\W]+\b)/gi,
+        all_exceptions = /\b((?:ww)?(?:m+[dclxvi]*|d+[clxvi]*|c+[lxvi]*|l+[xvi]*|x+[vi]*|v+i*|i+))\b/gi;
+>>>>>>> SpaceK33z/master
 
     array = array.split(/\s+/);
 
@@ -1986,20 +2226,28 @@ String.prototype.toCaps = function toCaps(all) {
           .replace(titles, ($0, $1, $$, $_) => $1.toLowerCase())
           .replace(cap_exceptions, ($0, $1, $$, $_) => $1.toUpperCase())
 <<<<<<< HEAD
+<<<<<<< HEAD
           .replace(all_exceptions, ($0, $1, $$, $_) => $1.toUpperCase())
           .replace(cam_exceptions, ($0, $1, $$, $_) => $0[0].toUpperCase() + $0.slice(1, $0.length).toLowerCase());
 =======
           .replace(all_exceptions, ($0, $1, $$, $_) => $1.toUpperCase());
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+          .replace(all_exceptions, ($0, $1, $$, $_) => $1.toUpperCase());
+>>>>>>> SpaceK33z/master
 
     return string;
 };
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 (function(parent) {
 =======
 
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+
+>>>>>>> SpaceK33z/master
 /* SortBy.js */
 /** Usage + Example
  // document.queryBy( selectors )...
@@ -2019,6 +2267,7 @@ String.prototype.toCaps = function toCaps(all) {
  <div>2</div>
  <div>3</div>
  */
+<<<<<<< HEAD
 <<<<<<< HEAD
     parent.queryBy = function queryBy(selectors, container = parent) {
         // Helpers
@@ -2161,6 +2410,8 @@ let PRIMITIVE = Symbol.toPrimitive,
 
 queryBy[PRIMITIVE] = furnish[PRIMITIVE] = String.prototype.toCaps[PRIMITIVE] = () => 'function furnish() { [foreign code] }';
 =======
+=======
+>>>>>>> SpaceK33z/master
 
 (function($) {
   $.queryBy = function(selectors) {
@@ -2217,4 +2468,7 @@ queryBy[PRIMITIVE] = furnish[PRIMITIVE] = String.prototype.toCaps[PRIMITIVE] = (
     return output;
   };
 })(document);
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master

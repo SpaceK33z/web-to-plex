@@ -10,6 +10,7 @@ function isShow() {
 let $$ = selector => document.querySelector(selector);
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 async function initPlexThingy(type) {
     let title, year, image, button = renderPlexButton();
 
@@ -31,6 +32,8 @@ async function initPlexThingy(type) {
         year = meta[1].textContent.replace(/[^]*(\d{4})[^]*?$/g, '$1').trim();
         image = meta[2].src;
 =======
+=======
+>>>>>>> SpaceK33z/master
 function renderPlexButton($parent, type) {
 	if (!$parent) return;
 
@@ -86,7 +89,10 @@ async function initPlexThingy(type) {
         button = $button;
         title = meta[0].textContent.replace(/\s*\((\d+)\)\s*/, '').trim();
         year = meta[1].textContent.replace(/[^]*(\d{4})[^]*?$/g, '$1').trim();
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
     }
 
     let Db = await getIDs({ title, year, type }),
@@ -98,10 +104,14 @@ async function initPlexThingy(type) {
     year = Db.year;
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 	findPlexMedia({ type, title, year, image, button, IMDbID, TMDbID, TVDbID });
 =======
 	findPlexMedia({ type, title, year, button, IMDbID, TMDbID, TVDbID });
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+	findPlexMedia({ type, title, year, button, IMDbID, TMDbID, TVDbID });
+>>>>>>> SpaceK33z/master
 }
 
 if (isMovie() || isShow()) {

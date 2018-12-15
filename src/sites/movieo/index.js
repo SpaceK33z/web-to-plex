@@ -37,6 +37,7 @@ parseOptions().then(() => {
 
 function initPlexThingy() {
 <<<<<<< HEAD
+<<<<<<< HEAD
 	let button = renderPlexButton();
 
 	if (!button)
@@ -50,6 +51,8 @@ function initPlexThingy() {
 		return modifyPlexButton(
 			button,
 =======
+=======
+>>>>>>> SpaceK33z/master
 	let $button = renderPlexButton();
 	if (!$button)
 		return;
@@ -60,7 +63,10 @@ function initPlexThingy() {
 	if (!$title || !$date)
 		return modifyPlexButton(
 			$button,
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
 			'error',
 			 `Could not extract ${ !$title? 'title': 'year' } from Movieo`
 		);
@@ -68,11 +74,14 @@ function initPlexThingy() {
 	let title = $title.dataset.title.trim(),
         year = $date.content.slice(0, 4),
 <<<<<<< HEAD
+<<<<<<< HEAD
         image = ($image || {}).src,
         IMDbID = getIMDbID();
 
 	findPlexMedia({ title, year, button, image, type: 'movie', IMDbID });
 =======
+=======
+>>>>>>> SpaceK33z/master
         IMDbID = getIMDbID();
 
 	findPlexMedia({ title, year, button: $button, type: 'movie', IMDbID });
@@ -102,7 +111,10 @@ function renderPlexButton() {
 
 	$actions.appendChild(el);
 	return el;
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
 }
 
 function getIMDbID() {

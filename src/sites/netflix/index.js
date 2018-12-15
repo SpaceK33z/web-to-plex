@@ -16,12 +16,15 @@ function isShow() {
 let $$ = selector => document.querySelector(selector);
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 async function initPlexThingy(type) {
 	let button = renderPlexButton();
 
 	if (!button)
 		return /* Fatal Error: Fail Silently */;
 =======
+=======
+>>>>>>> SpaceK33z/master
 function renderPlexButton($parent) {
 	if (!$parent) return;
 
@@ -55,7 +58,10 @@ async function initPlexThingy(type) {
 		return;
 
     terminal.log(type);
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
 
 	let $title = $$('.video-title h4'),
         title = $title.innerText.replace(/^\s+|\s+$/g, '').toCaps() || sessionStorage.getItem(`last-${type}-title`),
@@ -71,10 +77,14 @@ async function initPlexThingy(type) {
     sessionStorage.setItem(`last-${type}-title`, title);
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 	findPlexMedia({ type, title, year, button, IMDbID, TMDbID, TVDbID });
 =======
 	findPlexMedia({ type, title, year, button: $button, IMDbID, TMDbID, TVDbID, txt: 'title', hov: 'null' });
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+	findPlexMedia({ type, title, year, button: $button, IMDbID, TMDbID, TVDbID, txt: 'title', hov: 'null' });
+>>>>>>> SpaceK33z/master
 }
 
 (window.onlocationchange = () =>

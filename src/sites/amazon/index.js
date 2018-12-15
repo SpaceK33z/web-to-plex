@@ -5,10 +5,14 @@ function isMovie() {
 
 function isShow() {
 <<<<<<< HEAD
+<<<<<<< HEAD
 	return document.querySelector('[data-automation-id*="seasons"], [class*="seasons"], [class*="episodes"], [class*="series"]');
 =======
 	return document.querySelector('[data-automation-id*="seasons"], [class*="num-of-seasons"]');
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+	return document.querySelector('[data-automation-id*="seasons"], [class*="num-of-seasons"]');
+>>>>>>> SpaceK33z/master
 }
 
 function isPageReady() {
@@ -23,6 +27,7 @@ async function init() {
 		setTimeout(init, 1000);
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 async function initPlexThingy(type) {
 	let button = renderPlexButton(),
@@ -39,6 +44,8 @@ async function initPlexThingy(type) {
 		return modifyPlexButton(
 			button,
 =======
+=======
+>>>>>>> SpaceK33z/master
 function renderPlexButton($parent) {
 	if (!$parent) return;
 
@@ -70,7 +77,10 @@ async function initPlexThingy(type) {
     if (!$title)
 		return modifyPlexButton(
 			$button,
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
 			'error',
 			'Could not extract title from Amazon'
 		),
@@ -78,11 +88,15 @@ async function initPlexThingy(type) {
 
 	let title = $title.textContent.replace(/(?:\(.+?\)|(\d+)|\d+\s+seasons?\s+(\d+))\s*$/gi, '').trim(),
 <<<<<<< HEAD
+<<<<<<< HEAD
         year = $year? $year.textContent.trim(): R.$1 || R.$2 || YEAR,
         image = getComputedStyle($image).backgroundImage;
 =======
         year = $year? $year.textContent.trim(): R.$1 || R.$2 || YEAR;
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+        year = $year? $year.textContent.trim(): R.$1 || R.$2 || YEAR;
+>>>>>>> SpaceK33z/master
 
     let Db = await getIDs({ title, year, type }),
         IMDbID = Db.imdb,
@@ -93,10 +107,14 @@ async function initPlexThingy(type) {
     year = Db.year;
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 	findPlexMedia({ type, title, year, image, button, IMDbID, TMDbID, TVDbID });
 =======
 	findPlexMedia({ type, title, year, button: $button, IMDbID, TMDbID, TVDbID });
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+	findPlexMedia({ type, title, year, button: $button, IMDbID, TMDbID, TVDbID });
+>>>>>>> SpaceK33z/master
 }
 
 if (isMovie() || isShow()) {

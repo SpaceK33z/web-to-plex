@@ -16,6 +16,7 @@ function isShow() {
 
 async function initPlexThingy(type) {
 <<<<<<< HEAD
+<<<<<<< HEAD
 	let button = renderPlexButton();
 
 	if (!button)
@@ -29,6 +30,8 @@ async function initPlexThingy(type) {
 		return modifyPlexButton(
 			button,
 =======
+=======
+>>>>>>> SpaceK33z/master
 	let $button = renderPlexButton(type);
 	if (!$button)
 		return;
@@ -39,7 +42,10 @@ async function initPlexThingy(type) {
 	if (!$title || !$year)
 		return modifyPlexButton(
 			$button,
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
 			'error',
 			'Could not extract title or year from Rotten Tomatoes'
 		);
@@ -47,17 +53,23 @@ async function initPlexThingy(type) {
 	let title = $title.textContent.trim().replace(/(.+)\:[^]*$/, type == 'movie'? '$&': '$1'),
         year = $year.textContent.replace(/\D+/g, '').trim(),
 <<<<<<< HEAD
+<<<<<<< HEAD
         image = ($image || {}).src,
 =======
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
         Db = await getIDs({ title, year, type }),
         IMDbID = Db.imdb,
         TMDbID = Db.tmdb,
         TVDbID = Db.tvdb;
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 	findPlexMedia({ title, year, image, button, type, IMDbID, TMDbID, TVDbID });
 =======
+=======
+>>>>>>> SpaceK33z/master
     if($button.ch)
         $button.ch.querySelector('em').innerText = `${ title } (${ year })`;
 
@@ -112,7 +124,10 @@ function renderPlexButton(type) {
 
         return { el };
     }
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
 }
 
 parseOptions().then(init);

@@ -25,16 +25,22 @@ parseOptions().then(() => {
 
 async function initPlexThingy() {
 <<<<<<< HEAD
+<<<<<<< HEAD
 	let button = renderPlexButton();
 
 	if (!button)
 		return /* Fatal Error: Fail Silently */;
 =======
+=======
+>>>>>>> SpaceK33z/master
 
 	let $button = renderPlexButton();
 	if (!$button)
 		return;
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
 
 	let $title = document.querySelector('#dle-content .about > h1'),
         $date = document.querySelector('.features > .reset:nth-child(2) a');
@@ -42,10 +48,14 @@ async function initPlexThingy() {
 	if (!$title || !$date)
 		return modifyPlexButton(
 <<<<<<< HEAD
+<<<<<<< HEAD
 			button,
 =======
 			$button,
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+			$button,
+>>>>>>> SpaceK33z/master
 			'error',
 			'Could not extract title or year from Flenix'
 		),
@@ -70,8 +80,11 @@ async function initPlexThingy() {
     year = Db.year;
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 	findPlexMedia({ title, year, button, IMDbID, TMDbID, TVDbID, type, remote: '/engine/ajax/get.php', locale: 'flenix' });
 =======
+=======
+>>>>>>> SpaceK33z/master
 	findPlexMedia({ title, year, button: $button, IMDbID, TMDbID, TVDbID, type, remote: '/engine/ajax/get.php', locale: 'flenix' });
 }
 
@@ -107,5 +120,8 @@ function renderPlexButton() {
     });
 
 	return els;
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
 }

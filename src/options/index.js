@@ -1,6 +1,7 @@
 /* global parseXML */
 /* Notes:
 <<<<<<< HEAD
+<<<<<<< HEAD
     #1: See https://github.com/SpaceK33z/web-to-plex/commit/db01d1a83d32e4d73f2ea671f634e6cc5b4c0fe7
     #2: See https://github.com/SpaceK33z/web-to-plex/commit/27506b9a4c12496bd7aad6ee09deb8a5b9418cac
     #3: See https://github.com/SpaceK33z/web-to-plex/issues/21
@@ -16,6 +17,8 @@ if(chrome.runtime.lastError)
 const storage = (chrome.storage.sync || chrome.storage.local),
       $$ = (selector, all) => (all? document.querySelectorAll(selector): document.querySelector(selector)),
 =======
+=======
+>>>>>>> SpaceK33z/master
     #1: See <https://github.com/SpaceK33z/web-to-plex/commit/db01d1a83d32e4d73f2ea671f634e6cc5b4c0fe7>
     #2: See <https://github.com/SpaceK33z/web-to-plex/commit/27506b9a4c12496bd7aad6ee09deb8a5b9418cac>
     #3: See <https://github.com/SpaceK33z/web-to-plex/issues/21>
@@ -24,17 +27,24 @@ const storage = (chrome.storage.sync || chrome.storage.local),
 // FireFox doesn't support sync storage.
 const storage = (chrome.storage.sync || chrome.storage.local),
       $$ = selector => document.querySelector(selector),
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
       __servers__ = $$('#plex_servers'),
       __watcher_qualityProfile__ = $$(
           `[data-option="watcherQualityProfileId"]`
       ),
       __watcher_storagePath__ = $$(
 <<<<<<< HEAD
+<<<<<<< HEAD
           `[data-option="watcherStoragePath"]`
 =======
             `[data-option="watcherStoragePath"]`
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+            `[data-option="watcherStoragePath"]`
+>>>>>>> SpaceK33z/master
       ),
       __radarr_qualityProfile__ = $$(
           `[data-option="radarrQualityProfileId"]`
@@ -42,10 +52,14 @@ const storage = (chrome.storage.sync || chrome.storage.local),
       /* See #2 */
       __radarr_storagePath__ = $$(
 <<<<<<< HEAD
+<<<<<<< HEAD
           `[data-option="radarrStoragePath"]`
 =======
             `[data-option="radarrStoragePath"]`
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+            `[data-option="radarrStoragePath"]`
+>>>>>>> SpaceK33z/master
       ),
       __sonarr_qualityProfile__ = $$(
           `[data-option="sonarrQualityProfileId"]`
@@ -59,18 +73,25 @@ const storage = (chrome.storage.sync || chrome.storage.local),
             'plexURL',
             'plexToken',
 <<<<<<< HEAD
+<<<<<<< HEAD
             'UseOmbi',
 =======
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
             'couchpotatoURLRoot',
             'couchpotatoToken',
             'couchpotatoBasicAuthUsername',
             'couchpotatoBasicAuthPassword',
 <<<<<<< HEAD
+<<<<<<< HEAD
 //          'couchpotatoQualityProfileId',
 =======
             'couchpotatoQualityProfileId',
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+            'couchpotatoQualityProfileId',
+>>>>>>> SpaceK33z/master
             'watcherURLRoot',
             'watcherToken',
             'watcherBasicAuthUsername',
@@ -90,6 +111,7 @@ const storage = (chrome.storage.sync || chrome.storage.local),
             'sonarrStoragePath',
             'sonarrQualityProfileId',
 <<<<<<< HEAD
+<<<<<<< HEAD
             'ombiURLRoot',
             'ombiToken',
 
@@ -105,11 +127,16 @@ const storage = (chrome.storage.sync || chrome.storage.local),
             'plugin_shanaproject',
             'plugin_myanimelist',
 =======
+=======
+>>>>>>> SpaceK33z/master
             'OMDbAPI',
             'TMDbAPI',
             'UseLoose',
             'UseLooseScore'
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
       ];
 
 let PlexServers = [],
@@ -117,6 +144,7 @@ let PlexServers = [],
     ClientID = null,
     manifest = chrome.runtime.getManifest(),
     terminal = // See #3
+<<<<<<< HEAD
 <<<<<<< HEAD
         NO_DEBUGGER?
             { error: m => m, info: m => m, log: m => m, warn: m => m, group: m => m, groupEnd: m => m }:
@@ -176,12 +204,17 @@ class Notification {
 }
 
 =======
+=======
+>>>>>>> SpaceK33z/master
 //                { error: m => m, info: m => m, log: m => m, warn: m => m } ||
                 console;
 
 chrome.manifest = chrome.runtime.getManifest();
 
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
 function load(name) {
     return JSON.parse(localStorage.getItem(btoa(name)));
 }
@@ -229,25 +262,35 @@ function performPlexLogin() {
         s = $$('#plex_test_status');
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     s.title = '';
 =======
     s.textContent = '';
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+    s.textContent = '';
+>>>>>>> SpaceK33z/master
     __servers__.innerHTML = '';
     __save__.disabled = true;
 
     tryPlexLogin(u, p)
         .then(response => {
 <<<<<<< HEAD
+<<<<<<< HEAD
             if(response.error)
                 return s.title = 'Invalid login information', null;
 =======
+=======
+>>>>>>> SpaceK33z/master
             if(response.error) {
                 s.textContent = 'Invalid login information';
 
                 return;
             }
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
 
             if(response.user) {
                 let t = $$('#plex_token');
@@ -272,15 +315,21 @@ function performPlexTest(ServerID) {
         teststatus.textContent = '!';
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 		if(!servers)
             return teststatus.title = 'Failed to communicate with Plex', teststatus.classList = false;
 =======
+=======
+>>>>>>> SpaceK33z/master
 		if(!servers) {
             teststatus.classList = false;
 
             return;
         }
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
 
 		__save__.disabled = false;
         teststatus.classList = true;
@@ -323,6 +372,7 @@ function getOptionValues() {
 		);
 
 <<<<<<< HEAD
+<<<<<<< HEAD
         if(element) {
             if(element.type == 'checkbox')
                 options[option] = element.checked || element.getAttribute('checked');
@@ -330,16 +380,22 @@ function getOptionValues() {
                 options[option] = element.value;
         }
 =======
+=======
+>>>>>>> SpaceK33z/master
         if(element.type == 'checkbox')
             options[option] = element.checked;
         else if(element)
             options[option] = element.value;
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
 	});
 
 	return options;
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 function performOmbiLogin() {
     let l = $$('#ombi_url').value,
@@ -509,6 +565,9 @@ function getWatcher(options, api = "getconfig") {
 =======
 function getWatcher(options, api = "getconfig") {
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+function getWatcher(options, api = "getconfig") {
+>>>>>>> SpaceK33z/master
 	let headers = {
 		'Accept': 'application/json',
 		'Content-Type': 'application/json',
@@ -518,6 +577,7 @@ function getWatcher(options, api = "getconfig") {
 	if(options.watcherBasicAuthUsername)
 		headers.Authorization = `Basic ${ btoa(`${ options.watcherBasicAuthUsername }:${ options.watcherBasicAuthPassword }`) }`;
 
+<<<<<<< HEAD
 <<<<<<< HEAD
     return fetch(`${ options.watcherURLRoot }/api/?apikey=${ options.watcherToken }&mode=${ api }&quality=${ options.watcherQualityProfileId || 'Default' }`, { headers })
         .then(response => response.json())
@@ -592,6 +652,8 @@ function getRadarr(options, api = "profile") {
         return new Notification('error', 'Invalid Radarr token');
 
 =======
+=======
+>>>>>>> SpaceK33z/master
     options.watcherURLRoot = options.watcherURLRoot.replace(/^(?!^https?:)/, 'http://').replace(/\/+$/, '');
 
 	return fetch(`${ options.watcherURLRoot }/api/?apikey=${ options.watcherToken }&mode=${ api }&quality=${ options.watcherQualityProfileId || 'Default' }`, { headers })
@@ -642,7 +704,10 @@ function performWatcherTest(QualityProfileID = 'Default') {
 }
 
 function getRadarr(options, api = "profile") {
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
 	let headers = {
 		'Accept': 'application/json',
 		'Content-Type': 'application/json',
@@ -653,22 +718,29 @@ function getRadarr(options, api = "profile") {
 		headers.Authorization = `Basic ${ btoa(`${ options.radarrBasicAuthUsername }:${ options.radarrBasicAuthPassword }`) }`;
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 	return fetch(`${ options.radarrURLRoot }/api/${ api }`, { headers })
 		.then(response => response.json())
 		.catch(error => {
 			return new Notification('error', 'Radarr failed to connect with error:' + String(error)),
 =======
+=======
+>>>>>>> SpaceK33z/master
     options.radarrURLRoot = options.radarrURLRoot.replace(/^(?!^https?:)/, 'http://').replace(/\/+$/, '');
 
 	return fetch(`${ options.radarrURLRoot }/api/${ api }`, { headers })
 		.then(response => response.json())
 		.catch(error => {
 			return terminal.error('Radarr failed to connect with error:', error),
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
               [];
 		});
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 function performRadarrTest(QualityProfileID, StoragePath, refreshing = false) {
 	let options = getOptionValues(),
@@ -734,6 +806,8 @@ function getSonarr(options, api = "profile") {
         return new Notification('error', 'Invalid Sonarr token');
 
 =======
+=======
+>>>>>>> SpaceK33z/master
 function performRadarrTest(QualityProfileID, StoragePath) {
 	let options = getOptionValues(),
         teststatus = $$('#radarr_test_status'),
@@ -776,7 +850,10 @@ function performRadarrTest(QualityProfileID, StoragePath) {
 }
 
 function getSonarr(options, api = "profile") {
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
 	let headers = {
 		'Accept': 'application/json',
 		'Content-Type': 'application/json',
@@ -787,22 +864,29 @@ function getSonarr(options, api = "profile") {
 		headers.Authorization = `Basic ${ btoa(`${ options.sonarrBasicAuthUsername }:${ options.sonarrBasicAuthPassword }`) }`;
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 	return fetch(`${ options.sonarrURLRoot }/api/${ api }`, { headers })
 		.then(response => response.json())
 		.catch(error => {
 			return new Notification('error', 'Sonarr failed to connect with error:' + String(error)),
 =======
+=======
+>>>>>>> SpaceK33z/master
     options.sonarrURLRoot = options.sonarrURLRoot.replace(/^(?!^https?:)/, 'http://').replace(/\/+$/, '');
 
 	return fetch(`${ options.sonarrURLRoot }/api/${ api }`, { headers })
 		.then(response => response.json())
 		.catch(error => {
 			return terminal.error('Sonarr failed to connect with error:', error),
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
               [];
 		});
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 function performSonarrTest(QualityProfileID, StoragePath, refreshing = false) {
 	let options = getOptionValues(),
@@ -868,6 +952,8 @@ function saveOptions() {
 	if(!ServerID) {
 		return new Notification('error', 'Select a server!'),
 =======
+=======
+>>>>>>> SpaceK33z/master
 function performSonarrTest(QualityProfileID, StoragePath) {
 	let options = getOptionValues(),
         teststatus = $$('#sonarr_test_status'),
@@ -915,7 +1001,10 @@ function saveOptions() {
 
 	if(!ServerID) {
 		return status.textContent = 'Select a server!',
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
             null;
     }
 
@@ -923,15 +1012,21 @@ function saveOptions() {
 
     // This should never happen, but can be useful for debugging.
 <<<<<<< HEAD
+<<<<<<< HEAD
 	if(!server)
 		return new Notification('error', `Could not find Plex server ${ ServerID }`),
             null;
 =======
+=======
+>>>>>>> SpaceK33z/master
 	if(!server) {
 		return status.textContent = `Could not find Plex server ${ ServerID }`,
             null;
     }
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
 
 	terminal.log('Selected server information:', server);
 
@@ -941,11 +1036,14 @@ function saveOptions() {
     ClientID = server.clientIdentifier;
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 	if(!serverConnections.length)
 		return new Notification('error', 'Could not locate Plex server URL'),
             null;
 	terminal.log('Plex Server connections:', serverConnections);
 =======
+=======
+>>>>>>> SpaceK33z/master
 	if(!serverConnections.length) {
 		return status.textContent = 'Could not locate Plex server URL',
             null;
@@ -955,12 +1053,16 @@ function saveOptions() {
 		'Plex Server connections:',
 		serverConnections
 	);
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
 
 	// With a "user token" you can access multiple servers. A "normal" token is just for one server.
 	let options = getOptionValues(),
         endingSlash = ($0, $1, $$, $_) => ($1 + (/\\/.test($_)? '\\': '/'));
 
+<<<<<<< HEAD
 <<<<<<< HEAD
     let r, R = 'Radarr',
         s, S = 'Sonarr',
@@ -986,6 +1088,8 @@ function saveOptions() {
     } if(options.sonarrURLRoot && !options.sonarrQualityProfileId) {
         return new Notification('error', 'Select a quality profile for Sonarr'),
 =======
+=======
+>>>>>>> SpaceK33z/master
     // Instead of having the user be so wordy, complete the URL ourselves here
     if((!options.radarrURLRoot && options.radarrToken) || (!options.sonarrURLRoot && options.sonarrToken) || (!options.watcherURLRoot && options.watcherToken)) {
       return status.textContent = 'Please enter a valid manager URL',
@@ -1001,7 +1105,10 @@ function saveOptions() {
             null;
     } if(options.sonarrURLRoot && !options.sonarrQualityProfileId) {
         return status.textContent = 'Select a Sonarr quality profile',
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
             null;
     } if(!ClientID) {
         ClientID = window.crypto.getRandomValues(new Uint32Array(5))
@@ -1009,6 +1116,7 @@ function saveOptions() {
         storage.set({ ClientID });
     }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
     options.plexURL = options.plexURLRoot = (options.plexURL || "https://app.plex.tv/")
         .replace(/([^\\\/])$/, endingSlash)
@@ -1030,6 +1138,8 @@ function saveOptions() {
         .replace(/([^\\\/])$/, endingSlash)
         .replace(/^(?!^http(s)?:\/\/)(.+)/, 'http$1://$2');
 =======
+=======
+>>>>>>> SpaceK33z/master
     options.plexURL = options.plexURLRoot = (options.plexURL || "")
         .replace(/([^\\\/])$/, endingSlash)
         .replace(/^(?!^https?:\/\/)(.+)/, 'http://$1');
@@ -1045,7 +1155,10 @@ function saveOptions() {
     options.sonarrURLRoot = (options.sonarrURLRoot || "")
         .replace(/([^\\\/])$/, endingSlash)
         .replace(/^(?!^https?:\/\/)(.+)/, 'http://$1');
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
 
     options.radarrStoragePath = options.radarrStoragePath
         .replace(/([^\\\/])$/, endingSlash);
@@ -1054,10 +1167,13 @@ function saveOptions() {
         .replace(/([^\\\/])$/, endingSlash);
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     for(let index = 0, array = 'plex ombi watcher radarr sonarr couchpotato'.split(' '), item = save('URLs', array); index < array.length; index++)
         save(`${ item = array[index] }.url`, options[`${ item }URLRoot`]);
 
 =======
+=======
+>>>>>>> SpaceK33z/master
     for(let index = 0, array = 'plex watcher radarr sonarr couchpotato'.split(' '), item = save('URLs', array); index < array.length; index++)
         save(`${ item = array[index] }.url`, options[`${ item }URLRoot`]);
 
@@ -1073,12 +1189,16 @@ function saveOptions() {
         }
 	}
 
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
 	// Dynamically asking permissions
 	requestURLPermissions(options.couchpotatoURLRoot);
 	requestURLPermissions(options.watcherURLRoot);
 	requestURLPermissions(options.radarrURLRoot);
 	requestURLPermissions(options.sonarrURLRoot);
+<<<<<<< HEAD
 <<<<<<< HEAD
 	requestURLPermissions(options.ombiURLRoot);
 
@@ -1088,6 +1208,8 @@ function saveOptions() {
 	}
 	new Notification('update', 'Saving...', 3000);
 =======
+=======
+>>>>>>> SpaceK33z/master
 
 	function showOptionsSaved() {
 		// Update status to let user know options were saved.
@@ -1095,7 +1217,10 @@ function saveOptions() {
 		setTimeout((() => status.textContent = ''), 2500);
 	}
 	status.textContent = 'Saving...';
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
 
 	let data = {
 		...options,
@@ -1111,22 +1236,29 @@ function saveOptions() {
 	storage.set(data, () => {
 		if(chrome.runtime.lastError) {
 <<<<<<< HEAD
+<<<<<<< HEAD
 			new Notification('error', 'Error with saving: ' + chrome.runtime.lastError.message);
 			storage.set(data, OptionsSavedMessage);
 		} else {
             terminal.log('Saved Options: ' + JSON.stringify(options));
 			OptionsSavedMessage();
 =======
+=======
+>>>>>>> SpaceK33z/master
 			terminal.error('Error with saving', chrome.runtime.lastError.message);
 			chrome.storage.local.set(data, showOptionsSaved);
 		} else {
             terminal.log('Saved Options:', options);
 			showOptionsSaved();
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
 		}
 	});
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 function requestURLPermissions(url, callback) {
     if(url && callback)
@@ -1160,11 +1292,16 @@ function restoreOptions(OPTIONS) {
     if(!items) return;
 
 =======
+=======
+>>>>>>> SpaceK33z/master
 // Restores select box and checkbox state using the preferences
 // stored in chrome.storage.*
 function restoreOptions() {
 	function setOptions(items) {
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
 		__options__.forEach(option => {
             let el = $$(`[data-option="${ option }"]`);
 
@@ -1172,30 +1309,42 @@ function restoreOptions() {
 
             if(el.type == 'checkbox')
 <<<<<<< HEAD
+<<<<<<< HEAD
                 el.setAttribute('checked', el.checked = (typeof items[option] == 'boolean'? items[option]: el.getAttribute('checked') === 'true'));
 =======
                 el.checked = (items[option] + '') == 'true';
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+                el.checked = (items[option] + '') == 'true';
+>>>>>>> SpaceK33z/master
             else
                 el.value = items[option] || '';
 
             if(el.value !== '' && !el.disabled) {
                 if(el.type == 'checkbox')
 <<<<<<< HEAD
+<<<<<<< HEAD
                     el.setAttribute('save', el.checked == 'true');
 =======
                     el.setAttribute('save', el.checked);
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+                    el.setAttribute('save', el.checked);
+>>>>>>> SpaceK33z/master
                 else if(el.type == 'range')
                     el.setAttribute('save', el.value),
                     el.oninput({ target: el });
                 else if(/password$/i.test(option))
                     el.setAttribute('type', el.type = 'password');
 <<<<<<< HEAD
+<<<<<<< HEAD
                 else
 =======
                 else 
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+                else 
+>>>>>>> SpaceK33z/master
                     el.placeholder = `Last save: ${ el.value }`,
                     el.title = `Double-click to restore value ("${ el.value }")`,
                     el.setAttribute('save', el.value),
@@ -1206,6 +1355,7 @@ function restoreOptions() {
 		if(items.plexToken)
 			performPlexTest(items.servers ? items.servers[0].id : null);
         if(items.watcherURLRoot)
+<<<<<<< HEAD
 <<<<<<< HEAD
 			performWatcherTest(items.watcherQualityProfileId, true);
         if(items.ombiURLRoot)
@@ -1360,6 +1510,8 @@ $$('#version')
     .innerHTML = `Version ${ chrome.manifest.version }`;
 $$('[type="range"]', true)
 =======
+=======
+>>>>>>> SpaceK33z/master
 			performWatcherTest(items.watcherQualityProfileId);
         if(items.radarrURLRoot)
 			performRadarrTest(items.radarrQualityProfileId, items.radarrStoragePath);
@@ -1404,7 +1556,10 @@ document
     .innerHTML = `Version ${ chrome.manifest.version }`;
 document
     .querySelectorAll('[type="range"]')
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
     .forEach((element, index, array) => {
         element.nextElementSibling.value = element.value + '%';
 

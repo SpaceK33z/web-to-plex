@@ -25,8 +25,11 @@ let $$ = (selector, index = 0) => document.queryBy(selector)[index],
 function cleanYear(year) {
 	// The year can contain `()`, so we need to strip it out.
 <<<<<<< HEAD
+<<<<<<< HEAD
 	return year.replace(/^\(|\)$/g, '').trim();
 =======
+=======
+>>>>>>> SpaceK33z/master
 	return parseInt(year.trim().replace(/^\(|\)$/g, ''));
 }
 
@@ -45,11 +48,15 @@ function renderPlexButton($parent) {
 
 	$parent.appendChild(el);
 	return el;
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
 }
 
 async function initPlexMovie() {
 	let $parent = $$('.plot_summary'),
+<<<<<<< HEAD
 <<<<<<< HEAD
         button = renderPlexButton(),
         type = 'movie';
@@ -57,17 +64,23 @@ async function initPlexMovie() {
 	if (!button)
 		return /* Fatal Error: Fail Silently */;
 =======
+=======
+>>>>>>> SpaceK33z/master
         $button = renderPlexButton($parent),
         type = 'movie';
 
 	if (!$button)
 		return;
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
 
 	let $title = $$('.originalTitle, .title_wrapper h1'),
         $altname = $$('.title_wrapper h1'),
         $date = $$('.title_wrapper [href*="/releaseinfo"]'),
 	    $year = $$('.title_wrapper #titleYear'),
+<<<<<<< HEAD
 <<<<<<< HEAD
         $image = $$('img[alt$="poster" i]'),
 	// TODO: Hmm there should be a less risky way...
@@ -77,12 +90,17 @@ async function initPlexMovie() {
         year = +cleanYear($year.textContent),
         image = ($image || {}).src;
 =======
+=======
+>>>>>>> SpaceK33z/master
 	// TODO: Hmm there should be a less risky way...
         title = $title.childNodes[0].textContent.trim(),
         altname = ($altname == $title? null: $altname.childNodes[0].textContent.trim()),
         country = $date.innerText.replace(/[^]+\((\w+)\)[^]*?$/, '$1'),
         year = cleanYear($year.textContent);
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
     title = usa.test(country)? title: altname;
 
     let Db = await getIDs({ title, year, type, IMDbID }),
@@ -94,14 +112,19 @@ async function initPlexMovie() {
     year = Db.year;
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 	findPlexMedia({ type, title, year, image, button, IMDbID, TMDbID, TVDbID });
 =======
 	findPlexMedia({ type, title, year, button: $button, IMDbID, TMDbID, TVDbID });
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+	findPlexMedia({ type, title, year, button: $button, IMDbID, TMDbID, TVDbID });
+>>>>>>> SpaceK33z/master
 }
 
 async function initPlexShow() {
 	let $parent = $$('.plot_summary'),
+<<<<<<< HEAD
 <<<<<<< HEAD
         button = renderPlexButton(),
         type = 'show';
@@ -109,17 +132,23 @@ async function initPlexShow() {
 	if (!button)
 		return /* Fatal Error: Fail Silently */;
 =======
+=======
+>>>>>>> SpaceK33z/master
         $button = renderPlexButton($parent),
         type = 'show';
 
 	if (!$button)
 		return;
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
   
 	let $title = $$('.originalTitle, .title_wrapper h1'),
         $altname = $$('.title_wrapper h1'),
         $date = $$('.title_wrapper [href*="/releaseinfo"]'),
         date = $$('title').textContent,
+<<<<<<< HEAD
 <<<<<<< HEAD
         dateMatch = date.match(/Series\s*\(?(\d{4})(?:[^\)]+\))?/i),
         $image = $$('img[alt$="poster" i]');
@@ -133,6 +162,8 @@ async function initPlexShow() {
         year = parseInt(dateMatch[1]),
         image = ($image || {}).src;
 =======
+=======
+>>>>>>> SpaceK33z/master
         dateMatch = date.match(/Series\s+(\d{4})/);
 
 	if (!($title || $altname) || !dateMatch)
@@ -142,7 +173,10 @@ async function initPlexShow() {
         altname = ($altname == $title? null: $altname.childNodes[0].textContent.trim()),
         country = $date.innerText.replace(/[^]+\((\w+)\)[^]*?$/, '$1'),
         year = dateMatch[1];
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
     title = usa.test(country)? title: altname;
 
     let Db = await getIDs({ title, year, type, IMDbID }),
@@ -153,6 +187,7 @@ async function initPlexShow() {
     title = Db.title;
     year = Db.year;
 
+<<<<<<< HEAD
 <<<<<<< HEAD
     let savename = title.toLowerCase();
 
@@ -237,6 +272,8 @@ let init = () => {
 
 init();
 =======
+=======
+>>>>>>> SpaceK33z/master
 	findPlexMedia({ type, title, year, button: $button, IMDbID, TMDbID, TVDbID });
 }
 
@@ -278,4 +315,7 @@ if (((isMovie() || isShow()) && IMDbID) || isList()) {
 			initList();
 	});
 }
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master

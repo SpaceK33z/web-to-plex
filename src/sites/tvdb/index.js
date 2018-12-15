@@ -25,6 +25,7 @@ parseOptions().then(() => {
 
 function initPlexThingy() {
 <<<<<<< HEAD
+<<<<<<< HEAD
 	let button = renderPlexButton();
 
 	if (!button)
@@ -37,6 +38,8 @@ function initPlexThingy() {
 		return modifyPlexButton(
 			button,
 =======
+=======
+>>>>>>> SpaceK33z/master
 	let $button = renderPlexButton();
 	if (!$button)
 		return;
@@ -46,7 +49,10 @@ function initPlexThingy() {
 	if (!$title)
 		return modifyPlexButton(
 			$button,
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
 			'error',
 			 `Could not extract title from TheTVDb`
 		),
@@ -54,10 +60,13 @@ function initPlexThingy() {
 
 	let title = $title.innerText.trim(),
 <<<<<<< HEAD
+<<<<<<< HEAD
         year,
         image = ($image || {}).src,
 =======
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
         d = '<!---->', o = {},
 	    Db = document.querySelector('#series_basic_info')
             .textContent
@@ -76,6 +85,7 @@ function initPlexThingy() {
             });
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     year = ((o.first_aired || YEAR) + "").slice(0, 4);
 
     let savename = title.toLowerCase();
@@ -86,6 +96,8 @@ function initPlexThingy() {
 
 	findPlexMedia({ title, year, image, button, type: 'show', IMDbID: o.imdb, TVDbID: o.thetvdb });
 =======
+=======
+>>>>>>> SpaceK33z/master
 	findPlexMedia({ title, year: ((o.first_aired || YEAR) + "").slice(0, 4), button: $button, type: 'show', IMDbID: o.imdb, TVDbID: o.thetvdb });
 }
 
@@ -116,5 +128,8 @@ function renderPlexButton() {
     $actions.insertBefore(pa, $actions.firstChild);
 
 	return ch;
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
 }

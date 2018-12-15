@@ -25,6 +25,7 @@ parseOptions().then(async() => {
 
 async function initPlexThingy() {
 <<<<<<< HEAD
+<<<<<<< HEAD
 	let button = renderPlexButton();
 
 	if (!button)
@@ -34,22 +35,31 @@ async function initPlexThingy() {
         $date = document.querySelector('#year'),
         $image = document.querySelector('figure img'),
 =======
+=======
+>>>>>>> SpaceK33z/master
 	let $button = renderPlexButton();
 	if (!$button)
 		return;
 
 	let $title = document.querySelector('header.columns > h1'),
         $date = document.querySelector('#year'),
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
         $apid = window.location.pathname.replace(/\/shows\/(\d+).*/, '$1');
 
 	if (!$title || !$date)
 		return modifyPlexButton(
 <<<<<<< HEAD
+<<<<<<< HEAD
 			button,
 =======
 			$button,
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+			$button,
+>>>>>>> SpaceK33z/master
 			'error',
 			 `Could not extract ${ !$title? 'title': 'year' } from TV Maze`
 		),
@@ -58,9 +68,12 @@ async function initPlexThingy() {
 	let title = $title.innerText.trim(),
 	    year = $date.innerText.replace(/\((\d+).+\)/, '$1'),
 <<<<<<< HEAD
+<<<<<<< HEAD
         image = ($image || {}).src,
 =======
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
         Db = await getIDs({ title, year, type: 'tv', APIID: $apid }),
         IMDbID = Db.imdb,
         TMDbID = Db.tmdb,
@@ -70,8 +83,11 @@ async function initPlexThingy() {
     year = Db.year;
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 	findPlexMedia({ title, year, button, type: 'tv', IMDbID, TMDbID, TVDbID });
 =======
+=======
+>>>>>>> SpaceK33z/master
 	findPlexMedia({ title, year, button: $button, type: 'tv', IMDbID, TMDbID, TVDbID });
 }
 
@@ -103,5 +119,8 @@ function renderPlexButton() {
     });
 
 	return els;
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
 }

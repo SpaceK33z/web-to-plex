@@ -14,12 +14,15 @@ function isShow() {
 let $$ = selector => document.querySelector(selector);
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 async function initPlexThingy(type) {
 	let button = renderPlexButton();
 
 	if (!button)
 		return /* Fatal Error: Fail Silently */;
 =======
+=======
+>>>>>>> SpaceK33z/master
 function renderPlexButton($parent) {
 	if (!$parent) return;
 
@@ -43,7 +46,10 @@ async function initPlexThingy(type) {
 
 	if (!$button)
 		return;
+<<<<<<< HEAD
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+>>>>>>> SpaceK33z/master
 
 	let $title = $$('#content [class$="__name"]'),
         $year = $$('#content [class$="__meta"] [class$="segment"]:last-child'),
@@ -58,10 +64,14 @@ async function initPlexThingy(type) {
     year = Db.year;
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 	findPlexMedia({ type, title, year, button, IMDbID, TMDbID, TVDbID });
 =======
 	findPlexMedia({ type, title, year, button: $button, IMDbID, TMDbID, TVDbID, txt: 'title', hov: 'null' });
 >>>>>>> Upgrade to v4 (rebased) (#55)
+=======
+	findPlexMedia({ type, title, year, button: $button, IMDbID, TMDbID, TVDbID, txt: 'title', hov: 'null' });
+>>>>>>> SpaceK33z/master
 }
 
 (window.onlocationchange = () =>
