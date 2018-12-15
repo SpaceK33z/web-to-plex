@@ -6,7 +6,7 @@
     "homepage_url": "https://github.com/Ephellon/web-to-plex/",
 
 	"manifest_version": 2,
-    "version": "3.1.2.0",
+    "version": "4.0",
 // Firefox Support =>
 //    "applications": {
 //        "gecko": {
@@ -23,7 +23,15 @@
 	},
 
 	"content_scripts": [
-		{
+        // Allows media downloads
+        {
+            "matches": ["*://*.openload.co/*", "*://*.openload.com/*", "*://*.oload.fun/*"],
+            "js": ["download/oload.js"],
+            "all_frames": true
+        },
+
+        // The sites
+        {
 			"matches": ["*://*.movieo.me/*"],
 			"js": ["history-hack.js", "utils.js", "sites/movieo/index.js"],
 			"css": ["sites/movieo/index.css", "sites/common.css"]
@@ -36,7 +44,7 @@
 			"js": ["history-hack.js", "utils.js", "sites/trakt/index.js"],
 			"css": ["sites/trakt/index.css", "sites/common.css"]
 		},{
-			"matches": ["*://*.letterboxd.com/film/*"],
+			"matches": ["*://*.letterboxd.com/*"],
 			"js": ["utils.js", "sites/letterboxd/index.js"],
 			"css": ["sites/letterboxd/index.css", "sites/common.css"]
 		},{
@@ -58,14 +66,14 @@
 		},{
 			"matches": ["*://*.vrv.co/*"],
 			"js": ["utils.js", "sites/vrv/index.js"],
-			"css": ["sites/vrv/index.css"]
+			"css": ["sites/vrv/index.css", "sites/common.css"]
 		},{
 			"matches": ["*://*.hulu.com/*"],
 			"js": ["utils.js", "sites/hulu/index.js"],
 			"css": ["sites/hulu/index.css", "sites/common.css"]
 		},{
-			"matches": ["*://*.google.com/store/*"],
-			"js": ["utils.js", "sites/google/index.js"],
+			"matches": ["*://play.google.com/store/*"],
+			"js": ["utils.js", "sites/google/play.js"],
 			"css": ["sites/google/index.css", "sites/common.css"]
 		},{
 			"matches": ["*://*.apple.com/*"],
@@ -103,12 +111,24 @@
 			"matches": ["*://*.netflix.com/watch/*"],
 			"js": ["utils.js", "sites/netflix/index.js"],
 			"css": ["sites/netflix/index.css", "sites/common.css"]
+		},{
+            "matches": ["*://*.gostream.site/*"],
+            "js": ["utils.js", "sites/gostream/index.js"],
+            "css": ["sites/gostream/index.css", "sites/common.css"]
+        },{
+			"matches": ["*://www.google.com/*"],
+			"js": ["utils.js", "sites/google/index.js"],
+			"css": ["sites/google/index.css", "sites/common.css"]
+		},{
+			"matches": ["*://www.youtube.com/*"],
+			"js": ["utils.js", "sites/youtube/index.js"],
+			"css": ["sites/youtube/index.css", "sites/common.css"]
 		}
 	],
 
 	"background": {
-		"scripts": ["background.js"],
-		"persistent": false
+		"scripts": ["background.js", "plugn.js"],
+		"persistent": true
 	},
 
 	"options_page": "options/index.html",
@@ -131,11 +151,7 @@
 		"storage",
         "downloads",
         "contextMenus",
-		"https://*.plex.direct/*"
+        "<all_urls>"
 	],
-	"optional_permissions": [
-		"http://*/",
-		"https://*/"
-	],
-    "web_accessible_resources": ["img/16.png", "img/48.png", "img/_16.png", "img/_48.png", "img/o16.png", "img/o48.png"]
+    "web_accessible_resources": ["img/*"]
 }

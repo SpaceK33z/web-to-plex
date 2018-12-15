@@ -13,29 +13,11 @@ function isShow() {
 
 let $$ = selector => document.querySelector(selector);
 
-function renderPlexButton($parent) {
-	if (!$parent) return;
-
-	let existingButton = $$('a.web-to-plex-button');
-	if (existingButton)
-		existingButton.remove();
-
-	let el = document.createElement('a');
-
-    el.classList.add('Nav__item', 'web-to-plex-button');
-
-    el.innerHTML = `<img src="${ chrome.extension.getURL('img/o48.png') }"/>`;
-    el.title = 'Loading...';
-
-	$parent.insertBefore(el, $parent.lastChild);
-	return el;
-}
-
 async function initPlexThingy(type) {
-	let $button = renderPlexButton($$('#content .Nav .Nav__container'));
+	let button = renderPlexButton();
 
-	if (!$button)
-		return;
+	if (!button)
+		return /* Fatal Error: Fail Silently */;
 
 	let $title = $$('#content [class$="__name"]'),
         $year = $$('#content [class$="__meta"] [class$="segment"]:last-child'),
@@ -49,7 +31,7 @@ async function initPlexThingy(type) {
     title = Db.title;
     year = Db.year;
 
-	findPlexMedia({ type, title, year, button: $button, IMDbID, TMDbID, TVDbID, txt: 'title', hov: 'null' });
+	findPlexMedia({ type, title, year, button, IMDbID, TMDbID, TVDbID });
 }
 
 (window.onlocationchange = () =>

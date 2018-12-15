@@ -1,24 +1,247 @@
 /** Common CSS
- * Web to Plex+
+ * Web to Plex
  */
 
+/* Web to Plex notifications */
 .web-to-plex-notification {
+	background: #F45A26;
+	border-radius: 4px;
+	color: #FFF;
 	cursor: pointer;
 	display: block;
+    font-family: arial, verdana, sans-serif;
+	font-size: 20px;
+    text-align: center;
+
 	position: fixed;
-	top: 80px;
 	left: 50%;
 	margin-left: -175px;
-	width: 350px;
-	background: #fd6a00;
-	color: #fff;
-	font-size: 20px;
 	padding: 10px;
-	border-radius: 4px;
-	z-index: 999000;
-    font-family: arial, verdana, sans-serif;
+	top: 80px;
+
+	width: 350px;
+	z-index: 999999;
 }
 
-.web-to-plex-warning {
-	background: #fd2a00;
+/* Web to Plex general information notifications */
+.web-to-plex-notification.info {
+    background: #666!important;
+}
+
+/* Web to Plex update notifications */
+.web-to-plex-notification.update {
+    background: #2A2AFF!important;
+}
+
+/* Web to Plex warning notifications */
+.web-to-plex-notification.warning {
+	background: #FF2A2A!important;
+}
+
+/* Web to Plex buttons */
+.web-to-plex-button [module] {
+    position: relative!important;
+}
+
+.web-to-plex-button * {
+    border: none!important;
+}
+
+.web-to-plex-button {
+    background-color: #3F4245!important;
+    border: none;
+    color: #FFF;
+    font-family: Open Sans Semibold,Helvetica Neue,Helvetica,Arial,sans-serif!important;
+    font-size: 1em!important;
+    font-weight: 100!important;
+    text-align: center!important;
+
+    bottom: 5px!important;
+    left: 5px!important;
+    padding: 10px!important;
+    position: fixed!important;
+    z-index: 999999!important;
+
+    height: 72px!important;
+    width: 180px!important;
+
+    transition: all 0.3s ease!important;
+    transition: opacity 1s ese!important;
+}
+
+.web-to-plex-button.hide {
+    display: initial!important;
+}
+
+.web-to-plex-button.hide:not(:hover) {
+    opacity: 0.1!important;
+}
+
+*:not(#plexit-bookmarklet-frame) ~ .web-to-plex-button {
+    margin-left: 0px!important;
+}
+
+#plexit-bookmarklet-frame ~ .web-to-plex-button {
+    margin-left: 280px!important;
+}
+
+*:not(#plexit-bookmarklet-frame) + .web-to-plex-button #plexit, #plexit-bookmarklet-frame + .web-to-plex-button #wtp-plexit {
+    display: none!important;
+}
+
+.floating.web-to-plex-button {
+    border-radius: 50px;
+    box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.3);
+
+    height: 75px!important;
+    width: 75px!important;
+}
+.floating.web-to-plex-button::after {
+    content: ' ';
+
+    background: #666;
+    border: 1px solid #888;
+    border-radius: 16px!important;
+
+    right: 0!important;
+    top: 0!important;
+    position: absolute!important;
+
+    height: 16px!important;
+    width: 16px!important;
+
+    transition: background 0.4s linear;
+}
+
+.floating.web-to-plex-button:not(.restarting):active,
+.floating.web-to-plex-button:not(.restarting):hover {
+    box-shadow: 1px 5px 20px 0 rgba(0, 0, 0, 0.6)!important;
+    cursor: pointer!important;
+}
+
+.floating.web-to-plex-button:focus {
+    outline: none!important;
+}
+
+.web-to-plex-button.wtp--found::after, .web-to-plex-button.wtp--found::before {
+    background: #F9BD03!important;
+}
+
+.web-to-plex-button.wtp--download::after, .web-to-plex-button.wtp--download::before {
+    background: #265AF4!important;
+}
+
+.web-to-plex-button.wtp--error::after, .web-to-plex-button.wtp--error::before {
+    background: #FF2A2A!important;
+}
+
+.web-to-plex-button::before {
+    content: ' ';
+
+    background: #FFF6;
+    border-radius: inherit;
+    display: none;
+
+    margin-top: -10px!important;
+    margin-left: -10px!important;
+
+    height: 75px!important;
+    width: 75px!important;
+
+    position: absolute!important;
+    z-index: 9999999!important;
+}
+
+.web-to-plex-button.animate::before {
+    display: block;
+
+    -webkit-transform: scale(0);
+       -moz-transform: scale(0);
+         -o-transform: scale(0);
+            transform: scale(0);
+
+    -webkit-animation: web-to-plex-ripple 0.5s linear;
+       -moz-animation: web-to-plex-ripple 0.5s linear;
+         -o-animation: web-to-plex-ripple 0.5s linear;
+            animation: web-to-plex-ripple 0.5s linear;
+}
+
+@-webkit-keyframes web-to-plex-ripple {
+    100% {
+        opacity: 0;
+        -webkit-transform: scale(2.5);
+    }
+}
+@-moz-keyframes web-to-plex-ripple {
+    100% {
+        opacity: 0;
+        -moz-transform: scale(2.5);
+    }
+}
+@-o-keyframes web-to-plex-ripple {
+    100% {
+        opacity: 0;
+        -o-transform: scale(2.5);
+    }
+}
+@keyframes web-to-plex-ripple {
+    100% {
+        opacity: 0;
+        transform: scale(2.5);
+    }
+}
+
+.web-to-plex-button.open, #plexit-bookmarklet-frame + .web-to-plex-button {
+    opacity: 1!important;
+
+    width: 350px!important;
+}
+.web-to-plex-button .list-name {
+    float: left!important;
+}
+
+.web-to-plex-button ul {
+    margin: 0!important;
+    padding-left: 0!important;
+}
+
+.web-to-plex-button li {
+    display: inline-block!important;
+    list-style: none!important;
+
+    margin: 0!important;
+    padding: 5px!important;
+    vertical-align: bottom!important;
+}
+
+.web-to-plex-button li > img {
+    display: inline;
+
+    margin-top: 0!important;
+}
+
+*:not(#plexit-bookmarklet-frame) + .web-to-plex-button.closed .list-item {
+    float: left;
+    opacity: 0!important;
+    transition: opacity 0!important;
+}
+
+.web-to-plex-button.open .list-item {
+    opacity: 1!important;
+    transition: opacity 2s!important;
+}
+
+.web-to-plex-button.open li:hover [tooltip]::before, .web-to-plex-button.open [tooltip]:hover::before {
+    content: attr(tooltip);
+
+    background: #3F424599!important;
+    border-radius: 3px!important;
+    color: #fff!important;
+    font-family: arial, calibri, sans-serif, sans, monospace!important;
+    font-size: 15px!important;
+
+    bottom: 85px!important;
+    left: 35px!important;
+    padding: 3px 6px!important;
+    position: absolute!important;
 }

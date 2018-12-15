@@ -52,50 +52,44 @@ function init() {
 	}
 }
 
-function renderPlexButton() {
-	let $actions = $$('#info-wrapper .action-buttons');
-	if (!$actions)
-		return;
-
-	let existingButton = $actions.querySelector('a.web-to-plex-button');
-	if (existingButton)
-		return;
-
-	let pa = document.createElement('a'),
-        ma = document.createElement('div'),
-        ch = document.createElement('div'),
-        el = document.createElement('div');
-
-	pa.classList.add('btn', 'btn-block', 'btn-summary', 'btn-w2p');
-    ma.classList.add('fa', 'fa-fw', 'fa-download');
-    ch.classList.add('text');
-    el.textContent = 'Web to Plex';
-    el.classList.add('web-to-plex-button', 'main-info');
-    pa.appendChild(ma);
-    pa.appendChild(ch);
-    ch.appendChild(el);
-	$actions.insertBefore(pa, $actions.childNodes[3]);
-
-	return pa;
-}
-
 async function initPlexThingy(type) {
-	let $button = renderPlexButton();
+	let button = renderPlexButton();
 
-	if (!$button)
-		return;
+	if (!button)
+		return /* Fatal Error: Fail Silently */;
 
 	let $title = $$('.mobile-title'),
-        $year = $$('.mobile-title .year');
+        $year = $$('.mobile-title .year'),
+        $image = $$('.poster img.real[alt="poster" i]');
 
 	if (!$title || !$year)
-		return modifyPlexButton($button, 'error',  `Could not extract ${ !$title? 'title': 'year' } from Trakt`);
+		return modifyPlexButton(button, 'error', `Could not extract ${ !$title? 'title': 'year' } from Trakt`);
 
 	let title = $title.textContent.replace(/(.+)(\d{4}).*?$/, '$1').replace(/\s*\:\s*Season.*$/i, '').trim(),
-        year = (RegExp.$2 || $year.textContent).trim(),
+        year = +(RegExp.$2 || $year.textContent).trim(),
+        image = ($image || {}).src,
         IMDbID = getIMDbID(),
         TMDbID = getTMDbID(),
-        TVDbID = getTVDbID();
+        TVDbID = getTVDbID(),
+        o = (type == 'movie')? { im: IMDbID, tm: TMDbID }: { im: IMDbID, tm: TMDbID, tv: TVDbID };
+
+    /* use Trakt as a caching service when applicable */
+    if(type == 'movie') {
+        save(`${title} (${year}).tmdb`, { title, year, imdb: o.im, tmdb: o.tm });
+        save(`${title}.tmdb`, year);
+
+        save(`${title} (${year}).imdb`, { title, year, imdb: o.im });
+        save(`${title}.imdb`, year);
+    } else {
+        save(`${title} (${year}).tvdb`, { title, year, tvdb: o.tv, tmdb: o.tm, imdb: o.im });
+        save(`${title}.tvdb`, year);
+
+        save(`${title} (${year}).tmdb`, { title, year, tmdb: o.tm });
+        save(`${title}.tmdb`, year);
+
+        save(`${title} (${year}).imdb`, { title, year, imdb: o.im });
+        save(`${title}.imdb`, year);
+    }
 
     if((!IMDbID && !TMDbID) || !TVDbID) {
         let Db = await getIDs({ title, year, type, IMDbID, TMDbID, TVDbID });
@@ -107,7 +101,7 @@ async function initPlexThingy(type) {
         year = Db.year;
     }
 
-	findPlexMedia({ type, title, year, button: $button, IMDbID, TMDbID, TVDbID, txt: 'title', hov: 'null' });
+	findPlexMedia({ type, title, year, image, button, IMDbID, TMDbID, TVDbID });
 }
 
 async function initDash() {
@@ -125,6 +119,7 @@ async function initDash() {
                 return setTimeout( () => element.onclick(event, true), 5 );
 
             let title = $$("#watch-now-content h3").innerText.replace(/^\s*where\s+to\s+watch\s*/i, ''),
+                image = $$('.poster img.real[alt="poster" i]'),
                 type = 'show',
                 year = YEAR,
                 button = $$(".w2p-channel");
@@ -141,9 +136,9 @@ async function initDash() {
 `
 <div class="title">ondemand</div>
 <div class="section">
-    <a class="w2p-channel web-to-plex-button" href="#" title>
+    <a class="w2p-channel w2p-action" href="#" title>
       <div class="icon btn-amazon">
-        <img class="lazy" src="${ chrome.extension.getURL('img/_48.png') }" style="height: 45px; width: auto;" alt="Plugin">
+        <img class="lazy" src="${ IMG_URL._48 }" style="height: 45px; width: auto;" alt="Plugin">
       </div>
       <div class="price">Free</div>
     </a>

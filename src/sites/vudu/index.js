@@ -8,7 +8,7 @@ function isShow() {
 }
 
 function isPageReady() {
-    return !document.querySelector('.loadingScreenViewport');
+    return !!document.querySelector('img[src*="poster" i]');
 }
 
 async function init() {
@@ -19,42 +19,26 @@ async function init() {
 		setTimeout(init, 1000);
 }
 
-function renderPlexButton($parent) {
-	if (!$parent) return;
-
-	let existingButton = document.querySelector('a.web-to-plex-button');
-	if (existingButton)
-		existingButton.remove();
-
-	let el = document.createElement('a');
-
-    el.textContent = 'Web to Plex';
-    el.title = 'Loading...';
-	el.classList.add('web-to-plex-button');
-
-	$parent.appendChild(el);
-	return el;
-}
-
 async function initPlexThingy(type) {
-	let $parent = document.querySelector('.container .row:nth-child(3) .row > *, .container .row:nth-child(3) ~ * .row > *'),
-        $button = renderPlexButton($parent);
+	let button = renderPlexButton();
 
-	if (!$button)
-		return;
+	if (!button)
+		return /* Fatal Error: Fail Silently */;
 
 	let $title = document.querySelector('.head-big'),
-        $date = document.querySelector('.container .row:first-child .row ~ * > .row span');
+        $date = document.querySelector('.container .row:first-child .row ~ * > .row span'),
+        $image = document.querySelector('img[src*="poster" i]');
 
 	if (!$title)
 		return modifyPlexButton(
-			$button,
+			button,
 			'error',
 			 `Could not extract title from Vudu`
 		);
 
 	let title = $title.textContent.replace(/\((\d{4})\)/, '').trim(),
-        year = $date? $date.textContent.split(/\s*\|\s*/): RegExp.$1;
+        year = $date? $date.textContent.split(/\s*\|\s*/): RegExp.$1,
+        image = ($image || {}).src;
 
     year = +year[year.length - 1].slice(0, 4);
     year |= 0;
@@ -67,9 +51,7 @@ async function initPlexThingy(type) {
     title = Db.title;
     year = Db.year;
 
-    console.log(title, year, Db);
-
-	findPlexMedia({ type, title, year, button: $button, IMDbID, TMDbID, TVDbID });
+	findPlexMedia({ type, title, year, image, button, IMDbID, TMDbID, TVDbID });
 }
 
 if (isMovie() || isShow()) {

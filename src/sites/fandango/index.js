@@ -3,47 +3,28 @@ function isMovie() {
 	return /\/movie-overview\/?$/.test(window.location.pathname);
 }
 
-function renderPlexButton($parent) {
-	if (!$parent) return;
-
-	let existingButton = document.querySelector('a.web-to-plex-button');
-	if (existingButton)
-		existingButton.remove();
-
-	let pa = document.createElement('li'),
-        el = document.createElement('a');
-
-    pa.classList.add('web-to-plex--wrapper', 'subnav__link-item');
-
-    el.textContent = 'Web to Plex+';
-    el.title = 'Loading...';
-	el.classList.add('web-to-plex-button', 'subnav__link');
-
-    pa.appendChild(el);
-	$parent.insertBefore(pa, $parent.lastElementChild);
-	return el;
-}
-
 async function initPlexThingy(type) {
 	let $parent = document.querySelector('.subnav ul'),
-        $button = renderPlexButton($parent);
+        button = renderPlexButton();
 
-	if (!$button)
-		return;
+	if (!button)
+		return /* Fatal Error: Fail Silently */;
 
     let $title = document.querySelector('.subnav__title'),
-        $year = document.querySelector('.movie-details__release-date');
+        $year = document.querySelector('.movie-details__release-date'),
+        $image = document.querySelector('.movie-details__movie-img');
 
     if (!$title || !$year)
 		return modifyPlexButton(
-			$button,
+			button,
 			'error',
 			'Could not extract title or year from Fandango'
 		),
           null;
 
 	let title = $title.textContent.trim().split(/\n+/)[0].trim(),
-        year = $year.textContent.replace(/.*(\d{4}).*/, '$1').trim();
+        year = $year.textContent.replace(/.*(\d{4}).*/, '$1').trim(),
+        image = ($image || {}).src;
 
     let Db = await getIDs({ title, year, type }),
         IMDbID = Db.imdb,
@@ -53,7 +34,7 @@ async function initPlexThingy(type) {
     title = Db.title;
     year = Db.year;
 
-	findPlexMedia({ type, title, year, button: $button, IMDbID, TMDbID, TVDbID });
+	findPlexMedia({ type, title, year, image, button, IMDbID, TMDbID, TVDbID });
 }
 
 if (isMovie()) {

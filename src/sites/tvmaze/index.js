@@ -24,17 +24,19 @@ parseOptions().then(async() => {
 });
 
 async function initPlexThingy() {
-	let $button = renderPlexButton();
-	if (!$button)
-		return;
+	let button = renderPlexButton();
+
+	if (!button)
+		return /* Fatal Error: Fail Silently */;
 
 	let $title = document.querySelector('header.columns > h1'),
         $date = document.querySelector('#year'),
+        $image = document.querySelector('figure img'),
         $apid = window.location.pathname.replace(/\/shows\/(\d+).*/, '$1');
 
 	if (!$title || !$date)
 		return modifyPlexButton(
-			$button,
+			button,
 			'error',
 			 `Could not extract ${ !$title? 'title': 'year' } from TV Maze`
 		),
@@ -42,6 +44,7 @@ async function initPlexThingy() {
 
 	let title = $title.innerText.trim(),
 	    year = $date.innerText.replace(/\((\d+).+\)/, '$1'),
+        image = ($image || {}).src,
         Db = await getIDs({ title, year, type: 'tv', APIID: $apid }),
         IMDbID = Db.imdb,
         TMDbID = Db.tmdb,
@@ -50,35 +53,5 @@ async function initPlexThingy() {
     title = Db.title;
     year = Db.year;
 
-	findPlexMedia({ title, year, button: $button, type: 'tv', IMDbID, TMDbID, TVDbID });
-}
-
-function renderPlexButton() {
-	// The "download" buttons
-	let $actions = document.querySelectorAll(
-            'nav.page-subnav > ul'
-    );
-
-	if (!$actions)
-		return;
-
-	let $existingButton = document.querySelectorAll('a.web-to-plex-button');
-	if ($existingButton)
-		$existingButton.forEach(e => e.remove());
-
-    let els = [];
-	$actions.forEach((e, i) => {
-        let pa = document.createElement('li'),
-            el = document.createElement('a'),
-            li = /^[ou]l$/i.test(e.tagName);
-
-        pa.classList.add('web-to-plex-wrapper');
-        el.textContent = 'Web to Plex';
-        el.title = 'Loading...';
-	    el.classList.add((li? 'flatButton': 'roundButton'), 'web-to-plex-button');
-        e.appendChild(li? (pa.appendChild(el), pa): el);
-        return els.push(el);
-    });
-
-	return els;
+	findPlexMedia({ title, year, button, type: 'tv', IMDbID, TMDbID, TVDbID });
 }

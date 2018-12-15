@@ -1,83 +1,102 @@
 /* global chrome */
+let NO_DEBUGGER = false;
+
 let external = {},
     parentItem,
+    saveItem,
     terminal =
-//                { error: m => m, info: m => m, log: m => m, warn: m => m } ||
-                console;
+        NO_DEBUGGER?
+            { error: m => m, info: m => m, log: m => m, warn: m => m, group: m => m, groupEnd: m => m }:
+        console;
 
-let date = new Date(),
-    YEAR = date.getFullYear(),
+let date  = (new Date),
+    YEAR  = date.getFullYear(),
     MONTH = date.getMonth() + 1,
-    DATE = date.getDate();
+    DATE  = date.getDate();
 
+// returns the proper CORS mode of the URL
+let cors = url => ((/^(https|sftp)\b/i.test(url) || /\:(443|22)\b/? '': 'no-') + 'cors');
+
+// Create a Crypto-Key
+// new Key(number:integer, string) -> string
 class Key {
     constructor(length = 8, symbol = '') {
         let values = [];
 
         window.crypto.getRandomValues(new Uint32Array(16)).forEach((value, index, array) => values.push(value.toString(36)));
 
-        return this.value = values.join(symbol);
+        return this.length = length, this.value = values.join(symbol);
     }
 
-    rehash(length) {
-        return this.value = new Key(length);
+    rehash(length, symbol) {
+        if(length)
+            /* Do nothing */;
+        else
+            length = this.length;
+
+        return this.value = new Key(length, symbol);
     }
 }
 
-// Session key
-let SessionKey = new Key(16);
+// Session instances
+let SessionKey = new Key(16), // create a session key
+    SessionState = false;     // has this been run already?
 
-// Object{username, password} => Object
-function generateHeaders(auth) {
-    let headers = { Accept: 'application/json' };
+// Generate request headers (for fetches)
+// new Headers({username, password}) -> object
+class Headers {
+    constructor(Authorization) {
+        let headers = { Accept: 'application/json' };
 
-    if (!auth)
-        return headers;
+        if (!Authorization)
+            return headers;
 
-    return {
-        Authorization: `Basic ${ btoa(`${ auth.username }:${ auth.password }`) }`,
-        ...headers
-    };
+        return {
+            Authorization: `Basic ${ btoa(`${ Authorization.username }:${ Authorization.password }`) }`,
+            ...headers
+        };
+    }
 }
 
-// Object{MovieOrShowID, MovieOrShowTitle, MovieOrShowType, MovieOrShowIDProvider, MovieOrShowYear, LinkURL, FileType} => undefined
-function changeStatus({ id, tt, ty, pv, yr, ur = '', ft = '' }) {
+// Change the badge status
+// ChangeStatus({ MovieOrShowID, MovieOrShowTitle, MovieOrShowType, MovieOrShowIDProvider, MovieOrShowYear, LinkURL, FileType, FilePath }) -> undefined
+function ChangeStatus({ ITEM_ID, ITEM_TITLE, ITEM_TYPE, ID_PROVIDER, ITEM_YEAR, ITEM_URL = '', FILE_TYPE = '', FILE_PATH }) {
 
-    let tl = tt.replace(/\-/g, ' ').replace(/[\s\:]{2,}/g, ' - ').replace(/[^\w\s\-\']+/g, ''),
+    let FILE_TITLE = ITEM_TITLE.replace(/\-/g, ' ').replace(/[\s\:]{2,}/g, ' - ').replace(/[^\w\s\-\']+/g, ''),
     // File friendly title
-        st = tt.replace(/[\-\s]+/g, '-').replace(/[^\w\-]+/g, ''),
+        SEARCH_TITLE = ITEM_TITLE.replace(/[\-\s]+/g, '-').replace(/[^\w\-]+/g, ''),
     // Search friendly title
-        xx = /[it]m/i.test(pv)? 'FX': 'GG';
+        SEARCH_PROVIDER = /[it]m/i.test(ID_PROVIDER)? 'GX': 'GG';
 
-    id = (id && !/^tt-?$/i.test(id)? id: '') + '';
-    id = id.replace(/^.*\b(tt\d+)\b.*$/, '$1').replace(/^.*\bid=(\d+)\b.*$/, '$1').replace(/^.*(?:movie|tv|(?:tv-?)?(?:shows?|series|episodes?))\/(\d+).*$/, '$1');
+    ITEM_ID = (ITEM_ID && !/^tt-?$/i.test(ITEM_ID)? ITEM_ID: '') + '';
+    ITEM_ID = ITEM_ID.replace(/^.*\b(tt\d+)\b.*$/, '$1').replace(/^.*\bid=(\d+)\b.*$/, '$1').replace(/^.*(?:movie|tv|(?:tv-?)?(?:shows?|series|episodes?))\/(\d+).*$/, '$1');
 
-    external = { ...external, F: tl, P: pv, Q: id, S: tt, T: st, U: ur, V: ty, X: xx, Y: yr, Z: ft };
+    external = { ...external, ID_PROVIDER, ITEM_ID, ITEM_TITLE, ITEM_YEAR, ITEM_URL, ITEM_TYPE, SEARCH_PROVIDER, SEARCH_TITLE, FILE_PATH, FILE_TITLE, FILE_TYPE };
 
     chrome.browserAction.setBadgeText({
-        text: pv
+        text: ID_PROVIDER
     });
 
     chrome.browserAction.setBadgeBackgroundColor({
-       color: (id? '#f45a26': '#666666')
+       color: (ITEM_ID? '#f45a26': '#666666')
     });
 
     chrome.contextMenus.update('W2P', {
-        title: `Find "${ tt } (${ yr || YEAR })"`
+        title: `Find "${ ITEM_TITLE } (${ ITEM_YEAR || YEAR })"`
     });
 
     for(let array = 'IM TM TV'.split(' '), length = array.length, index = 0, item; index < length; index++)
         chrome.contextMenus.update('W2P-' + (item = array[index]), {
             title: (
-                ((pv == (item += 'Db')) && id)?
-                    `Open in ${ item } (${ (+id? '#': '') + id })`:
+                ((ID_PROVIDER == (item += 'Db')) && ITEM_ID)?
+                    `Open in ${ item } (${ (+ITEM_ID? '#': '') + ITEM_ID })`:
                 `Find in ${ item }`
             ),
             checked: false
         });
 
     chrome.contextMenus.update('W2P-XX', {
-        title: `Find on ${ (xx == 'FX'? 'Flenix': 'Google') }`,
+        title: `Find on ${ (SEARCH_PROVIDER == 'GX'? 'GoStream': 'Google') }`,
         checked: false
     });
 }
@@ -88,42 +107,51 @@ function changeStatus({ id, tt, ty, pv, yr, ur = '', ft = '' }) {
 // HTTP servers. Unfortunately, many people use CouchPotato over HTTP.
 function viewCouchPotato(request, sendResponse) {
 	fetch(`${ request.url }?id=${ request.imdbId }`, {
-		headers: generateHeaders(request.basicAuth)
+		headers: new Headers(request.basicAuth),
+        mode: cors(request.url)
 	})
-		.then(response => response.json())
-		.then(json => {
-			sendResponse({ success, status: success ? json.media.status : null });
-		})
-		.catch(error => {
-			sendResponse({ error: String(error), location: 'viewCouchPotato' });
-		});
+    .then(response => response.json())
+    .then(json => {
+        sendResponse({ success, status: (success? json.media.status: null) });
+    })
+    .catch(error => {
+        sendResponse({ error: String(error), location: 'viewCouchPotato' });
+    });
 }
 
 function addCouchpotato(request, sendResponse) {
 	fetch(`${ request.url }?identifier=${ request.imdbId }`, {
-		headers: generateHeaders(request.basicAuth)
+		headers: new Headers(request.basicAuth),
+        mode: cors(request.url)
 	})
-		.then(response => response.json())
-		.then(response => {
-			sendResponse({ success: response.success });
-		})
-		.catch(error => {
-			sendResponse({ error: String(error) , location: 'addCouchPotato'});
-		});
+    .then(response => response.json())
+    .catch(error => sendResponse({ error: 'Item not found', location: 'addCouchpotato => fetch.then.catch', silent: true }))
+    .then(response => {
+        sendResponse({ success: response.success });
+    })
+    .catch(error => {
+        sendResponse({ error: String(error) , location: 'addCouchPotato'});
+    });
 }
 
 function addWatcher(request, sendResponse) {
     let headers = {
             'Content-Type': 'application/json',
             'X-Api-Key': request.token,
-            ...generateHeaders(request.basicAuth)
+            ...(new Headers(request.basicAuth))
         },
         id = (/^(tt-?)?$/.test(request.imdbId)? request.tmdbId: request.imdbId),
+            // if the IMDbID is empty, jump to the TMDbID
         query = (/^tt-?\d+$/i.test(id)? 'imdbid': /^\d+$/.test(id)? 'tmdbid': (id = encodeURI(`${request.title} ${request.year}`), 'term')),
+            // if the IMDbID is empty, use "&tmdbid={ id }"
+            // if the IMDbID isn't empty, use "&imdbid={ id }"
+            // otherwise, use "&term={ title } { year }"
         debug = { headers, query, request };
+            // setup a stack trace for debugging
 
     fetch(debug.url = `${ request.url }?apikey=${ request.token }&mode=addmovie&${ query }=${ id }`)
         .then(response => response.json())
+        .catch(error => sendResponse({ error: 'Movie not found', location: 'addWatcher => fetch.then.catch', silent: true }))
         .then(response => {
             if((response.response + "") == "true")
                 return sendResponse({
@@ -145,20 +173,27 @@ function addRadarr(request, sendResponse) {
     let headers = {
             'Content-Type': 'application/json',
             'X-Api-Key': request.token,
-            ...generateHeaders(request.basicAuth)
+            ...(new Headers(request.basicAuth))
         },
         id = (/^(tt-?)?$/.test(request.imdbId)? request.tmdbId: request.imdbId),
+            // if the IMDbID is empty, jump to the TMDbID
         query = (/^tt-?\d+$/i.test(id)? 'imdb?imdbid': /^\d+$/.test(id)? 'tmdb?tmdbid': (id = encodeURI(`${request.title} ${request.year}`), 'term')),
+            // if the IMDbID is empty, use "/tmdb?tmdbid={ id }"
+            // if the IMDbID isn't empty, use "/imdb?imdbid={ id }"
+            // otherwise, use "&term={ title } { year }"
         debug = { headers, query, request };
+            // setup a stack trace for debugging
 
     fetch(debug.url = `${ request.url }lookup/${ query }=${ id }&apikey=${ request.token }`)
         .then(response => response.json())
+        .catch(error => sendResponse({ error: 'Movie not found', location: 'addRadarr => fetch.then.catch', silent: true }))
         .then(data => {
             let body,
+                // Monitor, search, and download movie ASAP
                 props = {
                     monitored: true,
                     minimumAvailability: 'preDB',
-                    qualityProfileId: request.QualityProfileId,
+                    qualityProfileId: request.QualityID,
                     rootFolderPath: request.StoragePath,
                     addOptions: {
                         searchForMovie: true
@@ -188,9 +223,9 @@ function addRadarr(request, sendResponse) {
             return debug.body = body;
         })
         .then(body => {
-            return fetch(`${ request.url }?apikey=${ request.token }`, debug.request = {
+            return fetch(`${ request.url }?apikey=${ request.token }`, debug.requestHeaders = {
                 method: 'POST',
-                mode: 'no-cors',
+                mode: cors(request.url),
                 body: JSON.stringify(body),
                 headers
             });
@@ -231,24 +266,26 @@ function addSonarr(request, sendResponse) {
     let headers = {
             'Content-Type': 'application/json',
             'X-Api-Key': request.token,
-            ...generateHeaders(request.basicAuth)
+            ...(new Headers(request.basicAuth))
         },
         id = request.tvdbId,
         query = encodeURIComponent(`tvdb:${ id }`),
         debug = { headers, query, request };
+            // setup stack trace for debugging
 
     fetch(debug.url = `${ request.url }lookup?apikey=${ request.token }&term=${ query }`)
         .then(response => response.json())
+        .catch(error => sendResponse({ error: 'TV Show not found', location: 'addSonarr => fetch.then.catch', silent: true }))
         .then(data => {
-            if (!data instanceof Array || !data.length) {
+            if (!data instanceof Array || !data.length)
                 throw new Error('TV Show not found');
-            }
 
+            // Monitor, search, and download series ASAP
             let body = {
                 ...data[0],
                 monitored: true,
                 minimumAvailability: 'preDB',
-                qualityProfileId: request.QualityProfileId,
+                qualityProfileId: request.QualityID,
                 rootFolderPath: request.StoragePath,
                 addOptions: {
                     searchForMissingEpisodes: true
@@ -264,9 +301,9 @@ function addSonarr(request, sendResponse) {
             return debug.body = body;
         })
         .then(body => {
-            return fetch(`${ request.url }?apikey=${ request.token }`, debug.request = {
+            return fetch(`${ request.url }?apikey=${ request.token }`, debug.requestHeaders = {
                 method: 'POST',
-                mode: 'no-cors',
+                mode: cors(request.url),
                 body: JSON.stringify(body),
                 headers
             });
@@ -303,6 +340,67 @@ function addSonarr(request, sendResponse) {
         });
 }
 
+function addOmbi(request, sendResponse) {
+    let headers = {
+            'Content-Type': 'application/json',
+            'ApiKey': request.token,
+            ...(new Headers)
+        },
+        type = request.contentType,
+        id = (type == 'movie'? request.tmdbId: request.tvdbId),
+        body = ({ [type == 'movie'? 'theMovieDbId': 'theTvDbId']: id }),
+        debug = { headers, request };
+            // setup stack trace for debugging
+
+    if(request.contentType == 'movie' && (id || null) === null)
+        sendResponse({ error: 'Invalid TMDbID', location: 'addOmbi => if', silent: true });
+    else if((id || null) === null)
+        sendResponse({ error: 'Invalid TVDbID', location: 'addOmbi => else if', silent: true });
+
+    fetch(debug.url = request.url, {
+            method: 'POST',
+            mode: cors(request.url),
+            body: JSON.stringify(body),
+            headers
+        })
+        .catch(error => sendResponse({ error: `${ type } not found`, location: 'addOmbi => fetch.then.catch', silent: true }))
+        .then(response => response.text())
+        .then(data => {
+            debug.data =
+            data = JSON.parse(data);
+
+            if (data && data.isError) {
+                if(/already +been +requested/i.test(data.errorMessage))
+                    sendResponse({
+                        success: 'Already requested on Ombi'
+                    });
+                else
+                    sendResponse({
+                        error: data.errorMessage,
+                        location: `addOmbi => fetch("${ request.url }", { headers }).then(data => { if })`,
+                        debug
+                    });
+            } else if (data && data.path) {
+                sendResponse({
+                    success: 'Added to Ombi'
+                });
+            } else {
+                sendResponse({
+                    error: 'Unknown error',
+                    location: `addOmbi => fetch("${ request.url }", { headers }).then(data => { else })`,
+                    debug
+                });
+            }
+        })
+        .catch(error => {
+            sendResponse({
+                error: String(error),
+                location: `addOmbi => fetch("${ request.url }", { headers }).catch(error => { sendResponse })`,
+                debug
+            });
+        });
+}
+
 // Unfortunately the native Promise.race does not work as you would suspect.
 // If one promise (Plex request) fails, we still want the other requests to continue racing.
 // See https://www.jcore.com/2016/12/18/promise-me-you-wont-use-promise-race/ for an explanation
@@ -333,6 +431,9 @@ function $searchPlex(connection, headers, options) {
     let type = options.type || 'movie',
         url = `${ connection.uri }/hubs/search`,
         field = options.field || 'title';
+
+    if(!options.title)
+        return {};
 
     if(type === 'tv')
         type = 'show';
@@ -409,19 +510,19 @@ async function searchPlex(request, sendResponse) {
 // Chrome is f**king retarted...
 // Instead of having an object returned (for the context-menu)
 // You have to make API calls on ALL clicks...
-
-chrome.contextMenus.onClicked.addListener((item) => {
+chrome.contextMenus.onClicked.addListener(item => {
     if(!/^W2P/i.test(item.menuItemId)) return;
 
     let url = "", dnl = false,
         db = item.menuItemId.slice(-2).toLowerCase(),
-        pv = external.P.slice(0, 2).toLowerCase(),
-        qu = external.Q,
-        tl = external.T,
-        yr = external.Y,
-        tt = external.S,
-        lt = external.F,
-        ft = external.Z,
+        pv = external.ID_PROVIDER.slice(0, 2).toLowerCase(),
+        qu = external.ITEM_ID,
+        tl = external.SEARCH_TITLE,
+        yr = external.ITEM_YEAR,
+        tt = external.ITEM_TITLE,
+        lt = external.FILE_TITLE,
+        ft = external.FILE_TYPE,
+        fp = external.FILE_PATH,
         p = (s, r = '+') => s.replace(/-/g, r);
 
     switch(db) {
@@ -432,7 +533,7 @@ chrome.contextMenus.onClicked.addListener((item) => {
             break;
         case 'tm':
             url = (qu && pv == 'tm')?
-                `themoviedb.org/${ external.V == 'show'? 'tv': 'movie' }/${ qu }`:
+                `themoviedb.org/${ external.ITEM_TYPE == 'show'? 'tv': 'movie' }/${ qu }`:
             `themoviedb.org/search?query=${ tl }`;
             break;
         case 'tv':
@@ -441,102 +542,145 @@ chrome.contextMenus.onClicked.addListener((item) => {
             `thetvdb.com/search?q=${ p(tl) }`;
             break;
         case 'xx':
-            url = external.X == 'FX'?
-                `flenix.tv/?do=search&story=${ p(tt) }&min_year=${ yr || 1990 }&filter=true&max_year=${ yr }&min_imdb=0&max_imdb=10&cat=1&order=date&g-recaptcha-response=${ SessionKey.value }`:
+            url = external.SEARCH_PROVIDER == 'GX'?
+                `gostream.site/?s=${ p(tl) }`:
             `google.com/search?q="${ p(tl, ' ') } ${ yr }"+${ pv }db`;
             break;
         case 'dl':
             dnl = true;
-            url = external.U;
+            url = external.ITEM_URL;
             break;
-        default: return;
+        default: return; break;
     }
 
     if(!dnl)
         window.open(`https://${ url }`, '_blank');
-    else
+    else if (dnl)
+        // try/catch won't work here, so use the first download's callback as an error catcher
         chrome.downloads.download({
-          url,
-          filename: `${ lt } (${ yr }).${ ft }`,
+          url: item.href,
+          filename: `${ fp }${ lt } (${ yr }).${ ft }`,
           saveAs: true
+        }, id => {
+            if(id == undefined || id == null)
+                chrome.downloads.download({
+                  url: item.href,
+                  saveAs: true
+                });
         });
 });
 
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    terminal.log('From:', sender);
+chrome.runtime.onMessage.addListener((request, sender, callback) => {
+    terminal.log('From: ' + sender);
 
-    let id = (request? request.options || request: {}),
-        tt = id.title,
-        yr = id.year,
-        ty = id.type,
-        pv = (id.TVDbID || id.tvdbId? 'TVDb': id.TMDbID || id.tmdbId? 'TMDb': 'IMDb'),
-        ur = id.href || '',
-        ft = id.tail || '';
-    id = id[pv + 'ID'] || id[pv.toLowerCase() + 'Id'];
-
-    changeStatus({ id, tt, yr, ty, pv, ur, ft });
+    let item = (request? request.options || request: {}),
+        ITEM_TITLE = item.title,
+        ITEM_YEAR = item.year,
+        ITEM_TYPE = item.type,
+        ID_PROVIDER = (i=>{for(let p in i)if(/^TVDb/i.test(p)&&i[p])return'TVDb';else if(/^TMDb/i.test(p)&&i[p])return'TMDb';return'IMDb'})(item),
+        ITEM_URL = item.href || '',
+        FILE_TYPE = (item.tail || 'mp4'),
+        FILE_PATH = item.path || '',
+        ITEM_ID = ((i, I)=>{for(let p in i)if(RegExp('^'+I,'i').test(p))return i[p]})(item, ID_PROVIDER);
 
     try {
         switch (request.type) {
             case 'SEARCH_PLEX':
-                searchPlex(request, sendResponse);
+                searchPlex(request, callback);
                 return true;
             case 'VIEW_COUCHPOTATO':
-                viewCouchPotato(request, sendResponse);
+                viewCouchPotato(request, callback);
                 return true;
             case 'ADD_COUCHPOTATO':
-                addCouchpotato(request, sendResponse);
+                addCouchpotato(request, callback);
                 return true;
             case 'ADD_RADARR':
-                addRadarr(request, sendResponse);
+                addRadarr(request, callback);
                 return true;
             case 'ADD_SONARR':
-                addSonarr(request, sendResponse);
+                addSonarr(request, callback);
                 return true;
             case 'ADD_WATCHER':
-                addWatcher(request, sendResponse);
+                addWatcher(request, callback);
+                return true;
+            case 'ADD_OMBI':
+                addOmbi(request, callback);
                 return true;
             case 'OPEN_OPTIONS':
                 chrome.runtime.openOptionsPage();
                 return true;
+            case 'SEARCH_FOR':
+                if(ITEM_TITLE && ITEM_TYPE)
+                    ChangeStatus({ ITEM_ID, ITEM_TITLE, ITEM_TYPE, ID_PROVIDER, ITEM_YEAR, ITEM_URL, FILE_TYPE, FILE_PATH });
+                return true;
             case 'SAVE_AS':
                 chrome.contextMenus.update('W2P-DL', {
-                    title: `Save as "${ tt } (${ yr })"`
+                    title: `Save as "${ ITEM_TITLE } (${ ITEM_YEAR })" (${ FILE_TYPE })`
+                });
+                return true;
+            case 'DOWNLOAD_FILE':
+
+                let FILE_TITLE = ITEM_TITLE.replace(/\-/g, ' ').replace(/[\s\:]{2,}/g, ' - ').replace(/[^\w\s\-\']+/g, '');
+
+                // no try/catch, use callback for that
+                chrome.downloads.download({
+                    url: item.href,
+                    filename: `${ FILE_TITLE } (${ ITEM_YEAR }).${ FILE_TYPE }`,
+                    saveAs: true
+                }, id => {
+                    // Error Occured
+                   if(id == undefined || id == null)
+                       chrome.downloads.download({
+                        url: item.href,
+                        filename: `${ FILE_TITLE } (${ ITEM_YEAR })`,
+                        saveAs: true
+                    }); 
                 });
                 return true;
             default:
+                terminal.warn(`Unknown event [${ request.type }]`);
                 return false;
         }   
     } catch (error) {
-        return sendResonpse(String(error));
+        return callback(String(error));
     }
 });
 
-parentItem = chrome.contextMenus.create({
-    id: 'W2P',
-    title: 'Web to Plex'
-});
+// If background.js is already running, ignore the new state
+// otherwise, use the following to start up
+if(SessionState === false) {
+    SessionState = true;
 
-saveItem = chrome.contextMenus.create({
-    id: 'W2P-DL',
-    title: 'Nothing to Save'
-});
+    parentItem = chrome.contextMenus.create({
+        id: 'W2P',
+        title: 'Web to Plex'
+    });
 
-// Standard search engines
-for(let array = 'IM TM TV'.split(' '), DL = {}, length = array.length, index = 0, item; index < length; index++)
+    saveItem = chrome.contextMenus.create({
+        id: 'W2P-DL',
+        title: 'Nothing to Save'
+    });
+
+    // Standard search engines
+    for(let array = 'IM TM TV'.split(' '), DL = {}, length = array.length, index = 0, item; index < length; index++)
+        chrome.contextMenus.create({
+            id: 'W2P-' + (item = array[index]),
+            parentId: parentItem,
+            title: `Using ${ item }Db`,
+            type: 'checkbox',
+            checked: true // implement a way to use the checkboxes?
+        });
+
+    // Non-standard search engines
     chrome.contextMenus.create({
-        id: 'W2P-' + (item = array[index]),
+        id: 'W2P-XX',
         parentId: parentItem,
-        title: `Using ${ item }Db`,
+        title: `Using best guess`,
         type: 'checkbox',
         checked: true // implement a way to use the checkboxes?
     });
 
-// Non-standard search engines
-chrome.contextMenus.create({
-    id: 'W2P-XX',
-    parentId: parentItem,
-    title: `Using best guess`,
-    type: 'checkbox',
-    checked: true // implement a way to use the checkboxes?
-});
+}
+
+if(chrome.runtime.lastError)
+    /* Attempt Error Suppression */;
