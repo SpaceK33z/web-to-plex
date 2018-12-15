@@ -1,4 +1,4 @@
-# Web to Plex (BETA Channel) ![Icon](src/img/48.png)
+# Web to Plex ![Icon](src/img/48.png)
 
 ![Logo](src/img/256.png)
 
@@ -9,12 +9,6 @@ Optionally, you can configure [Sonarr](https://sonarr.tv/) (TV Shows), [Radarr](
 If you don't feel like actually downloading the movie, or want a simple watchlist, you can also use the built-in "Plex It!" feature to bookmark the current page.
 
 ![Examples](example.png)
-
-----
-
-## Status: 307 (TEMP-RD)
-
-This is the BETA (testing) version, please visit [Web to Plex](https://github.com/SpaceK33z/web-to-plex) for the stable version.
 
 ----
 
@@ -94,11 +88,8 @@ This is the BETA (testing) version, please visit [Web to Plex](https://github.co
 
 ## Installing Web to Plex
 
-- **Download the [CRX](https://github.com/Ephellon/web-to-plex/raw/master/src.crx)**
-
-- **Download the [ZIP](https://github.com/Ephellon/web-to-plex/raw/master/src.zip)**
-
-- **Download the [SRC](https://github.com/Ephellon/web-to-plex/archive/master.zip)**
+- **Download from the [Chrome Webstore](https://chrome.google.com/webstore/detail/movieo-to-plex/kmcinnefmnkfnmnmijfmbiaflncfifcn)**
+- **Download from [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/web-to-plex/)**
 
 ## Requirements
 
