@@ -15,26 +15,12 @@ if(chrome.runtime.lastError)
 const storage = (chrome.storage.sync || chrome.storage.local),
       $$ = (selector, all) => (all? document.querySelectorAll(selector): document.querySelector(selector)),
       __servers__ = $$('#plex_servers'),
-      __watcher_qualityProfile__ = $$(
-          `[data-option="watcherQualityProfileId"]`
-      ),
-      __watcher_storagePath__ = $$(
-          `[data-option="watcherStoragePath"]`
-      ),
-      __radarr_qualityProfile__ = $$(
-          `[data-option="radarrQualityProfileId"]`
-      ),
-      /* See #2 */
-      __radarr_storagePath__ = $$(
-          `[data-option="radarrStoragePath"]`
-      ),
-      __sonarr_qualityProfile__ = $$(
-          `[data-option="sonarrQualityProfileId"]`
-      ),
-      /* See #2 */
-      __sonarr_storagePath__ = $$(
-          `[data-option="sonarrStoragePath"]`
-      ),
+      __watcher_qualityProfile__ = $$(`[data-option="watcherQualityProfileId"]`),
+      __watcher_storagePath__    = $$(`[data-option="watcherStoragePath"]`),
+      __radarr_qualityProfile__  = $$(`[data-option="radarrQualityProfileId"]`),
+      __radarr_storagePath__     = $$(`[data-option="radarrStoragePath"]`),
+      __sonarr_qualityProfile__  = $$(`[data-option="sonarrQualityProfileId"]`),
+      __sonarr_storagePath__     = $$(`[data-option="sonarrStoragePath"]`),
       __save__ = $$('#save'),
       __options__ = [
             'plexURL',
@@ -69,6 +55,8 @@ const storage = (chrome.storage.sync || chrome.storage.local),
             // Advance Settings
             'OMDbAPI',
             'TMDbAPI',
+            'UseAutoGrab',
+            'AutoGrabLimit',
             'UseLoose',
             'UseLooseScore',
             'ManagerSearch',
@@ -77,6 +65,7 @@ const storage = (chrome.storage.sync || chrome.storage.local),
             'plugin_toloka',
             'plugin_shanaproject',
             'plugin_myanimelist',
+            'plugin_myshows',
       ];
 
 let PlexServers = [],
@@ -96,33 +85,29 @@ chrome.manifest = chrome.runtime.getManifest();
 // state = "info" - grey
 // anything else for state will show as orange
 class Notification {
-    constructor(state, text, timeout = 7000, callback, requiresClick = true) {
+    constructor(state, text, timeout = 7000, callback = () => {}, requiresClick = true) {
         let queue = (Notification.queue = Notification.queue || { list: [] }),
             last = queue.list[queue.list.length - 1];
 
         if (last && last.done === false)
-            return (last => setTimeout(() => new Notification(state, text, timeout, callback), +(new Date) - last.start))(last);
+            return (last => setTimeout(() => new Notification(state, text, timeout, callback, requiresClick), +(new Date) - last.start))(last);
 
-        callback = callback || (() => {});
+        let element = document.furnish(`div.notification.${state}`, {
+            onclick: event => {
+                let notification = Notification.queue[event.target.id],
+                    element = notification.element;
 
-        let element = document.createElement('div');
+                notification.done = true;
+                Notification.queue.list.splice(notification.index, 1);
+                clearTimeout(notification.job);
+                element.remove();
 
-        element.classList.add('notification', state);
-        element.addEventListener('onclick', element.onclick = event => {
-            let notification = Notification.queue[event.target.id],
-                element = notification.element;
+                let removed = delete Notification.queue[notification.id];
 
-            notification.done = true;
-            Notification.queue.list.splice(notification.index, 1);
-            clearTimeout(notification.job);
-            element.remove();
+                return (event.requiresClick)? null: notification.callback(removed);
+            }
+        }, text);
 
-            let removed = delete Notification.queue[notification.id];
-
-            return (event.requiresClick)? null: notification.callback(removed);
-        });
-
-        element.innerHTML = text;
         queue[element.id = +(new Date)] = {
             start: +element.id,
             stop:  +element.id + timeout,
@@ -138,6 +123,139 @@ class Notification {
         document.body.appendChild(element);
 
         return queue[element.id];
+    }
+}
+
+class Prompt {
+    constructor(type, options, callback = () => {}, container = document.body) {
+        let prompt, remove, create,
+            array = (options instanceof Array? options: [].slice.call(options)),
+            data = [...array];
+
+        switch(type) {
+            /* Allows the user to add and remove items from a list */
+            case 'prompt':
+            case 'input':
+                remove = element => {
+                    let prompter = document.querySelector('.prompt'),
+                        header = document.querySelector('.prompt-header'),
+                        counter = document.querySelector('.prompt-options');
+
+                    if(element === true)
+                        return prompter.remove();
+                    else
+                        element.remove();
+
+                    data.splice(+element.value, 1, null);
+                    header.innerText = 'Approve ' + counter.children.length + (counter.children.length == 1?' item': ' items');
+                };
+
+                prompt = document.furnish('div.prompt', {},
+                    document.furnish('div.prompt-body', {},
+                        // The prompt's title
+                        document.furnish('h1.prompt-header', {}, 'Approve ' + array.length + (array.length == 1? ' item': ' items')),
+
+                        // The prompt's items
+                        document.furnish('div.prompt-options', {},
+                            ...(create = ITEMS => {
+                                let elements = [];
+
+                                for(let index = 0, length = ITEMS.length, ITEM; index < length; index++)
+                                    ITEM = ITEMS[index],
+                                    elements.push(
+                                        document.furnish('li.prompt-option.mutable', { value: index },
+                                            JSON.stringify(ITEM),
+                                            document.furnish('button', { title: 'Remove', onclick: event => { remove(event.target.parentElement); event.target.remove() } })
+                                        )
+                                    );
+
+                                return elements
+                            })(array)
+                        ),
+
+                        // The engagers
+                        document.furnish('div.prompt-footer', {},
+                            document.furnish('input.prompt-input[type=text]', { placeholder: 'Add an item (enter to add)', onkeydown: event => {
+                                let self = event.target;
+
+                                if (event.keyCode === 13) {
+                                    event.preventDefault();
+                                    remove(true);
+
+                                    let value = self.value;
+
+                                    try {
+                                        value = JSON.parse(value);
+                                    } catch(error) {
+                                        /* Suppress input errors */
+                                    }
+
+                                    new Prompt(type, [value, ...data.filter(value => value !== null && value !== undefined)], callback, container);
+                                }
+                            } }),
+                            document.furnish('button.prompt-decline', { onclick: event => { remove(true); callback([]) } }, 'Close'),
+                            document.furnish('button.prompt-accept', { onclick: event => { remove(true); new Prompt(type, options, callback, container) } }, 'Reset'),
+                            document.furnish('button.prompt-accept', { onclick: event => { remove(true); callback(data.filter(value => value !== null && value !== undefined)) } }, 'Continue')
+                        )
+                    )
+                );
+                break;
+
+            /* Allows the user to remove predetermined items */
+            case 'select':
+                remove = element => {
+                    let prompter = document.querySelector('.prompt'),
+                        header = document.querySelector('.prompt-header'),
+                        counter = document.querySelector('.prompt-options');
+
+                    if(element === true)
+                        return prompter.remove();
+                    else
+                        element.remove();
+
+                    data.splice(+element.value, 1, null);
+                    header.innerText = 'Approve ' + counter.children.length + (counter.children.length == 1?' item': ' items');
+                };
+
+                prompt = document.furnish('div.prompt', {},
+                    document.furnish('div.prompt-body', {},
+                        // The prompt's title
+                        document.furnish('h1.prompt-header', {}, 'Approve ' + array.length + (array.length == 1? ' item': ' items')),
+
+                        // The prompt's items
+                        document.furnish('div.prompt-options', {},
+                            ...(create = ITEMS => {
+                                let elements = [];
+
+                                for(let index = 0, length = ITEMS.length, ITEM; index < length; index++)
+                                    ITEM = ITEMS[index],
+                                    elements.push(
+                                        document.furnish('li.prompt-option.mutable', { value: index },
+                                            JSON.stringify(ITEM),
+                                            document.furnish('button', { title: 'Remove', onclick: event => { remove(event.target.parentElement); event.target.remove() } })
+                                        )
+                                    );
+
+                                return elements
+                            })(array)
+                        ),
+
+                        // The engagers
+                        document.furnish('div.prompt-footer', {},
+                            document.furnish('button.prompt-decline', { onclick: event => { remove(true); callback([]) } }, 'Close'),
+                            document.furnish('button.prompt-accept', { onclick: event => { remove(true); new Prompt(type, options, callback, container) } }, 'Reset'),
+                            document.furnish('button.prompt-accept', { onclick: event => { remove(true); callback(data.filter(value => value !== null && value !== undefined)) } }, 'Continue')
+                        )
+                    )
+                );
+                break;
+
+            default:
+                return terminal.warn(`Unknown prompt type "${ type }"`);
+                break;
+        }
+
+        return container.append(prompt), prompt;
     }
 }
 
@@ -884,11 +1002,63 @@ function restoreOptions(OPTIONS) {
     }
 }
 
+// Helpers
+document.furnish = function furnish(name, attributes = {}, ...children) {
+    let u = v => v && v.length, R = RegExp;
+
+    if( !u(name) )
+        throw TypeError(`TAGNAME cannot be ${ (name === '')? 'empty': name }`);
+
+    let options = attributes.is === true? { is: true }: null;
+
+    delete attributes.is;
+
+    name = name.split(/([#\.][^#\.\[\]]+)/).filter( u );
+
+    if(name.length <= 1)
+        name = name[0].split(/^([^\[\]]+)(\[.+\])/).filter( u );
+
+    if(name.length > 1)
+        for(let n = name, i = 1, l = n.length, t, v; i < l; i++)
+            if((v = n[i].slice(1, n[i].length)) && (t = n[i][0]) == '#')
+                attributes.id = v;
+            else if(t == '.')
+                attributes.classList = [].slice.call(attributes.classList || []).concat(v);
+            else if(/\[(.+)\]/.test(n[i]))
+                R.$1.split('][').forEach(N => attributes[(N = N.split('=', 2))[0]] = N[1] || '');
+    name = name[0];
+
+    let element = document.createElement(name, options);
+
+    if(attributes.classList instanceof Array)
+        attributes.classList = attributes.classList.join(' ');
+
+    Object.entries(attributes).forEach(
+        ([name, value]) => (/^(on|(?:inner|outer)(?:HTML|Text)|textContent|class(?:List|Name)$|value)/.test(name))?
+            element[name] = value:
+            element.setAttribute(name, value)
+    );
+
+    children
+        .filter( child => child !== undefined && child !== null )
+        .forEach(
+            child =>
+                child instanceof Element?
+                    element.append(child):
+                child instanceof Node?
+                    element.appendChild(child):
+                element.appendChild(document.createTextNode(child))
+        );
+
+    return element;
+};
+
 // Plugins and their links
 let plugins = {
     'Toloka': 'https://toloka.to/',
     'Shana Project': 'https://www.shanaproject.com/',
     'My Anime List': 'https://myanimelist.net/',
+    'My Shows': 'https://myshows.me/',
 
     // Dont' forget to add to the __options__ array!
 }, array = [], sites = {}, pluginElement = $$('#plugins');
@@ -1011,7 +1181,10 @@ $$('#version')
     .innerHTML = `Version ${ chrome.manifest.version }`;
 $$('[type="range"]', true)
     .forEach((element, index, array) => {
-        element.nextElementSibling.value = element.value + '%';
+        let sibling = element.nextElementSibling,
+            symbol = element.getAttribute('symbol') || '';
 
-        element.oninput = (event, self) => (self = event.target).nextElementSibling.value = self.value + '%';
+        sibling.value = element.value + symbol;
+
+        element.oninput = (event, self) => (self = event.target).nextElementSibling.value = self.value + (self.getAttribute('symbol') || '');
     });

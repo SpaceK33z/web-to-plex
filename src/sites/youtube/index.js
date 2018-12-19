@@ -16,14 +16,14 @@ async function init() {
     $$('.more-button').click(); // show the year and other information, fails otherwise
 
     if(isMovie(owner) || isShow())
-        await initPlexThingy(isMovie(owner)? 'movie': 'show');
+        await initPlexThingy(isMovie(owner)? 'movie': isShow()? 'show': null);
 
     $$('.less-button').click(); // close the meta-information
 }
 
 async function initPlexThingy(type) {
     let button = renderPlexButton();
-    if(!button)
+    if(!button || !type)
         return /* Fail silently */;
 
     let $title = (type == 'movie'? $$('.title'): $$('#owner-container')),

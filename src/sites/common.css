@@ -1,247 +1,484 @@
 /** Common CSS
  * Web to Plex
  */
+ /* Basic/Global Styling */
+ [class*="web-to-plex"] *::-webkit-scrollbar, [class*="web-to-plex"] *::-moz-scrollbar {
+    width: 10px !important;
+ }
+
+ [class*="web-to-plex"] *::-webkit-scrollbar-thumb, [class*="web-to-plex"] *::-moz-scrollbar-thumb {
+    min-height: 50px !important;
+    background: rgba(255, 255, 255, 0.15) !important;
+    border: 2px solid rgba(0, 0, 0, 0) !important;
+    border-radius: 8px !important;
+    background-clip: padding-box !important;
+ }
+
+ [class*="web-to-plex"] *::-webkit-scrollbar-track, [class*="web-to-plex"] *::-moz-scrollbar-track {
+    background: #0000 !important;
+ }
+
+ [class*="web-to-plex"] *::-webkit-input-placeholder, [class*="web-to-plex"] *::-moz-placeholder, [class*="web-to-plex"] *:-moz-placeholder {
+    color: #999 !important;
+ }
+
+ [class*="web-to-plex"] input[type="text"], [class*="web-to-plex"] input[type="password"], [class*="web-to-plex"] select {
+    width: 30vw;
+    line-height: 1.5em;
+    transition: background 0.2s;
+    display: block;
+    height: 38px;
+    padding: 6px 12px;
+    font-size: 16px;
+    color: #eee;
+    vertical-align: middle;
+    background: rgba(255, 255, 255, 0.25);
+    border: 3px solid rgba(0, 0, 0, 0);
+    border-radius: 3px;
+    font-family: inherit;
+    margin: 0;
+ }
+
+ [class*="web-to-plex"] select {
+    margin-left: 10px;
+    font-size: 16px;
+    line-height: inherit;
+    text-transform: none;
+ }
+
+ [class*="web-to-plex"] option {
+    background: #3f4245;
+ }
+
+ [class*="web-to-plex"] button {
+    padding: 10px 18px;
+    font-size: 16px;
+    line-height: 1.33;
+    border-radius: 3px;
+    font-family: inherit;
+    text-transform: uppercase;
+    border: 0;
+    box-shadow: none;
+    position: relative;
+    overflow: hidden;
+    color: #fff;
+    background: #cc7b19;
+    margin-bottom: 0;
+    font-weight: 400;
+    vertical-align: middle;
+    cursor: pointer;
+    white-space: nowrap;
+    user-select: none;
+    transition: all 0.1s;
+ }
+
+ [class*="web-to-plex"] button:hover {
+    background: #e59029;
+ }
+
+ [class*="web-to-plex"] input::placeholder, [class*="web-to-plex"] input:placeholder {
+    color: #999;
+ }
+
+ [class*="web-to-plex"][disabled], [class*="web-to-plex"] [disabled] {
+    cursor: not-allowed !important;
+    color: #909090EE !important;
+ }
 
 /* Web to Plex notifications */
 .web-to-plex-notification {
-	background: #F45A26;
-	border-radius: 4px;
-	color: #FFF;
-	cursor: pointer;
-	display: block;
-    font-family: arial, verdana, sans-serif;
-	font-size: 20px;
-    text-align: center;
+	background: #F45A26 !important;
+	border-radius: 4px !important;
+	color: #FFF !important;
+	cursor: pointer !important;
+	display: block !important;
+    font-family: arial, verdana, sans-serif !important;
+	font-size: 20px !important;
+    text-align: center !important;
 
-	position: fixed;
-	left: 50%;
-	margin-left: -175px;
-	padding: 10px;
-	top: 80px;
+	position: fixed !important;
+	left: 50% !important;
+	margin-left: -175px !important;
+	padding: 10px !important;
+	top: 80px !important;
 
-	width: 350px;
-	z-index: 999999;
+	width: 350px !important;
+	z-index: 999999999 !important;
 }
 
 /* Web to Plex general information notifications */
 .web-to-plex-notification.info {
-    background: #666!important;
+    background: #666 !important;
 }
 
 /* Web to Plex update notifications */
 .web-to-plex-notification.update {
-    background: #2A2AFF!important;
+    background: #2A2AFF !important;
 }
 
 /* Web to Plex warning notifications */
 .web-to-plex-notification.warning {
-	background: #FF2A2A!important;
+	background: #FF2A2A !important;
+}
+
+/* Web to Plex prompts */
+.web-to-plex-prompt {
+	background: #0008 !important;
+	box-sizing: border-box !important;
+	color: #eee !important;
+	display: block !important;
+	font-family: Open Sans Regular, Helvetica Neue, Helvetica, Arial, sans-serif !important;
+	font-size: 14px !important;
+	line-height: 24px !important;
+	overflow: auto !important;
+
+	height: 100% !important;
+	width: 100% !important;
+
+	bottom: 0 !important;
+	left: 0 !important;
+	right: 0 !important;
+	top: 0 !important;
+	position: fixed !important;
+	z-index: 99999999 !important;
+}
+
+.web-to-plex-prompt-body {
+	background: #282828 !important;
+	box-shadow: 0 5px 15px #0008 !important;
+	display: block !important;
+
+	left: 20% !important;
+	top: 5% !important;
+	padding-top: 10px !important;
+	padding-bottom: 70px !important;
+	position: relative !important;
+
+	height: 60% !important;
+	width: 60% !important;
+}
+
+.web-to-plex-prompt-header, .web-to-plex-prompt-footer {
+	background: #323232 !important;
+	border: 1px solid #0000 !important;
+	box-sizing: border-box !important;
+	color: #eee !important;
+	text-size-adjust: 100% !important;
+
+	margin-top: 0 !important;
+	padding: 15px 20px !important;
+	position: absolute !important;
+
+	height: 65px !important;
+	width: 100% !important;
+
+	-webkit-tap-highlight-color: #0000 !important;
+}
+
+.web-to-plex-prompt-header {
+	text-align: left !important;
+	border-bottom-color: #222 !important;
+	border-bottom-width: 1px !important;
+	border-top-left-radius: 3px !important;
+	border-top-right-radius: 3px !important;
+
+	top: 0 !important;
+}
+
+.web-to-plex-prompt-options {
+	display: block !important;
+	overflow-x: hidden !important;
+	overflow-y: auto !important;
+
+	padding: 12px !important;
+	position: relative !important;
+	top: 65px !important;
+
+	max-height: calc(100% - 65px) !important;
+}
+
+.web-to-plex-prompt-option {
+	background: #323232 !important;
+	border: 1px solid #202020 !important;
+	border-radius: 3px !important;
+	color: #999 !important;
+	display: block !important;
+	text-align: left !important;
+
+	margin-bottom: 10px !important;
+	padding: 10px !important;
+
+	min-height: 20px !important;
+}
+
+.web-to-plex-prompt-option.mutable {
+	max-width: 60% !important;
+}
+
+.web-to-plex-prompt-option.mutable > *:last-child {
+	background: #ffffff40 ;
+	border-radius: 3px !important;
+	transition: all 0.1s !important;
+
+	height: 30px !important;
+	width: 30px !important;
+
+	float: right !important;
+	margin-right: -9px !important;
+	margin-top: -9px !important;
+	padding: 0 !important;
+}
+
+.web-to-plex-prompt-option.mutable > *:last-child:hover {
+	background: #ffffff4d;
+}
+
+.web-to-plex-prompt-option.mutable > *:last-child:after {
+	content: '\00d7' !important;
+}
+
+.web-to-plex-prompt-footer {
+	text-align: right !important;
+	border-bottom-left-radius: 3px !important;
+	border-bottom-right-radius: 3px !important;
+	border-top-color: #222 !important;
+	border-top-width: 1px !important;
+
+	bottom: 0 !important;
+}
+
+.web-to-plex-prompt-input {
+	float: left !important;
+	position: relative !important;
+	margin-left: -16px !important;
+	margin-top: -11px !important;
+}
+
+.web-to-plex-prompt-accept, .web-to-plex-prompt-decline {
+	transition: all 0.1s !important;
+}
+
+.web-to-plex-prompt-accept {
+	background: #cc7b19 !important;
+	margin-left: 5px !important;
+}
+
+.web-to-plex-prompt-accept:hover {
+	background: #e59029 !important;
+}
+
+.web-to-plex-prompt-decline {
+	background: #ffffff40 !important;
+}
+
+.web-to-plex-prompt-decline:hover {
+	background: #ffffff4d !important;
 }
 
 /* Web to Plex buttons */
 .web-to-plex-button [module] {
-    position: relative!important;
+    position: relative !important;
 }
 
 .web-to-plex-button * {
-    border: none!important;
+    border: none !important;
 }
 
 .web-to-plex-button {
-    background-color: #3F4245!important;
-    border: none;
-    color: #FFF;
-    font-family: Open Sans Semibold,Helvetica Neue,Helvetica,Arial,sans-serif!important;
-    font-size: 1em!important;
-    font-weight: 100!important;
-    text-align: center!important;
+    background-color: #3F4245 !important;
+    border: none !important;
+    color: #FFF !important;
+    font-family: Open Sans Semibold,Helvetica Neue,Helvetica,Arial,sans-serif !important;
+    font-size: 1em !important;
+    font-weight: 100 !important;
+    text-align: center !important;
 
-    bottom: 5px!important;
-    left: 5px!important;
-    padding: 10px!important;
-    position: fixed!important;
-    z-index: 999999!important;
+    bottom: 5px !important;
+    left: 5px !important;
+    padding: 10px !important;
+    position: fixed !important;
+    z-index: 999999 !important;
 
-    height: 72px!important;
-    width: 180px!important;
+    height: 72px !important;
+    width: 180px !important;
 
-    transition: all 0.3s ease!important;
-    transition: opacity 1s ese!important;
+    transition: all 0.3s ease !important;
+    transition: opacity 1s ese !important;
 }
 
 .web-to-plex-button.hide {
-    display: initial!important;
+    display: initial !important;
 }
 
 .web-to-plex-button.hide:not(:hover) {
-    opacity: 0.1!important;
+    opacity: 0.1 !important;
 }
 
 *:not(#plexit-bookmarklet-frame) ~ .web-to-plex-button {
-    margin-left: 0px!important;
+    margin-left: 0px !important;
 }
 
 #plexit-bookmarklet-frame ~ .web-to-plex-button {
-    margin-left: 280px!important;
+    margin-left: 280px !important;
 }
 
 *:not(#plexit-bookmarklet-frame) + .web-to-plex-button #plexit, #plexit-bookmarklet-frame + .web-to-plex-button #wtp-plexit {
-    display: none!important;
+    display: none !important;
 }
 
 .floating.web-to-plex-button {
-    border-radius: 50px;
-    box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.3);
+    border-radius: 50px !important;
+    box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.3) !important;
 
-    height: 75px!important;
-    width: 75px!important;
+    height: 75px !important;
+    width: 75px !important;
 }
 .floating.web-to-plex-button::after {
-    content: ' ';
+    content: ' ' !important;
 
-    background: #666;
-    border: 1px solid #888;
-    border-radius: 16px!important;
+    background: #666 !important;
+    border: 1px solid #888 !important;
+    border-radius: 16px !important;
 
-    right: 0!important;
-    top: 0!important;
-    position: absolute!important;
+    right: 0 !important;
+    top: 0 !important;
+    position: absolute !important;
 
-    height: 16px!important;
-    width: 16px!important;
+    height: 16px !important;
+    width: 16px !important;
 
-    transition: background 0.4s linear;
+    transition: background 0.4s linear !important;
 }
 
 .floating.web-to-plex-button:not(.restarting):active,
 .floating.web-to-plex-button:not(.restarting):hover {
-    box-shadow: 1px 5px 20px 0 rgba(0, 0, 0, 0.6)!important;
-    cursor: pointer!important;
+    box-shadow: 1px 5px 20px 0 rgba(0, 0, 0, 0.6) !important;
+    cursor: pointer !important;
 }
 
 .floating.web-to-plex-button:focus {
-    outline: none!important;
+    outline: none !important;
 }
 
 .web-to-plex-button.wtp--found::after, .web-to-plex-button.wtp--found::before {
-    background: #F9BD03!important;
+    background: #F9BD03 !important;
 }
 
 .web-to-plex-button.wtp--download::after, .web-to-plex-button.wtp--download::before {
-    background: #265AF4!important;
+    background: #265AF4 !important;
 }
 
 .web-to-plex-button.wtp--error::after, .web-to-plex-button.wtp--error::before {
-    background: #FF2A2A!important;
+    background: #FF2A2A !important;
 }
 
 .web-to-plex-button::before {
-    content: ' ';
+    content: ' ' !important;
 
-    background: #FFF6;
-    border-radius: inherit;
-    display: none;
+    background: #FFF6 !important;
+    border-radius: inherit !important;
+    display: none !important;
 
-    margin-top: -10px!important;
-    margin-left: -10px!important;
+    margin-top: -10px !important;
+    margin-left: -10px !important;
 
-    height: 75px!important;
-    width: 75px!important;
+    height: 75px !important;
+    width: 75px !important;
 
-    position: absolute!important;
-    z-index: 9999999!important;
+    position: absolute !important;
+    z-index: 9999999 !important;
 }
 
 .web-to-plex-button.animate::before {
-    display: block;
+    display: block !important;
 
-    -webkit-transform: scale(0);
-       -moz-transform: scale(0);
-         -o-transform: scale(0);
-            transform: scale(0);
+    -webkit-transform: scale(0) !important;
+       -moz-transform: scale(0) !important;
+         -o-transform: scale(0) !important;
+            transform: scale(0) !important;
 
-    -webkit-animation: web-to-plex-ripple 0.5s linear;
-       -moz-animation: web-to-plex-ripple 0.5s linear;
-         -o-animation: web-to-plex-ripple 0.5s linear;
-            animation: web-to-plex-ripple 0.5s linear;
+    -webkit-animation: web-to-plex-ripple 0.5s linear !important;
+       -moz-animation: web-to-plex-ripple 0.5s linear !important;
+         -o-animation: web-to-plex-ripple 0.5s linear !important;
+            animation: web-to-plex-ripple 0.5s linear !important;
 }
 
 @-webkit-keyframes web-to-plex-ripple {
     100% {
-        opacity: 0;
-        -webkit-transform: scale(2.5);
+        opacity: 0 !important;
+        -webkit-transform: scale(2.5) !important;
     }
 }
 @-moz-keyframes web-to-plex-ripple {
     100% {
-        opacity: 0;
-        -moz-transform: scale(2.5);
+        opacity: 0 !important;
+        -moz-transform: scale(2.5) !important;
     }
 }
 @-o-keyframes web-to-plex-ripple {
     100% {
-        opacity: 0;
-        -o-transform: scale(2.5);
+        opacity: 0 !important;
+        -o-transform: scale(2.5) !important;
     }
 }
 @keyframes web-to-plex-ripple {
     100% {
-        opacity: 0;
-        transform: scale(2.5);
+        opacity: 0 !important;
+        transform: scale(2.5) !important;
     }
 }
 
 .web-to-plex-button.open, #plexit-bookmarklet-frame + .web-to-plex-button {
-    opacity: 1!important;
+    opacity: 1 !important;
 
-    width: 350px!important;
+    width: 350px !important;
 }
 .web-to-plex-button .list-name {
-    float: left!important;
+    float: left !important;
 }
 
 .web-to-plex-button ul {
-    margin: 0!important;
-    padding-left: 0!important;
+    margin: 0 !important;
+    padding-left: 0 !important;
 }
 
 .web-to-plex-button li {
-    display: inline-block!important;
-    list-style: none!important;
+    display: inline-block !important;
+    list-style: none !important;
 
-    margin: 0!important;
-    padding: 5px!important;
-    vertical-align: bottom!important;
+    margin: 0 !important;
+    padding: 5px !important;
+    vertical-align: bottom !important;
 }
 
 .web-to-plex-button li > img {
-    display: inline;
+    display: inline !important;
 
-    margin-top: 0!important;
+    margin-top: 0 !important;
 }
 
 *:not(#plexit-bookmarklet-frame) + .web-to-plex-button.closed .list-item {
-    float: left;
-    opacity: 0!important;
-    transition: opacity 0!important;
+    float: left !important;
+    opacity: 0 !important;
+    transition: opacity 0 !important;
 }
 
 .web-to-plex-button.open .list-item {
-    opacity: 1!important;
-    transition: opacity 2s!important;
+    opacity: 1 !important;
+    transition: opacity 2s !important;
 }
 
 .web-to-plex-button.open li:hover [tooltip]::before, .web-to-plex-button.open [tooltip]:hover::before {
-    content: attr(tooltip);
+    content: attr(tooltip) !important;
 
-    background: #3F424599!important;
-    border-radius: 3px!important;
-    color: #fff!important;
-    font-family: arial, calibri, sans-serif, sans, monospace!important;
-    font-size: 15px!important;
+    background: #3F424599 !important;
+    border-radius: 3px !important;
+    color: #fff !important;
+    font-family: arial, calibri, sans-serif, sans, monospace !important;
+    font-size: 15px !important;
 
-    bottom: 85px!important;
-    left: 35px!important;
-    padding: 3px 6px!important;
-    position: absolute!important;
+    bottom: 85px !important;
+    left: 35px !important;
+    padding: 3px 6px !important;
+    position: absolute !important;
 }

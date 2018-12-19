@@ -48,10 +48,6 @@
 			"js": ["utils.js", "sites/letterboxd/index.js"],
 			"css": ["sites/letterboxd/index.css", "sites/common.css"]
 		},{
-			"matches": ["*://*.flenix.co/*/*", "*://*.flenix.cc/*/*", "*://*.flenix.net/*/*", "*://*.flenix.tv/*/*"],
-			"js": ["utils.js", "sites/flenix/index.js"],
-			"css": ["sites/flenix/index.css", "sites/common.css"]
-		},{
 			"matches": ["*://*.tvmaze.com/shows/*"],
 			"js": ["utils.js", "sites/tvmaze/index.js"],
 			"css": ["sites/tvmaze/index.css", "sites/common.css"]

@@ -8,14 +8,14 @@ function isShow() {
 
 function init() {
     if(isMovie() || isShow())
-        initPlexThingy(isMovie()? 'movie': 'show');
+        initPlexThingy(isMovie()? 'movie': isShow()? 'show': null);
 }
 
 async function initPlexThingy(type) {
     let $title, $type, $date, $image;
 
     let button = renderPlexButton();
-    if(!button)
+    if(!button || !type)
         return /* Fail silently */;
 
     if(type == 'movie') {

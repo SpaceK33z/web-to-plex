@@ -60,13 +60,16 @@ function initPlexThingy() {
                 o[n] = /,/.test(v)? v.split(/\s*,\s*/): v;
             });
 
-    year = ((o.first_aired || YEAR) + "").slice(0, 4);
+    year = +(((o.first_aired || YEAR) + "").slice(0, 4));
 
-    let savename = title.toLowerCase();
+	let savename = title.toLowerCase(),
+		cached = await load(`${savename}.tvdb`);
 
-    save(`${savename} (${year}).tvdb`, { title, year, tvdb: o.thetvdb, imdb: o.imdb });
-    save(`${savename}.tvdb`, +year);
-    terminal.log(`Saved as "${savename} (${year}).tvdb"`);
+	if(!cached) {
+		save(`${savename} (${year}).tvdb`, { title, year, tvdb: +o.thetvdb, imdb: o.imdb });
+	    save(`${savename}.tvdb`, +year);
+	    terminal.log(`Saved as "${savename} (${year}).tvdb"`);
+	}
 
-	findPlexMedia({ title, year, image, button, type: 'show', IMDbID: o.imdb, TVDbID: o.thetvdb });
+	findPlexMedia({ title, year, image, button, type: 'show', IMDbID: o.imdb, TVDbID: +o.thetvdb });
 }

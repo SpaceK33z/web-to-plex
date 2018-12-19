@@ -129,6 +129,10 @@ String.prototype.toCaps = function toCaps(all) {
             last: {
                 value: media[media.length - 1],
                 ...properties
+            },
+            child: {
+                value: index => media[index - 1],
+                ...properties
             }
         });
 
@@ -169,7 +173,7 @@ String.prototype.toCaps = function toCaps(all) {
         attributes.classList = attributes.classList.join(' ');
 
       Object.entries(attributes).forEach(
-        ([name, value]) => (/^(on|(?:inner|outer)(?:HTML|Text)|class(?:List|Name)$|value)/.test(name))?
+        ([name, value]) => (/^(on|(?:inner|outer)(?:HTML|Text)|textContent|class(?:List|Name)$|value)/.test(name))?
           element[name] = value:
         element.setAttribute(name, value)
       );
@@ -182,7 +186,9 @@ String.prototype.toCaps = function toCaps(all) {
               element.append(child):
             child instanceof Node?
               element.appendChild(child):
-            parent.createTextNode(child)
+            element.appendChild(
+                parent.createTextNode(child)
+            )
         );
 
       return element;
@@ -193,6 +199,6 @@ let PRIMITIVE = Symbol.toPrimitive,
     queryBy = document.queryBy,
     furnish = document.furnish;
 
-queryBy[PRIMITIVE] = furnish[PRIMITIVE] = String.prototype.toCaps[PRIMITIVE] = () => 'function furnish() { [foreign code] }';
+queryBy[PRIMITIVE] = furnish[PRIMITIVE] = String.prototype.toCaps[PRIMITIVE] = () => 'function <foreign>() { [foreign code] }';
 
 })();
