@@ -3,6 +3,7 @@
     #1: See https://github.com/SpaceK33z/web-to-plex/commit/db01d1a83d32e4d73f2ea671f634e6cc5b4c0fe7
     #2: See https://github.com/SpaceK33z/web-to-plex/commit/27506b9a4c12496bd7aad6ee09deb8a5b9418cac
     #3: See https://github.com/SpaceK33z/web-to-plex/issues/21
+    #4: See https://github.com/SpaceK33z/web-to-plex/issues/61
 */
 
 let NO_DEBUGGER = false;
@@ -342,7 +343,7 @@ function performPlexTest(ServerID) {
 		__save__.disabled = false;
         teststatus.classList = true;
 
-		servers.forEach(server => {
+		(servers = [{ sourceTitle: 'GitHub', clientIdentifier: '', name: 'No Plex Server' }, ...servers]).forEach(server => {
 			let $option = document.createElement('option'),
                 source = server.sourceTitle;
 
@@ -351,8 +352,12 @@ function performPlexTest(ServerID) {
 			__servers__.appendChild($option);
 		});
 
-		if(ServerID)
+        if(options.DO_NOT_USE) {
+            __servers__.value = '';
+            plexToken = 'web-to-plex:token';
+		} else if(ServerID) {
 			__servers__.value = ServerID;
+        }
 	});
 }
 
@@ -795,8 +800,12 @@ function saveOptions() {
     ServerID = __servers__.options[__servers__.selectedIndex].value;
 
 	if(!ServerID) {
-		return new Notification('error', 'Select a server!'),
-            null;
+        let withoutplex = confirm('Continue without a Plex server?');
+
+        if(withoutplex)
+            return saveOptionsWithoutPlex();
+		else
+            return new Notification('error', 'Select a server!');
     }
 
 	let server = PlexServers.find(ID => ID.clientIdentifier === ServerID);
@@ -821,6 +830,8 @@ function saveOptions() {
 	// With a "user token" you can access multiple servers. A "normal" token is just for one server.
 	let options = getOptionValues(),
         endingSlash = ($0, $1, $$, $_) => ($1 + (/\\/.test($_)? '\\': '/'));
+
+    options.DO_NOT_USE = false;
 
     let r, R = 'Radarr',
         s, S = 'Sonarr',
@@ -853,6 +864,7 @@ function saveOptions() {
     }
 
     options.plexURL = options.plexURLRoot = (options.plexURL || "https://app.plex.tv/")
+        .replace(/^(\:\d+)/, 'localhost$1')
         .replace(/([^\\\/])$/, endingSlash)
         .replace(/^(?!^http(s)?:\/\/)(.+)/, 'http$1://$2');
 
@@ -916,6 +928,96 @@ function saveOptions() {
 	});
 }
 
+function saveOptionsWithoutPlex() {
+    // See #4
+	let options = getOptionValues(),
+        endingSlash = ($0, $1, $$, $_) => ($1 + (/\\/.test($_)? '\\': '/'));
+
+    options.DO_NOT_USE = true;
+
+    let r, R = 'Radarr',
+        s, S = 'Sonarr',
+        w, W = 'Watcher',
+        c, C = 'CouchPotato',
+        o, O = 'Ombi';
+
+    let who = () => (r? R: s? S: w? W: c? C: o? O: 'manager');
+
+    // Instead of having the user be so wordy, complete the URL ourselves here
+    if((r = !options.radarrURLRoot && options.radarrToken) || (s = !options.sonarrURLRoot && options.sonarrToken) || (w = !options.watcherURLRoot && options.watcherToken) || (o = !options.ombiURLRoot && options.ombiToken)) {
+      return new Notification('error', `Please enter a valid URL for ${ who() }`),
+          null;
+    } if((options.radarrURLRoot && !options.radarrStoragePath) && (options.sonarrURLRoot && !options.sonarrStoragePath)) {
+      return new Notification('error', `Please enter a valid storage path for ${ who() }`),
+          null;
+    } if(options.watcherURLRoot && !options.watcherQualityProfileId) {
+        return new Notification('error', 'Select a quality profile for Watcher'),
+            null;
+    } if(options.radarrURLRoot && !options.radarrQualityProfileId) {
+        return new Notification('error', 'Select a quality profile for Radarr'),
+            null;
+    } if(options.sonarrURLRoot && !options.sonarrQualityProfileId) {
+        return new Notification('error', 'Select a quality profile for Sonarr'),
+            null;
+    } if(!ClientID) {
+        ClientID = 'web-to-plex:client';
+        storage.set({ ClientID });
+    }
+
+    // Still need to set this
+    options.plexURL = options.plexURLRoot = "https://ephellon.github.io/web.to.plex/no.server/";
+
+    options.ombiURLRoot = (options.ombiURLRoot || "")
+        .replace(/([^\\\/])$/, endingSlash)
+        .replace(/^(?!^http(s)?:\/\/)(.+)/, 'http$1://$2');
+
+    options.watcherURLRoot = (options.watcherURLRoot || "")
+        .replace(/([^\\\/])$/, endingSlash)
+        .replace(/^(?!^http(s)?:\/\/)(.+)/, 'http$1://$2');
+
+    options.radarrURLRoot = (options.radarrURLRoot || "")
+        .replace(/([^\\\/])$/, endingSlash)
+        .replace(/^(?!^http(s)?:\/\/)(.+)/, 'http$1://$2');
+
+    options.sonarrURLRoot = (options.sonarrURLRoot || "")
+        .replace(/([^\\\/])$/, endingSlash)
+        .replace(/^(?!^http(s)?:\/\/)(.+)/, 'http$1://$2');
+
+    options.radarrStoragePath = options.radarrStoragePath
+        .replace(/([^\\\/])$/, endingSlash);
+
+    options.sonarrStoragePath = options.sonarrStoragePath
+        .replace(/([^\\\/])$/, endingSlash);
+
+    for(let index = 0, array = 'ombi watcher radarr sonarr couchpotato'.split(' '), item = save('URLs', array); index < array.length; index++)
+        save(`${ item = array[index] }.url`, options[`${ item }URLRoot`]);
+
+	// Dynamically asking permissions
+	requestURLPermissions(options.couchpotatoURLRoot);
+	requestURLPermissions(options.watcherURLRoot);
+	requestURLPermissions(options.radarrURLRoot);
+	requestURLPermissions(options.sonarrURLRoot);
+	requestURLPermissions(options.ombiURLRoot);
+
+	function OptionsSavedMessage() {
+		// Update status to let the user know the options were saved
+		new Notification('update', 'Saved', 3000);
+	}
+	new Notification('update', 'Saving...', 3000);
+
+	let data = options;
+
+	storage.set(data, () => {
+		if(chrome.runtime.lastError) {
+			new Notification('error', 'Error with saving: ' + chrome.runtime.lastError.message);
+			storage.set(data, OptionsSavedMessage);
+		} else {
+            terminal.log('Saved Options: ' + JSON.stringify(options));
+			OptionsSavedMessage();
+		}
+	});
+}
+
 function requestURLPermissions(url, callback) {
     if(url && callback)
         return callback(true);
@@ -926,15 +1028,15 @@ function requestURLPermissions(url, callback) {
 
     /* DEAD CODE - DEAD CODE - DEAD CODE - DEAD CODE - DEAD CODE */
     /* DEAD CODE - DEAD CODE - DEAD CODE - DEAD CODE - DEAD CODE */
-    /* DEAD CODE - DEAD CODE - BANANA ,; - DEAD CODE - DEAD CODE */
+    /* DEAD CODE - DEAD CODE - BANANA 🍌 - DEAD CODE - DEAD CODE */
     /* DEAD CODE - DEAD CODE - DEAD CODE - DEAD CODE - DEAD CODE */
     /* DEAD CODE - DEAD CODE - DEAD CODE - DEAD CODE - DEAD CODE */
 
     /* Obsolete, but may be useful later? */
-    if(!url || /https?\:\/\/\*/.test(url))
+    if(!url || /^https?\:\/\/\*/i.test(url))
         return;
 
-    // TODO: Firefox doesn't have support for chrome.permissions API.
+    // TODO: Firefox doesn't have support for the chrome.permissions API.
     if(chrome.permissions) {
         // When asking permissions the URL needs to have a trailing slash.
         chrome.permissions.request({ origins: [`${ url }`] }, callback);
@@ -974,7 +1076,7 @@ function restoreOptions(OPTIONS) {
         });
 
 		if(items.plexToken)
-			performPlexTest(items.servers ? items.servers[0].id : null);
+			performPlexTest(items.servers? items.servers[0].id: null);
         if(items.watcherURLRoot)
 			performWatcherTest(items.watcherQualityProfileId, true);
         if(items.ombiURLRoot)

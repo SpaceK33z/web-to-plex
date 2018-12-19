@@ -435,7 +435,9 @@ function $searchPlex(connection, headers, options) {
     if(!options.title)
         return {};
 
-    if(type === 'tv')
+    if(/movie|film|cinema|theat[re]{2}/i.test(type))
+        type = 'movie';
+    else if(/tv|show|series|episode/i.test(type))
         type = 'show';
 
     // Letterboxd can contain special white-space characters. Plex doesn't like this.
@@ -473,9 +475,9 @@ function $searchPlex(connection, headers, options) {
 
             if (!media) {
                 media = movies.find(meta => ((meta.year == +options.year + 1) && strip(meta.title) == strip(options.title)));
-            } else {
-                key = media.key.replace('/children', '');
             }
+
+            key = !!media? media.key.replace('/children', ''): key;
 
             return {
                 found: !!media,
@@ -634,13 +636,13 @@ chrome.runtime.onMessage.addListener((request, sender, callback) => {
                         url: item.href,
                         filename: `${ FILE_TITLE } (${ ITEM_YEAR })`,
                         saveAs: true
-                    }); 
+                    });
                 });
                 return true;
             default:
                 terminal.warn(`Unknown event [${ request.type }]`);
                 return false;
-        }   
+        }
     } catch (error) {
         return callback(String(error));
     }

@@ -320,7 +320,7 @@
 - Fixed the notifications (`class Notification`)
 - **Added support for [YouTube](https://youtube.com/)**
 
-## v4.0.0.1 / unreleased
+## v4.1.0.0 / unreleased
 
 - Removed Flenix's files, no purpose found in keeping them
 - Fixed Rotten Tomatoes' image error
@@ -333,3 +333,5 @@
         - `prompt` asks the user to approve/remove/append to the option(s)
             - `input` does the same
     - when the user is done using the prompt, an array of approved items is passed to `callback` (`callback(approved)`)
+- remedied [#61](https://github.com/SpaceK33z/web-to-plex/issues/62)
+    - this **will** cause problems for unknowing users

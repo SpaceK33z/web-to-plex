@@ -330,13 +330,16 @@ function sendUpdate(type, options = {}) {
 function $getOptions() {
     return new Promise((resolve, reject) => {
         function handleOptions(options) {
-            if (!options.plexToken || !options.servers)
-                return reject(new Error('Options are undefined')),
+            if ((!options.plexToken || !options.servers) && !options.DO_NOT_USE)
+                return reject(new Error('Required options are missing')),
                     null;
 
-            // For now we support only one Plex server, but the options already
-            // allow multiple for easy migration in the future.
-            let server = options.servers[0],
+            let server, o;
+
+            if (!options.DO_NOT_USE) {
+                // For now we support only one Plex server, but the options already
+                // allow multiple for easy migration in the future.
+                server = options.servers[0];
                 o = {
                     server: {
                         ...server,
@@ -346,9 +349,12 @@ function $getOptions() {
                     ...options
                 };
 
-            options.plexURL = o.plexURL?
-                `${ o.plexURL }web#!/server/${ o.server.id }/`:
-            `https://app.plex.tv/web/app#!/server/${ o.server.id }/`;
+                options.plexURL = o.plexURL?
+                    `${ o.plexURL }web#!/server/${ o.server.id }/`:
+                `https://app.plex.tv/web/app#!/server/${ o.server.id }/`;
+            } else {
+                o = options;
+            }
 
             if (o.couchpotatoBasicAuthUsername)
                 o.couchpotatoBasicAuth = {
@@ -486,11 +492,11 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
     let local, savename;
 
     if(year) {
-        savename = `${title.toLowerCase()} (${year}).${rqut}`,
+        savename = `${title} (${year}).${rqut}`.toLowerCase(),
         local = await load(savename);
     } else {
-        year = await load(`${title}.${rqut}`) || year;
-        `${title.toLowerCase()} (${year}).${rqut}`;
+        year = await load(`${title}.${rqut}`.toLowerCase()) || year;
+        `${title} (${year}).${rqut}`.toLowerCase();
         local = await load(savename);
     }
 
@@ -848,8 +854,8 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
         return terminal.log(`No information was found for "${ title } (${ year })"`), {};
 
     save(savename, data); // e.g. "Coco (0)" on Netflix before correction / no repeat searches
-    save(savename = `${title.toLowerCase()} (${year}).${rqut}`.toLowerCase(), data); // e.g. "Coco (2017)" on Netflix after correction / no repeat searches
-    save(`${title.toLowerCase()}.${rqut}`.toLowerCase(), year);
+    save(savename = `${title} (${year}).${rqut}`.toLowerCase(), data); // e.g. "Coco (2017)" on Netflix after correction / no repeat searches
+    save(`${title}.${rqut}`.toLowerCase(), year);
 
     terminal.log(`Saved as "${ savename }"`, data);
 
@@ -1520,6 +1526,9 @@ function findPlexMedia(options) {
 }
 
 function getPlexMediaRequest(options) {
+    if(!(config.plexURL && config.plexToken) || config.DO_NOT_USE)
+        return new Promise((resolve, reject) => resolve({ found: false, key: null }));
+
     return new Promise((resolve, reject) => {
         chrome.runtime.sendMessage({
                 type: 'SEARCH_PLEX',
