@@ -27,7 +27,7 @@ function initPlexThingy() {
 		return modifyPlexButton(
 			button,
 			'error',
-			'Could not extract title or year from Movieo'
+			'Could not extract title or year from Letterboxd'
 		);
 
 	let title = $title.textContent.trim(),
@@ -73,7 +73,7 @@ async function addInListItem(element) {
 
 function initList() {
 	let $listItems = document.querySelectorAll('.poster-list .poster-container'),
-        button = renderPlexButton(),
+        button = renderPlexButton(true),
         options = [], length = $listItems.length - 1;
 
 	if (!button)

@@ -59,7 +59,7 @@ let tabchange = tabs => {
     if(!tab) return;
 
     TAB = tab;
-    
+
     let id  = tab.id,
         url = tab.url,
         can, org, ali, js;
@@ -74,20 +74,20 @@ let tabchange = tabs => {
 
     url = new URL(url);
     org = url.origin;
-    ali = url.host.replace(/^(ww\w+\.)/i, '');
+    ali = url.host.replace(/^(ww\w+\.|\w{2}\.)/i, '');
     can = GetConsent(ali);
     js  = load(`script:${ ali }`);
 
     if(!can || !js) return;
 
-    let name = /* js + '_' + */ instance; // "js + '_'" was only to make debugging easier
+    let name = (KILL_DEBUGGER? instance: `top.${instance }`); // makes debugging easier
 
     fetch(`https://ephellon.github.io/web.to.plex/plugins/${ js }.js`, { mode: 'cors' })
         .then(response => response.text())
         .then(code => {
             chrome.tabs.executeScript(id, { file: 'helpers.js' }, () => {
                 // Sorry, but the instance needs to be callable multiple times
-                chrome.tabs.executeScript(id, { code: `var ${ name }; ${ name } = (${ name } || (()=>{'use strict';\n${ code }\n;return RegExp(plugin.url.replace(/\\|.*?(\\)|$)/g, '').replace(/^\\*\\:/, '\\\\w{3,}:').replace(/\\*\\./g, '([^\\\\.]+\\\\.)?'), 'i').test("${ url.href }")?plugin.init():console.warn("The domain '${ org }' ('${ url.href }') does not match the domain pattern '"+plugin.url+"'")\n})()); ${ name }` }, results => handle(results, id, instance, js))
+                chrome.tabs.executeScript(id, { code: `${ name } = (${ name } || (()=>{'use strict';\n${ code }\n;return RegExp(plugin.url.replace(/\\|.*?(\\)|$)/g, '').replace(/^\\*\\:/, '\\\\w{3,}:').replace(/\\*\\./g, '([^\\\\.]+\\\\.)?'), 'i').test("${ url.href }")?plugin.init():console.warn("The domain '${ org }' ('${ url.href }') does not match the domain pattern '"+plugin.url+"'")\n})()); ${ name }` }, results => handle(results, id, instance, js))
             })
         })
         .then(() => running.push(id, instance))

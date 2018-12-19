@@ -2,7 +2,7 @@
 function init() {
 	wait(
 		() => document.querySelector('.media-body .clearfix') && document.querySelector('.media-body .clearfix').children.length > 1,
-		() => initPlexThingy(isMovie()? 'movie': 'show')
+		() => initPlexThingy(isMovie()? 'movie': isShow()? 'show': null)
 	);
 }
 
@@ -17,7 +17,7 @@ function isShow() {
 function initPlexThingy(type) {
 	let button = renderPlexButton();
 
-	if (!button)
+	if (!button || !type)
 		return /* Fatal Error: Fail Silently */;
 
 	let $title = document.querySelector('[itemprop="description"]'),

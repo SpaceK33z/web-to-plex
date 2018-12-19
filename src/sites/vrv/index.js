@@ -4,18 +4,26 @@ function isShowPage() {
 	return /^\/(?:series|watch)\//.test(window.location.pathname);
 }
 
-function isShowPageReady() {
-    let img = document.querySelector('.h-thumbnail > img');
-	return img && img.src;
+function isPageReady() {
+    let img = document.querySelector('.h-thumbnail > img'),
+		pre = document.querySelector('#content .content .card');
+	return isList()? pre && pre.textContent: img && img.src;
+}
+
+function isList() {
+	return /\/(watchlist)\b/i.test(window.location.pathname);
 }
 
 function init() {
-	if (isShowPage())
-		if (isShowPageReady())
+	if (isPageReady()) {
+		if (isShowPage())
 			initPlexThingy();
-		else
-			// This almost never happens, but sometimes the page is too slow so we need to wait a bit.
-			setTimeout(init, 1000);
+		else if(isList())
+			initList();
+	} else {
+		// This almost never happens, but sometimes the page is too slow so we need to wait a bit.
+		setTimeout(init, 1000);
+	}
 }
 
 parseOptions().then(() => {
@@ -54,4 +62,51 @@ async function initPlexThingy() {
     year = year || Db.year;
 
 	findPlexMedia({ title, year, image, button, type: 'show', IMDbID, TMDbID, TVDbID });
+}
+
+async function addInListItem(element) {
+	let $title = element.querySelector('.info > *'),
+        $image = element.querySelector('.poster-image img');
+
+	if (!$title)
+		return;
+
+	let title = $title.textContent.trim(),
+        image = $image.src,
+		type = 'show', /* there are a few movies, but f*ck figuring that out here */
+		year;
+
+    let Db = await getIDs({ type, title }),
+		IMDbID = Db.imdb,
+		TMDbID = Db.tmdb,
+        TVDbID = +Db.tvdb;
+
+    title = title || Db.title;
+    year = Db.year;
+
+	return { type, title, year, image, IMDbID, TMDbID, TVDbID };
+}
+
+function initList() {
+	let $listItems = document.querySelectorAll('#content .content .card'),
+        button = renderPlexButton(),
+        options = [], length = $listItems.length - 1;
+
+	if (!button)
+		return /* Fatal Error: Fail Silently */;
+
+	$listItems.forEach(async(element, index, array) => {
+        let option = await addInListItem(element);
+
+        if(option)
+            options.push(option);
+
+        if(index == length)
+            setTimeout(() => {
+                if (!options.length)
+                    new Notification('error', 'Failed to process list');
+                else
+                    squabblePlex(options, button);
+            }, 50);
+    });
 }

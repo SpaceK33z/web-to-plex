@@ -68,7 +68,7 @@ function ChangeStatus({ ITEM_ID, ITEM_TITLE, ITEM_TYPE, ID_PROVIDER, ITEM_YEAR, 
     // Search friendly title
         SEARCH_PROVIDER = /[it]m/i.test(ID_PROVIDER)? 'GX': 'GG';
 
-    ITEM_ID = (ITEM_ID && !/^tt-?$/i.test(ITEM_ID)? ITEM_ID: '') + '';
+    ITEM_ID = (ITEM_ID && !/^tt$/i.test(ITEM_ID)? ITEM_ID: '') + '';
     ITEM_ID = ITEM_ID.replace(/^.*\b(tt\d+)\b.*$/, '$1').replace(/^.*\bid=(\d+)\b.*$/, '$1').replace(/^.*(?:movie|tv|(?:tv-?)?(?:shows?|series|episodes?))\/(\d+).*$/, '$1');
 
     external = { ...external, ID_PROVIDER, ITEM_ID, ITEM_TITLE, ITEM_YEAR, ITEM_URL, ITEM_TYPE, SEARCH_PROVIDER, SEARCH_TITLE, FILE_PATH, FILE_TITLE, FILE_TYPE };
@@ -140,9 +140,9 @@ function addWatcher(request, sendResponse) {
             'X-Api-Key': request.token,
             ...(new Headers(request.basicAuth))
         },
-        id = (/^(tt-?)?$/.test(request.imdbId)? request.tmdbId: request.imdbId),
+        id = (/^(tt)?$/.test(request.imdbId)? request.tmdbId: request.imdbId),
             // if the IMDbID is empty, jump to the TMDbID
-        query = (/^tt-?\d+$/i.test(id)? 'imdbid': /^\d+$/.test(id)? 'tmdbid': (id = encodeURI(`${request.title} ${request.year}`), 'term')),
+        query = (/^tt\d+$/i.test(id)? 'imdbid': /^\d+$/.test(id)? 'tmdbid': (id = encodeURI(`${request.title} ${request.year}`), 'term')),
             // if the IMDbID is empty, use "&tmdbid={ id }"
             // if the IMDbID isn't empty, use "&imdbid={ id }"
             // otherwise, use "&term={ title } { year }"
@@ -175,9 +175,9 @@ function addRadarr(request, sendResponse) {
             'X-Api-Key': request.token,
             ...(new Headers(request.basicAuth))
         },
-        id = (/^(tt-?)?$/.test(request.imdbId)? request.tmdbId: request.imdbId),
+        id = (/^(tt)?$/.test(request.imdbId)? request.tmdbId: request.imdbId),
             // if the IMDbID is empty, jump to the TMDbID
-        query = (/^tt-?\d+$/i.test(id)? 'imdb?imdbid': /^\d+$/.test(id)? 'tmdb?tmdbid': (id = encodeURI(`${request.title} ${request.year}`), 'term')),
+        query = (/^tt\d+$/i.test(id)? 'imdb?imdbid': /^\d+$/.test(id)? 'tmdb?tmdbid': (id = encodeURI(`${request.title} ${request.year}`), 'term')),
             // if the IMDbID is empty, use "/tmdb?tmdbid={ id }"
             // if the IMDbID isn't empty, use "/imdb?imdbid={ id }"
             // otherwise, use "&term={ title } { year }"

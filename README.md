@@ -1,14 +1,25 @@
 # Web to Plex (BETA Channel) ![Icon](src/img/48.png)
 
-![Logo](src/img/256.png)
+![Examples](example.png)
 
 This browser extension searches your [Plex Media Server (PMS)](https://www.plex.tv/downloads/) for matching media on sites like [IMDb](https://imdb.com), letting you immediately open the movie or TV show in Plex, if it is available. If the item isn't found on your PMS, then a download button is added instead.
 
-Optionally, you can configure [Sonarr](https://sonarr.tv/) (TV Shows), [Radarr](https://radarr.video/) (Movies), [Watcher 3](https://nosmokingbandit.github.io/) (Movies), and/or [CouchPotato](https://couchpota.to/) (Both) in the extension's options. After that, you can immediately add a TV show or movie to CouchPotato/Sonarr/Radarr/Watcher with one click, right from your favorite site.
+----
+
+# NZB Managers
+
+Optionally, you can configure your NZB manager(s) (see support table) in the extension's options. After that, you can immediately add a TV show or movie with one click, right from your favorite site.
+
+## Supported Managers
+| Manager                                         | Movie Support | TV Show Support | Searchable
+| ----------------------------------------------- | ------------- | --------------- | ----------
+| [Watcher 3](https://nosmokingbandit.github.io/) | Yes           |                 |
+| [CouchPotato](https://couchpota.to/)            | Yes           | Yes             |
+| [Radarr](https://radarr.video/)                 | Yes           |                 | Yes
+| [Sonarr](https://sonarr.tv/)                    |               | Yes             | Yes
+| [Ombi](https://ombi.io/)                        | Yes           | Yes             | Yes
 
 If you don't feel like actually downloading the movie, or want a simple watchlist, you can also use the built-in "Plex It!" feature to bookmark the current page.
-
-![Examples](example.png)
 
 ----
 
@@ -43,9 +54,7 @@ This is the BETA (testing) version, please visit [Web to Plex](https://github.co
 - Offers a "Direct Plex URL" feature
   - i.e. you can specify `localhost:32400` as your Plex URL to avoid bandwidth usage for Plex requests
 
-## Supported sites: *Site (button location)*
-
-*Given in order of completion*
+## Supported sites
 
 1.  [Movieo](http://movieo.me/)
 2.  [IMDb](http://imdb.com/)
