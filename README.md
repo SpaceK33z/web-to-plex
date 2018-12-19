@@ -8,7 +8,7 @@ This browser extension searches your [Plex Media Server (PMS)](https://www.plex.
 
 # NZB Managers
 
-Optionally, you can configure NZB Manager (see support table) in the extension's options. After that, you can immediately add a TV show or movie with one click, right from your favorite site.
+Optionally, you can configure your NZB manager(s) (see the support table) in the extension's options. After that, you can immediately add a TV show or movie with one click, right from your favorite site.
 
 ## Supported Managers
 | Manager                                         | Movie Support | TV Show Support | Searchable
