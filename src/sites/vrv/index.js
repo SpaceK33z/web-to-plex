@@ -1,7 +1,11 @@
 /* global findPlexMedia, parseOptions, modifyPlexButton */
-function isShowPage() {
+function isShow() {
 	// An example movie page: /series/GR75MN7ZY/Deep-Space-69-Unrated
-	return /^\/(?:series|watch)\//.test(window.location.pathname);
+	return /^\/(?:series)\//.test(window.location.pathname) || (/^\/(?:watch)\//.test(window.location.pathname) && document.querySelector('.content .series'));
+}
+
+function isMovie() {
+	return /^\/(?:watch)\//.test(window.location.pathname) && !document.querySelector('.content .series');
 }
 
 function isPageReady() {
@@ -16,8 +20,10 @@ function isList() {
 
 function init() {
 	if (isPageReady()) {
-		if (isShowPage())
-			initPlexThingy();
+		if (isShow())
+			initPlexThingy('show');
+		else if (isMovie())
+			initPlexThingy('movie');
 		else if(isList())
 			initList();
 	} else {
@@ -32,7 +38,7 @@ parseOptions().then(() => {
 	(window.onlocationchange = init)();
 });
 
-async function initPlexThingy() {
+async function initPlexThingy(type) {
 	let button = renderPlexButton();
 
 	if (!button)
@@ -53,7 +59,7 @@ async function initPlexThingy() {
 	let title = $title.innerText.replace(/(unrated|mature|tv-?\d{1,2})\s*$/i, '').trim(),
         year = $year? $year.textContent.replace(/.+(\d{4}).*/, '$1').trim(): 0,
         image = ($image || {}).src,
-	    Db = await getIDs({ title, year, APIType: 'tv' }),
+	    Db = await getIDs({ type, title, year }),
         IMDbID = Db.imdb,
         TMDbID = Db.tmdb,
         TVDbID = Db.tvdb;
@@ -61,19 +67,20 @@ async function initPlexThingy() {
     title = title || Db.title;
     year = year || Db.year;
 
-	findPlexMedia({ title, year, image, button, type: 'show', IMDbID, TMDbID, TVDbID });
+	findPlexMedia({ type, title, year, image, button, IMDbID, TMDbID, TVDbID });
 }
 
 async function addInListItem(element) {
 	let $title = element.querySelector('.info > *'),
-        $image = element.querySelector('.poster-image img');
+        $image = element.querySelector('.poster-image img'),
+		$type = element.querySelector('.info [class*="series"], .info [class*="movie"]');
 
-	if (!$title)
+	if (!$title || !$type)
 		return;
 
 	let title = $title.textContent.trim(),
         image = $image.src,
-		type = 'show', /* there are a few movies, but f*ck figuring that out here */
+		type  = $type.getAttribute('class').replace(/[^]*(movie|series)[^]*/, '$1'),
 		year;
 
     let Db = await getIDs({ type, title }),
