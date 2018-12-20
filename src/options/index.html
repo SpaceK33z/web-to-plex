@@ -54,7 +54,7 @@
             margin-bottom: 5px;
         }
 
-        input[type="text"], input[type="password"], select {
+        input[type="text"], input[type="password"], textarea, select {
             width: 30vw !important;
             line-height: 1.5em !important;
             transition: background 0.2s;
@@ -70,6 +70,10 @@
             font-family: inherit;
             margin: 0;
         }
+
+		textarea {
+			height: 114px !important;
+		}
 
         div:not(body > div) {
             color: rgba(255, 255, 255, 0.45) !important;
@@ -375,26 +379,6 @@
             color: #cc7b19 !important;
         }
 
-        ::-webkit-scrollbar {
-            width: 10px;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            min-height: 50px;
-            background: rgba(255, 255, 255, 0.15);
-            border: 2px solid rgba(0, 0, 0, 0);
-            border-radius: 8px;
-            background-clip: padding-box;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #0000!important;
-        }
-
-        input::placeholder, input:placeholder {
-            color: #999;
-        }
-
         /* bbodine @CodePen - https://codepen.io/bbodine1/pen/novBm */
         .checkbox {
             width: 80px;
@@ -550,9 +534,37 @@
             color: #909090EE!important;
         }
 
-        ::-webkit-input-placeholder, ::-moz-placeholder, :-moz-placeholder {
-            color: #999;
+		[code], code {
+			font-family: monospace, console, consolas, system, arial !important;
+		}
+
+        *::-webkit-scrollbar {
+            width: 10px;
         }
+
+        *::-webkit-scrollbar-thumb {
+            min-height: 50px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid rgba(0, 0, 0, 0);
+            border-radius: 8px;
+            background-clip: padding-box;
+        }
+
+        *::-webkit-scrollbar-track {
+            background: #0000!important;
+        }
+
+        *::placeholder {
+            color: #999!important;
+        }
+
+		*::-moz-placeholder, *:-moz-placeholder {
+			color: #999;
+		}
+
+		*::-webkit-input-placeholder {
+			color: #999;
+		}
 	</style>
 </head>
 
@@ -938,6 +950,48 @@ div
 		</details>
 	</article>
 
+	<article>
+		<details>
+			<summary>Connection Settings</summary>
+
+			<h2>Proxy Settings</h2>
+			<section>
+				<label>Force Secure Connections</label>
+                <div class="checkbox">
+                    <input id="always-secure" type="checkbox" data-option="UseProxy"/>
+                    <label for="always-secure"></label>
+                </div>
+				<div>
+					If enabled, all insecure (HTTP) requests will be through an <a href="https://en.wikipedia.org/wiki/Proxy_server">HTTPS proxy</a>.
+				</div>
+			</section>
+
+			<section>
+				<label>Proxy URL &amp; Syntax</label>
+				<input type="text" data-option="ProxyURL" placeholder="Enter the Proxy URL and syntax">
+				<div>
+					Please provide the URL of your proxy.
+					<br>
+					If your proxy requires a special syntax, enter that information in as well.
+					<br>
+					<ul>
+						<li><code>{url}</code> <em>OR</em> <code>{raw-url}</code> &mdash; the raw, uneditied URL</li>
+						<li><code>{enc-url}</code> <em>OR</em> <code>{encode-url}</code> &mdash; an encoded URL</li>
+						<li><code>{b64-url}</code> <em>OR</em> <code>{base64-url}</code> &mdash; a Base-64 encoded URL</li>
+					</ul>
+				</div>
+			</section>
+
+			<section>
+				<label>Proxy Headers</label>
+				<textarea type="text" data-option="ProxyHeaders" placeholder="Enter the Proxy headers" code></textarea>
+				<div>
+					If your proxy requires special headers, enter that information in here.
+				</div>
+			</section>
+		</details>
+	</article>
+
     <article>
         <details>
             <summary>Advance Settings</summary>
@@ -1011,18 +1065,6 @@ div
                 </div>
             </section>
 			<hr>
-			<h2>Proxy Settings</h2>
-			<section>
-				<label>Force Secure Connections</label>
-                <div class="checkbox">
-                    <input id="always-secure" type="checkbox" data-option="UseProxy"/>
-                    <label for="always-secure"></label>
-                </div>
-				<div>
-					If enabled, all insecure (HTTP) requests will be through an <a href="https://en.wikipedia.org/wiki/Proxy_server">HTTPS proxy</a>.
-				</div>
-			</section>
-            <hr>
             <h2>Data Handling</h2>
             <section>
                 <h3>Configuration Data (Copy/Paste)</h3>

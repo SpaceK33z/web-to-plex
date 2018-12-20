@@ -327,11 +327,14 @@
 - Updated the `getIDs` function to also use the already given IDs
 - Moved the plugin-sites to their own section on the options page
 - Added several sites' list pages
-- added the `class Prompt` feature to remedy [#62.447673935](https://github.com/SpaceK33z/web-to-plex/issues/62#issuecomment-447673935) (`new Prompt(type:string, options:array/object, callback:function[, container:Element])`)
+- Added the `class Prompt` feature to remedy [#62.447673935](https://github.com/SpaceK33z/web-to-plex/issues/62#issuecomment-447673935) (`new Prompt(type:string, options:array/object, callback:function[, container:Element])`)
     - type is an enum. of "select", "prompt", and "input"
         - `select` asks the user to approve/remove the supplied option(s)
         - `prompt` asks the user to approve/remove/append to the option(s)
             - `input` does the same
     - when the user is done using the prompt, an array of approved items is passed to `callback` (`callback(approved)`)
-- remedied [#61](https://github.com/SpaceK33z/web-to-plex/issues/62)
+- Remedied [#61](https://github.com/SpaceK33z/web-to-plex/issues/61)
     - this **will** cause problems for unknowing users
+- Added support for VRV movies
+- **Added the proxy settings**
+  - **Added advance proxy settings**

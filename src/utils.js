@@ -453,6 +453,32 @@ let config = parseOptions(),
         LIMIT:   config.AutoGrabLimit,
     };
 
+function HandleProxyHeaders(Headers = "", URL = "") {
+    let headers = {};
+
+    Headers.replace(/^[ \t]*([^\=\s]+)[ \t]*=[ \t]*((["'`])(?:[^\\\3]*|\\.)\3|[^\f\n\r\v]*)/gm, ($0, $1, $2, $3, $$, $_) => {
+        let string = !!$3;
+
+        if(string) {
+            headers[$1] = $2.replace(RegExp(`^${ $3 }|${ $3 }$`, 'g'), '');
+        } else {
+            $2 = $2.replace(/@([\w\.]+)/g, (_0, _1, _$, __) => {
+                let path = _1.split('.'), property = top;
+
+                for(let index = 0, length = path.length; index < length; index++)
+                    property = property[path[index]];
+
+                headers[$1] = property;
+            })
+            .replace(/@\{b(ase-?)?64-url\}/gi, btoa(URL))
+            .replace(/@\{enc(ode)?-url\}/gi, encodeURIComponent(URL))
+            .replace(/@\{(raw-)?url\}/gi, URL);
+        }
+    });
+
+    return headers;
+}
+
 // fetch/search for the item's media ID(s)
 async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APIID, meta, rerun }) {
     let json = {}, // returned object
@@ -469,7 +495,6 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
         mid = TMDbID || null, // TMDbID
         tid = TVDbID || null, // TVDbID
         rqut = apit, // request type: tmdb, imdb, or tvdb
-        cors = 'https://cors-anywhere.herokuapp.com/', // if cors is requried and not uspported, proxy through this URL
         manable = config.ManagerSearch && !rerun; // is the user's "Manager Searches" option enabled?
 
     type = type || null;
@@ -543,15 +568,24 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
             `https://www.theimdbapi.org/api/find/movie?title=${ encodeURI(title) }${ year? '&year=' + year: '' }`:
         null;
 
-    let proxy = !/^https:/i.test(url) && config.UseProxy;
+    if(url === null) return null;
 
-    if(url === null) return 0;
-    if(proxy)
-        url = cors + url;
+    let proxy = config.proxy,
+        cors = proxy.url, // if cors is requried and not uspported, proxy through this URL
+        headers = HandleProxyHeaders(proxy.headers, url);
 
-    terminal.log(`Searching for "${ title } (${ year })" in ${ type || apit }/${ rqut } => ${ url.replace(cors, '') }`);
+    if(proxy.enabled && /(^http:\/\/)(?!localhost|127\.0\.0\.1(?:\/8)?|::1(?:\/128)?|:\d+)\b/i.test(url)) {
+        url = cors
+            .replace(/\{b(ase-?)?64-url\}/gi, btoa(url))
+            .replace(/\{enc(ode)?-url\}/gi, encodeURIComponent(url))
+            .replace(/\{(raw-)?url\}/gi, url);
 
-    await(proxy? fetch(url, { mode: "cors", headers: { "X-Requested-With": top.location.origin } }): fetch(url))
+        terminal.log({ proxy, url, headers });
+    }
+
+    terminal.log(`Searching for "${ title } (${ year })" in ${ type || apit }/${ rqut }${ proxy.enabled? '[PROXY]': '' } => ${ url }`);
+
+    await(proxy? fetch(url, { mode: "cors", headers }): fetch(url))
         .then(response => response.text())
         .then(data => {
             try {

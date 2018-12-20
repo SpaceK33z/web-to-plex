@@ -53,10 +53,14 @@ const storage = (chrome.storage.sync || chrome.storage.local),
             'ombiURLRoot',
             'ombiToken',
 
+            // Connection settings
+            'UseProxy',
+            'ProxyURL',
+            'ProxyHeaders',
+
             // Advance Settings
             'OMDbAPI',
             'TMDbAPI',
-            'UseProxy',
             'UseAutoGrab',
             'AutoGrabLimit',
             'UseLoose',
@@ -794,6 +798,14 @@ function performSonarrTest(QualityProfileID, StoragePath, refreshing = false) {
         );
 }
 
+function HandleProxySettings(data) {
+    return {
+        enabled: data.UseProxy,
+        url: data.ProxyURL,
+        headers: data.ProxyHeaders,
+    };
+}
+
 function saveOptions() {
     ServerID = __servers__.options[__servers__.selectedIndex].value;
 
@@ -898,6 +910,9 @@ function saveOptions() {
 	requestURLPermissions(options.sonarrURLRoot);
 	requestURLPermissions(options.ombiURLRoot);
 
+    // Handle the proxy settings
+    options.proxy = HandleProxySettings(options);
+
 	function OptionsSavedMessage() {
 		// Update status to let the user know the options were saved
 		new Notification('update', 'Saved', 3000);
@@ -996,6 +1011,9 @@ function saveOptionsWithoutPlex() {
 	requestURLPermissions(options.radarrURLRoot);
 	requestURLPermissions(options.sonarrURLRoot);
 	requestURLPermissions(options.ombiURLRoot);
+
+    // Handle the proxy settings
+    options.proxy = HandleProxySettings(options);
 
 	function OptionsSavedMessage() {
 		// Update status to let the user know the options were saved
