@@ -56,6 +56,7 @@ const storage = (chrome.storage.sync || chrome.storage.local),
             // Advance Settings
             'OMDbAPI',
             'TMDbAPI',
+            'UseProxy',
             'UseAutoGrab',
             'AutoGrabLimit',
             'UseLoose',
@@ -352,10 +353,7 @@ function performPlexTest(ServerID) {
 			__servers__.appendChild($option);
 		});
 
-        if(options.DO_NOT_USE) {
-            __servers__.value = '';
-            plexToken = 'web-to-plex:token';
-		} else if(ServerID) {
+        if(ServerID) {
 			__servers__.value = ServerID;
         }
 	});
@@ -386,7 +384,7 @@ function getOptionValues() {
 
         if(element) {
             if(element.type == 'checkbox')
-                options[option] = element.checked || element.getAttribute('checked');
+                options[option] = element.checked || element.getAttribute('checked') == "true";
             else
                 options[option] = element.value;
         }
@@ -1055,7 +1053,7 @@ function restoreOptions(OPTIONS) {
             if(!el) return;
 
             if(el.type == 'checkbox')
-                el.setAttribute('checked', el.checked = (typeof items[option] == 'boolean'? items[option]: el.getAttribute('checked') === 'true'));
+                el.setAttribute('checked', el.checked = (typeof items[option] == 'boolean'? items[option]: el.getAttribute('checked') == 'true'));
             else
                 el.value = items[option] || '';
 

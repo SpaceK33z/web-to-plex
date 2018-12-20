@@ -23,7 +23,7 @@ parseOptions().then(() => {
 	init();
 });
 
-function initPlexThingy() {
+async function initPlexThingy() {
 	let button = renderPlexButton();
 
 	if (!button)

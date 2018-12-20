@@ -543,11 +543,15 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
             `https://www.theimdbapi.org/api/find/movie?title=${ encodeURI(title) }${ year? '&year=' + year: '' }`:
         null;
 
+    let proxy = !/^https:/i.test(url) && config.UseProxy;
+
     if(url === null) return 0;
+    if(proxy)
+        url = cors + url;
 
     terminal.log(`Searching for "${ title } (${ year })" in ${ type || apit }/${ rqut } => ${ url.replace(cors, '') }`);
 
-    await(meta? fetch(url/*, meta*/): fetch(url))
+    await(proxy? fetch(url, { mode: "cors", headers: { "X-Requested-With": top.location.origin } }): fetch(url))
         .then(response => response.text())
         .then(data => {
             try {
