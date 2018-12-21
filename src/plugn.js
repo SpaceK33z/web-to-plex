@@ -108,7 +108,7 @@ let handle = (results, tabID, instance, plugin) => {
     let data = results[0];
 
     try {
-        chrome.tabs.executeScript(tabID, { file: 'utils.js' }, () => {
+        chrome.tabs.executeScript(tabID, { file: 'index.js' }, () => {
             chrome.tabs.insertCSS(tabID, { file: 'sites/common.css' });
             chrome.tabs.sendMessage(tabID, { data, plugin, instance, type: 'POPULATE' });
         });
