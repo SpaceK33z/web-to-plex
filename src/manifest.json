@@ -119,6 +119,10 @@
 			"matches": ["*://www.youtube.com/*"],
 			"js": ["utils.js", "sites/youtube/index.js"],
 			"css": ["sites/youtube/index.css", "sites/common.css"]
+		},{
+			"matches": ["*://*.flickmetrix.com/*"],
+			"js": ["utils.js", "sites/flickmetrix/index.js"],
+			"css": ["sites/flickmetrix/index.css", "sites/common.css"]
 		}
 	],
 

@@ -6,6 +6,12 @@ This browser extension searches your [Plex Media Server (PMS)](https://www.plex.
 
 ----
 
+## Status: 307 (TEMP-RD)
+
+This is the BETA (testing) version, please visit [Web to Plex](https://github.com/SpaceK33z/web-to-plex) for the stable version.
+
+----
+
 # NZB Managers
 
 Optionally, you can configure your NZB manager(s) (see support table) in the extension's options. After that, you can immediately add a TV show or movie with one click, right from your favorite site.
@@ -20,12 +26,6 @@ Optionally, you can configure your NZB manager(s) (see support table) in the ext
 | [Ombi](https://ombi.io/)                        | Yes           | Yes             | Yes
 
 If you don't feel like actually downloading the movie, or want a simple watchlist, you can also use the built-in "Plex It!" feature to bookmark the current page.
-
-----
-
-## Status: 307 (TEMP-RD)
-
-This is the BETA (testing) version, please visit [Web to Plex](https://github.com/SpaceK33z/web-to-plex) for the stable version.
 
 ----
 
@@ -82,8 +82,9 @@ This is the BETA (testing) version, please visit [Web to Plex](https://github.co
 21. [Netflix](https://netflix.com/)<sup>3</sup>
 22. [Toloka](https://toloka.to/)<sup>6</sup>
 23. [Shana Project](https://www.shanaproject.com/)<sup>6</sup>
-24. [My Anime List](https://myanimelist.com/)<sup>6</sup>
+24. [My Anime List](https://myanimelist.net/)<sup>6</sup>
 25. [YouTube](https://youtube.com/)
+26. [Flickmetrix](https://flickmetrix.com/) (formerly "Cinesift")
 
 *Notes*
 

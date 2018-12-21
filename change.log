@@ -337,4 +337,6 @@
     - this **will** cause problems for unknowing users
 - Added support for VRV movies
 - **Added the proxy settings**
-  - **Added advance proxy settings**
+    - **Added advance proxy settings**
+- **Added support for:**
+    - Flickmetrix

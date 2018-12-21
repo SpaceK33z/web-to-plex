@@ -163,6 +163,9 @@
 	border: 1px solid #0000 !important;
 	box-sizing: border-box !important;
 	color: #eee !important;
+    font: inherit !important;
+    font-size: 2em !important;
+    line-height: initial !important;
 	text-size-adjust: 100% !important;
 
 	margin-top: 0 !important;
