@@ -524,11 +524,12 @@ function performOmbiLogin() {
 function performOmbiTest(refreshing = false) {
     let options = getOptionValues(),
         teststatus = $$('#ombi_test_status'),
+        path = $$('[data-option="ombiURLRoot"]'),
         url,
         headers = { headers: { apikey: options.ombiToken, accept: 'text/html' } };
 
     teststatus.textContent = '?';
-    options.ombiURLRoot = url = options.ombiURLRoot.replace(/^(\:\d+)/, 'localhost$1').replace(/^(?!^http(s)?:)/, 'http$1://').replace(/\/+$/, '');
+    options.ombiURLRoot = url = path.value = options.ombiURLRoot.replace(/^(\:\d+)/, 'localhost$1').replace(/^(?!^http(s)?:)/, 'http$1://').replace(/\/+$/, '');
 
     let Get = () =>
         fetch(`${ url }/api/v1/Status`, headers)
@@ -582,6 +583,7 @@ function getWatcher(options, api = "getconfig") {
 function performWatcherTest(QualityProfileID = 'Default', refreshing = false) {
 	let options = getOptionValues(),
         teststatus = $$('#watcher_test_status'),
+        path = $$('[data-option="watcherURLRoot"]'),
         storagepath = __watcher_storagePath__,
         quality = __watcher_qualityProfile__,
         url;
@@ -589,7 +591,7 @@ function performWatcherTest(QualityProfileID = 'Default', refreshing = false) {
 	quality.innerHTML = '';
 	teststatus.textContent = '?';
     storagepath.value = '[Empty]';
-    options.watcherURLRoot = url = options.watcherURLRoot.replace(/^(\:\d+)/, 'localhost$1').replace(/^(?!^http(s)?:)/, 'http$1://').replace(/\/+$/, '');
+    options.watcherURLRoot = url = path.value = options.watcherURLRoot.replace(/^(\:\d+)/, 'localhost$1').replace(/^(?!^http(s)?:)/, 'http$1://').replace(/\/+$/, '');
 
     let Get = () =>
         getWatcher(options, 'getconfig').then(config => {
@@ -663,6 +665,7 @@ function getRadarr(options, api = "profile") {
 function performRadarrTest(QualityProfileID, StoragePath, refreshing = false) {
 	let options = getOptionValues(),
         teststatus = $$('#radarr_test_status'),
+        path = $$('[data-option="radarrURLRoot"]'),
         storagepath = __radarr_storagePath__,
         quality = __radarr_qualityProfile__,
         url;
@@ -670,7 +673,7 @@ function performRadarrTest(QualityProfileID, StoragePath, refreshing = false) {
 	quality.innerHTML = '';
 	teststatus.textContent = '?';
     storagepath.textContent = '';
-    options.radarrURLRoot = url = options.radarrURLRoot.replace(/^(\:\d+)/, 'localhost$1').replace(/^(?!^http(s)?:)/, 'http$1://').replace(/\/+$/, '');
+    options.radarrURLRoot = url = path.value = options.radarrURLRoot.replace(/^(\:\d+)/, 'localhost$1').replace(/^(?!^http(s)?:)/, 'http$1://').replace(/\/+$/, '');
 
     let Get = () => {
         getRadarr(options, 'profile').then(profiles => {
@@ -743,6 +746,7 @@ function getSonarr(options, api = "profile") {
 function performSonarrTest(QualityProfileID, StoragePath, refreshing = false) {
 	let options = getOptionValues(),
         teststatus = $$('#sonarr_test_status'),
+        path = $$('[data-option="sonarrURLRoot"]'),
         storagepath = __sonarr_storagePath__,
         quality = __sonarr_qualityProfile__,
         url;
@@ -750,7 +754,7 @@ function performSonarrTest(QualityProfileID, StoragePath, refreshing = false) {
 	quality.innerHTML = '';
 	teststatus.textContent = '?';
     storagepath.textContent = '';
-    options.sonarrURLRoot = url = options.sonarrURLRoot.replace(/^(\:\d+)/, 'localhost$1').replace(/^(?!^http(s)?:)/, 'http$1://').replace(/\/+$/, '');
+    options.sonarrURLRoot = url = path.value = options.sonarrURLRoot.replace(/^(\:\d+)/, 'localhost$1').replace(/^(?!^http(s)?:)/, 'http$1://').replace(/\/+$/, '');
 
     let Get = () => {
         getSonarr(options, 'profile').then(profiles => {
