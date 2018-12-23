@@ -12,14 +12,14 @@ function isMoviePage() {
 	return !jup.includes('/');
 }
 
-function isListPage() {
+function isList() {
 	let path = window.location.pathname;
 
 	return /\/(black|seen|watch)?lists?\//i.test(path);
 }
 
 function isPageReady() {
-	return !!document.querySelector('.share-box');
+	return !!document.querySelector('.share-box, .zopim');
 }
 
 function init() {
@@ -32,9 +32,9 @@ function init() {
 			// going back in history and then going forward in history.
 			setTimeout(init, 1000);
 		}
-	} else if (isListPage()) {
+	} else if (isList()) {
 		if (isPageReady()) {
-			initPlexList();
+			initList();
 		} else {
 			setTimeout(init, 1000);
 		}
@@ -103,7 +103,7 @@ async function addInListItem(element) {
 	return { type, title, year, image, IMDbID, TMDbID, TVDbID };
 }
 
-function initPlexList() {
+function initList() {
 	let $listItems = document.querySelectorAll('[data-title][data-id]'),
         button = renderPlexButton(true),
         options = [], length = $listItems.length - 1;
