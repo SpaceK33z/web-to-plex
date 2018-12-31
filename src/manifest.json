@@ -72,7 +72,7 @@
 			"js": ["utils.js", "sites/google/play.js"],
 			"css": ["sites/google/index.css", "sites/common.css"]
 		},{
-			"matches": ["*://*.apple.com/*"],
+			"matches": ["*://itunes.apple.com/*"],
 			"js": ["utils.js", "sites/itunes/index.js"],
 			"css": ["sites/itunes/index.css", "sites/common.css"]
 		},{
