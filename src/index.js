@@ -521,7 +521,7 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
         local = await load(savename);
     } else {
         year = await load(`${title}.${rqut}`.toLowerCase()) || year;
-        `${title} (${year}).${rqut}`.toLowerCase();
+        savename = `${title} (${year}).${rqut}`.toLowerCase();
         local = await load(savename);
     }
 
