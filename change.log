@@ -1,32 +1,5 @@
 # NOTES
-
 - **Bolded items** are deemed the most significant, such as added sites and new features
-
-# TODO
-
-- [x] Use the "download" API to save files (i.e. Flenix's "Save As" option for non-Flenix domains)
-  - v3.0.1.0
-- [x] Use Radarr and/or Sonarr's searching feature (if installed)?
-  - see [Radarr's Lookup API](https://github.com/Radarr/Radarr/wiki/API:Movie-Lookup)
-  - see [Sonarr's Lookup API](https://github.com/Sonarr/Sonarr/wiki/Series-Lookup)
-  - Caveats / Conflicts with Trakt's "to do"s
-      - **All [branding requirements](https://trakt.tv/branding) must be followed.**
-      - **Trakt data cannot be used in apps or websites that promote copyright infringement or piracy.**
-      - **Use only [documented API methods](https://trakt.docs.apiary.io/) and please don't scrape the website for information.**<sup>?</sup>
-- [ ] Create the "Auto Manage" feature
-  - use the user's manager settings for file renaming (vs. sending a secondary prompt)
-  - no documented API for such an action...
-- Close issues:
-  - [x] #13
-  - [x] #14
-  - [x] #21
-  - [x] #25
-  - [x] #53
-  - [x] #57
-- Revisit issues:
-  - [x] #17
-  - [x] #16
-  - [x] #24
 
 # CHANGELOG (Oldest to Newest)
 
@@ -34,6 +7,7 @@
 
 - Removed CouchPotato settings as they were unused (later redacted: v0.2.2.0)
 - **Added Flenix as a supported site** (later redacted: v4.0.0.0)
+- **Added support for Sonarr**
 
 ### v0.2 / [SpaceK33z@f3564c8](https://github.com/SpaceK33z/web-to-plex/commit/f3564c87241265a7913c043d0aa0e11cbff7c2c3)
 
@@ -315,12 +289,11 @@
 - Removed the test button on the options page for Couchpotato (unused)
 - Added links to the Web to Plex GitHub page in the options page
 - Redid the Web to Plex Wiki
-- made messages on the options page easier to see (changed to notifications)
 - **Added Ombi support**
 - Fixed the notifications (`class Notification`)
-- **Added support for [YouTube](https://youtube.com/)**
+- **Added support for YouTube**
 
-## v4.1.0.0 / unreleased
+## v4.1.0.0 / [SpaceK33z@8e9db1](https://github.com/SpaceK33z/web-to-plex/commit/8e9db12e3229ba089c4a31b4fa75e5920899c3bf)
 
 - Removed Flenix's files, no purpose found in keeping them
 - Fixed Rotten Tomatoes' image error
