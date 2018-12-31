@@ -505,6 +505,7 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
     /(movie|film)/i.test(rqut)?
         'tmdb':
     rqut || '*';
+    manable = manable && (config.ombiURL || (config.radarrURL && rqut == 'tmdb') || (config.sonarrURL && rqut == 'tvdb'));
     title = (title? title.replace(/\s*[\:,]\s*Season\s+\d+.*$/i, '').toCaps(): "")
         .replace(/\u201a/g, ',') // fancy comma
         .replace(/[\u2019\u201b]/g, "'") // fancy apostrophe
@@ -886,7 +887,7 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
 
     let best = { title, year, data, type, rqut, score: json.score | 0 };
 
-    terminal.log('Best match', best);
+    terminal.log('Best match:', url, { best, json });
 
     if(best.data.imdb == ei && best.data.tmdb == 0 && best.data.tvdb == 0)
         return terminal.log(`No information was found for "${ title } (${ year })"`), {};
@@ -1142,12 +1143,13 @@ function pushSonarrRequest(options) {
 
 // make the button
 function renderPlexButton(persistent) {
-	let existingButtons = document.querySelectorAll('.web-to-plex-button');
+	let existingButtons = document.querySelectorAll('.web-to-plex-button'),
+        firstButton = existingButtons[0];
 
 	if (existingButtons.length && !persistent)
 		[].slice.call(existingButtons).forEach(button => button.remove());
-    else if(persistent)
-        return existingButtons[0];
+    else if(persistent && firstButton !== null && firstButton !== undefined)
+        return firstButton;
 
     // <button>
     let button =
@@ -1323,7 +1325,7 @@ function modifyPlexButton(button, action, title, options = {}) {
         element.addEventListener('click', e => (AUTO_GRAB.ENABLED && AUTO_GRAB.LIMIT > options.length)? element.ON_CLICK(e): new Prompt('select', options, o => { button.setAttribute('saved_options', btoa(JSON.stringify(o))); element.ON_CLICK(e) }));
 
         element.setAttribute(hov, `Grab ${len} new item${s}: ${ t }`);
-        button.classList.add(saved_options.length? 'wtp--download': 'wtp--error');
+        button.classList.add(saved_options.length || len? 'wtp--download': 'wtp--error');
     } else {
     /* Handle a single item */
 

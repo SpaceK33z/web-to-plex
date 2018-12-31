@@ -340,3 +340,4 @@
     - **Added advance proxy settings**
 - **Added support for:**
     - Flickmetrix
+- Fixed short-hand error on options page
