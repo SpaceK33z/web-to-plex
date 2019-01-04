@@ -20,29 +20,6 @@ function GetConsent(origin) {
     return load('permission:' + origin);
 }
 
-let locationchangecallbacks = [];
-
-function watchlocationchange(subject) {
-    watchlocationchange[subject] = watchlocationchange[subject] || location[subject];
-
-    if (watchlocationchange[subject] != location[subject]) {
-        watchlocationchange[subject] = location[subject];
-
-        for(let index = 0, length = locationchangecallbacks.length, callback; index < length; index++) {
-            callback = locationchangecallbacks[index];
-
-            if(callback && typeof callback == 'function')
-                callback(new Event('locationchange', { bubbles: true }));
-        }
-    }
-}
-
-Object.defineProperty(window, 'onlocationchange', {
-    set: callback => locationchangecallbacks.push(callback)
-});
-
-setInterval(() => watchlocationchange('pathname'), 1000);
-
 function RandomName(length = 16, symbol = '') {
     let values = [];
 
@@ -65,7 +42,8 @@ let tabchange = tabs => {
         can, org, ali, js;
 
     if(!url || /^chrome/i.test(url) || (!!~running.indexOf(id) && !!~running.indexOf(instance)))
-        return /*
+        return
+        /*
             Stop if:
                 a) There isn't a url
                 b) The url is a chrome url
@@ -80,7 +58,7 @@ let tabchange = tabs => {
 
     if(!can || !js) return;
 
-    let name = (KILL_DEBUGGER? instance: `top.${instance }`); // makes debugging easier
+    let name = (KILL_DEBUGGER? instance: `top.${ instance }`); // makes debugging easier
 
     fetch(`https://ephellon.github.io/web.to.plex/plugins/${ js }.js`, { mode: 'cors' })
         .then(response => response.text())
@@ -94,13 +72,8 @@ let tabchange = tabs => {
         .catch(error => { throw error });
 };
 
-window.onlocationchange = event => {
-    instance = RandomName();
-    tabchange([TAB]);
-};
-
 let handle = (results, tabID, instance, plugin) => {
-    let InstanceWarning = `Instance @${ tabID } [${ instance }] failed to execute`;
+    let InstanceWarning = `Instance @${ plugin }#${ tabID } (${ instance }) failed to execute`;
 
     if(!results || !results[0] || !instance)
         return logger.warn(InstanceWarning);
@@ -117,10 +90,11 @@ let handle = (results, tabID, instance, plugin) => {
     }
 };
 
-// this doesn't actually work...
-//chrome.tabs.onActiveChanged.addListener(tabchange);
+chrome.tabs.onUpdated.addListener((tabID, changes, tab) => {
+    instance = RandomName();
+    tabchange([tabID]);
+});
 
-// workaround for the above
 setInterval(() =>
     chrome.tabs.query({
         active: true,
