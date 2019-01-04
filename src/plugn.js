@@ -165,8 +165,10 @@ let handle = async(results, tabID, instance, script, type) => {
     }
 };
 
-// this doesn't actually work...
-//chrome.tabs.onActiveChanged.addListener(tabchange);
+chrome.tabs.onUpdated.addListener((tabID, changes, tab) => {
+    instance = RandomName();
+    tabchange([tabID]);
+});
 
 // workaround for the above
 chrome.tabs.onActivated.addListener(change => {
