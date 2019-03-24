@@ -4,6 +4,8 @@
 
 This browser extension searches your [Plex Media Server (PMS)](https://www.plex.tv/downloads/) for matching media on sites like [IMDb](https://imdb.com), letting you immediately open the movie or TV show in Plex, if it is available. If the item isn't found on your PMS, then a download button is added instead.
 
+**We're currently in the process of making a v4 release which will contain the features listed below. The version that is available on the Chrome and Firefox webstore doesn't contain these features!**
+
 ----
 
 ## Features:
