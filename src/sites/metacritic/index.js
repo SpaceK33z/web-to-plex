@@ -2,22 +2,26 @@
 function init() {
 	wait(
 		() => document.readyState === 'complete',
-		() => initPlexThingy(isMoviePage() ? 'movie' : 'tv')
+		() => initPlexThingy(isMovie()? 'movie': isShow()? 'tv': null) || isList()? initList(): null
 	);
 }
 
-function isMoviePage() {
-	return window.location.pathname.startsWith('/movie/');
+function isMovie() {
+	return /^\/movie\//i.test(window.location.pathname);
 }
 
-function isShowPage() {
-	return window.location.pathname.startsWith('/tv/');
+function isShow() {
+	return /^\/tv\//i.test(window.location.pathname);
+}
+
+function isList() {
+	return /(^\/list\/)/i.test(window.location.pathname);
 }
 
 async function initPlexThingy(type) {
 	let button = renderPlexButton();
 
-	if (!button)
+	if (!button || !type)
 		return /* Fatal Error: Fail Silently */;
 
 	let $title = document.querySelector('.product_page_title > *, .product_title'),
@@ -46,6 +50,11 @@ async function initPlexThingy(type) {
     type = type === 'tv'? 'show': type;
 
 	findPlexMedia({ title, year, button, type, IMDbID, TMDbID, TVDbID });
+}
+
+async function initList() {
+	/* Not implemented... Metacritic has too much sh*t loading to even try to open a console */
+	/* Targeted for v5/v6 */
 }
 
 parseOptions().then(() => {

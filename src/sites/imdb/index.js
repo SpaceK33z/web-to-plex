@@ -49,8 +49,8 @@ async function initPlexMovie() {
     title = usa.test(country)? title: altname;
 
     let Db = await getIDs({ title, year, type, IMDbID }),
-        TMDbID = Db.tmdb,
-        TVDbID = Db.tvdb;
+        TMDbID = +Db.tmdb,
+        TVDbID = +Db.tvdb;
 
     IMDbID = IMDbID || Db.imdb;
     title = Db.title;
@@ -66,7 +66,7 @@ async function initPlexShow() {
 
 	if (!button)
 		return /* Fatal Error: Fail Silently */;
-  
+
 	let $title = $$('.originalTitle, .title_wrapper h1'),
         $altname = $$('.title_wrapper h1'),
         $date = $$('.title_wrapper [href*="/releaseinfo"]'),
@@ -85,18 +85,21 @@ async function initPlexShow() {
     title = usa.test(country)? title: altname;
 
     let Db = await getIDs({ title, year, type, IMDbID }),
-        TMDbID = Db.tmdb,
-        TVDbID = Db.tvdb;
+        TMDbID = +Db.tmdb,
+        TVDbID = +Db.tvdb;
 
     IMDbID = IMDbID || Db.imdb;
     title = Db.title;
     year = Db.year;
 
-    let savename = title.toLowerCase();
+	let savename = title.toLowerCase(),
+		cached = await load(`${savename}.imdb`);
 
-    save(`${savename} (${year}).imdb`, { type, title, year, imdb: IMDbID, tmdb: TMDbID, tvdb: TVDbID });
-    save(`${savename}.imdb`, +year);
-    terminal.log(`Saved as "${savename} (${year}).imdb"`);
+	if(!cached) {
+	    save(`${savename} (${year}).imdb`, { type, title, year, imdb: IMDbID, tmdb: TMDbID, tvdb: TVDbID });
+	    save(`${savename}.imdb`, +year);
+	    terminal.log(`Saved as "${savename} (${year}).imdb"`);
+	}
 
 	findPlexMedia({ type, title, year, button, IMDbID, TMDbID, TVDbID });
 }
@@ -114,28 +117,32 @@ async function addInListItem(element) {
         year = cleanYear($date.textContent),
         image = $image.src,
         IMDbID = $IMDbID.href.replace(/.*\/(tt\d+)\b.*$/, '$1'),
-        type = (/[\-\u2013]$/.test(year) ? 'show' : 'movie');
+        type = (/[\-\u2010-\u2015]/.test(year)? 'show': 'movie');
+
     year = parseInt(year);
 
     let Db = await getIDs({ type, title, year, IMDbID }),
-        TMDbID = Db.tmdb,
-        TVDbID = Db.tvdb;
+        TMDbID = +Db.tmdb,
+        TVDbID = +Db.tvdb;
 
     title = title || Db.title;
     year = year || Db.year;
 
-    let savename = title.toLowerCase();
+	let savename = title.toLowerCase(),
+		cached = await load(`${savename}.imdb`);
 
-    save(`${savename} (${year}).imdb`, { type, title, year, imdb: IMDbID, tmdb: TMDbID, tvdb: TVDbID });
-    save(`${savename}.imdb`, +year);
-    terminal.log(`Saved as "${savename} (${year}).imdb"`);
+	if(!cached) {
+	    save(`${savename} (${year}).imdb`, { type, title, year, imdb: IMDbID, tmdb: TMDbID, tvdb: TVDbID });
+	    save(`${savename}.imdb`, +year);
+	    terminal.log(`Saved as "${savename} (${year}).imdb"`);
+	}
 
 	return { type, title, year, image, IMDbID, TMDbID, TVDbID };
 }
 
 function initList() {
 	let $listItems = document.querySelectorAll('#main .lister-item'),
-        button = renderPlexButton(),
+        button = renderPlexButton(true),
         options = [], length = $listItems.length - 1;
 
     if (!/&mode=simple/i.test(location.search))
@@ -167,7 +174,7 @@ let init = () => {
                 await initPlexMovie();
             else if (isShow())
                 await initPlexShow();
-            else
+            else if(isList())
                 await initList();
         });
     }

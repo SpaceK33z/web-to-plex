@@ -1,21 +1,35 @@
 /* global findPlexMedia, parseOptions, modifyPlexButton */
-function isShowPage() {
+function isShow() {
 	// An example movie page: /series/GR75MN7ZY/Deep-Space-69-Unrated
-	return /^\/(?:series|watch)\//.test(window.location.pathname);
+	return /^\/(?:series)\//.test(window.location.pathname) || (/^\/(?:watch)\//.test(window.location.pathname) && document.querySelector('.content .series'));
 }
 
-function isShowPageReady() {
-    let img = document.querySelector('.h-thumbnail > img');
-	return img && img.src;
+function isMovie() {
+	return /^\/(?:watch)\//.test(window.location.pathname) && !document.querySelector('.content .series');
+}
+
+function isPageReady() {
+    let img = document.querySelector('.h-thumbnail > img'),
+		pre = document.querySelector('#content .content .card');
+	return isList()? pre && pre.textContent: img && img.src;
+}
+
+function isList() {
+	return /\/(watchlist)\b/i.test(window.location.pathname);
 }
 
 function init() {
-	if (isShowPage())
-		if (isShowPageReady())
-			initPlexThingy();
-		else
-			// This almost never happens, but sometimes the page is too slow so we need to wait a bit.
-			setTimeout(init, 1000);
+	if (isPageReady()) {
+		if (isShow())
+			initPlexThingy('show');
+		else if (isMovie())
+			initPlexThingy('movie');
+		else if(isList())
+			initList();
+	} else {
+		// This almost never happens, but sometimes the page is too slow so we need to wait a bit.
+		setTimeout(init, 1000);
+	}
 }
 
 parseOptions().then(() => {
@@ -24,7 +38,7 @@ parseOptions().then(() => {
 	(window.onlocationchange = init)();
 });
 
-async function initPlexThingy() {
+async function initPlexThingy(type) {
 	let button = renderPlexButton();
 
 	if (!button)
@@ -45,7 +59,7 @@ async function initPlexThingy() {
 	let title = $title.innerText.replace(/(unrated|mature|tv-?\d{1,2})\s*$/i, '').trim(),
         year = $year? $year.textContent.replace(/.+(\d{4}).*/, '$1').trim(): 0,
         image = ($image || {}).src,
-	    Db = await getIDs({ title, year, APIType: 'tv' }),
+	    Db = await getIDs({ type, title, year }),
         IMDbID = Db.imdb,
         TMDbID = Db.tmdb,
         TVDbID = Db.tvdb;
@@ -53,5 +67,53 @@ async function initPlexThingy() {
     title = title || Db.title;
     year = year || Db.year;
 
-	findPlexMedia({ title, year, image, button, type: 'show', IMDbID, TMDbID, TVDbID });
+	findPlexMedia({ type, title, year, image, button, IMDbID, TMDbID, TVDbID });
+}
+
+async function addInListItem(element) {
+	let $title = element.querySelector('.info > *'),
+        $image = element.querySelector('.poster-image img'),
+		$type = element.querySelector('.info [class*="series"], .info [class*="movie"]');
+
+	if (!$title || !$type)
+		return;
+
+	let title = $title.textContent.trim(),
+        image = $image.src,
+		type  = $type.getAttribute('class').replace(/[^]*(movie|series)[^]*/, '$1'),
+		year;
+
+    let Db = await getIDs({ type, title }),
+		IMDbID = Db.imdb,
+		TMDbID = Db.tmdb,
+        TVDbID = +Db.tvdb;
+
+    title = title || Db.title;
+    year = Db.year;
+
+	return { type, title, year, image, IMDbID, TMDbID, TVDbID };
+}
+
+function initList() {
+	let $listItems = document.querySelectorAll('#content .content .card'),
+        button = renderPlexButton(),
+        options = [], length = $listItems.length - 1;
+
+	if (!button)
+		return /* Fatal Error: Fail Silently */;
+
+	$listItems.forEach(async(element, index, array) => {
+        let option = await addInListItem(element);
+
+        if(option)
+            options.push(option);
+
+        if(index == length)
+            setTimeout(() => {
+                if (!options.length)
+                    new Notification('error', 'Failed to process list');
+                else
+                    squabblePlex(options, button);
+            }, 50);
+    });
 }

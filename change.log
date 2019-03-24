@@ -263,7 +263,7 @@
 - Added `/people` to Trakt's "Watch Now" link feature
   - v3.0.0.0
 
-## v4.0.0.0 / unreleased
+## v4.0.0.0 / [SpaceK33z@4aaea32](https://github.com/SpaceK33z/web-to-plex/commit/4aaea32034a6a753db6152fbabad76060e7f1420)
 
 - **Complete overhaul of button UI/UX**
     - Instead of individual buttons and locations, there is a single location (bottom left)
@@ -319,3 +319,25 @@
 - **Added Ombi support**
 - Fixed the notifications (`class Notification`)
 - **Added support for [YouTube](https://youtube.com/)**
+
+## v4.1.0.0 / unreleased
+
+- Removed Flenix's files, no purpose found in keeping them
+- Fixed Rotten Tomatoes' image error
+- Updated the `getIDs` function to also use the already given IDs
+- Moved the plugin-sites to their own section on the options page
+- Added several sites' list pages
+- Added the `class Prompt` feature to remedy [#62.447673935](https://github.com/SpaceK33z/web-to-plex/issues/62#issuecomment-447673935) (`new Prompt(type:string, options:array/object, callback:function[, container:Element])`)
+    - type is an enum. of "select", "prompt", and "input"
+        - `select` asks the user to approve/remove the supplied option(s)
+        - `prompt` asks the user to approve/remove/append to the option(s)
+            - `input` does the same
+    - when the user is done using the prompt, an array of approved items is passed to `callback` (`callback(approved)`)
+- Remedied [#61](https://github.com/SpaceK33z/web-to-plex/issues/61)
+    - this **will** cause problems for unknowing users
+- Added support for VRV movies
+- **Added the proxy settings**
+    - **Added advance proxy settings**
+- **Added support for:**
+    - Flickmetrix
+- Fixed short-hand error on options page

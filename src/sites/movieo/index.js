@@ -12,18 +12,30 @@ function isMoviePage() {
 	return !jup.includes('/');
 }
 
-function isMoviePageReady() {
-	return !!document.querySelector('.share-box');
+function isList() {
+	let path = window.location.pathname;
+
+	return /\/(black|seen|watch)?lists?\//i.test(path);
+}
+
+function isPageReady() {
+	return !!document.querySelector('.share-box, .zopim');
 }
 
 function init() {
 	if (isMoviePage()) {
-		if (isMoviePageReady()) {
+		if (isPageReady()) {
 			initPlexThingy();
 		} else {
 			// This almost never happens, but sometimes the page is too slow so we need to wait a bit.
 			// I could reproduce this by clicking on a movie in the movie watchlist,
 			// going back in history and then going forward in history.
+			setTimeout(init, 1000);
+		}
+	} else if (isList()) {
+		if (isPageReady()) {
+			initList();
+		} else {
 			setTimeout(init, 1000);
 		}
 	}
@@ -65,5 +77,52 @@ function getIMDbID() {
 		'.tt-parent[href*="imdb.com/title/tt"]'
 	);
 	if ($link)
-		return $link.href.replace(/^.*imdb\.com\/title\//, '');
+		return $link.href.replace(/^[^]*\/title\//, '');
+}
+
+async function addInListItem(element) {
+	let $title = element.querySelector('.title'),
+        $image = element.querySelector('.poster-cont');
+
+	if (!$title)
+		return;
+
+	let title = $title.textContent.trim().replace(/\s*\((\d{4})\)/, ''),
+        year = +RegExp.$1,
+        image = $image.getAttribute('data-src'),
+        type = 'movie';
+
+    let Db = await getIDs({ type, title, year }),
+		IMDbID = Db.imdb,
+        TMDbID = Db.tmdb,
+        TVDbID = Db.tvdb;
+
+    title = title || Db.title;
+    year = year || Db.year;
+
+	return { type, title, year, image, IMDbID, TMDbID, TVDbID };
+}
+
+function initList() {
+	let $listItems = document.querySelectorAll('[data-title][data-id]'),
+        button = renderPlexButton(true),
+        options = [], length = $listItems.length - 1;
+
+	if (!button)
+		return /* Fatal Error: Fail Silently */;
+
+	$listItems.forEach(async(element, index, array) => {
+        let option = await addInListItem(element);
+
+        if(option)
+            options.push(option);
+
+        if(index == length)
+            setTimeout(() => {
+                if (!options.length)
+                    new Notification('error', 'Failed to process list');
+                else
+                    squabblePlex(options, button);
+            }, 50);
+    });
 }

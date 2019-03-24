@@ -16,7 +16,7 @@ let $$ = selector => document.querySelector(selector);
 async function initPlexThingy(type) {
 	let button = renderPlexButton();
 
-	if (!button)
+	if (!button || !type)
 		return /* Fatal Error: Fail Silently */;
 
 	let $title = $$('#content [class$="__name"]'),
@@ -35,5 +35,5 @@ async function initPlexThingy(type) {
 }
 
 (window.onlocationchange = () =>
-    wait(isReady, () => parseOptions().then(async() => await initPlexThingy(isMovie()? 'movie': 'tv')))
+    wait(isReady, () => parseOptions().then(async() => await initPlexThingy(isMovie()? 'movie': isShow()? 'tv': null)))
 )();

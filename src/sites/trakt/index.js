@@ -70,28 +70,9 @@ async function initPlexThingy(type) {
         image = ($image || {}).src,
         IMDbID = getIMDbID(),
         TMDbID = getTMDbID(),
-        TVDbID = getTVDbID(),
-        o = (type == 'movie')? { im: IMDbID, tm: TMDbID }: { im: IMDbID, tm: TMDbID, tv: TVDbID };
+        TVDbID = getTVDbID();
 
-    /* use Trakt as a caching service when applicable */
-    if(type == 'movie') {
-        save(`${title} (${year}).tmdb`, { title, year, imdb: o.im, tmdb: o.tm });
-        save(`${title}.tmdb`, year);
-
-        save(`${title} (${year}).imdb`, { title, year, imdb: o.im });
-        save(`${title}.imdb`, year);
-    } else {
-        save(`${title} (${year}).tvdb`, { title, year, tvdb: o.tv, tmdb: o.tm, imdb: o.im });
-        save(`${title}.tvdb`, year);
-
-        save(`${title} (${year}).tmdb`, { title, year, tmdb: o.tm });
-        save(`${title}.tmdb`, year);
-
-        save(`${title} (${year}).imdb`, { title, year, imdb: o.im });
-        save(`${title}.imdb`, year);
-    }
-
-    if((!IMDbID && !TMDbID) || !TVDbID) {
+    if(!IMDbID && !TMDbID && !TVDbID) {
         let Db = await getIDs({ title, year, type, IMDbID, TMDbID, TVDbID });
 
         IMDbID = IMDbID || Db.imdb,
@@ -99,6 +80,47 @@ async function initPlexThingy(type) {
         TVDbID = TVDbID || Db.tvdb;
         title = Db.title;
         year = Db.year;
+    }
+
+	let o = (type == 'movie')? { im: IMDbID, tm: +TMDbID }: { im: IMDbID, tm: +TMDbID, tv: +TVDbID };
+
+    /* use Trakt as a caching service when applicable */
+	/* yes, Trakt asks not to scrape their site, and we're not saving this to a server, so I'm gonna say OK */
+	let savename = title.toLowerCase(),
+		cached = {};
+
+    if(type == 'movie') {
+		cached.tmdb = await load(`${savename}.tmdb`);
+		cached.imdb = await load(`${savename}.imdb`);
+
+		if(!cached.tmdb) {
+	        save(`${title} (${year}).tmdb`, { title, year, imdb: o.im, tmdb: o.tm });
+	        save(`${title}.tmdb`, year);
+		}
+
+		if(!cached.imdb) {
+	        save(`${title} (${year}).imdb`, { title, year, imdb: o.im });
+	        save(`${title}.imdb`, year);
+		}
+    } else {
+		cached.tvdb = await load(`${savename}.tvdb`);
+		cached.tmdb = await load(`${savename}.tmdb`);
+		cached.imdb = await load(`${savename}.imdb`);
+
+		if(!cached.tvdb) {
+	        save(`${title} (${year}).tvdb`, { title, year, tvdb: o.tv, tmdb: o.tm, imdb: o.im });
+	        save(`${title}.tvdb`, year);
+		}
+
+		if(!cached.tmdb) {
+	        save(`${title} (${year}).tmdb`, { title, year, imdb: o.im, tmdb: o.tm });
+	        save(`${title}.tmdb`, year);
+		}
+
+		if(!cached.imdb) {
+	        save(`${title} (${year}).imdb`, { title, year, imdb: o.im });
+	        save(`${title}.imdb`, year);
+		}
     }
 
 	findPlexMedia({ type, title, year, image, button, IMDbID, TMDbID, TVDbID });
@@ -149,8 +171,8 @@ async function initDash() {
 
             let Db = await getIDs({ title, year, type }),
                 IMDbID = Db.imdb,
-                TMDbID = Db.tmdb,
-                TVDbID = Db.tvdb;
+                TMDbID = +Db.tmdb,
+                TVDbID = +Db.tvdb;
 
             title = Db.title;
             year = Db.year;

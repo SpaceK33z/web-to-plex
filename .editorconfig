@@ -1,4 +1,5 @@
 # editorconfig.org
+# atom packages: atom-beautify permanent-delete teletype zip-folder
 root = true
 
 [*]

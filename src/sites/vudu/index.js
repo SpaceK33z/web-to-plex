@@ -13,7 +13,7 @@ function isPageReady() {
 
 async function init() {
 	if (isPageReady())
-        await initPlexThingy(isMovie()? 'movie': 'tv');
+        await initPlexThingy(isMovie()? 'movie': isShow()? 'tv': null);
 	else
 		// This almost never happens, but sometimes the page is too slow so we need to wait a bit.
 		setTimeout(init, 1000);
@@ -22,7 +22,7 @@ async function init() {
 async function initPlexThingy(type) {
 	let button = renderPlexButton();
 
-	if (!button)
+	if (!button || !type)
 		return /* Fatal Error: Fail Silently */;
 
 	let $title = document.querySelector('.head-big'),

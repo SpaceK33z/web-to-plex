@@ -68,7 +68,7 @@ function ChangeStatus({ ITEM_ID, ITEM_TITLE, ITEM_TYPE, ID_PROVIDER, ITEM_YEAR, 
     // Search friendly title
         SEARCH_PROVIDER = /[it]m/i.test(ID_PROVIDER)? 'GX': 'GG';
 
-    ITEM_ID = (ITEM_ID && !/^tt-?$/i.test(ITEM_ID)? ITEM_ID: '') + '';
+    ITEM_ID = (ITEM_ID && !/^tt$/i.test(ITEM_ID)? ITEM_ID: '') + '';
     ITEM_ID = ITEM_ID.replace(/^.*\b(tt\d+)\b.*$/, '$1').replace(/^.*\bid=(\d+)\b.*$/, '$1').replace(/^.*(?:movie|tv|(?:tv-?)?(?:shows?|series|episodes?))\/(\d+).*$/, '$1');
 
     external = { ...external, ID_PROVIDER, ITEM_ID, ITEM_TITLE, ITEM_YEAR, ITEM_URL, ITEM_TYPE, SEARCH_PROVIDER, SEARCH_TITLE, FILE_PATH, FILE_TITLE, FILE_TYPE };
@@ -140,9 +140,9 @@ function addWatcher(request, sendResponse) {
             'X-Api-Key': request.token,
             ...(new Headers(request.basicAuth))
         },
-        id = (/^(tt-?)?$/.test(request.imdbId)? request.tmdbId: request.imdbId),
+        id = (/^(tt)?$/.test(request.imdbId)? request.tmdbId: request.imdbId),
             // if the IMDbID is empty, jump to the TMDbID
-        query = (/^tt-?\d+$/i.test(id)? 'imdbid': /^\d+$/.test(id)? 'tmdbid': (id = encodeURI(`${request.title} ${request.year}`), 'term')),
+        query = (/^tt\d+$/i.test(id)? 'imdbid': /^\d+$/.test(id)? 'tmdbid': (id = encodeURI(`${request.title} ${request.year}`), 'term')),
             // if the IMDbID is empty, use "&tmdbid={ id }"
             // if the IMDbID isn't empty, use "&imdbid={ id }"
             // otherwise, use "&term={ title } { year }"
@@ -175,9 +175,9 @@ function addRadarr(request, sendResponse) {
             'X-Api-Key': request.token,
             ...(new Headers(request.basicAuth))
         },
-        id = (/^(tt-?)?$/.test(request.imdbId)? request.tmdbId: request.imdbId),
+        id = (/^(tt)?$/.test(request.imdbId)? request.tmdbId: request.imdbId),
             // if the IMDbID is empty, jump to the TMDbID
-        query = (/^tt-?\d+$/i.test(id)? 'imdb?imdbid': /^\d+$/.test(id)? 'tmdb?tmdbid': (id = encodeURI(`${request.title} ${request.year}`), 'term')),
+        query = (/^tt\d+$/i.test(id)? 'imdb?imdbid': /^\d+$/.test(id)? 'tmdb?tmdbid': (id = encodeURI(`${request.title} ${request.year}`), 'term')),
             // if the IMDbID is empty, use "/tmdb?tmdbid={ id }"
             // if the IMDbID isn't empty, use "/imdb?imdbid={ id }"
             // otherwise, use "&term={ title } { year }"
@@ -435,7 +435,9 @@ function $searchPlex(connection, headers, options) {
     if(!options.title)
         return {};
 
-    if(type === 'tv')
+    if(/movie|film|cinema|theat[re]{2}/i.test(type))
+        type = 'movie';
+    else if(/tv|show|series|episode/i.test(type))
         type = 'show';
 
     // Letterboxd can contain special white-space characters. Plex doesn't like this.
@@ -473,9 +475,9 @@ function $searchPlex(connection, headers, options) {
 
             if (!media) {
                 media = movies.find(meta => ((meta.year == +options.year + 1) && strip(meta.title) == strip(options.title)));
-            } else {
-                key = media.key.replace('/children', '');
             }
+
+            key = !!media? media.key.replace('/children', ''): key;
 
             return {
                 found: !!media,
@@ -634,13 +636,13 @@ chrome.runtime.onMessage.addListener((request, sender, callback) => {
                         url: item.href,
                         filename: `${ FILE_TITLE } (${ ITEM_YEAR })`,
                         saveAs: true
-                    }); 
+                    });
                 });
                 return true;
             default:
                 terminal.warn(`Unknown event [${ request.type }]`);
                 return false;
-        }   
+        }
     } catch (error) {
         return callback(String(error));
     }

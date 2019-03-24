@@ -1,4 +1,4 @@
-# Web to Plex ![Icon](src/img/48.png)
+# Web to Plex (BETA Channel) ![Icon](src/img/48.png)
 
 ![Examples](example.png)
 
@@ -6,18 +6,26 @@ This browser extension searches your [Plex Media Server (PMS)](https://www.plex.
 
 ----
 
+## Status: 307 (TEMP-RD)
+
+This is the BETA (testing) version, please visit [Web to Plex](https://github.com/SpaceK33z/web-to-plex) for the stable version.
+
+----
+
 # NZB Managers
 
-Optionally, you can configure your NZB manager(s) (see the support table) in the extension's options. After that, you can immediately add a TV show or movie with one click, right from your favorite site.
+Optionally, you can configure your NZB manager(s) (see support table) in the extension's options. After that, you can immediately add a TV show or movie with one click, right from your favorite site.
 
 ## Supported Managers
 | Manager                                         | Movie Support | TV Show Support | Searchable
 | ----------------------------------------------- | ------------- | --------------- | ----------
-| [CouchPotato](https://couchpota.to/)            | Yes           | Yes             |
 | [Watcher 3](https://nosmokingbandit.github.io/) | Yes           |                 |
+| [CouchPotato](https://couchpota.to/)            | Yes           | Yes             |
 | [Radarr](https://radarr.video/)                 | Yes           |                 | Yes
 | [Sonarr](https://sonarr.tv/)                    |               | Yes             | Yes
 | [Ombi](https://ombi.io/)                        | Yes           | Yes             | Yes
+
+If you don't feel like actually downloading the movie, or want a simple watchlist, you can also use the built-in "Plex It!" feature to bookmark the current page.
 
 ----
 
@@ -47,9 +55,7 @@ Optionally, you can configure your NZB manager(s) (see the support table) in the
 - Offers a "Direct Plex URL" feature
   - i.e. you can specify `localhost:32400` as your Plex URL to avoid bandwidth usage for Plex requests
 
-## Supported sites: *Site (button location)*
-
-*Given in order of completion*
+## Supported sites
 
 1.  [Movieo](http://movieo.me/)
 2.  [IMDb](http://imdb.com/)
@@ -76,8 +82,9 @@ Optionally, you can configure your NZB manager(s) (see the support table) in the
 21. [Netflix](https://netflix.com/)<sup>3</sup>
 22. [Toloka](https://toloka.to/)<sup>6</sup>
 23. [Shana Project](https://www.shanaproject.com/)<sup>6</sup>
-24. [My Anime List](https://myanimelist.com/)<sup>6</sup>
+24. [My Anime List](https://myanimelist.net/)<sup>6</sup>
 25. [YouTube](https://youtube.com/)
+26. [Flickmetrix](https://flickmetrix.com/) (formerly "Cinesift")
 
 *Notes*
 
@@ -98,8 +105,11 @@ Optionally, you can configure your NZB manager(s) (see the support table) in the
 
 ## Installing Web to Plex
 
-- **Download from the [Chrome Webstore](https://chrome.google.com/webstore/detail/movieo-to-plex/kmcinnefmnkfnmnmijfmbiaflncfifcn)**
-- **Download from [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/web-to-plex/)**
+- **Download the [CRX](https://github.com/Ephellon/web-to-plex/raw/master/src.crx)**
+
+- **Download the [ZIP](https://github.com/Ephellon/web-to-plex/raw/master/src.zip)**
+
+- **Download the [SRC](https://github.com/Ephellon/web-to-plex/archive/master.zip)**
 
 ## Requirements
 

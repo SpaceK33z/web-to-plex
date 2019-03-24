@@ -12,7 +12,7 @@ let $$ = selector => document.querySelector(selector);
 async function initPlexThingy(type) {
     let title, year, image, button = renderPlexButton();
 
-	if (!button)
+	if (!button || !type)
 		return /* Fatal Error: Fail Silently */;
 
     if(type == 'movie') {
@@ -42,6 +42,4 @@ async function initPlexThingy(type) {
 	findPlexMedia({ type, title, year, image, button, IMDbID, TMDbID, TVDbID });
 }
 
-if (isMovie() || isShow()) {
-	parseOptions().then(async() => await initPlexThingy(isMovie()? 'movie': 'tv'));
-}
+parseOptions().then(async() => await initPlexThingy(isMovie()? 'movie': isShow()? 'tv': null));

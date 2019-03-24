@@ -107,6 +107,215 @@ async function kill(name) {
   return storage.remove(['Cache-Data/' + btoa(name.toLowerCase().replace(/\s+/g, ''))]);
 }
 
+// create and/or queue a notification
+// state = "error" - red
+// state = "update" - blue
+// state = "info" - grey
+// anything else for state will show as orange
+class Notification {
+    constructor(state, text, timeout = 7000, callback = () => {}, requiresClick = true) {
+        let queue = (Notification.queue = Notification.queue || { list: [] }),
+            last = queue.list[queue.list.length - 1];
+
+        if (last && last.done === false)
+            return (last => setTimeout(() => new Notification(state, text, timeout, callback, requiresClick), +(new Date) - last.start))(last);
+
+        let element = document.furnish(`div.web-to-plex-notification.${state}`, {
+            onclick: event => {
+                let notification = Notification.queue[event.target.id],
+                    element = notification.element;
+
+                notification.done = true;
+                Notification.queue.list.splice(notification.index, 1);
+                clearTimeout(notification.job);
+                element.remove();
+
+                let removed = delete Notification.queue[notification.id];
+
+                return (event.requiresClick)? null: notification.callback(removed);
+            }
+        }, text);
+
+        queue[element.id = +(new Date)] = {
+            start: +element.id,
+            stop:  +element.id + timeout,
+            span:  +timeout,
+            done:  false,
+            index: queue.list.length,
+            job:   setTimeout(() => element.onclick({ target: element, requiresClick }), timeout),
+            id:    +element.id,
+            callback, element
+        };
+        queue.list.push(queue[element.id]);
+
+        document.body.appendChild(element);
+
+        return queue[element.id];
+    }
+}
+
+class Prompt {
+    constructor(prompt_type, options, callback = () => {}, container = document.body) {
+        let prompt, remove,
+            array = (options instanceof Array? options: [].slice.call(options)),
+            data = [...array];
+
+        switch(prompt_type) {
+            /* Allows the user to add and remove items from a list */
+            case 'prompt':
+            case 'input':
+                remove = element => {
+                    let prompter = document.queryBy('.web-to-plex-prompt').first,
+                        header = document.queryBy('.web-to-plex-prompt-header').first,
+                        counter = document.queryBy('.web-to-plex-prompt-options').first;
+
+                    if(element === true)
+                        return prompter.remove();
+                    else
+                        element.remove();
+
+                    data.splice(+element.value, 1, null);
+                    header.innerText = 'Approve ' + counter.children.length + (counter.children.length == 1?' item': ' items');
+                };
+
+                prompt = document.furnish('div.web-to-plex-prompt', {},
+                    document.furnish('div.web-to-plex-prompt-body', {},
+                        // The prompt's title
+                        document.furnish('h1.web-to-plex-prompt-header', {}, 'Approve ' + array.length + (array.length == 1? ' item': ' items')),
+
+                        // The prompt's items
+                        document.furnish('div.web-to-plex-prompt-options', {},
+                            ...(ITEMS => {
+                                let elements = [];
+
+                                for(let index = 0, length = ITEMS.length, ITEM; index < length; index++)
+                                    ITEM = ITEMS[index],
+                                    elements.push(
+                                        document.furnish('li.web-to-plex-prompt-option.mutable', { value: index, innerHTML: `${ ITEM.title }${ ITEM.year? ` (${ ITEM.year })`: '' } <em>\u2014 ${ ITEM.type }</em>` },
+                                            document.furnish('button', { title: `Remove "${ ITEM.title }"`, onclick: event => { remove(event.target.parentElement); event.target.remove() } })
+                                        ),
+                                    );
+
+                                return elements
+                            })(array)
+                        ),
+
+                        // The engagers
+                        document.furnish('div.web-to-plex-prompt-footer', {},
+                            document.furnish('input.web-to-plex-prompt-input[type=text]', { placeholder: 'Add an item (enter to add): Title (Year) Type / ID Type', title: 'Solo: A Star Wars Story (2018) movie / tt3778644 m', onkeydown: async event => {
+                                if (event.keyCode === 13) {
+                                    let title, year, type, self = event.target, R = RegExp,
+                                        movie = /^(m(?:ovies?)?|f(?:ilms?)?|c(?:inemas?)?)/i,
+                                        Db, IMDbID, TMDbID, TVDbID, value = self.value;
+
+                                    self.setAttribute('disabled', self.disabled = true);
+                                    self.value = `Searching for "${ value }"...`;
+                                    data = data.filter(value => value !== null && value !== undefined);
+
+                                    if(/^\s*((?:tt)?\d+)(?:\s+(\w+)|\s*)?$/i.test(value)) {
+                                        let APIID = R.$1,
+                                            type = R.$2 || (data.length? data[0].type: 'movie'),
+                                            APIType = movie.test(type)? /^tt/i.test(APIID)? 'imdb': 'tmdb': 'tvdb';
+
+                                        type = movie.test(type)? 'movie': 'show';
+
+                                        Db = await getIDs({ type, APIID, APIType });
+                                        IMDbID = Db.imdb;
+                                        TMDbID = Db.tmdb;
+                                        TVDbID = Db.tvdb;
+
+                                        title = Db.title;
+                                        year = Db.year;
+                                    } else if(/^([^]+)(\s*\(\d{2,4}\)\s*|\s+\d{2,4}\s+)([\w\s\-]+)$/.test(value)) {
+                                        title = R.$1;
+                                        year  = R.$2 || YEAR + '';
+                                        type  = R.$3 || (data.length? data[0].type: 'movie');
+
+                                        year = +year.replace(/\D/g, '').replace(/^\d{2}$/, '20$&');
+                                        type = movie.test(type)? 'movie': 'show';
+
+                                        Db = await getIDs({ type, title, year });
+                                        IMDbID = Db.imdb;
+                                        TMDbID = Db.tmdb;
+                                        TVDbID = Db.tvdb;
+                                    }
+
+                                    event.preventDefault();
+                                    if(type && title && !(/^(?:tt)?$/i.test(IMDbID || '') && /^0?$/.test(+TMDbID | 0) && /^0?$/.test(+TVDbID | 0))) {
+                                        remove(true);
+                                        new Prompt(prompt_type, [{ ...Db, type, IMDbID, TMDbID, TVDbID }, ...data], callback, container);
+                                    } else {
+                                        self.disabled = self.removeAttribute('disabled');
+                                        self.value = value;
+                                        new Notification('error', `Couldn't find "${ value }"`);
+                                    }
+                                }
+                            } }),
+                            document.furnish('button.web-to-plex-prompt-decline', { onclick: event => { remove(true); callback([]) } }, 'Close'),
+                            document.furnish('button.web-to-plex-prompt-accept', { onclick: event => { remove(true); new Prompt(prompt_type, options, callback, container) } }, 'Reset'),
+                            document.furnish('button.web-to-plex-prompt-accept', { onclick: event => { remove(true); callback(data.filter(value => value !== null && value !== undefined)) } }, 'Continue')
+                        )
+                    )
+                );
+                break;
+
+            /* Allows the user to remove predetermined items */
+            case 'select':
+                remove = element => {
+                    let prompter = document.queryBy('.web-to-plex-prompt').first,
+                        header = document.queryBy('.web-to-plex-prompt-header').first,
+                        counter = document.queryBy('.web-to-plex-prompt-options').first;
+
+                    if(element === true)
+                        return prompter.remove();
+                    else
+                        element.remove();
+
+                    data.splice(+element.value, 1, null);
+                    header.innerText = 'Approve ' + counter.children.length + (counter.children.length == 1?' item': ' items');
+                };
+
+                prompt = document.furnish('div.web-to-plex-prompt', {},
+                    document.furnish('div.web-to-plex-prompt-body', {},
+                        // The prompt's title
+                        document.furnish('h1.web-to-plex-prompt-header', {}, 'Approve ' + array.length + (array.length == 1? ' item': ' items')),
+
+                        // The prompt's items
+                        document.furnish('div.web-to-plex-prompt-options', {},
+                            ...(ITEMS => {
+                                let elements = [];
+
+                                for(let index = 0, length = ITEMS.length, ITEM; index < length; index++)
+                                    ITEM = ITEMS[index],
+                                    elements.push(
+                                        document.furnish('li.web-to-plex-prompt-option.mutable', { value: index, innerHTML: `${ ITEM.title }${ ITEM.year? ` (${ ITEM.year })`: '' } <em>\u2014 ${ ITEM.type }</em>` },
+                                            document.furnish('button', { title: `Remove "${ ITEM.title }"`, onclick: event => { remove(event.target.parentElement); event.target.remove() } })
+                                        ),
+                                    );
+
+                                return elements
+                            })(array)
+                        ),
+
+                        // The engagers
+                        document.furnish('div.web-to-plex-prompt-footer', {},
+                            document.furnish('button.web-to-plex-prompt-decline', { onclick: event => { remove(true); callback([]) } }, 'Close'),
+                            document.furnish('button.web-to-plex-prompt-accept', { onclick: event => { remove(true); new Prompt(prompt_type, options, callback, container) } }, 'Reset'),
+                            document.furnish('button.web-to-plex-prompt-accept', { onclick: event => { remove(true); callback(data.filter(value => value !== null && value !== undefined)) } }, 'Continue')
+                        )
+                    )
+                );
+                break;
+
+            default:
+                return terminal.warn(`Unknown prompt type "${ prompt_type }"`);
+                break;
+        }
+
+        return container.append(prompt), prompt;
+    }
+}
+
 // Send an update query to background.js
 function sendUpdate(type, options = {}) {
     terminal.log(`Requesting update: ${ type }`, options);
@@ -121,13 +330,16 @@ function sendUpdate(type, options = {}) {
 function $getOptions() {
     return new Promise((resolve, reject) => {
         function handleOptions(options) {
-            if (!options.plexToken || !options.servers)
-                return reject(new Error('Options are undefined')),
+            if ((!options.plexToken || !options.servers) && !options.DO_NOT_USE)
+                return reject(new Error('Required options are missing')),
                     null;
 
-            // For now we support only one Plex server, but the options already
-            // allow multiple for easy migration in the future.
-            let server = options.servers[0],
+            let server, o;
+
+            if (!options.DO_NOT_USE) {
+                // For now we support only one Plex server, but the options already
+                // allow multiple for easy migration in the future.
+                server = options.servers[0];
                 o = {
                     server: {
                         ...server,
@@ -137,9 +349,12 @@ function $getOptions() {
                     ...options
                 };
 
-            options.plexURL = o.plexURL?
-                `${ o.plexURL }web#!/server/${ o.server.id }/`:
-            `https://app.plex.tv/web/app#!/server/${ o.server.id }/`;
+                options.plexURL = o.plexURL?
+                    `${ o.plexURL }web#!/server/${ o.server.id }/`:
+                `https://app.plex.tv/web/app#!/server/${ o.server.id }/`;
+            } else {
+                o = options;
+            }
 
             if (o.couchpotatoBasicAuthUsername)
                 o.couchpotatoBasicAuth = {
@@ -232,7 +447,37 @@ function parseOptions() {
         );
 }
 
-let config = parseOptions();
+let config = parseOptions(),
+    AUTO_GRAB = {
+        ENABLED: config.UseAutoGrab,
+        LIMIT:   config.AutoGrabLimit,
+    };
+
+function HandleProxyHeaders(Headers = "", URL = "") {
+    let headers = {};
+
+    Headers.replace(/^[ \t]*([^\=\s]+)[ \t]*=[ \t]*((["'`])(?:[^\\\3]*|\\.)\3|[^\f\n\r\v]*)/gm, ($0, $1, $2, $3, $$, $_) => {
+        let string = !!$3;
+
+        if(string) {
+            headers[$1] = $2.replace(RegExp(`^${ $3 }|${ $3 }$`, 'g'), '');
+        } else {
+            $2 = $2.replace(/@([\w\.]+)/g, (_0, _1, _$, __) => {
+                let path = _1.split('.'), property = top;
+
+                for(let index = 0, length = path.length; index < length; index++)
+                    property = property[path[index]];
+
+                headers[$1] = property;
+            })
+            .replace(/@\{b(ase-?)?64-url\}/gi, btoa(URL))
+            .replace(/@\{enc(ode)?-url\}/gi, encodeURIComponent(URL))
+            .replace(/@\{(raw-)?url\}/gi, URL);
+        }
+    });
+
+    return headers;
+}
 
 // fetch/search for the item's media ID(s)
 async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APIID, meta, rerun }) {
@@ -250,7 +495,6 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
         mid = TMDbID || null, // TMDbID
         tid = TVDbID || null, // TVDbID
         rqut = apit, // request type: tmdb, imdb, or tvdb
-        cors = 'https://cors-anywhere.herokuapp.com/', // if cors is requried and not uspported, proxy through this URL
         manable = config.ManagerSearch && !rerun; // is the user's "Manager Searches" option enabled?
 
     type = type || null;
@@ -261,6 +505,7 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
     /(movie|film)/i.test(rqut)?
         'tmdb':
     rqut || '*';
+    manable = manable && (config.ombiURL || (config.radarrURL && rqut == 'tmdb') || (config.sonarrURL && rqut == 'tvdb'));
     title = (title? title.replace(/\s*[\:,]\s*Season\s+\d+.*$/i, '').toCaps(): "")
         .replace(/\u201a/g, ',') // fancy comma
         .replace(/[\u2019\u201b]/g, "'") // fancy apostrophe
@@ -273,11 +518,11 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
     let local, savename;
 
     if(year) {
-        savename = `${title.toLowerCase()} (${year}).${rqut}`,
+        savename = `${title} (${year}).${rqut}`.toLowerCase(),
         local = await load(savename);
     } else {
-        year = await load(`${title}.${rqut}`) || year;
-        `${title.toLowerCase()} (${year}).${rqut}`;
+        year = await load(`${title}.${rqut}`.toLowerCase()) || year;
+        `${title} (${year}).${rqut}`.toLowerCase();
         local = await load(savename);
     }
 
@@ -288,7 +533,7 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
 
     /* the rest of this function is a beautiful mess that will need to be dealt with later... but it works */
     let url =
-        (manable && config.ombiURLRoot)?
+        (manable && title && config.ombiURLRoot)?
             `${ config.ombiURLRoot }api/v1/Search/${ (rqut == 'imdb' || rqut == 'tmdb' || apit == 'movie')? 'movie': 'tv' }/${ plus(title, '%20') }/?apikey=${ api.ombi }`:
         (manable && (config.radarrURLRoot || config.sonarrURLRoot))?
             (config.radarrURLRoot && (rqut == 'imdb' || rqut == 'tmdb'))?
@@ -324,16 +569,32 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
             `https://www.theimdbapi.org/api/find/movie?title=${ encodeURI(title) }${ year? '&year=' + year: '' }`:
         null;
 
-    if(url === null) return 0;
+    if(url === null) return null;
 
-    terminal.log(`Searching for "${ title } (${ year })" in ${ type || apit }/${ rqut } => ${ url.replace(cors, '') }`);
+    let proxy = config.proxy,
+        cors = proxy.url, // if cors is requried and not uspported, proxy through this URL
+        headers = HandleProxyHeaders(proxy.headers, url);
 
-    await(meta? fetch(url/*, meta*/): fetch(url))
-        .then(response => {
-            return response.json();
-        })
-        .then(objects => {
-            return json = objects;
+    if(proxy.enabled && /(^http:\/\/)(?!localhost|127\.0\.0\.1(?:\/8)?|::1(?:\/128)?|:\d+)\b/i.test(url)) {
+        url = cors
+            .replace(/\{b(ase-?)?64-url\}/gi, btoa(url))
+            .replace(/\{enc(ode)?-url\}/gi, encodeURIComponent(url))
+            .replace(/\{(raw-)?url\}/gi, url);
+
+        terminal.log({ proxy, url, headers });
+    }
+
+    terminal.log(`Searching for "${ title } (${ year })" in ${ type || apit }/${ rqut }${ proxy.enabled? '[PROXY]': '' } => ${ url }`);
+
+    await(proxy? fetch(url, { mode: "cors", headers }): fetch(url))
+        .then(response => response.text())
+        .then(data => {
+            try {
+                if(data)
+                    json = JSON.parse(data);
+            } catch(error) {
+                terminal.error(`Failed to parse JSON: "${ data }"`);
+            }
         })
         .catch(error => {
             throw error;
@@ -370,7 +631,7 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
 
                 return (S != '' && score >= passing) || (n? R(S, s, !n): n);
             },
-            en = /^en(glish)?$/i;
+            en = /^(u[ks]-?|utf8-?)?en(glish)?$/i;
 
         // Find an exact match: Title (Year) | #IMDbID
         let index, found, $data, lastscore;
@@ -543,9 +804,9 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
     if((json === undefined || json === null || json === false) && !rerun)
         return json = getIDs({ title, year: YEAR, type, IMDbID, TMDbID, TVDbID, APIType, APIID, meta, rerun: true });
     else if((json === undefined || json === null))
-        json = {};
+        json = { IMDbID, TMDbID, TVDbID };
 
-    let ei = 'tt-',
+    let ei = 'tt',
         mr = 'movie_results',
         tr = 'tv_results';
 
@@ -555,23 +816,23 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
         json = json[0];
 
     if(!json)
-        json = {};
+        json = { IMDbID, TMDbID, TVDbID };
 
     // Ombi, Radarr and Sonarr
     if(manable)
         data = {
-            imdb: IMDbID || json.imdbId || ei,
-            tmdb: TMDbID || json.tmdbId || json.theMovieDbId | 0,
-            tvdb: TVDbID || json.tvdbId || json.theTvDbId    | 0,
+            imdb: iid || json.imdbId || ei,
+            tmdb: mid || json.tmdbId || json.theMovieDbId | 0,
+            tvdb: tid || json.tvdbId || json.theTvDbId    | 0,
             title: json.title || title,
             year: +(json.year || year)
         };
     //api.tvmaze.com/
     else if('externals' in (json = json.show || json))
         data = {
-            imdb: IMDbID || json.externals.imdb || ei,
-            tmdb: TMDbID || json.externals.themoviedb | 0,
-            tvdb: TVDbID || json.externals.thetvdb | 0,
+            imdb: iid || json.externals.imdb || ei,
+            tmdb: mid || json.externals.themoviedb | 0,
+            tvdb: tid || json.externals.thetvdb | 0,
             title: json.name || title,
             year: ((json.premiered || json.first_aired_date || year) + '').slice(0, 4)
         };
@@ -603,11 +864,20 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
             year: json.data.year || year
         };
     //theimdbapi.org/
-    else
+    else if('imdb' in json)
         data = {
             imdb: iid || json.imdb || ei,
-            tmdb: mid || json.id | 0,
+            tmdb: mid || json.id   | 0,
             tvdb: tid || json.tvdb | 0,
+            title,
+            year
+        };
+    // given by the requesting service
+    else
+        data = {
+            imdb: iid || ei,
+            tmdb: mid | 0,
+            tvdb: tid | 0,
             title,
             year
         };
@@ -617,69 +887,18 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
 
     let best = { title, year, data, type, rqut, score: json.score | 0 };
 
-    terminal.log('Best match', best);
+    terminal.log('Best match:', url, { best, json });
 
     if(best.data.imdb == ei && best.data.tmdb == 0 && best.data.tvdb == 0)
         return terminal.log(`No information was found for "${ title } (${ year })"`), {};
 
     save(savename, data); // e.g. "Coco (0)" on Netflix before correction / no repeat searches
-    save(savename = `${title.toLowerCase()} (${year}).${rqut}`.toLowerCase(), data); // e.g. "Coco (2017)" on Netflix after correction / no repeat searches
-    save(`${title.toLowerCase()}.${rqut}`.toLowerCase(), year);
+    save(savename = `${title} (${year}).${rqut}`.toLowerCase(), data); // e.g. "Coco (2017)" on Netflix after correction / no repeat searches
+    save(`${title}.${rqut}`.toLowerCase(), year);
 
     terminal.log(`Saved as "${ savename }"`, data);
 
     return data;
-}
-
-// create and/or queue a notification
-// state = "error" - red
-// state = "update" - blue
-// state = "info" - grey
-// anything else for state will show as orange
-class Notification {
-    constructor(state, text, timeout = 7000, callback, requiresClick = true) {
-        let queue = (Notification.queue = Notification.queue || { list: [] }),
-            last = queue.list[queue.list.length - 1];
-
-        if (last && last.done === false)
-            return (last => setTimeout(() => new Notification(state, text, timeout, callback), +(new Date) - last.start))(last);
-
-        callback = callback || (() => {});
-
-        let element = document.createElement('div');
-
-        element.classList.add('web-to-plex-notification', state);
-        element.addEventListener('onclick', element.onclick = event => {
-            let notification = Notification.queue[event.target.id],
-                element = notification.element;
-
-            notification.done = true;
-            Notification.queue.list.splice(notification.index, 1);
-            clearTimeout(notification.job);
-            element.remove();
-
-            let removed = delete Notification.queue[notification.id];
-
-            return (event.requiresClick)? null: notification.callback(removed);
-        });
-
-        element.innerHTML = text;
-        queue[element.id = +(new Date)] = {
-            start: +element.id,
-            stop:  +element.id + timeout,
-            span:  +timeout,
-            done:  false,
-            index: queue.list.length,
-            job:   setTimeout(() => element.onclick({ target: element, requiresClick }), timeout),
-            id:    +element.id,
-            callback, element
-        };
-        queue.list.push(queue[element.id]);
-
-        document.body.appendChild(element);
-
-        return queue[element.id];
-    }
 }
 
 function $pushAddToCouchpotato(options) {
@@ -748,15 +967,15 @@ function pushOmbiRequest(options) {
             terminal.log('Pushing to Ombi', response);
 
             if (response && response.error) {
-                return new Notification('warning', 'Could not add to Ombi: ' + response.error) ||
+                return new Notification('warning', `Could not add "${ options.title }" to Ombi: ${ response.error }`) ||
                     (!response.silent && terminal.error('Error adding to Ombi: ' + String(response.error), response.location, response.debug));
             } else if (response && response.success) {
                 let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-{2,}/g, '-').toLowerCase();
 
-                terminal.log('Successfully pushed');
-                new Notification('update', `Added ${ (contentType == 'tv'? 'TV show': 'movie') } to Ombi`, 7000, () => window.open(config.ombiURL, '_blank'));
+                terminal.log('Successfully pushed', options);
+                new Notification('update', `Added "${ options.title }" to Ombi`, 7000, () => window.open(config.ombiURL, '_blank'));
             } else {
-                new Notification('warning', 'Could not add to Ombi: Unknown Error') ||
+                new Notification('warning', `Could not add "${ options.title }" to Ombi: Unknown Error`) ||
                 (!response.silent && terminal.error('Error adding to Ombi: ' + String(response)));
             }
         }
@@ -782,15 +1001,15 @@ function pushCouchPotatoRequest(options) {
 			if (response.error) {
 				return new Notification(
 					'warning',
-					'Could not add to CouchPotato (see your console)'
+					`Could not add "${ options.title }" to CouchPotato (see your console)`
 				) ||
-				(!response.silent && terminal.error('Error adding to CouchPotato: ' + String(response.error)));
+				(!response.silent && terminal.error('Error adding to CouchPotato: ' + String(response.error), response.location, response.debug));
 			}
 			if (response.success) {
-                terminal.log('Successfully pushed');
-				new Notification('update', 'Added movie to CouchPotato');
+                terminal.log('Successfully pushed', options);
+				new Notification('update', `Added "${ options.title }" to CouchPotato`);
 			} else {
-				new Notification('warning', 'Could not add to CouchPotato');
+				new Notification('warning', `Could not add "${ options.title }" to CouchPotato`);
 			}
 		}
 	);
@@ -822,16 +1041,16 @@ function pushWatcherRequest(options) {
             terminal.log('Pushing to Watcher', response);
 
             if (response && response.error) {
-                return new Notification('warning', 'Could not add to Watcher: ' + response.error) ||
+                return new Notification('warning', `Could not add "${ options.title }" to Watcher: ${ response.error }`) ||
                     (!response.silent && terminal.error('Error adding to Watcher: ' + String(response.error), response.location, response.debug));
             } else if (response && (response.success || (response.response + "") == "true")) {
                 let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-{2,}/g, '-').toLowerCase(),
                     TMDbID = options.TMDbID || response.tmdbId;
 
-                terminal.log('Successfully pushed');
-                new Notification('update', 'Added movie to Watcher', 7000, () => window.open(`${config.watcherURL}library/status${TMDbID? `#${title}-${TMDbID}`: '' }`, '_blank'));
+                terminal.log('Successfully pushed', options);
+                new Notification('update', `Added "${ options.title }" to Watcher`, 7000, () => window.open(`${config.watcherURL}library/status${TMDbID? `#${title}-${TMDbID}`: '' }`, '_blank'));
             } else {
-                new Notification('warning', 'Could not add to Watcher: Unknown Error') ||
+                new Notification('warning', `Could not add "${ options.title }" to Watcher: Unknown Error`) ||
                 (!response.silent && terminal.error('Error adding to Watcher: ' + String(response)));
             }
         }
@@ -865,16 +1084,16 @@ function pushRadarrRequest(options) {
             terminal.log('Pushing to Radarr', response);
 
             if (response && response.error) {
-                return new Notification('warning', 'Could not add to Radarr: ' + response.error) ||
+                return new Notification('warning', `Could not add "${ options.title }" to Radarr: ${ response.error }`) ||
                     (!response.silent && terminal.error('Error adding to Radarr: ' + String(response.error), response.location, response.debug));
             } else if (response && response.success) {
                 let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-{2,}/g, '-').toLowerCase(),
                     TMDbID = options.TMDbID || response.tmdbId;
 
-                terminal.log('Successfully pushed');
-                new Notification('update', 'Added movie to Radarr', 7000, () => window.open(`${config.radarrURL}${TMDbID? `movies/${title}-${TMDbID}`: '' }`, '_blank'));
+                terminal.log('Successfully pushed', options);
+                new Notification('update', `Added "${ options.title }" to Radarr`, 7000, () => window.open(`${config.radarrURL}${TMDbID? `movies/${title}-${TMDbID}`: '' }`, '_blank'));
             } else {
-                new Notification('warning', 'Could not add to Radarr: Unknown Error') ||
+                new Notification('warning', `Could not add "${ options.title }" to Radarr: Unknown Error`) ||
                 (!response.silent && terminal.error('Error adding to Radarr: ' + String(response)));
             }
         }
@@ -885,7 +1104,7 @@ function pushRadarrRequest(options) {
 function pushSonarrRequest(options) {
     new Notification('info', `Adding "${ options.title }" to Sonarr`, 3000);
 
-    if (!options.TVDbID || options.TVDbID == "") {
+    if (!options.TVDbID) {
         return new Notification(
             'warning',
             'Stopped adding to Sonarr: No TVDb ID'
@@ -907,15 +1126,15 @@ function pushSonarrRequest(options) {
             terminal.log('Pushing to Sonarr', response);
 
             if (response && response.error) {
-                return new Notification('warning', 'Could not add to Sonarr: ' + response.error) ||
+                return new Notification('warning', `Could not add "${ options.title }" to Sonarr: ${ response.error }`) ||
                     (!response.silent && terminal.error('Error adding to Sonarr: ' + String(response.error), response.location, response.debug));
             } else if (response && response.success) {
                 let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-{2,}/g, '-').toLowerCase();
 
-                terminal.log('Successfully pushed');
-                new Notification('update', 'Added series to Sonarr', 7000, () => window.open(`${config.sonarrURL}series/${title}`, '_blank'));
+                terminal.log('Successfully pushed', options);
+                new Notification('update', `Added "${ options.title }" to Sonarr`, 7000, () => window.open(`${config.sonarrURL}series/${title}`, '_blank'));
             } else {
-                new Notification('warning', 'Could not add to Sonarr: Unknown Error') ||
+                new Notification('warning', `Could not add "${ options.title }" to Sonarr: Unknown Error`) ||
                 (!response.silent && terminal.error('Error adding to Sonarr: ' + String(response)));
             }
         }
@@ -924,12 +1143,13 @@ function pushSonarrRequest(options) {
 
 // make the button
 function renderPlexButton(persistent) {
-	let existingButtons = document.querySelectorAll('.web-to-plex-button');
+	let existingButtons = document.querySelectorAll('.web-to-plex-button'),
+        firstButton = existingButtons[0];
 
 	if (existingButtons.length && !persistent)
 		[].slice.call(existingButtons).forEach(button => button.remove());
-    else if(persistent)
-        return existingButtons[0];
+    else if(persistent && firstButton !== null && firstButton !== undefined)
+        return firstButton;
 
     // <button>
     let button =
@@ -998,7 +1218,7 @@ function renderPlexButton(persistent) {
                         let self = event.target, parent = button;
 
                         if(init)
-                            button.setAttribute('class', 'closed floating web-to-plex-button restarting'), button.onmouseenter = button.onmouseleave = null, button.setAttribute('tooltip', 'Restarting...'), button.querySelector('.list-action').setAttribute('tooltip', 'Restarting...'), setTimeout(init, 3000);
+                            button.setAttribute('class', 'closed floating web-to-plex-button restarting'), button.onmouseenter = button.onmouseleave = null, button.setAttribute('tooltip', 'Restarting...'), button.querySelector('.list-action').setAttribute('tooltip', 'Restarting...'), setTimeout(init, 500);
                         else
                             new Notification('warning', "Couldn't reload. Please refresh the page.");
                     }
@@ -1032,7 +1252,7 @@ function modifyPlexButton(button, action, title, options = {}) {
         element = button.querySelector('.w2p-action, .list-action'),
         delimeter = '<!---->',
         ty = 'Item', txt = 'title', hov = 'tooltip',
-        em = /^(tt-?|0)?$/i,
+        em = /^(tt|0)?$/i,
         tv = /tv[\s-]?|shows?|series/i;
 
     if(!element) {
@@ -1059,10 +1279,10 @@ function modifyPlexButton(button, action, title, options = {}) {
 
             // the action should be an array
             // we'll give the button a list of links to engage, so make it snappy!
-            let url = `#${ option.imdb || 'tt-' }-${ option.tmdb | 0 }-${ option.tvdb | 0 }`;
+            let url = `#${ option.imdb || 'tt' }-${ option.tmdb | 0 }-${ option.tvdb | 0 }`;
 
             /* Failed */
-            if(/#tt-+0-0/i.test(url))
+            if(/#tt-0-0/i.test(url))
                 continue;
 
             saved_options.push(option);
@@ -1072,8 +1292,7 @@ function modifyPlexButton(button, action, title, options = {}) {
         t = t.join(', ');
         t = t.length > 24? t.slice(0, 21).replace(/\W+$/, '') + '...': t;
 
-        button.setAttribute('saved_options', btoa(JSON.stringify(saved_options)));
-        element.addEventListener('click', element.ON_CLICK = e => {
+        element.ON_CLICK = e => {
             e.preventDefault();
 
             let self = e.target, tv = /tv[\s-]?|shows?|series/i, fail = 0,
@@ -1100,10 +1319,13 @@ function modifyPlexButton(button, action, title, options = {}) {
 
             if (fail)
                 new Notification('error', `Failed to grab ${ fail } item${fail==1?'':'s'}`);
-        });
+        };
+
+        button.setAttribute('saved_options', btoa(JSON.stringify(saved_options)));
+        element.addEventListener('click', e => (AUTO_GRAB.ENABLED && AUTO_GRAB.LIMIT > options.length)? element.ON_CLICK(e): new Prompt('select', options, o => { button.setAttribute('saved_options', btoa(JSON.stringify(o))); element.ON_CLICK(e) }));
 
         element.setAttribute(hov, `Grab ${len} new item${s}: ${ t }`);
-        button.classList.add(saved_options.length? 'wtp--download': 'wtp--error');
+        button.classList.add(saved_options.length || len? 'wtp--download': 'wtp--error');
     } else {
     /* Handle a single item */
 
@@ -1162,7 +1384,7 @@ function modifyPlexButton(button, action, title, options = {}) {
                     let url = `#${ options.IMDbID || 'tt' }-${ options.TMDbID | 0 }-${ options.TVDbID | 0 }`;
 
                     /* Failed */
-                    if(/#tt-+0-0/i.test(url))
+                    if(/#tt-0-0/i.test(url))
                         return modifyPlexButton(button, 'notfound', title, options);
 
                     element.href = url;
@@ -1199,7 +1421,7 @@ function modifyPlexButton(button, action, title, options = {}) {
             button.classList.add('wtp--error');
         }
 
-        element.id = options? `${options.IMDbID || 'tt'}-${options.TMDbID | 0}-${options.TVDbID | 0}`: 'tt--0-0';
+        element.id = options? `${options.IMDbID || 'tt'}-${options.TMDbID | 0}-${options.TVDbID | 0}`: 'tt-0-0';
     }
 }
 
@@ -1207,13 +1429,15 @@ async function squabblePlex(options, button) {
     if(!(options && options.length && button))
         return;
 
-    let results = [];
+    let results = [],
+        length = options.length;
 
     squabblePlex.OPTIONS = options;
 
-    for(let index = 0, length = options.length, option, opt; index < length; index++) {
-        let { IMDbID, TMDbID, TVDbID } = (option = await options[index]);
+    new Notification('info', `Processing ${ length } item${ 's'[+(length === 1)] || '' }...`);
 
+    for(let index = 0, option, opt; index < length; index++) {
+        let { IMDbID, TMDbID, TVDbID } = (option = await options[index]);
 
         opt = { name: option.title, title: option.title, year: option.year, image: options.image, type: option.type, imdb: IMDbID, IMDbID, tmdb: TMDbID, TMDbID, tvdb: TVDbID, TVDbID };
 
@@ -1243,6 +1467,7 @@ async function squabblePlex(options, button) {
                 })
         } catch(error) {
             terminal.error('Request to Plex failed: ' + String(error));
+            // new Notification('error', 'Failed to query item #' + (index + 1));
         }
     }
 
@@ -1256,8 +1481,13 @@ async function squabblePlex(options, button) {
         po.remove();
     button.querySelector('ul').insertBefore(pi, op);
 
-    if (results.length)
-        modifyPlexButton(button, 'multiple', 'Download these items', results);
+    let multiple = results.length,
+        items = multiple == 1? 'item': 'items';
+
+    new Notification('update', `Done. ${ multiple } new ${ items } can be grabbed`, 7000, (event, target = button.querySelector('.list-action')) => target.click({ ...event, target }));
+
+    if (multiple)
+        modifyPlexButton(button, 'multiple', `Download ${ multiple } ${ items }`, results);
 }
 
 function findPlexMedia(options) {
@@ -1265,6 +1495,9 @@ function findPlexMedia(options) {
         return;
 
     let { IMDbID, TMDbID, TVDbID } = options;
+
+    TMDbID = +TMDbID;
+    TVDbID = +TVDbID;
 
     let opt = { name: options.title, year: options.year, image: options.image || IMG_URL.nil, type: options.type, imdb: IMDbID, IMDbID, tmdb: TMDbID, TMDbID, tvdb: TVDbID, TVDbID },
         op  = document.querySelector('#wtp-plexit'),
@@ -1328,10 +1561,14 @@ function findPlexMedia(options) {
                     options
                 ),
                 terminal.error(`Request to Plex failed: ${ String(error) }`);
+                // new Notification('Failed to communicate with Plex');
         }
 }
 
 function getPlexMediaRequest(options) {
+    if(!(config.plexURL && config.plexToken) || config.DO_NOT_USE)
+        return new Promise((resolve, reject) => resolve({ found: false, key: null }));
+
     return new Promise((resolve, reject) => {
         chrome.runtime.sendMessage({
                 type: 'SEARCH_PLEX',
@@ -1358,24 +1595,59 @@ chrome.runtime.onMessage.addListener(async(request, sender) => {
 
     switch(request.type) {
         case 'POPULATE':
-            let button = renderPlexButton(), data = request.data;
+            let button = renderPlexButton(),
+                data = request.data,
+                PARSING_ERROR = `Can't parse missing information. ${ request.name } @ instance ${ request.instance }`,
+                BUTTON_ERROR  = `The button failed to render. ${ request.name } @ instance ${ request.instance }`;
 
             if(!button)
-                return terminal.warn(`The button failed to render. ${ request.name } @ instance ${ request.instance }`);
-            if(!data.title || !data.type)
-                return terminal.error(`Can't parse missing information. ${ request.name } @ instance ${ request.instance }`);
+                return terminal.warn(BUTTON_ERROR);
 
-            let { image, type, title, year, IMDbID, TMDbID, TVDbID } = data;
-            let Db = await getIDs(data);
+            if(data instanceof Array) {
+                for(let index = 0, length = data.length, item; index < length; index++)
+                    if(!(item = data[index]) || !item.type)
+                        data.splice(index, 1, null);
 
-            IMDbID = IMDbID || Db.imdb || 'tt-';
-            TMDbID = TMDbID || Db.tmdb || 0;
-            TVDbID = TVDbID || Db.tvdb || 0;
+                data = data.filter(value => value !== null && value !== undefined);
 
-            title = title || Db.title;
-            year = +(year || Db.year || 0);
+                for(let index = 0, length = data.length, item; index < length; index++) {
+                    let { image, type, title, year, IMDbID, TMDbID, TVDbID } = (item = data[index]);
 
-            findPlexMedia({ type, title, year, image, button, IMDbID, TMDbID, TVDbID });
+                    if(!item.title || !item.type)
+                        continue;
+
+                    let Db = await getIDs(item);
+
+                    IMDbID = IMDbID || Db.imdb || 'tt';
+                    TMDbID = TMDbID || Db.tmdb || 0;
+                    TVDbID = TVDbID || Db.tvdb || 0;
+
+                    title = title || Db.title;
+                    year = +(year || Db.year || 0);
+
+                    data.splice(index, 1, { type, title, year, image, button, IMDbID, TMDbID, TVDbID });
+                }
+
+                if(!data.length)
+                    return terminal.error(PARSING_ERROR);
+                else
+                    squabblePlex(data, button);
+            } else {
+                if(!data.title || !data.type)
+                    return terminal.error(PARSING_ERROR);
+
+                let { image, type, title, year, IMDbID, TMDbID, TVDbID } = data;
+                let Db = await getIDs(data);
+
+                IMDbID = IMDbID || Db.imdb || 'tt';
+                TMDbID = TMDbID || Db.tmdb || 0;
+                TVDbID = TVDbID || Db.tvdb || 0;
+
+                title = title || Db.title;
+                year = +(year || Db.year || 0);
+
+                findPlexMedia({ type, title, year, image, button, IMDbID, TMDbID, TVDbID });
+            }
             return true;
 
         default:
@@ -1535,6 +1807,10 @@ String.prototype.toCaps = function toCaps(all) {
             last: {
                 value: media[media.length - 1],
                 ...properties
+            },
+            child: {
+                value: index => media[index - 1],
+                ...properties
             }
         });
 
@@ -1545,53 +1821,55 @@ String.prototype.toCaps = function toCaps(all) {
  * LICENSE: MIT (2018)
  */
     parent.furnish = function furnish(name, attributes = {}, ...children) {
-      let u = v => v && v.length, R = RegExp;
+        let u = v => v && v.length, R = RegExp;
 
-      if( !u(name) )
-        throw TypeError(`TAGNAME cannot be ${ (name === '')? 'empty': name }`);
+        if( !u(name) )
+            throw TypeError(`TAGNAME cannot be ${ (name === '')? 'empty': name }`);
 
-      let options = attributes.is === true? { is: true }: null;
+        let options = attributes.is === true? { is: true }: null;
 
-      delete attributes.is;
+        delete attributes.is;
 
-      name = name.split(/([#\.][^#\.\[\]]+)/).filter( u );
+        name = name.split(/([#\.][^#\.\[\]]+)/).filter( u );
 
-      if(name.length <= 1)
-        name = name[0].split(/^([^\[\]]+)(\[.+\])/).filter( u );
+        if(name.length <= 1)
+            name = name[0].split(/^([^\[\]]+)(\[.+\])/).filter( u );
 
-      if(name.length > 1)
-        for(let n = name, i = 1, l = n.length, t, v; i < l; i++)
-          if((v = n[i].slice(1, n[i].length)) && (t = n[i][0]) == '#')
-            attributes.id = v;
-          else if(t == '.')
-            attributes.classList = [].slice.call(attributes.classList || []).concat(v);
-          else if(/\[(.+)\]/.test(n[i]))
-            R.$1.split('][').forEach(N => attributes[(N = N.split('=', 2))[0]] = N[1] || '');
-      name = name[0];
+        if(name.length > 1)
+            for(let n = name, i = 1, l = n.length, t, v; i < l; i++)
+                if((v = n[i].slice(1, n[i].length)) && (t = n[i][0]) == '#')
+                    attributes.id = v;
+                else if(t == '.')
+                    attributes.classList = [].slice.call(attributes.classList || []).concat(v);
+                else if(/\[(.+)\]/.test(n[i]))
+                    R.$1.split('][').forEach(N => attributes[(N = N.split('=', 2))[0]] = N[1] || '');
+        name = name[0];
 
-      let element = document.createElement(name, options);
+        let element = document.createElement(name, options);
 
-      if(attributes.classList instanceof Array)
-        attributes.classList = attributes.classList.join(' ');
+        if(attributes.classList instanceof Array)
+            attributes.classList = attributes.classList.join(' ');
 
-      Object.entries(attributes).forEach(
-        ([name, value]) => (/^(on|(?:inner|outer)(?:HTML|Text)|class(?:List|Name)$|value)/.test(name))?
-          element[name] = value:
-        element.setAttribute(name, value)
-      );
-
-      children
-        .filter( child => child !== undefined && child !== null )
-        .forEach(
-          child =>
-            child instanceof Element?
-              element.append(child):
-            child instanceof Node?
-              element.appendChild(child):
-            parent.createTextNode(child)
+        Object.entries(attributes).forEach(
+            ([name, value]) => (/^(on|(?:inner|outer)(?:HTML|Text)|textContent|class(?:List|Name)$|value)/.test(name))?
+                element[name] = value:
+                element.setAttribute(name, value)
         );
 
-      return element;
+        children
+            .filter( child => child !== undefined && child !== null )
+            .forEach(
+                child =>
+                    child instanceof Element?
+                        element.append(child):
+                    child instanceof Node?
+                        element.appendChild(child):
+                    element.appendChild(
+                        parent.createTextNode(child)
+                    )
+            );
+
+        return element;
     }
 })(document);
 
@@ -1599,4 +1877,4 @@ let PRIMITIVE = Symbol.toPrimitive,
     queryBy = document.queryBy,
     furnish = document.furnish;
 
-queryBy[PRIMITIVE] = furnish[PRIMITIVE] = String.prototype.toCaps[PRIMITIVE] = () => 'function furnish() { [foreign code] }';
+queryBy[PRIMITIVE] = furnish[PRIMITIVE] = String.prototype.toCaps[PRIMITIVE] = () => "function <foreign>() { [foreign code] }";

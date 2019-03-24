@@ -6,7 +6,7 @@
     "homepage_url": "https://github.com/Ephellon/web-to-plex/",
 
 	"manifest_version": 2,
-    "version": "4.0",
+    "version": "4.1",
 // Firefox Support =>
 //    "applications": {
 //        "gecko": {
@@ -48,10 +48,6 @@
 			"js": ["utils.js", "sites/letterboxd/index.js"],
 			"css": ["sites/letterboxd/index.css", "sites/common.css"]
 		},{
-			"matches": ["*://*.flenix.co/*/*", "*://*.flenix.cc/*/*", "*://*.flenix.net/*/*", "*://*.flenix.tv/*/*"],
-			"js": ["utils.js", "sites/flenix/index.js"],
-			"css": ["sites/flenix/index.css", "sites/common.css"]
-		},{
 			"matches": ["*://*.tvmaze.com/shows/*"],
 			"js": ["utils.js", "sites/tvmaze/index.js"],
 			"css": ["sites/tvmaze/index.css", "sites/common.css"]
@@ -76,7 +72,7 @@
 			"js": ["utils.js", "sites/google/play.js"],
 			"css": ["sites/google/index.css", "sites/common.css"]
 		},{
-			"matches": ["*://*.apple.com/*"],
+			"matches": ["*://itunes.apple.com/*"],
 			"js": ["utils.js", "sites/itunes/index.js"],
 			"css": ["sites/itunes/index.css", "sites/common.css"]
 		},{
@@ -123,6 +119,10 @@
 			"matches": ["*://www.youtube.com/*"],
 			"js": ["utils.js", "sites/youtube/index.js"],
 			"css": ["sites/youtube/index.css", "sites/common.css"]
+		},{
+			"matches": ["*://*.flickmetrix.com/*"],
+			"js": ["utils.js", "sites/flickmetrix/index.js"],
+			"css": ["sites/flickmetrix/index.css", "sites/common.css"]
 		}
 	],
 
