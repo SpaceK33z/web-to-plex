@@ -6,30 +6,30 @@ String.prototype.toCaps = function toCaps(all) {
      * Conjunctions: and, but, for, nor, or, so, & yet
      * Prepositions: across, after, although, at, because, before, between, by, during, from, if, in, into, of, on, to, through, under, with, & without
      */
-     let array = this.toLowerCase(),
-         titles = /(?!^|(?:an?|the)\s+)\b(a([st]|nd?|cross|fter|lthough)?|b(e(cause|fore|tween)|ut|y)|during|from|in(to)?|[io][fn]|[fn]?or|the|[st]o|through|under|with(out)?|yet)(?!\s*$)\b/gi,
-         cap_exceptions = /([\|\"\(]\s*[a-z]|[\:\.\!\?]\s+[a-z]|(?:^\b|[^\'\-\+]\b)[^aeiouy\d\W]+\b)/gi, // Punctuation exceptions, e.g. "And not I"
-         all_exceptions = /\b((?:ww)?(?:m+[dclxvi]*|d+[clxvi]*|c+[lxvi]*|l+[xvi]*|x+[vi]*|v+i*|i+))\b/gi, // Roman Numberals
-         cam_exceptions = /\b((?:mr?s|[sdjm]r|mx)|(?:adm|cm?dr?|chf|c[op][lmr]|cpt|gen|lt|mjr|sgt)|doc|hon|prof)\./gi; // Titles (Most Common?)
+    let array = this.toLowerCase(),
+        titles = /(?!^|(?:an?|the)\s+)\b(a([st]|nd?|cross|fter|lthough)?|b(e(cause|fore|tween)?|ut|y)|during|from|in(to)?|[io][fn]|[fn]?or|the|[st]o|through|under|with(out)?|yet)(?!\s*$)\b/gi,
+        cap_exceptions = /([\|\"\(]\s*[a-z]|[\:\.\!\?]\s+[a-z]|(?:^\b|[^\'\-\+]\b)[^aeiouy\d\W]+\b)/gi, // Punctuation exceptions, e.g. "And not I"
+        all_exceptions = /\b((?:ww)?(?:m{1,4}(?:c?d(?:c{0,3}(?:x?l(?:x{0,3}(?:i?vi{0,3})?)?)?)?)?|c?d(?:c{0,3}(?:x?l(?:x{0,3}(?:i?vi{0,3})?)?)?)?|c{1,3}(?:x?l(?:x{0,3}(?:i?vi{0,3})?)?)?|x?l(?:x{0,3}(?:i?vi{0,3})?)?|x{1,3}(?:i?vi{0,3})?|i?vi{0,3}|i{1,3}))\b/gi, // Roman Numberals
+        cam_exceptions = /\b((?:mr?s|[sdjm]r|mx)|(?:adm|cm?dr?|chf|c[op][lmr]|cpt|gen|lt|mjr|sgt)|doc|hon|prof)\./gi; // Titles (Most Common?)
 
-     array = array.split(/\s+/);
+    array = array.split(/\s+/);
 
-     let index, length, string, word;
-     for(index = 0, length = array.length, string = [], word; index < length; index++) {
-         word = array[index];
+    let index, length, string, word;
+    for(index = 0, length = array.length, string = [], word; index < length; index++) {
+        word = array[index];
 
-         if(word)
-             string.push( word[0].toUpperCase() + word.slice(1, word.length) );
+        if(word)
+            string.push( word[0].toUpperCase() + word.slice(1, word.length) );
      }
 
-     string = string.join(' ');
+    string = string.join(' ');
 
-     if(!all)
-         string = string
-           .replace(titles, ($0, $1, $$, $_) => $1.toLowerCase())
-           .replace(cap_exceptions, ($0, $1, $$, $_) => $1.toUpperCase())
-           .replace(all_exceptions, ($0, $1, $$, $_) => $1.toUpperCase())
-           .replace(cam_exceptions, ($0, $1, $$, $_) => $0[0].toUpperCase() + $0.slice(1, $0.length).toLowerCase());
+    if(!all)
+        string = string
+          .replace(titles, ($0, $1, $$, $_) => $1.toLowerCase())
+          .replace(cap_exceptions, ($0, $1, $$, $_) => $1.toUpperCase())
+          .replace(all_exceptions, ($0, $1, $$, $_) => $1.toUpperCase())
+          .replace(cam_exceptions, ($0, $1, $$, $_) => $0[0].toUpperCase() + $0.slice(1, $0.length).toLowerCase());
 
     return string;
 };
@@ -56,7 +56,7 @@ String.prototype.toCaps = function toCaps(all) {
  */
     parent.queryBy = function queryBy(selectors, container = parent) {
         // Helpers
-        let copy = array => [].slice.call(array),
+        let copy = array => [...array],
             query = (SELECTORS, CONTAINER = container) => CONTAINER.querySelectorAll(SELECTORS);
 
         // Get rid of enclosing syntaxes: [...] and (...)
@@ -87,25 +87,27 @@ String.prototype.toCaps = function toCaps(all) {
           selector = selector
             .replace(/\:nth-parent\((\d+)\)/g, ($0, $1, $$, $_) => (generations -= +$1, ''))
             .replace(/(\:{1,2}parent\b|<\s*(\*|\s*(,|$)))/g, ($0, $$, $_) => (--generations, ''))
-            .replace(/<([^<,]+)?/g, ($0, $1, $$, $_) => (ancestor = $1, --generations, ''));
+            .replace(/<([^<,]+)?/g, ($0, $1, $$, $_) => (ancestor = $1, --generations, ''))
+            .replace(/^\s+|\s+$/g, '');
 
           let elements = query(selector),
               parents = [], parent;
 
           for(; generations < 0; generations++)
-            elements.forEach( element => {
-              let P = element,
-                  E = C => [].slice.call(query(ancestor, C)),
-                  F;
+          elements.forEach( element => {
+              let P = element, Q = P.parentElement, R = (Q? Q.parentElement: {}),
+                  E = C => [...query(ancestor, C)],
+                  F, G;
 
-              for(let I = 0, L = -generations; ancestor && !!P && I < L; I++)
-                P = !!~E(P.parentElement).indexOf(P)? P: P.parentElement;
+              for(let I = 0, L = -generations; ancestor && !!R && !!Q && !!P && I < L; I++)
+                parent = !!~E(R).indexOf(Q)? Q: G;
 
-              parent = ancestor? !~E(P.parentElement).indexOf(P)? null: P: P.parentElement;
+              for(let I = 0, L = -generations; !!Q && !!P && I < L; I++)
+                parent = Q = (P = Q).parentElement;
 
               if(!~parents.indexOf(parent))
                 parents.push(parent);
-            });
+          });
           media.push(parents.length? parents: elements);
         }
 
@@ -132,6 +134,10 @@ String.prototype.toCaps = function toCaps(all) {
             },
             child: {
                 value: index => media[index - 1],
+                ...properties
+            },
+            empty: {
+                value: !media.length,
                 ...properties
             }
         });

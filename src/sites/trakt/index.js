@@ -160,7 +160,7 @@ async function initDash() {
 <div class="section">
     <a class="w2p-channel w2p-action" href="#" title>
       <div class="icon btn-amazon">
-        <img class="lazy" src="${ IMG_URL._48 }" style="height: 45px; width: auto;" alt="Plugin">
+        <img class="lazy" src="${ IMG_URL.icon_white_48 }" style="height: 45px; width: auto;" alt="Plugin">
       </div>
       <div class="price">Free</div>
     </a>

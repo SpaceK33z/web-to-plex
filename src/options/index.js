@@ -1175,6 +1175,70 @@ document.furnish = function furnish(name, attributes = {}, ...children) {
     return element;
 };
 
+// Default sites and their links
+let builtins = {
+    "Netflix": "https://netflix.com/",
+    "Verizon": "https://tv.verizon.com/",
+    "Trakt": "https://trakt.tv/",
+    "Shana Project": "https://shanaproject.com/",
+    "YouTube": "https://youtube.com/",
+    "Rotten Tomatoes": "https://rottentomatoes.com/",
+    "Fandango": "https://www.fandango.com/",
+    "Amazon": "https://www.amazon.com/Amazon-Video/s/browse/ref=web_to_plex?node=2858778011",
+    "IMDb": "https://imdb.com/",
+    "Couch Potato": "http://couchpotato.life/",
+    "VRV": "https://vrv.co/",
+    "TMDb": "https://themoviedb.org/",
+    "Letterboxd": "https://letterboxd.com/",
+    "Hulu": "https://hulu.com/",
+    "Flickmetrix": "https://flickmetrix.com/",
+    "TVDb": "https://thetvdb.com/",
+    "Metacritic": "https://www.metacritic.com/",
+    "ShowRSS": "https://showrss.info/",
+    "Vudu": "https://vudu.com/",
+    "Movieo": "https://movieo.me/",
+    "GoStream": "https://gostream.site/",
+    "TV Maze": "https://tvmaze.com/",
+    "Google": "https://play.google.com/store/movies",
+    "iTunes": "https://itunes.apple.com/",
+
+}, builtin_array = [], builtin_sites = {}, builtinElement = $$('#builtin');
+
+for(let builtin in builtins)
+    builtin_array.push(builtin);
+builtin_array = builtin_array.sort();
+
+for(let index = 0, length = builtin_array.length; builtinElement && index < length; index++) {
+    let title = builtin_array[index],
+        name  = 'builtin_' + title.toLowerCase().replace(/\s+/g, ''),
+        url   = new URL(builtins[title]),
+        js    = name.replace(/^builtin_/i, ''),
+        o     = url.origin,
+        r     = url.host.replace(/^(ww\w+\.)/, '');
+
+    builtin_sites[r] = o;
+
+    builtinElement.innerHTML +=
+`
+<h3>${ title }</h3>
+<div class="checkbox" disabled>
+    <input id="${ name }" type="checkbox" disabled checked="true" data-option="${ name }" bid="${ r }" js="${ js }">
+    <label for="${ name }"></label>
+</div>
+<div>
+    Run on <a href="${ url.href }" title="${ r }" target="_blank">${ title }</a>
+</div>
+
+<hr>
+`;
+
+    save(`permission:${ r }`, true);
+    save(`script:${ r }`, js);
+    save(`builtin:${ r }`, true);
+}
+
+save('builtin.sites', builtin_sites);
+
 // Plugins and their links
 let plugins = {
     'Toloka': 'https://toloka.to/',
@@ -1183,21 +1247,21 @@ let plugins = {
     'My Shows': 'https://myshows.me/',
 
     // Dont' forget to add to the __options__ array!
-}, array = [], sites = {}, pluginElement = $$('#plugins');
+}, plugin_array = [], plugin_sites = {}, pluginElement = $$('#plugins');
 
 for(let plugin in plugins)
-    array.push(plugin);
-array = array.sort();
+    plugin_array.push(plugin);
+plugin_array = plugin_array.sort();
 
-for(let index = 0, length = array.length; pluginElement && index < length; index++) {
-    let title = array[index],
+for(let index = 0, length = plugin_array.length; pluginElement && index < length; index++) {
+    let title = plugin_array[index],
         name  = 'plugin_' + title.toLowerCase().replace(/\s+/g, ''),
         url   = new URL(plugins[title]),
         js    = name.replace(/^plugin_/i, ''),
         o     = url.origin,
         r     = url.host.replace(/^(ww\w+\.)/, '');
 
-    sites[r] = o;
+    plugin_sites[r] = o;
 
     pluginElement.innerHTML +=
 `
@@ -1207,14 +1271,14 @@ for(let index = 0, length = array.length; pluginElement && index < length; index
     <label for="${ name }"></label>
 </div>
 <div>
-    Allows the ${ title } plugin to run on <a href="${ url.href }" title="${ o }" target="_blank">${ r }</a>
+    Run on <a href="${ url.href }" title="${ r }" target="_blank">${ title }</a>
 </div>
 
 <hr>
 `;
 }
 
-save('optional.sites', sites);
+save('optional.sites', plugin_sites);
 
 $$('[id^="plugin_"]', true)
     .forEach(element => element.addEventListener('click', event => {
@@ -1232,6 +1296,8 @@ $$('[id^="plugin_"]', true)
             save(`permission:${ pid }`, false);
             save(`script:${ pid }`, null);
         }
+
+        save(`builtin:${ pid }`, false);
     })
 );
 

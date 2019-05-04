@@ -25,6 +25,13 @@
             text-decoration: none !important;
         }
 
+		a[target="_blank"]:after {
+		    content: " [\2197]";
+		    font-size: 70%;
+
+		    vertical-align: super;
+		}
+
         h1 {
             position: sticky;
             top: 0;
@@ -453,6 +460,10 @@
             background: #cc7b19;
         }
 
+		.checkbox[disabled] {
+			opacity: 0.25 !important;
+		}
+
         [white] {
             color: #fff!important;
         }
@@ -529,7 +540,7 @@
             top: calc(100vh - 20px);
         }
 
-        [disabled] {
+        [disabled], [disabled] * {
             cursor: not-allowed!important;
             color: #909090EE!important;
         }
@@ -940,13 +951,18 @@ div
 
 	<article>
 		<details>
-			<summary>Plugins</summary>
+			<summary>Site Settings</summary>
 
             <h2>Experimental Sites</h2>
             <section id="plugins">
                 <!-- Filled in via the index.js script -->
             </section>
-            <hr>
+			<hr>
+
+            <h2>Default Sites</h2>
+            <section id="builtin">
+                <!-- Filled in via the index.js script -->
+            </section>
 		</details>
 	</article>
 
@@ -962,7 +978,7 @@ div
                     <label for="always-secure"></label>
                 </div>
 				<div>
-					If enabled, all insecure (HTTP) requests will be through an <a href="https://en.wikipedia.org/wiki/Proxy_server">HTTPS proxy</a>.
+					If enabled, all insecure (HTTP) requests will be through an <a href="https://en.wikipedia.org/wiki/Proxy_server" target="_blank">HTTPS proxy</a>.
 				</div>
 			</section>
 
@@ -986,7 +1002,7 @@ div
 				<label>Proxy Headers</label>
 				<textarea type="text" data-option="ProxyHeaders" placeholder="Enter the Proxy headers" code></textarea>
 				<div>
-					If your proxy requires special headers, enter that information in here.
+					If your proxy requires <a href="https://github.com/SpaceK33z/web-to-plex/wiki/Settings#connection-settings--proxy-settings" target="_blank">special headers</a>, enter that information in here.
 				</div>
 			</section>
 		</details>

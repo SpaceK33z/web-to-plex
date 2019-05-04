@@ -2,8 +2,8 @@
 let NO_DEBUGGER = false;
 
 let external = {},
-    parentItem,
-    saveItem,
+    __context_parent__,
+    __context_save_element__,
     terminal =
         NO_DEBUGGER?
             { error: m => m, info: m => m, log: m => m, warn: m => m, group: m => m, groupEnd: m => m }:
@@ -18,7 +18,7 @@ let date  = (new Date),
 let cors = url => ((/^(https|sftp)\b/i.test(url) || /\:(443|22)\b/? '': 'no-') + 'cors');
 
 // Create a Crypto-Key
-// new Key(number:integer, string) -> string
+// new Key(number:integer, string:symbol) -> string
 class Key {
     constructor(length = 8, symbol = '') {
         let values = [];
@@ -29,9 +29,7 @@ class Key {
     }
 
     rehash(length, symbol) {
-        if(length)
-            /* Do nothing */;
-        else
+        if(length <= 0)
             length = this.length;
 
         return this.value = new Key(length, symbol);
@@ -63,9 +61,9 @@ class Headers {
 function ChangeStatus({ ITEM_ID, ITEM_TITLE, ITEM_TYPE, ID_PROVIDER, ITEM_YEAR, ITEM_URL = '', FILE_TYPE = '', FILE_PATH }) {
 
     let FILE_TITLE = ITEM_TITLE.replace(/\-/g, ' ').replace(/[\s\:]{2,}/g, ' - ').replace(/[^\w\s\-\']+/g, ''),
-    // File friendly title
+            // File friendly title
         SEARCH_TITLE = ITEM_TITLE.replace(/[\-\s]+/g, '-').replace(/[^\w\-]+/g, ''),
-    // Search friendly title
+            // Search friendly title
         SEARCH_PROVIDER = /[it]m/i.test(ID_PROVIDER)? 'GX': 'GG';
 
     ITEM_ID = (ITEM_ID && !/^tt$/i.test(ITEM_ID)? ITEM_ID: '') + '';
@@ -85,12 +83,12 @@ function ChangeStatus({ ITEM_ID, ITEM_TITLE, ITEM_TYPE, ID_PROVIDER, ITEM_YEAR, 
         title: `Find "${ ITEM_TITLE } (${ ITEM_YEAR || YEAR })"`
     });
 
-    for(let array = 'IM TM TV'.split(' '), length = array.length, index = 0, item; index < length; index++)
-        chrome.contextMenus.update('W2P-' + (item = array[index]), {
+    for(let databases = 'IM TM TV'.split(' '), length = databases.length, index = 0, database; index < length; index++)
+        chrome.contextMenus.update('W2P-' + (database = databases[index]), {
             title: (
-                ((ID_PROVIDER == (item += 'Db')) && ITEM_ID)?
-                    `Open in ${ item } (${ (+ITEM_ID? '#': '') + ITEM_ID })`:
-                `Find in ${ item }`
+                ((ID_PROVIDER == (database += 'Db')) && ITEM_ID)?
+                    `Open in ${ database } (${ (+ITEM_ID? '#': '') + ITEM_ID })`:
+                `Find in ${ database }`
             ),
             checked: false
         });
@@ -101,6 +99,7 @@ function ChangeStatus({ ITEM_ID, ITEM_TITLE, ITEM_TYPE, ID_PROVIDER, ITEM_YEAR, 
     });
 }
 
+/** CouchPotato - TV Shows/Movies? **/
 // At this point you might want to think, WHY would you want to do
 // these requests in a background page instead of the content script?
 // This is because Movieo is served over HTTPS, so it won't accept requests to
@@ -134,6 +133,7 @@ function addCouchpotato(request, sendResponse) {
     });
 }
 
+/** Watcher - Movies **/
 function addWatcher(request, sendResponse) {
     let headers = {
             'Content-Type': 'application/json',
@@ -169,6 +169,7 @@ function addWatcher(request, sendResponse) {
         });
 }
 
+/** Radarr - Movies **/
 function addRadarr(request, sendResponse) {
     let headers = {
             'Content-Type': 'application/json',
@@ -262,6 +263,7 @@ function addRadarr(request, sendResponse) {
         });
 }
 
+/** Sonarr - TV Shows **/
 function addSonarr(request, sendResponse) {
     let headers = {
             'Content-Type': 'application/json',
@@ -340,6 +342,7 @@ function addSonarr(request, sendResponse) {
         });
 }
 
+/** Ombi* - TV Shows/Movies **/
 function addOmbi(request, sendResponse) {
     let headers = {
             'Content-Type': 'application/json',
@@ -580,9 +583,9 @@ chrome.runtime.onMessage.addListener((request, sender, callback) => {
         ITEM_YEAR = item.year,
         ITEM_TYPE = item.type,
         ID_PROVIDER = (i=>{for(let p in i)if(/^TVDb/i.test(p)&&i[p])return'TVDb';else if(/^TMDb/i.test(p)&&i[p])return'TMDb';return'IMDb'})(item),
-        ITEM_URL = item.href || '',
+        ITEM_URL = (item.href || ''),
         FILE_TYPE = (item.tail || 'mp4'),
-        FILE_PATH = item.path || '',
+        FILE_PATH = (item.path || ''),
         ITEM_ID = ((i, I)=>{for(let p in i)if(RegExp('^'+I,'i').test(p))return i[p]})(item, ID_PROVIDER);
 
     try {
@@ -639,6 +642,10 @@ chrome.runtime.onMessage.addListener((request, sender, callback) => {
                     });
                 });
                 return true;
+            case 'PLUGIN':
+            case 'SCRIPT':
+                /* These are meant to be handled by plugn.js */
+                return false;
             default:
                 terminal.warn(`Unknown event [${ request.type }]`);
                 return false;
@@ -653,12 +660,12 @@ chrome.runtime.onMessage.addListener((request, sender, callback) => {
 if(SessionState === false) {
     SessionState = true;
 
-    parentItem = chrome.contextMenus.create({
+    __context_parent__ = chrome.contextMenus.create({
         id: 'W2P',
         title: 'Web to Plex'
     });
 
-    saveItem = chrome.contextMenus.create({
+    __context_save_element__ = chrome.contextMenus.create({
         id: 'W2P-DL',
         title: 'Nothing to Save'
     });
@@ -667,7 +674,7 @@ if(SessionState === false) {
     for(let array = 'IM TM TV'.split(' '), DL = {}, length = array.length, index = 0, item; index < length; index++)
         chrome.contextMenus.create({
             id: 'W2P-' + (item = array[index]),
-            parentId: parentItem,
+            parentId: __context_parent__,
             title: `Using ${ item }Db`,
             type: 'checkbox',
             checked: true // implement a way to use the checkboxes?
@@ -676,7 +683,7 @@ if(SessionState === false) {
     // Non-standard search engines
     chrome.contextMenus.create({
         id: 'W2P-XX',
-        parentId: parentItem,
+        parentId: __context_parent__,
         title: `Using best guess`,
         type: 'checkbox',
         checked: true // implement a way to use the checkboxes?

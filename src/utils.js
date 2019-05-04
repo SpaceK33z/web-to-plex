@@ -1,11 +1,5 @@
 /* eslint-disable no-unused-vars */
 /* global config */
-function wait(on, then) {
-    if (on())
-        then && then();
-    else
-        setTimeout(() => wait(on, then), 50);
-}
 
 let NO_DEBUGGER = false;
 
@@ -22,27 +16,34 @@ let YEAR = date.getFullYear(),
 let getURL = url => chrome.extension.getURL(url);
 
 let IMG_URL = {
-    'i16': getURL('img/16.png'),
-    'i48': getURL('img/48.png'),
-    '_16': getURL('img/_16.png'),
-    '_48': getURL('img/_48.png'),
-    'o16': getURL('img/o16.png'),
-    'o48': getURL('img/o48.png'),
-    'h16': getURL('img/hide.16.png'),
-    'h48': getURL('img/hide.48.png'),
-    'j16': getURL('img/show.16.png'),
-    'j48': getURL('img/show.48.png'),
-    'p16': getURL('img/plexit.16.png'),
-    'p48': getURL('img/plexit.48.png'),
-    'r16': getURL('img/reload.16.png'),
-    'r48': getURL('img/reload.48.png'),
-    'x16': getURL('img/close.16.png'),
-    'x48': getURL('img/close.48.png'),
-    's16': getURL('img/settings.16.png'),
-    's48': getURL('img/settings.48.png'),
-    'noi': getURL('img/noise.png'),
-    'nil': getURL('img/null.png'),
+    'icon_16':          getURL('img/16.png'),
+    'icon_48':          getURL('img/48.png'),
+    'icon_white_16':    getURL('img/_16.png'),
+    'icon_white_48':    getURL('img/_48.png'),
+    'icon_outline_16':  getURL('img/o16.png'),
+    'icon_outline_48':  getURL('img/o48.png'),
+    'hide_icon_16':     getURL('img/hide.16.png'),
+    'hide_icon_48':     getURL('img/hide.48.png'),
+    'show_icon_16':     getURL('img/show.16.png'),
+    'show_icon_48':     getURL('img/show.48.png'),
+    'plexit_icon_16':   getURL('img/plexit.16.png'),
+    'plexit_icon_48':   getURL('img/plexit.48.png'),
+    'reload_icon_16':   getURL('img/reload.16.png'),
+    'reload_icon_48':   getURL('img/reload.48.png'),
+    'close_icon_16':    getURL('img/close.16.png'),
+    'close_icon_48':    getURL('img/close.48.png'),
+    'settings_icon_16': getURL('img/settings.16.png'),
+    'settings_icon_48': getURL('img/settings.48.png'),
+    'noise_background': getURL('img/noise.png'),
+    'nil':              getURL('img/null.png'),
 };
+
+function wait(on, then) {
+    if (on && on())
+        then && then();
+    else
+        setTimeout(() => wait(on, then), 50);
+}
 
 // the custom "on location change" event
 let locationchangecallbacks = [];
@@ -483,7 +484,7 @@ function HandleProxyHeaders(Headers = "", URL = "") {
 async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APIID, meta, rerun }) {
     let json = {}, // returned object
         data = {}, // mutated object
-        promise, // query promise
+        promise,   // query promise
         api = {
             tmdb: config.TMDbAPI || 'bcb95f026f9a01ffa707fcff71900e94',
             omdb: config.OMDbAPI || 'PlzBanMe',
@@ -506,7 +507,7 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
         'tmdb':
     rqut || '*';
     manable = manable && (config.ombiURL || (config.radarrURL && rqut == 'tmdb') || (config.sonarrURL && rqut == 'tvdb'));
-    title = (title? title.replace(/\s*[\:,]\s*Season\s+\d+.*$/i, '').toCaps(): "")
+    title = (title? title.replace(/\s*[\:,]\s*seasons?\s+\d+.*$/i, '').toCaps(): "")
         .replace(/\u201a/g, ',') // fancy comma
         .replace(/[\u2019\u201b]/g, "'") // fancy apostrophe
         .replace(/[\u201c\u201d]/g, '"') // fancy quotation marks
@@ -1167,13 +1168,13 @@ function renderPlexButton(persistent) {
                     self.classList.remove('open', 'animate');
                     self.classList.add('closed');
                 },
-                style: `background-image: url(${ IMG_URL.noi })`
+                style: `background-image: url(${ IMG_URL.noise_background })`
             },
             // <ul>
             furnish('ul', {},
                 // <li>
                 furnish('li#wtp-list-name.list-name', {},
-                    furnish('a.list-action', {}, furnish(`img[alt=Web to Plex]`, { src: IMG_URL.i48 }))
+                    furnish('a.list-action', {}, furnish(`img[alt=Web to Plex]`, { src: IMG_URL.icon_48 }))
                 ),
 
                 furnish('li#wtp-plexit.list-item', {
@@ -1184,7 +1185,7 @@ function renderPlexButton(persistent) {
                         (d=>{let s=d.createElement('script'),h=d.querySelector('head');s.type='text/javascript';s.src='//ephellon.github.io/plex.it.js';h.appendChild(s)})(document);
                     }
                 },
-                furnish('img[alt=Favorite]', { src: IMG_URL.p48, onclick: event => event.target.parentElement.click() }) // <img/>
+                furnish('img[alt=Favorite]', { src: IMG_URL.plexit_icon_48, onclick: event => event.target.parentElement.click() }) // <img/>
                 ),
 
                 furnish('li#wtp-hide.list-item', {
@@ -1197,7 +1198,7 @@ function renderPlexButton(persistent) {
 
                         let img = self.querySelector('img');
 
-                        img && (img.src = state == 'show'? IMG_URL.j48: IMG_URL.h48);
+                        img && (img.src = state == 'show'? IMG_URL.show_icon_48: IMG_URL.hide_icon_48);
 
                         if(state == 'show') {
                             state = 'hide';
@@ -1209,7 +1210,7 @@ function renderPlexButton(persistent) {
                         self.setAttribute('state', state);
                     }
                 },
-                furnish('img[alt=Hide]', { src: IMG_URL.h48, onclick: event => event.target.parentElement.click() }) // <img/>
+                furnish('img[alt=Hide]', { src: IMG_URL.hide_icon_48, onclick: event => event.target.parentElement.click() }) // <img/>
                 ),
 
                 furnish('li#wtp-refresh.list-item', {
@@ -1223,7 +1224,7 @@ function renderPlexButton(persistent) {
                             new Notification('warning', "Couldn't reload. Please refresh the page.");
                     }
                 },
-                furnish('img[alt=Reload]', { src: IMG_URL.r48, onclick: event => event.target.parentElement.click() }) // <img/>
+                furnish('img[alt=Reload]', { src: IMG_URL.reload_icon_48, onclick: event => event.target.parentElement.click() }) // <img/>
                 ),
 
                 furnish('li#wtp-options.list-item', {
@@ -1234,7 +1235,7 @@ function renderPlexButton(persistent) {
                         return openOptionsPage();
                     }
                 },
-                furnish('img[alt=Settings]', { src: IMG_URL.s48, onclick: event => event.target.parentElement.click() }) // <img/>
+                furnish('img[alt=Settings]', { src: IMG_URL.settings_icon_48, onclick: event => event.target.parentElement.click() }) // <img/>
                 )
                 // </li>
             )
@@ -1473,7 +1474,7 @@ async function squabblePlex(options, button) {
 
     results = results.filter(v => v.status == 'downloader');
 
-    let img = furnish('img', { title: 'Add to Plex It!', src: IMG_URL.p48, onclick: event => {let frame = document.querySelector('#plexit-bookmarklet-frame'); frame.src = frame.src.replace(/(#plexit:.*)?$/, '#plexit:' + event.target.parentElement.getAttribute('data'))} }),
+    let img = furnish('img', { title: 'Add to Plex It!', src: IMG_URL.plexit_icon_48, onclick: event => {let frame = document.querySelector('#plexit-bookmarklet-frame'); frame.src = frame.src.replace(/(#plexit:.*)?$/, '#plexit:' + event.target.parentElement.getAttribute('data'))} }),
         po, pi = furnish('li#plexit.list-item', { data: btoa(JSON.stringify(results)) }, img),
         op  = document.querySelector('#wtp-plexit');
 
@@ -1502,8 +1503,8 @@ function findPlexMedia(options) {
     let opt = { name: options.title, year: options.year, image: options.image || IMG_URL.nil, type: options.type, imdb: IMDbID, IMDbID, tmdb: TMDbID, TMDbID, tvdb: TVDbID, TVDbID },
         op  = document.querySelector('#wtp-plexit'),
         img = (options.image)?
-            furnish('div', { tooltip: 'Add to Plex It!', style: `background: url(${ IMG_URL.p16 }) top right/60% no-repeat, #0004 url(${ opt.image }) center/contain no-repeat; height: 48px; width: 34px;`, draggable: true, onclick: event => {let frame = document.querySelector('#plexit-bookmarklet-frame'); frame.src = frame.src.replace(/(#plexit:.*)?$/, '#plexit:' + event.target.parentElement.getAttribute('data'))} }):
-        furnish('img', { title: 'Add to Plex It!', src: IMG_URL.p48, onclick: event => {let frame = document.querySelector('#plexit-bookmarklet-frame'); frame.src = frame.src.replace(/(#plexit:.*)?$/, '#plexit:' + event.target.parentElement.getAttribute('data'))} });
+            furnish('div', { tooltip: 'Add to Plex It!', style: `background: url(${ IMG_URL.plexit_icon_16 }) top right/60% no-repeat, #0004 url(${ opt.image }) center/contain no-repeat; height: 48px; width: 34px;`, draggable: true, onclick: event => {let frame = document.querySelector('#plexit-bookmarklet-frame'); frame.src = frame.src.replace(/(#plexit:.*)?$/, '#plexit:' + event.target.parentElement.getAttribute('data'))} }):
+        furnish('img', { title: 'Add to Plex It!', src: IMG_URL.plexit_icon_48, onclick: event => {let frame = document.querySelector('#plexit-bookmarklet-frame'); frame.src = frame.src.replace(/(#plexit:.*)?$/, '#plexit:' + event.target.parentElement.getAttribute('data'))} });
 
     findPlexMedia.OPTIONS = options;
 
@@ -1589,9 +1590,9 @@ function getPlexMediaURL(PlexUIID, key) {
     return config.plexURL.replace(RegExp(`\/(${ config.server.id })?$`), `/web#!/server/` + PlexUIID) + `/details?key=${encodeURIComponent( key )}`;
 }
 
-/* Listen for Plugin events */
+/* Listen for events */
 chrome.runtime.onMessage.addListener(async(request, sender) => {
-    terminal.log(`Plugin event [${ request.plugin }]:`, request);
+    terminal.log(`Listener event [${ request.instance_type }#${ request[request.instance_type] }]:`, request);
 
     switch(request.type) {
         case 'POPULATE':
@@ -1685,10 +1686,10 @@ String.prototype.toCaps = function toCaps(all) {
      * Prepositions: across, after, although, at, because, before, between, by, during, from, if, in, into, of, on, to, through, under, with, & without
      */
     let array = this.toLowerCase(),
-        titles = /(?!^|(?:an?|the)\s+)\b(a([st]|nd?|cross|fter|lthough)?|b(e(cause|fore|tween)|ut|y)|during|from|in(to)?|[io][fn]|[fn]?or|the|[st]o|through|under|with(out)?|yet)(?!\s*$)\b/gi,
+        titles = /(?!^|(?:an?|the)\s+)\b(a([st]|nd?|cross|fter|lthough)?|b(e(cause|fore|tween)?|ut|y)|during|from|in(to)?|[io][fn]|[fn]?or|the|[st]o|through|under|with(out)?|yet)(?!\s*$)\b/gi,
         cap_exceptions = /([\|\"\(]\s*[a-z]|[\:\.\!\?]\s+[a-z]|(?:^\b|[^\'\-\+]\b)[^aeiouy\d\W]+\b)/gi, // Punctuation exceptions, e.g. "And not I"
-        all_exceptions = /\b((?:ww)?(?:m+[dclxvi]*|d+[clxvi]*|c+[lxvi]*|l+[xvi]*|x+[vi]*|v+i*|i+))\b/gi, // Roman Numberals
-        cam_exceptions = /\b((?:mr?s|[sdjm]r|mx)|(?:adm|cm?dr?|chf|c[op][lmr]|cpt|gen|lt|mjr|sgt)|doc|hon|prof)\./gi; // Titles (Most Common?)
+        all_exceptions = /\b((?:ww)?(?:m{1,4}(?:c?d(?:c{0,3}(?:x?l(?:x{0,3}(?:i?vi{0,3})?)?)?)?)?|c?d(?:c{0,3}(?:x?l(?:x{0,3}(?:i?vi{0,3})?)?)?)?|c{1,3}(?:x?l(?:x{0,3}(?:i?vi{0,3})?)?)?|x?l(?:x{0,3}(?:i?vi{0,3})?)?|x{1,3}(?:i?vi{0,3})?|i?vi{0,3}|i{1,3}))\b/gi, // Roman Numberals
+        cam_exceptions = /\b((?:mr?s|[sdjm]r|mx)|(?:adm|cm?dr?|chf|c[op][lmr]|cpt|gen|lt|mjr|sgt)|doc|hon|prof)(?:\.|\b)/gi; // Titles (Most Common?)
 
     array = array.split(/\s+/);
 
@@ -1707,7 +1708,7 @@ String.prototype.toCaps = function toCaps(all) {
           .replace(titles, ($0, $1, $$, $_) => $1.toLowerCase())
           .replace(cap_exceptions, ($0, $1, $$, $_) => $1.toUpperCase())
           .replace(all_exceptions, ($0, $1, $$, $_) => $1.toUpperCase())
-          .replace(cam_exceptions, ($0, $1, $$, $_) => $0[0].toUpperCase() + $0.slice(1, $0.length).toLowerCase());
+          .replace(cam_exceptions, ($0, $1, $$, $_) => $1[0].toUpperCase() + $1.slice(1, $1.length).toLowerCase() + '.');
 
     return string;
 };
@@ -1734,7 +1735,7 @@ String.prototype.toCaps = function toCaps(all) {
  */
     parent.queryBy = function queryBy(selectors, container = parent) {
         // Helpers
-        let copy = array => [].slice.call(array),
+        let copy  = array => [...array],
             query = (SELECTORS, CONTAINER = container) => CONTAINER.querySelectorAll(SELECTORS);
 
         // Get rid of enclosing syntaxes: [...] and (...)
@@ -1765,24 +1766,26 @@ String.prototype.toCaps = function toCaps(all) {
           selector = selector
             .replace(/\:nth-parent\((\d+)\)/g, ($0, $1, $$, $_) => (generations -= +$1, ''))
             .replace(/(\:{1,2}parent\b|<\s*(\*|\s*(,|$)))/g, ($0, $$, $_) => (--generations, ''))
-            .replace(/<([^<,]+)?/g, ($0, $1, $$, $_) => (ancestor = $1, --generations, ''));
+            .replace(/<([^<,]+)?/g, ($0, $1, $$, $_) => (ancestor = $1, --generations, ''))
+            .replace(/^\s+|\s+$/g, '');
 
           let elements = query(selector),
               parents = [], parent;
 
           for(; generations < 0; generations++)
             elements.forEach( element => {
-              let P = element,
-                  E = C => [].slice.call(query(ancestor, C)),
-                  F;
+                let P = element, Q = P.parentElement, R = (Q? Q.parentElement: {}),
+                    E = C => [...query(ancestor, C)],
+                    F, G;
 
-              for(let I = 0, L = -generations; ancestor && !!P && I < L; I++)
-                P = !!~E(P.parentElement).indexOf(P)? P: P.parentElement;
+                for(let I = 0, L = -generations; ancestor && !!R && !!Q && !!P && I < L; I++)
+                  parent = !!~E(R).indexOf(Q)? Q: G;
 
-              parent = ancestor? !~E(P.parentElement).indexOf(P)? null: P: P.parentElement;
+                for(let I = 0, L = -generations; !!Q && !!P && I < L; I++)
+                  parent = Q = (P = Q).parentElement;
 
-              if(!~parents.indexOf(parent))
-                parents.push(parent);
+                if(!~parents.indexOf(parent))
+                  parents.push(parent);
             });
           media.push(parents.length? parents: elements);
         }
@@ -1853,7 +1856,7 @@ String.prototype.toCaps = function toCaps(all) {
         Object.entries(attributes).forEach(
             ([name, value]) => (/^(on|(?:inner|outer)(?:HTML|Text)|textContent|class(?:List|Name)$|value)/.test(name))?
                 element[name] = value:
-                element.setAttribute(name, value)
+            element.setAttribute(name, value)
         );
 
         children
