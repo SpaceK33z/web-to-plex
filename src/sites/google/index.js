@@ -54,8 +54,6 @@ async function initPlexThingy(type) {
         TMDbID = Db.tmdb,
         TVDbID = Db.tvdb;
 
-    IMDbID = IMDbID || Db.imdb;
-
     findPlexMedia({ type, title, year, image, button, IMDbID, TMDbID, TVDbID });
 }
 

@@ -524,11 +524,12 @@ function performOmbiLogin() {
 function performOmbiTest(refreshing = false) {
     let options = getOptionValues(),
         teststatus = $$('#ombi_test_status'),
+        path = $$('[data-option="ombiURLRoot"]'),
         url,
         headers = { headers: { apikey: options.ombiToken, accept: 'text/html' } };
 
     teststatus.textContent = '?';
-    options.ombiURLRoot = url = options.ombiURLRoot.replace(/^(\:\d+)/, 'localhost$1').replace(/^(?!^http(s)?:)/, 'http$1://').replace(/\/+$/, '');
+    options.ombiURLRoot = url = path.value = options.ombiURLRoot.replace(/^(\:\d+)/, 'localhost$1').replace(/^(?!^http(s)?:)/, 'http$1://').replace(/\/+$/, '');
 
     let Get = () =>
         fetch(`${ url }/api/v1/Status`, headers)
@@ -582,6 +583,7 @@ function getWatcher(options, api = "getconfig") {
 function performWatcherTest(QualityProfileID = 'Default', refreshing = false) {
 	let options = getOptionValues(),
         teststatus = $$('#watcher_test_status'),
+        path = $$('[data-option="watcherURLRoot"]'),
         storagepath = __watcher_storagePath__,
         quality = __watcher_qualityProfile__,
         url;
@@ -589,7 +591,7 @@ function performWatcherTest(QualityProfileID = 'Default', refreshing = false) {
 	quality.innerHTML = '';
 	teststatus.textContent = '?';
     storagepath.value = '[Empty]';
-    options.watcherURLRoot = url = options.watcherURLRoot.replace(/^(\:\d+)/, 'localhost$1').replace(/^(?!^http(s)?:)/, 'http$1://').replace(/\/+$/, '');
+    options.watcherURLRoot = url = path.value = options.watcherURLRoot.replace(/^(\:\d+)/, 'localhost$1').replace(/^(?!^http(s)?:)/, 'http$1://').replace(/\/+$/, '');
 
     let Get = () =>
         getWatcher(options, 'getconfig').then(config => {
@@ -663,6 +665,7 @@ function getRadarr(options, api = "profile") {
 function performRadarrTest(QualityProfileID, StoragePath, refreshing = false) {
 	let options = getOptionValues(),
         teststatus = $$('#radarr_test_status'),
+        path = $$('[data-option="radarrURLRoot"]'),
         storagepath = __radarr_storagePath__,
         quality = __radarr_qualityProfile__,
         url;
@@ -670,7 +673,7 @@ function performRadarrTest(QualityProfileID, StoragePath, refreshing = false) {
 	quality.innerHTML = '';
 	teststatus.textContent = '?';
     storagepath.textContent = '';
-    options.radarrURLRoot = url = options.radarrURLRoot.replace(/^(\:\d+)/, 'localhost$1').replace(/^(?!^http(s)?:)/, 'http$1://').replace(/\/+$/, '');
+    options.radarrURLRoot = url = path.value = options.radarrURLRoot.replace(/^(\:\d+)/, 'localhost$1').replace(/^(?!^http(s)?:)/, 'http$1://').replace(/\/+$/, '');
 
     let Get = () => {
         getRadarr(options, 'profile').then(profiles => {
@@ -743,6 +746,7 @@ function getSonarr(options, api = "profile") {
 function performSonarrTest(QualityProfileID, StoragePath, refreshing = false) {
 	let options = getOptionValues(),
         teststatus = $$('#sonarr_test_status'),
+        path = $$('[data-option="sonarrURLRoot"]'),
         storagepath = __sonarr_storagePath__,
         quality = __sonarr_qualityProfile__,
         url;
@@ -750,7 +754,7 @@ function performSonarrTest(QualityProfileID, StoragePath, refreshing = false) {
 	quality.innerHTML = '';
 	teststatus.textContent = '?';
     storagepath.textContent = '';
-    options.sonarrURLRoot = url = options.sonarrURLRoot.replace(/^(\:\d+)/, 'localhost$1').replace(/^(?!^http(s)?:)/, 'http$1://').replace(/\/+$/, '');
+    options.sonarrURLRoot = url = path.value = options.sonarrURLRoot.replace(/^(\:\d+)/, 'localhost$1').replace(/^(?!^http(s)?:)/, 'http$1://').replace(/\/+$/, '');
 
     let Get = () => {
         getSonarr(options, 'profile').then(profiles => {
@@ -1171,6 +1175,70 @@ document.furnish = function furnish(name, attributes = {}, ...children) {
     return element;
 };
 
+// Default sites and their links
+let builtins = {
+    "Netflix": "https://netflix.com/",
+    "Verizon": "https://tv.verizon.com/",
+    "Trakt": "https://trakt.tv/",
+    "Shana Project": "https://shanaproject.com/",
+    "YouTube": "https://youtube.com/",
+    "Rotten Tomatoes": "https://rottentomatoes.com/",
+    "Fandango": "https://www.fandango.com/",
+    "Amazon": "https://www.amazon.com/Amazon-Video/s/browse/ref=web_to_plex?node=2858778011",
+    "IMDb": "https://imdb.com/",
+    "Couch Potato": "http://couchpotato.life/",
+    "VRV": "https://vrv.co/",
+    "TMDb": "https://themoviedb.org/",
+    "Letterboxd": "https://letterboxd.com/",
+    "Hulu": "https://hulu.com/",
+    "Flickmetrix": "https://flickmetrix.com/",
+    "TVDb": "https://thetvdb.com/",
+    "Metacritic": "https://www.metacritic.com/",
+    "ShowRSS": "https://showrss.info/",
+    "Vudu": "https://vudu.com/",
+    "Movieo": "https://movieo.me/",
+    "GoStream": "https://gostream.site/",
+    "TV Maze": "https://tvmaze.com/",
+    "Google": "https://play.google.com/store/movies",
+    "iTunes": "https://itunes.apple.com/",
+
+}, builtin_array = [], builtin_sites = {}, builtinElement = $$('#builtin');
+
+for(let builtin in builtins)
+    builtin_array.push(builtin);
+builtin_array = builtin_array.sort();
+
+for(let index = 0, length = builtin_array.length; builtinElement && index < length; index++) {
+    let title = builtin_array[index],
+        name  = 'builtin_' + title.toLowerCase().replace(/\s+/g, ''),
+        url   = new URL(builtins[title]),
+        js    = name.replace(/^builtin_/i, ''),
+        o     = url.origin,
+        r     = url.host.replace(/^(ww\w+\.)/, '');
+
+    builtin_sites[r] = o;
+
+    builtinElement.innerHTML +=
+`
+<h3>${ title }</h3>
+<div class="checkbox" disabled>
+    <input id="${ name }" type="checkbox" disabled checked="true" data-option="${ name }" bid="${ r }" js="${ js }">
+    <label for="${ name }"></label>
+</div>
+<div>
+    Run on <a href="${ url.href }" title="${ r }" target="_blank">${ title }</a>
+</div>
+
+<hr>
+`;
+
+    save(`permission:${ r }`, true);
+    save(`script:${ r }`, js);
+    save(`builtin:${ r }`, true);
+}
+
+save('builtin.sites', builtin_sites);
+
 // Plugins and their links
 let plugins = {
     'Toloka': 'https://toloka.to/',
@@ -1179,21 +1247,21 @@ let plugins = {
     'My Shows': 'https://myshows.me/',
 
     // Dont' forget to add to the __options__ array!
-}, array = [], sites = {}, pluginElement = $$('#plugins');
+}, plugin_array = [], plugin_sites = {}, pluginElement = $$('#plugins');
 
 for(let plugin in plugins)
-    array.push(plugin);
-array = array.sort();
+    plugin_array.push(plugin);
+plugin_array = plugin_array.sort();
 
-for(let index = 0, length = array.length; pluginElement && index < length; index++) {
-    let title = array[index],
+for(let index = 0, length = plugin_array.length; pluginElement && index < length; index++) {
+    let title = plugin_array[index],
         name  = 'plugin_' + title.toLowerCase().replace(/\s+/g, ''),
         url   = new URL(plugins[title]),
         js    = name.replace(/^plugin_/i, ''),
         o     = url.origin,
         r     = url.host.replace(/^(ww\w+\.)/, '');
 
-    sites[r] = o;
+    plugin_sites[r] = o;
 
     pluginElement.innerHTML +=
 `
@@ -1203,14 +1271,14 @@ for(let index = 0, length = array.length; pluginElement && index < length; index
     <label for="${ name }"></label>
 </div>
 <div>
-    Allows the ${ title } plugin to run on <a href="${ url.href }" title="${ o }" target="_blank">${ r }</a>
+    Run on <a href="${ url.href }" title="${ r }" target="_blank">${ title }</a>
 </div>
 
 <hr>
 `;
 }
 
-save('optional.sites', sites);
+save('optional.sites', plugin_sites);
 
 $$('[id^="plugin_"]', true)
     .forEach(element => element.addEventListener('click', event => {
@@ -1228,6 +1296,8 @@ $$('[id^="plugin_"]', true)
             save(`permission:${ pid }`, false);
             save(`script:${ pid }`, null);
         }
+
+        save(`builtin:${ pid }`, false);
     })
 );
 

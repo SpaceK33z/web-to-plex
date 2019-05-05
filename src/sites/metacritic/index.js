@@ -2,7 +2,7 @@
 function init() {
 	wait(
 		() => document.readyState === 'complete',
-		() => initPlexThingy(isMovie()? 'movie': isShow()? 'tv': null) || isList()? initPlexList(): null
+		() => initPlexThingy(isMovie()? 'movie': isShow()? 'tv': null) || isList()? initList(): null
 	);
 }
 
@@ -52,7 +52,7 @@ async function initPlexThingy(type) {
 	findPlexMedia({ title, year, button, type, IMDbID, TMDbID, TVDbID });
 }
 
-async function initPlexList() {
+async function initList() {
 	/* Not implemented... Metacritic has too much sh*t loading to even try to open a console */
 	/* Targeted for v5/v6 */
 }

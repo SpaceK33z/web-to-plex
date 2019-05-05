@@ -1,31 +1,10 @@
-# Web to Plex (BETA Channel) ![Icon](src/img/48.png)
+# Web to Plex ![Icon](src/img/48.png)
 
 ![Examples](example.png)
 
 This browser extension searches your [Plex Media Server (PMS)](https://www.plex.tv/downloads/) for matching media on sites like [IMDb](https://imdb.com), letting you immediately open the movie or TV show in Plex, if it is available. If the item isn't found on your PMS, then a download button is added instead.
 
-----
-
-## Status: 307 (TEMP-RD)
-
-This is the BETA (testing) version, please visit [Web to Plex](https://github.com/SpaceK33z/web-to-plex) for the stable version.
-
-----
-
-# NZB Managers
-
-Optionally, you can configure your NZB manager(s) (see support table) in the extension's options. After that, you can immediately add a TV show or movie with one click, right from your favorite site.
-
-## Supported Managers
-| Manager                                         | Movie Support | TV Show Support | Searchable
-| ----------------------------------------------- | ------------- | --------------- | ----------
-| [Watcher 3](https://nosmokingbandit.github.io/) | Yes           |                 |
-| [CouchPotato](https://couchpota.to/)            | Yes           | Yes             |
-| [Radarr](https://radarr.video/)                 | Yes           |                 | Yes
-| [Sonarr](https://sonarr.tv/)                    |               | Yes             | Yes
-| [Ombi](https://ombi.io/)                        | Yes           | Yes             | Yes
-
-If you don't feel like actually downloading the movie, or want a simple watchlist, you can also use the built-in "Plex It!" feature to bookmark the current page.
+**We're currently in the process of making a v4 release which will contain the features listed below. The version that is available on the Chrome and Firefox webstore doesn't contain these features!**
 
 ----
 
@@ -33,11 +12,11 @@ If you don't feel like actually downloading the movie, or want a simple watchlis
 
 - Can save media directly from noted sites (file downloads/magnet URLs)
   - Right-click | Web to Plex | Save as "Show/Movie (Year)"
-- Can push requests to your chosen NZB manager
+- Can push requests to your chosen download manager
   - [Radarr](https://radarr.video/)
   - [Sonarr](https://sonarr.tv/)
   - [CouchPotato](https://couchpota.to/)
-  - [Watcher 3](https://nosmokingbandit.github.io/) ("Watcher, version 3")
+  - [Watcher 3](https://nosmokingbandit.github.io/)
   - [Ombi](https://ombi.io/)
 - Offers search options via right-click (context menu)
   - Right-click | Web to Plex | Find "Show/Movie (Year)"
@@ -54,6 +33,21 @@ If you don't feel like actually downloading the movie, or want a simple watchlis
   - Offers an API login feature
 - Offers a "Direct Plex URL" feature
   - i.e. you can specify `localhost:32400` as your Plex URL to avoid bandwidth usage for Plex requests
+
+# Download Managers
+
+Optionally, you can configure your download manager(s) (see support table) in the extension's options. After that, you can immediately add a TV show or movie with one click, right from your favorite site.
+
+## Supported Managers
+| Manager                                         | Movie Support | TV Show Support | Searchable
+| ----------------------------------------------- | ------------- | --------------- | ----------
+| [Watcher 3](https://nosmokingbandit.github.io/) | Yes           |                 |
+| [CouchPotato](https://couchpota.to/)            | Yes           | Yes             |
+| [Radarr](https://radarr.video/)                 | Yes           |                 | Yes
+| [Sonarr](https://sonarr.tv/)                    |               | Yes             | Yes
+| [Ombi](https://ombi.io/)                        | Yes           | Yes             | Yes
+
+If you don't feel like actually downloading the movie, or want a simple watchlist, you can also use the built-in "Plex It!" feature to bookmark the current page.
 
 ## Supported sites
 
@@ -95,21 +89,13 @@ If you don't feel like actually downloading the movie, or want a simple watchlis
 - `5` *This site is known to update frequently, support may change without notice.*
 - `6` *This site is only supported via a plugin (enabled in the settings)*
 
-## In Progress sites (adding support):
-
-- Nothing here... for now
-
-## En Progress sites (may add support):
-
-- Nothing here... for now
-
 ## Installing Web to Plex
 
-- **Download the [CRX](https://github.com/Ephellon/web-to-plex/raw/master/src.crx)**
+**Download on [Chrome Webstore](https://chrome.google.com/webstore/detail/movieo-to-plex/kmcinnefmnkfnmnmijfmbiaflncfifcn).**
 
-- **Download the [ZIP](https://github.com/Ephellon/web-to-plex/raw/master/src.zip)**
+**Download on [FireFox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/web-to-plex/).**
 
-- **Download the [SRC](https://github.com/Ephellon/web-to-plex/archive/master.zip)**
+**Download the [SRC](https://github.com/Ephellon/web-to-plex/archive/master.zip)**
 
 ## Requirements
 
