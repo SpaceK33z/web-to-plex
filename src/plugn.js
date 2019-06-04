@@ -157,6 +157,9 @@ let handle = async(results, tabID, instance, script, type) => {
     if(typeof data != 'object')
         return /* setTimeout */;
 
+    if(typeof data != 'object')
+        return /* setTimeout */;
+
     try {
         chrome.tabs.insertCSS(tabID, { file: 'sites/common.css' });
         chrome.tabs.sendMessage(tabID, { data, script, instance, instance_type: 'script', type: 'POPULATE' });
@@ -169,9 +172,19 @@ let handle = async(results, tabID, instance, script, type) => {
 //chrome.tabs.onActiveChanged.addListener(tabchange);
 
 // workaround for the above
+chrome.tabs.onActivated.addListener(change => {
+    instance = RandomName();
+
+    chrome.tabs.get(change.tabId, tab => tabchange([ tab ]));
+});
+
 chrome.tabs.onUpdated.addListener((ID, change, tab) => {
-    if(change.status == 'complete' && tab.active)
+    instance = RandomName();
+
+    if(change.status == 'complete' && !tab.discarded)
         tabchange([ tab ]);
+    else if(!tab.discarded)
+        setTimeout(() => tabchange([ tab ]), 1000);
 });
 
 // workaround for the above
