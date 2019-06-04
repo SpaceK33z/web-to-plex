@@ -1,5 +1,5 @@
 {
-    "update_url": "https://github.com/Ephellon/web-to-plex/raw/master/src.crx",
+    "update_url": "https://github.com/Ephellon/web-to-plex/",
 
 	"name": "Web to Plex",
 	"description": "Adds a button on various movie & TV show sites to open the item in Plex, or send to your designated NZB manager for download.",

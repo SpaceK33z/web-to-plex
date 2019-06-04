@@ -11,9 +11,11 @@ let date = (new Date),
 
 let YEAR = date.getFullYear(),
     MONTH = date.getMonth() + 1,
-    DATE = date.getDate();
+    DATE = date.getDate(),
+    NOTIFIED = false;
 
-let getURL = url => chrome.extension.getURL(url);
+let getURL = url => chrome.extension.getURL(url),
+    init;
 
 let IMG_URL = {
     'icon_16':          getURL('img/16.png'),
@@ -63,9 +65,10 @@ function watchlocationchange(subject) {
     }
 }
 
-Object.defineProperty(window, 'onlocationchange', {
-    set: callback => locationchangecallbacks.push(callback)
-});
+if(!('onlocationchange' in window))
+    Object.defineProperty(window, 'onlocationchange', {
+        set: callback => locationchangecallbacks.push(callback)
+    });
 
 setInterval(() => watchlocationchange('pathname'), 1000); // at least 1s is needed to properly fire the event ._.
 
@@ -118,6 +121,11 @@ class Notification {
         let queue = (Notification.queue = Notification.queue || { list: [] }),
             last = queue.list[queue.list.length - 1];
 
+        if((config.NotifyNewOnly && /\balready (exists|(been )?added)\b/.test(text)) || (config.NotifyOnlyOnce && NOTIFIED && state === 'info'))
+            return /* Don't match /.../i as to not match item titles */;
+
+        NOTIFIED = true;
+
         if (last && last.done === false)
             return (last => setTimeout(() => new Notification(state, text, timeout, callback, requiresClick), +(new Date) - last.start))(last);
 
@@ -159,7 +167,47 @@ class Prompt {
     constructor(prompt_type, options, callback = () => {}, container = document.body) {
         let prompt, remove,
             array = (options instanceof Array? options: [].slice.call(options)),
-            data = [...array];
+            data = [...array],
+            profiles = {
+                movie: JSON.parse(
+                    config.usingRadarr?
+                        config.radarrQualities:
+                    config.usingWatcher?
+                        config.watcherQualities:
+                    '[]'
+                ),
+                show: JSON.parse(
+                    config.usingSonarr?
+                        config.sonarrQualities:
+                    '[]'
+                )
+            },
+            locations = {
+                movie: JSON.parse(
+                    config.usingRadarr?
+                        config.radarrStoragePaths:
+                    config.usingWatcher?
+                        config.watcherStoragePaths:
+                    '[]'
+                ),
+                show: JSON.parse(
+                    config.usingSonarr?
+                        config.sonarrStoragePaths:
+                    '[]'
+                )
+            },
+            defaults = {
+                movie: (
+                    config.usingRadarr?
+                        { quality: config.__radarrQuality, location: config.__radarrStoragePath }:
+                    {}
+                ),
+                show: (
+                    config.usingSonarr?
+                        { quality: config.__sonarrQuality, location: config.__sonarrStoragePath }:
+                    {}
+                )
+            };
 
         switch(prompt_type) {
             /* Allows the user to add and remove items from a list */
@@ -189,13 +237,29 @@ class Prompt {
                             ...(ITEMS => {
                                 let elements = [];
 
-                                for(let index = 0, length = ITEMS.length, ITEM; index < length; index++)
-                                    ITEM = ITEMS[index],
+                                for(let index = 0, length = ITEMS.length, ITEM, P_QUA, P_LOC; index < length; index++) {
+                                    ITEM = ITEMS[index];
+
                                     elements.push(
-                                        document.furnish('li.web-to-plex-prompt-option.mutable', { value: index, innerHTML: `${ ITEM.title }${ ITEM.year? ` (${ ITEM.year })`: '' } <em>\u2014 ${ ITEM.type }</em>` },
-                                            document.furnish('button', { title: `Remove "${ ITEM.title }"`, onclick: event => { remove(event.target.parentElement); event.target.remove() } })
-                                        ),
+                                        document.furnish('li.web-to-plex-prompt-option.mutable', { value: index, innerHTML: `<h2>${ index + 1 } \u00b7 ${ ITEM.title }${ ITEM.year? ` (${ ITEM.year })`: '' } <em>\u2014 ${ ITEM.type }</em></h2>` },
+                                            document.furnish('button.remove', { title: `Remove "${ ITEM.title }"`, onclick: event => { remove(event.target.parentElement); event.target.remove() } }),
+                                            (
+                                                config.PromptQuality?
+                                                    P_QUA = document.furnish('select.quality', { index, onchange: event => data[event.target.getAttribute('index')].quality = event.target.value }, ...profiles[/(movie|film|cinema)/i.test(ITEM.type)?'movie':'show'].map(Q => document.furnish('option', { value: Q.id }, Q.name))):
+                                                ''
+                                            ),(
+                                                config.PromptLocation?
+                                                    P_LOC = document.furnish('select.location', { index, onchange: event => data[event.target.getAttribute('index')].location = event.target.value }, ...locations[/(movie|film|cinema)/i.test(ITEM.type)?'movie':'show'].map(Q => document.furnish('option', { value: Q.id }, Q.path))):
+                                                ''
+                                            )
+                                        )
                                     );
+
+                                    if(P_QUA) P_QUA.value = defaults[ITEM.type].quality;
+                                    if(P_LOC) P_LOC.value = defaults[ITEM.type].location;
+
+                                    P_QUA = P_LOC = null;
+                                }
 
                                 return elements
                             })(array)
@@ -286,13 +350,29 @@ class Prompt {
                             ...(ITEMS => {
                                 let elements = [];
 
-                                for(let index = 0, length = ITEMS.length, ITEM; index < length; index++)
-                                    ITEM = ITEMS[index],
+                                for(let index = 0, length = ITEMS.length, ITEM, P_QUA, P_LOC; index < length; index++) {
+                                    ITEM = ITEMS[index];
+
                                     elements.push(
-                                        document.furnish('li.web-to-plex-prompt-option.mutable', { value: index, innerHTML: `${ ITEM.title }${ ITEM.year? ` (${ ITEM.year })`: '' } <em>\u2014 ${ ITEM.type }</em>` },
-                                            document.furnish('button', { title: `Remove "${ ITEM.title }"`, onclick: event => { remove(event.target.parentElement); event.target.remove() } })
-                                        ),
+                                        document.furnish('li.web-to-plex-prompt-option.mutable', { value: index, innerHTML: `<h2>${ index + 1 } \u00b7 ${ ITEM.title }${ ITEM.year? ` (${ ITEM.year })`: '' } <em>\u2014 ${ ITEM.type }</em></h2>` },
+                                            document.furnish('button.remove', { title: `Remove "${ ITEM.title }"`, onclick: event => { remove(event.target.parentElement); event.target.remove() } }),
+                                            (
+                                                config.PromptQuality?
+                                                    P_QUA = document.furnish('select.quality', { index, onchange: event => data[event.target.getAttribute('index')].quality = event.target.value }, ...profiles[/(movie|film|cinema)/i.test(ITEM.type)?'movie':'show'].map(Q => document.furnish('option', { value: Q.id }, Q.name))):
+                                                ''
+                                            ),(
+                                                config.PromptLocation?
+                                                    P_LOC = document.furnish('select.location', { index, onchange: event => data[event.target.getAttribute('index')].location = event.target.value }, ...locations[/(movie|film|cinema)/i.test(ITEM.type)?'movie':'show'].map(Q => document.furnish('option', { value: Q.id }, Q.path))):
+                                                ''
+                                            )
+                                        )
                                     );
+
+                                    if(P_QUA) P_QUA.value = defaults[ITEM.type].quality;
+                                    if(P_LOC) P_LOC.value = defaults[ITEM.type].location;
+
+                                    P_QUA = P_LOC = null;
+                                }
 
                                 return elements
                             })(array)
@@ -506,7 +586,7 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
     /(movie|film)/i.test(rqut)?
         'tmdb':
     rqut || '*';
-    manable = manable && (config.ombiURL || (config.radarrURL && rqut == 'tmdb') || (config.sonarrURL && rqut == 'tvdb'));
+    manable = manable && (config.usingOmbi || (config.usingRadarr && rqut == 'tmdb') || (config.usingSonarr && rqut == 'tvdb'));
     title = (title? title.replace(/\s*[\:,]\s*seasons?\s+\d+.*$/i, '').toCaps(): "")
         .replace(/\u201a/g, ',') // fancy comma
         .replace(/[\u2019\u201b]/g, "'") // fancy apostrophe
@@ -534,10 +614,10 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
 
     /* the rest of this function is a beautiful mess that will need to be dealt with later... but it works */
     let url =
-        (manable && title && config.ombiURLRoot)?
+        (manable && title && config.usingOmbi)?
             `${ config.ombiURLRoot }api/v1/Search/${ (rqut == 'imdb' || rqut == 'tmdb' || apit == 'movie')? 'movie': 'tv' }/${ plus(title, '%20') }/?apikey=${ api.ombi }`:
-        (manable && (config.radarrURLRoot || config.sonarrURLRoot))?
-            (config.radarrURLRoot && (rqut == 'imdb' || rqut == 'tmdb'))?
+        (manable && (config.usingRadarr || config.usingSonarr))?
+            (config.usingRadarr && (rqut == 'imdb' || rqut == 'tmdb'))?
                 (mid)?
                     `${ config.radarrURLRoot }api/movie/lookup/tmdb?tmdbId=${ mid }&apikey=${ config.radarrToken }`:
                 (iid)?
@@ -934,7 +1014,7 @@ function $pushAddToCouchpotato(options) {
 			}
 			new Notification(
 				'warning',
-				`Movie is already in CouchPotato (status: ${response.status})`
+				`Movie already exists in CouchPotato (status: ${response.status})`
 			);
 		}
 	);
@@ -1069,6 +1149,14 @@ function pushRadarrRequest(options) {
         );
     }
 
+    let PromptValues = {},
+        { PromptQuality, PromptLocation } = config;
+
+    if(PromptQuality && +options.quality > 0)
+        PromptValues.QualityID = +options.quality;
+    if(PromptLocation && options.location)
+        PromptValues.StoragePath = JSON.parse(config.radarrStoragePaths)[+options.location - 1].path.replace(/\\/g, '\\\\');
+
     chrome.runtime.sendMessage({
             type: 'ADD_RADARR',
             url: `${ config.radarrURL }api/movie/`,
@@ -1080,6 +1168,7 @@ function pushRadarrRequest(options) {
             year: options.year,
             imdbId: options.IMDbID,
             tmdbId: options.TMDbID,
+            ...PromptValues
         },
         response => {
             terminal.log('Pushing to Radarr', response);
@@ -1112,6 +1201,14 @@ function pushSonarrRequest(options) {
         );
     }
 
+    let PromptValues = {},
+        { PromptQuality, PromptLocation } = config;
+
+    if(PromptQuality && +options.quality > 0)
+        PromptValues.QualityID = +options.quality;
+    if(PromptLocation && options.location)
+        PromptValues.StoragePath = JSON.parse(config.sonarrStoragePaths)[+options.location - 1].path.replace(/\\/g, '\\\\');
+
     chrome.runtime.sendMessage({
             type: 'ADD_SONARR',
             url: `${ config.sonarrURL }api/series/`,
@@ -1122,6 +1219,7 @@ function pushSonarrRequest(options) {
             title: options.title,
             year: options.year,
             tvdbId: options.TVDbID,
+            ...PromptValues
         },
         response => {
             terminal.log('Pushing to Sonarr', response);
@@ -1303,20 +1401,21 @@ function modifyPlexButton(button, action, title, options = {}) {
                 option = options[index];
 
                 try {
-                    if(config.ombiURL)
+                    if(config.usingOmbi)
                         pushOmbiRequest(option);
-                    else if (config.watcherURL && !tv.test(option.type))
+                    else if (config.usingWatcher && !tv.test(option.type))
                         pushWatcherRequest(option);
-                    else if (config.radarrURL && !tv.test(option.type))
+                    else if (config.usingRadarr && !tv.test(option.type))
                         pushRadarrRequest(option);
-                    else if (config.sonarrURL && tv.test(option.type))
+                    else if (config.usingSonarr && tv.test(option.type))
                         pushSonarrRequest(option);
-                    else if(config.couchpotatoURL && tv.test(option.type))
+                    else if(config.usingCouchPotato)
                         $pushAddToCouchpotato(option);
                 } catch(error) {
                     terminal.error(`Failed to get "${ option.title }" (Error #${ ++fail })`)
                 }
             }
+            NOTIFIED = false;
 
             if (fail)
                 new Notification('error', `Failed to grab ${ fail } item${fail==1?'':'s'}`);
@@ -1352,15 +1451,15 @@ function modifyPlexButton(button, action, title, options = {}) {
                 case 'oload':
                     let href = options.href, path = '';
 
-                    if (config.ombiURL) {
+                    if (config.usingOmbi) {
                         path = '';
-                    } else if (config.watcherURL && !tv.test(options.type)) {
+                    } else if (config.usingWatcher && !tv.test(options.type)) {
                         path = '';
-                    } else if (config.radarrURL && !tv.test(options.type)) {
+                    } else if (config.usingRadarr && !tv.test(options.type)) {
                         path = config.radarrStoragePath;
-                    } else if (config.sonarrURL && tv.test(options.type)) {
+                    } else if (config.usingSonarr && tv.test(options.type)) {
                         path = config.sonarrStoragePath;
-                    } else if(config.couchpotatoURL && tv.test(options.type)) {
+                    } else if(config.usingCouchPotato) {
                         path = '';
                     }
 
@@ -1392,19 +1491,20 @@ function modifyPlexButton(button, action, title, options = {}) {
                     button.classList.add('wtp--download');
                     element.addEventListener('click', element.ON_CLICK = e => {
                         e.preventDefault();
-                        if (config.ombiURL) {
+                        if (config.usingOmbi) {
                             pushOmbiRequest(options);
-                        } else if (config.watcherURL && !tv.test(options.type)) {
+                        } else if (config.usingWatcher && !tv.test(options.type)) {
                             pushWatcherRequest(options);
-                        } else if (config.radarrURL && !tv.test(options.type)) {
+                        } else if (config.usingRadarr && !tv.test(options.type)) {
                             pushRadarrRequest(options);
-                        } else if (config.sonarrURL && tv.test(options.type)) {
+                        } else if (config.usingSonarr && tv.test(options.type)) {
                             pushSonarrRequest(options);
-                        } else if(config.couchpotatoURL && tv.test(options.type)) {
+                        } else if(config.usingCouchPotato) {
                             $pushAddToCouchpotato(options);
                         }
                     });
             }
+            NOTIFIED = false;
 
             element.setAttribute(hov, `Add "${ nice_title }" | ${ty}`);
             element.style.removeProperty('display');
@@ -1426,14 +1526,34 @@ function modifyPlexButton(button, action, title, options = {}) {
     }
 }
 
-async function squabblePlex(options, button) {
+async function squabblePlexMedia(options, button) {
     if(!(options && options.length && button))
         return;
 
     let results = [],
-        length = options.length;
+        length = options.length,
+        queries = (squabblePlexMedia.queries = squabblePlexMedia.queries || {});
 
-    squabblePlex.OPTIONS = options;
+    squabblePlexMedia.OPTIONS = options;
+
+    let query = JSON.stringify(options);
+
+    query = (queries[query] = queries[query] || {});
+
+    if(query.running === true)
+        return;
+    else if(query.results) {
+        let { results, multiple, items } = query;
+
+        new Notification('update', `Welcome back. ${ multiple } new ${ items } can be grabbed`, 7000, (event, target = button.querySelector('.list-action')) => target.click({ ...event, target }));
+
+        if (multiple)
+            modifyPlexButton(button, 'multiple', `Download ${ multiple } ${ items }`, results);
+
+        return;
+    }
+
+    query.running = true;
 
     new Notification('info', `Processing ${ length } item${ 's'[+(length === 1)] || '' }...`);
 
@@ -1455,7 +1575,7 @@ async function squabblePlex(options, button) {
                                 if (found) {
                                     // ignore found items, we only want new items
                                 } else {
-                                    let available = (config.ombiURL || config.watcherURL || config.radarrURL || config.sonarrURL || config.couchpotatoURL),
+                                    let available = (config.usingOmbi || config.usingWatcher || config.usingRadarr || config.usingSonarr || config.usingCouchPotato),
                                         action = (available ? 'downloader' : 'notfound'),
                                         title = available ?
                                             'Not on Plex (download available)':
@@ -1480,12 +1600,19 @@ async function squabblePlex(options, button) {
 
     if(po = button.querySelector('#plexit'))
         po.remove();
-    button.querySelector('ul').insertBefore(pi, op);
+    try {
+        button.querySelector('ul').insertBefore(pi, op);
+    } catch(e) { /* Don't do anything */ }
 
     let multiple = results.length,
         items = multiple == 1? 'item': 'items';
 
     new Notification('update', `Done. ${ multiple } new ${ items } can be grabbed`, 7000, (event, target = button.querySelector('.list-action')) => target.click({ ...event, target }));
+
+    query.running = false;
+    query.results = results;
+    query.multiple = multiple;
+    query.items = items;
 
     if (multiple)
         modifyPlexButton(button, 'multiple', `Download ${ multiple } ${ items }`, results);
@@ -1509,7 +1636,7 @@ function findPlexMedia(options) {
     findPlexMedia.OPTIONS = options;
 
     try {
-        getPlexMediaRequest(options)
+        return getPlexMediaRequest(options)
             .then(({ found, key }) => {
                 if (found) {
                         modifyPlexButton(options.button, 'found', 'On Plex', { ...options, key });
@@ -1519,7 +1646,9 @@ function findPlexMedia(options) {
 
                         if(po = options.button.querySelector('#plexit'))
                             po.remove();
-                        options.button.querySelector('ul').insertBefore(pi, op);
+                        try {
+                            options.button.querySelector('ul').insertBefore(pi, op);
+                        } catch(e) { /* Don't do anything */ }
                 } else {
                     options.field = 'original_title';
 
@@ -1533,9 +1662,11 @@ function findPlexMedia(options) {
 
                                 if(po = options.button.querySelector('#plexit'))
                                     po.remove();
-                                options.button.querySelector('ul').insertBefore(pi, op);
+                                try {
+                                    options.button.querySelector('ul').insertBefore(pi, op);
+                                } catch(e) { /* Don't do anything */ }
                             } else {
-                                let available = (config.ombiURL || config.watcherURL || config.radarrURL || config.sonarrURL || config.couchpotatoURL),
+                                let available = (config.usingOmbi || config.usingWatcher || config.usingRadarr || config.usingSonarr || config.usingCouchPotato),
                                     action = (available ? 'downloader' : 'notfound'),
                                     title = available ?
                                         'Not on Plex (download available)':
@@ -1549,10 +1680,14 @@ function findPlexMedia(options) {
                                 if(po = options.button.querySelector('#plexit'))
                                     po.remove();
                                 if(!!~[].slice.call(options.button.querySelector('ul').children).indexOf(op))
-                                    options.button.querySelector('ul').insertBefore(pi, op);
+                                    try {
+                                        options.button.querySelector('ul').insertBefore(pi, op);
+                                    } catch(e) { /* Don't do anything */ }
                             }
+                            return found;
                         });
                 }
+                return found;
             })
         } catch(error) {
             return modifyPlexButton(
@@ -1561,7 +1696,8 @@ function findPlexMedia(options) {
                     'Request to Plex Media Server failed',
                     options
                 ),
-                terminal.error(`Request to Plex failed: ${ String(error) }`);
+                terminal.error(`Request to Plex failed: ${ String(error) }`),
+                false;
                 // new Notification('Failed to communicate with Plex');
         }
 }
@@ -1594,15 +1730,21 @@ function getPlexMediaURL(PlexUIID, key) {
 chrome.runtime.onMessage.addListener(async(request, sender) => {
     terminal.log(`Listener event [${ request.instance_type }#${ request[request.instance_type] }]:`, request);
 
+    let data = request.data,
+        LOCATION = `${ request.name || 'anonymous' } @ instance ${ request.instance }`,
+        PARSING_ERROR = `Can't parse missing information. ${ LOCATION }`,
+        BUTTON_ERROR  = `The button failed to render. ${ LOCATION }`,
+        EMPTY_REQUEST = `The given request is empty. ${ LOCATION }`;
+
+    if(!data)
+        return terminal.warn(EMPTY_REQUEST);
+    let button = renderPlexButton();
+
+    if(!button)
+        return terminal.warn(BUTTON_ERROR);
+
     switch(request.type) {
         case 'POPULATE':
-            let button = renderPlexButton(),
-                data = request.data,
-                PARSING_ERROR = `Can't parse missing information. ${ request.name } @ instance ${ request.instance }`,
-                BUTTON_ERROR  = `The button failed to render. ${ request.name } @ instance ${ request.instance }`;
-
-            if(!button)
-                return terminal.warn(BUTTON_ERROR);
 
             if(data instanceof Array) {
                 for(let index = 0, length = data.length, item; index < length; index++)
@@ -1632,9 +1774,9 @@ chrome.runtime.onMessage.addListener(async(request, sender) => {
                 if(!data.length)
                     return terminal.error(PARSING_ERROR);
                 else
-                    squabblePlex(data, button);
+                    squabblePlexMedia(data, button);
             } else {
-                if(!data.title || !data.type)
+                if(!data || !data.title || !data.type)
                     return terminal.error(PARSING_ERROR);
 
                 let { image, type, title, year, IMDbID, TMDbID, TVDbID } = data;
@@ -1647,7 +1789,8 @@ chrome.runtime.onMessage.addListener(async(request, sender) => {
                 title = title || Db.title;
                 year = +(year || Db.year || 0);
 
-                findPlexMedia({ type, title, year, image, button, IMDbID, TMDbID, TVDbID });
+                let found = await findPlexMedia({ type, title, year, image, button, IMDbID, TMDbID, TVDbID });
+                sendUpdate('FOUND', { ...request, found });
             }
             return true;
 
@@ -1814,7 +1957,11 @@ String.prototype.toCaps = function toCaps(all) {
             child: {
                 value: index => media[index - 1],
                 ...properties
-            }
+            },
+            empty: {
+                value: !media.length,
+                ...properties
+            },
         });
 
         return media;
@@ -1823,8 +1970,8 @@ String.prototype.toCaps = function toCaps(all) {
 /** Adopted from <https://github.com/crislin2046/createElement>
  * LICENSE: MIT (2018)
  */
-    parent.furnish = function furnish(name, attributes = {}, ...children) {
-        let u = v => v && v.length, R = RegExp;
+    parent.furnish = function furnish(TAGNAME, ATTRIBUTES = {}, ...CHILDREN) {
+        let u = v => v && v.length, R = RegExp, name = TAGNAME, attributes = ATTRIBUTES, children = CHILDREN;
 
         if( !u(name) )
             throw TypeError(`TAGNAME cannot be ${ (name === '')? 'empty': name }`);
@@ -1854,7 +2001,7 @@ String.prototype.toCaps = function toCaps(all) {
             attributes.classList = attributes.classList.join(' ');
 
         Object.entries(attributes).forEach(
-            ([name, value]) => (/^(on|(?:inner|outer)(?:HTML|Text)|textContent|class(?:List|Name)$|value)/.test(name))?
+            ([name, value]) => (/^(on|(?:(?:inner|outer)(?:HTML|Text)|textContent|class(?:List|Name)|value)$)/.test(name))?
                 element[name] = value:
             element.setAttribute(name, value)
         );

@@ -92,7 +92,7 @@
             z-index: 18 !important;
         }
 
-        button {
+        button, input[type="button"i] {
             padding: 10px 18px !important;
             font-size: 16px !important;
             line-height: 1.33 !important;
@@ -114,7 +114,7 @@
 			transition: all 0.1s;
         }
 
-		button:hover {
+		button:hover, input[type="button"i]:hover {
 			background: #e59029 !important;
 		}
 
@@ -353,7 +353,7 @@
 			background: #ffffff4d!important;
 		}
 
-        [type="password"] ~ .hidden-help {
+        [type="password"] ~ .hidden-help, .hide {
             display: none;
         }
 
@@ -396,6 +396,13 @@
             border-radius: 50px;
             box-shadow: inset 0px 1px 1px rgba(0, 0, 0, 0.5), 0px 1px 0px rgba(255, 255, 255, 0.2);
         }
+
+		span.checkbox {
+			display: inline-block;
+
+			margin: 0;
+			vertical-align: text-bottom;
+		}
 
         .checkbox:after {
             content: 'OFF';
@@ -536,8 +543,8 @@
             color: #fff;
 
             position: fixed;
-            right: 0;
-            top: calc(100vh - 20px);
+            right: 4px;
+            top: calc(100vh - 24px);
         }
 
         [disabled], [disabled] * {
@@ -562,7 +569,7 @@
         }
 
         *::-webkit-scrollbar-track {
-            background: #0000!important;
+            background: url(../img/noise.png) fixed, url(../img/256.png) no-repeat fixed center, #3f4245 !important;
         }
 
         *::placeholder {
@@ -637,7 +644,7 @@ div
                 <input type="text" id="ombi_url" style="border-bottom-left-radius: 0 !important; border-bottom-right-radius: 0 !important;" placeholder="Enter your Ombi URL"/>
                 <input type="text" id="ombi_api" style="border-top-left-radius: 0 !important; border-top-right-radius: 0 !important;" placeholder="Enter your Ombi API key"/>
                 <br>
-                <em>Fill in Manager Settings with Ombi?</em>
+                <h3><em>Fill in Manager Settings with Ombi?</em></h3>
                 <div class="checkbox" prompt="y/n">
                     <input id="use-ombi" type="checkbox" data-option="UseOmbi" checked="true"/>
                     <label for="use-ombi"></label>
@@ -680,7 +687,7 @@ div
 
     <article>
         <details id="ombi">
-            <summary>Ombi (Movies/TV Shows)</summary>
+            <summary>Ombi (Movies/TV Shows) <span class="checkbox" disabled prompt-yes="use" prompt-no="skip"><input id="using-ombi" type="checkbox" data-option="usingOmbi" checked="false" /><label for="using-ombi"></label></span></summary>
 
             <h2>Connection Settings</h2>
             <section>
@@ -722,7 +729,7 @@ div
         </details>
 
         <details id="watcher">
-            <summary>Watcher (Movies)</summary>
+            <summary>Watcher (Movies) <span class="checkbox" disabled prompt-yes="use" prompt-no="skip"><input id="using-watcher" type="checkbox" data-option="usingWatcher" checked="false" /><label for="using-watcher"></label></span></summary>
 
             <h2>Connection Settings</h2>
             <section>
@@ -778,7 +785,7 @@ div
         </details>
 
         <details id="radarr">
-            <summary>Radarr (Movies)</summary>
+            <summary>Radarr (Movies) <span class="checkbox" disabled prompt-yes="use" prompt-no="skip"><input id="using-radarr" type="checkbox" data-option="usingRadarr" checked="false" /><label for="using-radarr"></label></span></summary>
 
             <h2>Connection Settings</h2>
             <section>
@@ -820,7 +827,7 @@ div
 
             <section>
                 <label>Radarr Storage Path</label>
-                <select type="text" data-option="radarrStoragePath">
+                <select data-option="radarrStoragePath">
                     <option value="">Press "Test [?]" first</option>
                 </select>
                 <div>
@@ -836,7 +843,7 @@ div
         </details>
 
         <details id="sonarr">
-            <summary>Sonarr (TV Shows)</summary>
+            <summary>Sonarr (TV Shows) <span class="checkbox" disabled prompt-yes="use" prompt-no="skip"><input id="using-sonarr" type="checkbox" data-option="usingSonarr" checked="false" /><label for="using-sonarr"></label></span></summary>
 
             <h2>Connection Settings</h2>
             <section>
@@ -878,7 +885,7 @@ div
 
             <section>
                 <label>Sonarr Storage Path</label>
-                <select type="text" data-option="sonarrStoragePath">
+                <select data-option="sonarrStoragePath">
                     <option value="">Press "Test [?]" first</option>
                 </select>
                 <div>
@@ -894,7 +901,7 @@ div
         </details>
 
         <details id="couchpotato">
-            <summary>CouchPotato (Movies/TV Shows)</summary>
+            <summary>CouchPotato (Movies/TV Shows) <span class="checkbox" disabled prompt-yes="use" prompt-no="skip"><input id="use-couchpotato" type="checkbox" data-option="usingCouchPotato" checked="false" /><label for="use-couchpotato"></label></span></summary>
 
             <h2>Connection Settings</h2>
             <section>
@@ -932,7 +939,6 @@ div
                 <div>This information will be used for <a href="https://wikipedia.org/wiki/Basic_access_authentication" target="_blank">Basic Access Authentication</a> only. This will allow the extension to ask Couchpotato for your list of videos, or to add to your list of videos.</div>
             </section>
 <!--
-
             <section>
                 <button type="button" id="couchpotato_test" disabled="true">Test <span id="couchpotato_test_status">?</span></button>
             </section>
@@ -943,6 +949,9 @@ div
                 </select>
             </section>
 -->
+			<section>
+				<button id="enable-couchpotato" data-option="enableCouchPotato">Enable CouchPotato</button>
+			</section>
         </details>
     </article>
 </div>
@@ -972,18 +981,20 @@ div
 
 			<h2>Proxy Settings</h2>
 			<section>
-				<label>Force Secure Connections</label>
-                <div class="checkbox">
-                    <input id="always-secure" type="checkbox" data-option="UseProxy"/>
-                    <label for="always-secure"></label>
-                </div>
+				<h3>
+					Force Secure Connections
+					<span class="checkbox">
+	                    <input id="always-secure" type="checkbox" data-option="UseProxy"/>
+	                    <label for="always-secure"></label>
+	                </span>
+				</h3>
 				<div>
 					If enabled, all insecure (HTTP) requests will be through an <a href="https://en.wikipedia.org/wiki/Proxy_server" target="_blank">HTTPS proxy</a>.
 				</div>
 			</section>
 
 			<section>
-				<label>Proxy URL &amp; Syntax</label>
+				<h3>Proxy URL &amp; Syntax</h3>
 				<input type="text" data-option="ProxyURL" placeholder="Enter the Proxy URL and syntax">
 				<div>
 					Please provide the URL of your proxy.
@@ -999,7 +1010,7 @@ div
 			</section>
 
 			<section>
-				<label>Proxy Headers</label>
+				<h3>Proxy Headers</h3>
 				<textarea type="text" data-option="ProxyHeaders" placeholder="Enter the Proxy headers" code></textarea>
 				<div>
 					If your proxy requires <a href="https://github.com/SpaceK33z/web-to-plex/wiki/Settings#connection-settings--proxy-settings" target="_blank">special headers</a>, enter that information in here.
@@ -1008,17 +1019,17 @@ div
 		</details>
 	</article>
 
-    <article>
-        <details>
-            <summary>Advanced Settings</summary>
-
-			<h2>List Options</h2>
+	<article>
+		<details>
+			<summary>Media Settings</summary>
 			<section>
-				<h3>AutoGrab</h3>
-                <div class="checkbox" prompt-yes="all" prompt-no="ask">
-                    <input id="use-autograb" type="checkbox" data-option="UseAutoGrab" checked="false" />
-                    <label for="use-autograb"></label>
-                </div>
+				<h3>
+					Auto Grab
+					<span class="checkbox" prompt-yes="all" prompt-no="ask">
+	                    <input id="use-autograb" type="checkbox" data-option="UseAutoGrab" checked="false" />
+	                    <label for="use-autograb"></label>
+	                </span>
+				</h3>
 				<div>
 					When the user presses the Grab button, the extension should:
 					<ul>
@@ -1026,7 +1037,7 @@ div
 						<li><em>ASK</em> user: Find items not on Plex, and grab what the user approves</li>
 					</ul>
 				</div>
-				<h3>Maximum AutoGrabs</h3>
+				<h3>Maximum Auto Grabs</h3>
                 <input type="range" data-option="AutoGrabLimit" min="10" max="100" step="10" value="30"/>
                 <output type="text" value="30"></output>
 				<div>
@@ -1034,13 +1045,76 @@ div
 				</div>
 			</section>
 			<hr>
-            <h2>Search Options</h2>
+			<section>
+				<h3>
+					Prompt for Save Location
+					<span class="checkbox" prompt="y/n">
+	                    <input id="prompt-location" type="checkbox" data-option="PromptLocation" checked="false" />
+	                    <label for="prompt-location"></label>
+	                </span>
+				</h3>
+				<div>
+					When the user presses the Grab button should the save location be asked for?
+					<br>
+					<em>Only supports Radarr and Sonarr.</em>
+				</div>
+			</section>
+			<hr>
+			<section>
+				<h3>
+					Prompt for Quality
+					<span class="checkbox" prompt="y/n">
+	                    <input id="prompt-quality" type="checkbox" data-option="PromptQuality" checked="false" />
+	                    <label for="prompt-quality"></label>
+	                </span>
+				</h3>
+				<div>
+					When the user presses the Grab button should the quality be asked for?
+					<br>
+					<em>Only supports Radarr and Sonarr.</em>
+				</div>
+			</section>
+		</details>
+	</article>
+
+	<article>
+		<details>
+			<summary>Notification Settings</summary>
+			<h3>
+				Ignore Found Items
+	            <span class="checkbox" prompt="y/n">
+	                <input id="notify-new-only" type="checkbox" data-option="NotifyNewOnly" checked="false" />
+	                <label for="notify-new-only"></label>
+	            </span>
+			</h3>
+			<div>
+				When the user presses the Grab button and an item already exists, should the notification be ignored or not?
+			</div>
+			<hr>
+			<h3>
+				Ignore Repetitive Notifications
+	            <span class="checkbox" prompt="y/n">
+	                <input id="notify-only-once" type="checkbox" data-option="NotifyOnlyOnce" checked="false" />
+	                <label for="notify-only-once"></label>
+	            </span>
+			</h3>
+			<div>
+				When the user presses the Grab button and there are several incoming notifications of similar information, should the notifications be ignored (after the first one) or not?
+			</div>
+		</details>
+	</article>
+
+	<article>
+		<details>
+			<Summary>Search Settings</Summary>
             <section>
-                <h3>Loose Searching</h3>
-                <div class="checkbox">
-                    <input id="use-loose" type="checkbox" data-option="UseLoose" checked="true"/>
-                    <label for="use-loose"></label>
-                </div>
+                <h3>
+					Loose Searching
+					<span class="checkbox">
+	                    <input id="use-loose" type="checkbox" data-option="UseLoose" checked="true"/>
+	                    <label for="use-loose"></label>
+	                </span>
+				</h3>
                 <label>Searching Sensitivity</label>
                 <br>
                 <input type="range" data-option="UseLooseScore" min="0" max="100" step="5" value="40" symbol="%" />
@@ -1051,19 +1125,26 @@ div
                     Higer sensitivity means more strict searches.
                 </div>
             </section>
-
+			<hr>
             <section>
-                <h3>Manager Searching</h3>
-                <div class="checkbox">
-                    <input id="manager-search" type="checkbox" data-option="ManagerSearch"/>
-                    <label for="manager-search"></label>
-                </div>
+                <h3>
+					Manager Searching
+					<span class="checkbox">
+	                    <input id="manager-search" type="checkbox" data-option="ManagerSearch"/>
+	                    <label for="manager-search"></label>
+	                </span>
+				</h3>
                 <div>
                     Allows the extension to use your manager(s) to find media.<br>
                     Currently supports: Ombi, Radarr, and Sonarr.
                 </div>
             </section>
-            <hr>
+		</details>
+	</article>
+
+    <article>
+        <details>
+            <summary>Advanced Settings</summary>
             <h2>API Keys</h2>
             <section>
                 <label>OMDb</label>
@@ -1104,6 +1185,21 @@ div
                     <strong>This action cannot be undone.</strong>
                 </div>
             </section>
+			<hr>
+			<h2>Developer Options</h2>
+			<section>
+				<h3>
+					Developer Mode
+	                <span class="checkbox">
+	                    <input id="extension-branch-type" type="checkbox" checked data-option="ExtensionBranchType"/>
+	                    <label for="extension-branch-type"></label>
+	                </span>
+				</h3>
+				<label>
+					<em>WARNING</em>: may cause data loss.<br>
+					Enables developer (debugging) mode, showing advance errors and logging to the console when possible.
+				</label>
+			</section>
         </details>
     </article>
 
@@ -1163,6 +1259,19 @@ div
 	<section>
 		<button id="save">Save</button>
 	</section>
+
+	<div class="hide">
+		<input data-option="watcherQualities" value />
+		<input data-option="radarrQualities" value />
+		<input data-option="sonarrQualities" value />
+		<input data-option="watcherStoragePaths" value />
+		<input data-option="radarrStoragePaths" value />
+		<input data-option="sonarrStoragePaths" value />
+		<input data-option="__radarrQuality" value />
+		<input data-option="__sonarrQuality" value />
+		<input data-option="__radarrStoragePath" value />
+		<input data-option="__sonarrStoragePath" value />
+	</div>
 
     <footer id="version"></footer>
 

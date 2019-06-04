@@ -1,5 +1,5 @@
 let script = {
-    "url": "*://*.couchpotato.life/*/*",
+    "url": "*://*.couchpotato.life/(movies|shows)/*",
 
     "ready": () => !$('.media-body .clearfix').empty && $('.media-body .clearfix').first.children.length,
 
@@ -12,12 +12,9 @@ let script = {
             type   = script.getType(),
             IMDbID = script.getIMDbID();
 
-        if(!type)
-            return TRY_AGAIN;
-
         title = title.textContent.trim();
         year  = year.textContent.trim();
-        image = image.empty? '': image.src;
+        image = image.empty? '': image.first.src;
 
         return { type, title, year, image, IMDbID };
     },
@@ -33,10 +30,10 @@ let script = {
     },
 
     "getIMDbID": () => {
-        let link = $('href*="imdb.com/title/tt"]');
+        let link = $('[href*="imdb.com/title/tt"]');
 
         if(!link.empty)
-            return link.href
+            return link.first.href
                 .replace(/^.*imdb\.com\/title\//, '')
                 .replace(/\/(?:maindetails\/?)?$/, '');
     },

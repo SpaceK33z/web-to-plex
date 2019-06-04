@@ -6,7 +6,7 @@
     #4: See https://github.com/SpaceK33z/web-to-plex/issues/61
 */
 
-let NO_DEBUGGER = false;
+let DEVELOPER_MODE;
 
 if(chrome.runtime.lastError)
     /* Always causes errors on *nix machines, so just "poke" the errors here */
@@ -24,48 +24,90 @@ const storage = (chrome.storage.sync || chrome.storage.local),
       __sonarr_storagePath__     = $$(`[data-option="sonarrStoragePath"]`),
       __save__ = $$('#save'),
       __options__ = [
+            /* Plex Settings */
             'plexURL',
             'plexToken',
             'UseOmbi',
-            'couchpotatoURLRoot',
-            'couchpotatoToken',
-            'couchpotatoBasicAuthUsername',
-            'couchpotatoBasicAuthPassword',
-//          'couchpotatoQualityProfileId',
+
+            /* Manager Settings */
+            // Ombi
+            'usingOmbi',
+            'ombiURLRoot',
+            'ombiToken',
+
+            // Watcher
+            'usingWatcher',
             'watcherURLRoot',
             'watcherToken',
             'watcherBasicAuthUsername',
             'watcherBasicAuthPassword',
             'watcherStoragePath',
             'watcherQualityProfileId',
+
+            // Radarr
+            'usingRadarr',
             'radarrURLRoot',
             'radarrToken',
             'radarrBasicAuthUsername',
             'radarrBasicAuthPassword',
             'radarrStoragePath',
             'radarrQualityProfileId',
+
+            // Sonarr
+            'usingSonarr',
             'sonarrURLRoot',
             'sonarrToken',
             'sonarrBasicAuthUsername',
             'sonarrBasicAuthPassword',
             'sonarrStoragePath',
             'sonarrQualityProfileId',
-            'ombiURLRoot',
-            'ombiToken',
 
+            // CouchPotato
+            'enableCouchPotato',
+            'usingCouchPotato',
+            'couchpotatoURLRoot',
+            'couchpotatoToken',
+            'couchpotatoBasicAuthUsername',
+            'couchpotatoBasicAuthPassword',
+            // 'couchpotatoQualityProfileId',
+
+            /* Other Settings */
             // Connection settings
             'UseProxy',
             'ProxyURL',
             'ProxyHeaders',
 
-            // Advance Settings
-            'OMDbAPI',
-            'TMDbAPI',
+            // Media settings
             'UseAutoGrab',
             'AutoGrabLimit',
+            'PromptLocation',
+            'PromptQuality',
+
+            // Notification Settings
+            'NotifyNewOnly',
+            'NotifyOnlyOnce',
+
+            // Search Settings
             'UseLoose',
             'UseLooseScore',
             'ManagerSearch',
+
+            // Advance Settings
+            'OMDbAPI',
+            'TMDbAPI',
+            'ExtensionBranchType',
+
+            // Hidden values
+            'watcherQualities',
+            'radarrQualities',
+            'sonarrQualities',
+            'watcherStoragePaths',
+            'radarrStoragePaths',
+            'sonarrStoragePaths',
+            '__radarrQuality',
+            '__sonarrQuality',
+            '__radarrStoragePath',
+            '__sonarrStoragePath',
 
             // Plugins - End of file, before "let empty = ..."
             'plugin_toloka',
@@ -79,7 +121,7 @@ let PlexServers = [],
     ClientID = null,
     manifest = chrome.runtime.getManifest(),
     terminal = // See #3
-        NO_DEBUGGER?
+        (DEVELOPER_MODE = $$('[data-option="ExtensionBranchType"]').checked)?
             { error: m => m, info: m => m, log: m => m, warn: m => m, group: m => m, groupEnd: m => m }:
         console;
 
@@ -526,7 +568,8 @@ function performOmbiTest(refreshing = false) {
         teststatus = $$('#ombi_test_status'),
         path = $$('[data-option="ombiURLRoot"]'),
         url,
-        headers = { headers: { apikey: options.ombiToken, accept: 'text/html' } };
+        headers = { headers: { apikey: options.ombiToken, accept: 'text/html' } },
+        enabled = $$('#using-ombi');
 
     teststatus.textContent = '?';
     options.ombiURLRoot = url = path.value = options.ombiURLRoot.replace(/^(\:\d+)/, 'localhost$1').replace(/^(?!^http(s)?:)/, 'http$1://').replace(/\/+$/, '');
@@ -539,10 +582,12 @@ function performOmbiTest(refreshing = false) {
 
                 if ((status = +status) >= 200 && status < 400) {
                     teststatus.textContent = '!';
-                    teststatus.classList = 'true';
+                    enabled.checked = teststatus.classList = true;
+                    enabled.parentElement.removeAttribute('disabled');
                 } else {
                     teststatus.textContent = '!';
-                    teststatus.classList = 'false';
+                    enabled.checked = teststatus.classList = false;
+                    enabled.parentElement.setAttribute('disabled');
 
                     throw new Error(`Ombi error [${ status }]`);
                 }
@@ -586,7 +631,8 @@ function performWatcherTest(QualityProfileID = 'Default', refreshing = false) {
         path = $$('[data-option="watcherURLRoot"]'),
         storagepath = __watcher_storagePath__,
         quality = __watcher_qualityProfile__,
-        url;
+        url,
+        enabled = $$('#using-watcher');
 
 	quality.innerHTML = '';
 	teststatus.textContent = '?';
@@ -611,24 +657,32 @@ function performWatcherTest(QualityProfileID = 'Default', refreshing = false) {
                 });
 
             teststatus.textContent = '!';
-            teststatus.classList = !!profiles.length;
+            teststatus.classList = enabled.checked = !!profiles.length;
 
             if(!profiles.length)
-                teststatus.title = 'Failed to communicate with Watcher';
+                return teststatus.title = 'Failed to communicate with Watcher';
+            enabled.parentElement.removeAttribute('disabled');
 
+            let qualities = [];
             profiles.forEach(profile => {
                 let option = document.createElement('option');
+                let { id, name } = profile;
 
-                option.value = profile.id;
-                option.textContent = profile.name;
+                option.value = id;
+                option.textContent = name;
+                qualities.push({ id, name });
                 quality.appendChild(option);
             });
+
+            $$('[data-option="watcherQualities"i]').value = JSON.stringify(qualities);
 
             // Because the <select> was reset, the original value is lost.
             if(QualityProfileID)
                 quality.value = QualityProfileID;
 
-            storagepath.value = path || '[Empty]';
+            storagepath.value = path || '[Default Location]';
+
+            $$('[data-option="watcherStoragePaths"i]').value = JSON.stringify(path || { path: '[Default Location]', id: 0 });
         });
 
     if(refreshing)
@@ -668,7 +722,8 @@ function performRadarrTest(QualityProfileID, StoragePath, refreshing = false) {
         path = $$('[data-option="radarrURLRoot"]'),
         storagepath = __radarr_storagePath__,
         quality = __radarr_qualityProfile__,
-        url;
+        url,
+        enabled = $$('#using-radarr');
 
 	quality.innerHTML = '';
 	teststatus.textContent = '?';
@@ -680,35 +735,46 @@ function performRadarrTest(QualityProfileID, StoragePath, refreshing = false) {
             if(!profiles) return new Notification('error', 'Failed to get Radarr configuration');
 
             teststatus.textContent = '!';
-            teststatus.classList = !!profiles.length;
+            teststatus.classList = enabled.checked = !!profiles.length;
 
             if(!profiles.length)
-                teststatus.title = 'Failed to communicate with Radarr';
+                return teststatus.title = 'Failed to communicate with Radarr';
+            enabled.parentElement.removeAttribute('disabled');
 
+            let qualities = [];
             profiles.forEach(profile => {
                 let option = document.createElement('option');
+                let { id, name } = profile;
 
-                option.value = profile.id;
-                option.textContent = profile.name;
+                option.value = id;
+                option.textContent = name;
+                qualities.push({ id, name });
                 quality.appendChild(option);
             });
 
+            $$('[data-option="radarrQualities"i]').value = JSON.stringify(qualities);
+
             // Because the <select> was reset, the original value is lost.
             if(QualityProfileID)
-                quality.value = QualityProfileID;
+                $$('[data-option="__radarrQuality"i]').value = quality.value = QualityProfileID;
         });
 
+        let StoragePaths = [];
         getRadarr(options, 'rootfolder').then(storagepaths => {
             storagepaths.forEach(path => {
                 let option = document.createElement('option');
 
-                option.value = option.textContent = path.path;
+                StoragePaths.push((option.value = option.textContent = path.path).replace(/\\/g, '/'));
                 storagepath.appendChild(option);
             });
+
+            $$('[data-option="radarrStoragePaths"i]').value = JSON.stringify(storagepaths);
 
             // Because the <select> was reset, the original value is lost.
             if(StoragePath)
                 storagepath.value = StoragePath;
+
+            $$('[data-option="__radarrStoragePath"i]').value = StoragePaths.indexOf(StoragePath.replace(/\\/g, '/')) + 1;
         });
     };
 
@@ -749,7 +815,8 @@ function performSonarrTest(QualityProfileID, StoragePath, refreshing = false) {
         path = $$('[data-option="sonarrURLRoot"]'),
         storagepath = __sonarr_storagePath__,
         quality = __sonarr_qualityProfile__,
-        url;
+        url,
+        enabled = $$('#using-sonarr');
 
 	quality.innerHTML = '';
 	teststatus.textContent = '?';
@@ -761,34 +828,46 @@ function performSonarrTest(QualityProfileID, StoragePath, refreshing = false) {
             if(!profiles) return new Notification('error', 'Failed to get Sonarr configuration');
 
             teststatus.textContent = '!';
-            teststatus.classList = !!profiles.length;
+            teststatus.classList = enabled.checked = !!profiles.length;
 
             if(!profiles.length)
-                teststatus.title = 'Failed to communicate with Sonarr';
+                return teststatus.title = 'Failed to communicate with Sonarr';
+            enabled.parentElement.removeAttribute('disabled');
 
+            let qualities = [];
             profiles.forEach(profile => {
                 let option = document.createElement('option');
-                option.value = profile.id;
-                option.textContent = profile.name;
+                let { id, name } = profile;
+
+                option.value = id;
+                option.textContent = name;
+                qualities.push({ id, name });
                 quality.appendChild(option);
             });
 
+            $$('[data-option="sonarrQualities"i]').value = JSON.stringify(qualities);
+
             // Because the <select> was reset, the original value is lost.
             if(QualityProfileID)
-                quality.value = QualityProfileID;
+                $$('[data-option="__sonarrQuality"i]').value = quality.value = QualityProfileID;
         });
 
+        let StoragePaths = [];
         getSonarr(options, 'rootfolder').then(storagepaths => {
             storagepaths.forEach(path => {
                 let option = document.createElement('option');
 
-                option.value = option.textContent = path.path;
+                StoragePaths.push((option.value = option.textContent = path.path).replace(/\\/g, '/'));
                 storagepath.appendChild(option);
             });
+
+            $$('[data-option="sonarrStoragePaths"i]').value = JSON.stringify(storagepaths);
 
             // Because the <select> was reset, the original value is lost.
             if(StoragePath)
                 storagepath.value = StoragePath;
+
+            $$('[data-option="__sonarrStoragePath"i]').value = StoragePaths.indexOf(StoragePath.replace(/\\/g, '/')) + 1;
         });
     };
 
@@ -800,6 +879,10 @@ function performSonarrTest(QualityProfileID, StoragePath, refreshing = false) {
                 Get():
             new Notification('error', 'The user refused permission to access Sonarr')
         );
+}
+
+function enableCouchPotato() {
+    $$('#use-couchpotato').parentElement.removeAttribute('disabled');
 }
 
 function HandleProxySettings(data) {
@@ -1105,6 +1188,8 @@ function restoreOptions(OPTIONS) {
 			performRadarrTest(items.radarrQualityProfileId, items.radarrStoragePath, true);
         if(items.sonarrURLRoot)
 			performSonarrTest(items.sonarrQualityProfileId, items.sonarrStoragePath, true);
+        if(items.couchpotatoURLRoot)
+            enableCouchPotato();
 	}
 
 
@@ -1221,8 +1306,8 @@ for(let index = 0, length = builtin_array.length; builtinElement && index < leng
     builtinElement.innerHTML +=
 `
 <h3>${ title }</h3>
-<div class="checkbox" disabled>
-    <input id="${ name }" type="checkbox" disabled checked="true" data-option="${ name }" bid="${ r }" js="${ js }">
+<div class="checkbox">
+    <input id="${ name }" type="checkbox" checked="true" data-option="${ name }" bid="${ r }" js="${ js }">
     <label for="${ name }"></label>
 </div>
 <div>
@@ -1232,12 +1317,33 @@ for(let index = 0, length = builtin_array.length; builtinElement && index < leng
 <hr>
 `;
 
-    save(`permission:${ r }`, true);
-    save(`script:${ r }`, js);
-    save(`builtin:${ r }`, true);
+    // save(`permission:${ r }`, true);
+    // save(`script:${ r }`, js);
+    // save(`builtin:${ r }`, true);
 }
 
 save('builtin.sites', builtin_sites);
+
+$$('[id^="builtin_"]', true)
+    .forEach(element => element.addEventListener('click', event => {
+        let self = event.target,
+            bid = self.getAttribute('bid'),
+            js = self.getAttribute('js');
+
+        if(self.checked) {
+            terminal.log(bid, builtins[bid]);
+            requestURLPermissions(sites[pid].replace(/https?:\/\/(ww\w+\.)?/i, '*://*.').replace(/\/?$/, '/*'), granted => {
+                save(`permission:${ bid }`, granted);
+                save(`script:${ bid }`, granted? js: null);
+            });
+        } else {
+            save(`permission:${ bid }`, false);
+            save(`script:${ bid }`, null);
+        }
+
+        save(`builtin:${ bid }`, true);
+    })
+);
 
 // Plugins and their links
 let plugins = {
@@ -1287,7 +1393,7 @@ $$('[id^="plugin_"]', true)
             js = self.getAttribute('js');
 
         if(self.checked) {
-            terminal.log(pid, sites[pid])
+            terminal.log(pid, sites[pid]);
             requestURLPermissions(sites[pid].replace(/https?:\/\/(ww\w+\.)?/i, '*://*.').replace(/\/?$/, '/*'), granted => {
                 save(`permission:${ pid }`, granted);
                 save(`script:${ pid }`, granted? js: null);
@@ -1325,6 +1431,7 @@ $$('#watcher_test', true).forEach(element => element.addEventListener('click', e
 $$('#radarr_test', true).forEach(element => element.addEventListener('click', event => performRadarrTest()));
 $$('#sonarr_test', true).forEach(element => element.addEventListener('click', event => performSonarrTest()));
 $$('#ombi_test', true).forEach(element => element.addEventListener('click', event => performOmbiTest()));
+$$('#enable-couchpotato', true).forEach(element => element.addEventListener('click', event => enableCouchPotato()));
 
 /* INPUT | Get the JSON data */
 $$('#json_get').addEventListener('click', event => {
@@ -1367,6 +1474,7 @@ $$('#erase_cache').addEventListener('click', event => {
 
 $$('#version')
     .innerHTML = `Version ${ chrome.manifest.version }`;
+
 $$('[type="range"]', true)
     .forEach((element, index, array) => {
         let sibling = element.nextElementSibling,
@@ -1375,4 +1483,18 @@ $$('[type="range"]', true)
         sibling.value = element.value + symbol;
 
         element.oninput = (event, self) => (self = event.target).nextElementSibling.value = self.value + (self.getAttribute('symbol') || '');
+    });
+
+$$('.checkbox', true)
+    .forEach((element, index, array) => {
+        element.addEventListener('click', event => {
+            let self = event.target;
+
+            while(!~[...self.classList].indexOf('checkbox') && self.parentElement && self.parentElement != self)
+                self = self.parentElement;
+
+            if('disabled' in self.attributes)
+                return event.preventDefault(true);
+            /* Stop the event from further processing */
+        });
     });

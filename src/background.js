@@ -447,6 +447,7 @@ function $searchPlex(connection, headers, options) {
     let title = encodeURIComponent(options.title.replace(/\s+/g, ' ')),
         finalURL = `${ url }?query=${ field }:${ title }`;
 
+    // terminal.warn(`Fetching <${ JSON.stringify(headers) } ${ finalURL } >`);
     return fetch(finalURL, { headers })
         .then(response => response.json())
         .then(data => {
@@ -486,7 +487,8 @@ function $searchPlex(connection, headers, options) {
                 found: !!media,
                 key
             };
-        });
+        })
+        .catch(error => { throw error });
 }
 
 async function searchPlex(request, sendResponse) {
@@ -644,6 +646,8 @@ chrome.runtime.onMessage.addListener((request, sender, callback) => {
                 return true;
             case 'PLUGIN':
             case 'SCRIPT':
+            case '_INIT_':
+            case 'FOUND':
                 /* These are meant to be handled by plugn.js */
                 return false;
             default:

@@ -91,7 +91,7 @@ function initList() {
                 if (!options.length)
                     new Notification('error', 'Failed to process list');
                 else
-                    squabblePlex(options, button);
+                    squabblePlexMedia(options, button);
             }, 50);
     });
 }
