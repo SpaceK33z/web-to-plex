@@ -1,2 +1,2 @@
 /* global sendUpdate(type:string, details:object) */
-sendUpdate('SCRIPT', { script: 'hulu' });
+(init = () => sendUpdate('SCRIPT', { script: 'hulu' }))();

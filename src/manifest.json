@@ -123,6 +123,18 @@
 			"matches": ["*://*.flickmetrix.com/*"],
 			"js": ["utils.js", "sites/flickmetrix/index.js"],
 			"css": ["sites/flickmetrix/index.css", "sites/common.css"]
+		},{
+			"matches": ["*://*.justwatch.com/*"],
+			"js": ["utils.js", "sites/justwatch/index.js"],
+			"css": ["sites/justwatch/index.css", "sites/common.css"]
+		},{
+			"matches": ["*://*.moviemeter.nl/*"],
+			"js": ["utils.js", "sites/moviemeter/index.js"],
+			"css": ["sites/moviemeter/index.css", "sites/common.css"]
+		},{
+			"matches": ["*://*.allocine.fr/*"],
+			"js": ["utils.js", "sites/allocine/index.js"],
+			"css": ["sites/allocine/index.css", "sites/common.css"]
 		}
 	],
 

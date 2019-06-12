@@ -1,11 +1,11 @@
 /* eslint-disable no-unused-vars */
 /* global config */
 
-let NO_DEBUGGER = false;
+let DISABLE_DEBUGGER = false;
 
 let date = (new Date),
     terminal =
-        NO_DEBUGGER?
+        DISABLE_DEBUGGER?
             { error: m => m, info: m => m, log: m => m, warn: m => m, group: m => m, groupEnd: m => m }:
         console;
 
@@ -39,38 +39,6 @@ let IMG_URL = {
     'noise_background': getURL('img/noise.png'),
     'nil':              getURL('img/null.png'),
 };
-
-function wait(on, then) {
-    if (on && on())
-        then && then();
-    else
-        setTimeout(() => wait(on, then), 50);
-}
-
-// the custom "on location change" event
-let locationchangecallbacks = [];
-
-function watchlocationchange(subject) {
-    watchlocationchange[subject] = watchlocationchange[subject] || location[subject];
-
-    if (watchlocationchange[subject] != location[subject]) {
-        watchlocationchange[subject] = location[subject];
-
-        for(let index = 0, length = locationchangecallbacks.length, callback; index < length; index++) {
-            callback = locationchangecallbacks[index];
-
-            if(callback && typeof callback == 'function')
-                callback(new Event('locationchange', { bubbles: true }));
-        }
-    }
-}
-
-if(!('onlocationchange' in window))
-    Object.defineProperty(window, 'onlocationchange', {
-        set: callback => locationchangecallbacks.push(callback)
-    });
-
-setInterval(() => watchlocationchange('pathname'), 1000); // at least 1s is needed to properly fire the event ._.
 
 // the storage
 const storage = chrome.storage.sync || chrome.storage.local;
@@ -108,7 +76,7 @@ async function save(name = '', data) {
 }
 
 async function kill(name) {
-  return storage.remove(['Cache-Data/' + btoa(name.toLowerCase().replace(/\s+/g, ''))]);
+    return storage.remove(['Cache-Data/' + btoa(name.toLowerCase().replace(/\s+/g, ''))]);
 }
 
 // create and/or queue a notification
@@ -130,7 +98,7 @@ class Notification {
             return (last => setTimeout(() => new Notification(state, text, timeout, callback, requiresClick), +(new Date) - last.start))(last);
 
         let element = document.furnish(`div.web-to-plex-notification.${state}`, {
-            onclick: event => {
+            onmouseup: event => {
                 let notification = Notification.queue[event.target.id],
                     element = notification.element;
 
@@ -151,7 +119,7 @@ class Notification {
             span:  +timeout,
             done:  false,
             index: queue.list.length,
-            job:   setTimeout(() => element.onclick({ target: element, requiresClick }), timeout),
+            job:   setTimeout(() => element.onmouseup({ target: element, requiresClick }), timeout),
             id:    +element.id,
             callback, element
         };
@@ -242,7 +210,7 @@ class Prompt {
 
                                     elements.push(
                                         document.furnish('li.web-to-plex-prompt-option.mutable', { value: index, innerHTML: `<h2>${ index + 1 } \u00b7 ${ ITEM.title }${ ITEM.year? ` (${ ITEM.year })`: '' } <em>\u2014 ${ ITEM.type }</em></h2>` },
-                                            document.furnish('button.remove', { title: `Remove "${ ITEM.title }"`, onclick: event => { remove(event.target.parentElement); event.target.remove() } }),
+                                            document.furnish('button.remove', { title: `Remove "${ ITEM.title }"`, onmouseup: event => { remove(event.target.parentElement); event.target.remove() } }),
                                             (
                                                 config.PromptQuality?
                                                     P_QUA = document.furnish('select.quality', { index, onchange: event => data[event.target.getAttribute('index')].quality = event.target.value }, ...profiles[/(movie|film|cinema)/i.test(ITEM.type)?'movie':'show'].map(Q => document.furnish('option', { value: Q.id }, Q.name))):
@@ -316,9 +284,9 @@ class Prompt {
                                     }
                                 }
                             } }),
-                            document.furnish('button.web-to-plex-prompt-decline', { onclick: event => { remove(true); callback([]) } }, 'Close'),
-                            document.furnish('button.web-to-plex-prompt-accept', { onclick: event => { remove(true); new Prompt(prompt_type, options, callback, container) } }, 'Reset'),
-                            document.furnish('button.web-to-plex-prompt-accept', { onclick: event => { remove(true); callback(data.filter(value => value !== null && value !== undefined)) } }, 'Continue')
+                            document.furnish('button.web-to-plex-prompt-decline', { onmouseup: event => { remove(true); callback([]) } }, 'Close'),
+                            document.furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { remove(true); new Prompt(prompt_type, options, callback, container) } }, 'Reset'),
+                            document.furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { remove(true); callback(data.filter(value => value !== null && value !== undefined)) } }, 'Continue')
                         )
                     )
                 );
@@ -355,7 +323,7 @@ class Prompt {
 
                                     elements.push(
                                         document.furnish('li.web-to-plex-prompt-option.mutable', { value: index, innerHTML: `<h2>${ index + 1 } \u00b7 ${ ITEM.title }${ ITEM.year? ` (${ ITEM.year })`: '' } <em>\u2014 ${ ITEM.type }</em></h2>` },
-                                            document.furnish('button.remove', { title: `Remove "${ ITEM.title }"`, onclick: event => { remove(event.target.parentElement); event.target.remove() } }),
+                                            document.furnish('button.remove', { title: `Remove "${ ITEM.title }"`, onmouseup: event => { remove(event.target.parentElement); event.target.remove() } }),
                                             (
                                                 config.PromptQuality?
                                                     P_QUA = document.furnish('select.quality', { index, onchange: event => data[event.target.getAttribute('index')].quality = event.target.value }, ...profiles[/(movie|film|cinema)/i.test(ITEM.type)?'movie':'show'].map(Q => document.furnish('option', { value: Q.id }, Q.name))):
@@ -380,9 +348,9 @@ class Prompt {
 
                         // The engagers
                         document.furnish('div.web-to-plex-prompt-footer', {},
-                            document.furnish('button.web-to-plex-prompt-decline', { onclick: event => { remove(true); callback([]) } }, 'Close'),
-                            document.furnish('button.web-to-plex-prompt-accept', { onclick: event => { remove(true); new Prompt(prompt_type, options, callback, container) } }, 'Reset'),
-                            document.furnish('button.web-to-plex-prompt-accept', { onclick: event => { remove(true); callback(data.filter(value => value !== null && value !== undefined)) } }, 'Continue')
+                            document.furnish('button.web-to-plex-prompt-decline', { onmouseup: event => { remove(true); callback([]) } }, 'Close'),
+                            document.furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { remove(true); new Prompt(prompt_type, options, callback, container) } }, 'Reset'),
+                            document.furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { remove(true); callback(data.filter(value => value !== null && value !== undefined)) } }, 'Continue')
                         )
                     )
                 );
@@ -583,7 +551,7 @@ async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APII
     rqut =
     /(tv|show|series)/i.test(rqut)?
         'tvdb':
-    /(movie|film)/i.test(rqut)?
+    /(movie|film|cinema)s?/i.test(rqut)?
         'tmdb':
     rqut || '*';
     manable = manable && (config.usingOmbi || (config.usingRadarr && rqut == 'tmdb') || (config.usingSonarr && rqut == 'tvdb'));
@@ -1277,18 +1245,18 @@ function renderPlexButton(persistent) {
 
                 furnish('li#wtp-plexit.list-item', {
                     tooltip: 'Open Plex It!',
-                    onclick: event => {
+                    onmouseup: event => {
                         let self = event.target, parent = button;
 
                         (d=>{let s=d.createElement('script'),h=d.querySelector('head');s.type='text/javascript';s.src='//ephellon.github.io/plex.it.js';h.appendChild(s)})(document);
                     }
                 },
-                furnish('img[alt=Favorite]', { src: IMG_URL.plexit_icon_48, onclick: event => event.target.parentElement.click() }) // <img/>
+                furnish('img[alt=Favorite]', { src: IMG_URL.plexit_icon_48, onmouseup: event => event.target.parentElement.click() }) // <img/>
                 ),
 
                 furnish('li#wtp-hide.list-item', {
                     tooltip: 'Hide Web to Plex',
-                    onclick: event => {
+                    onmouseup: event => {
                         let self = event.target, parent = button, state = self.getAttribute('state') || 'show';
 
                         parent.classList.remove(state);
@@ -1308,12 +1276,12 @@ function renderPlexButton(persistent) {
                         self.setAttribute('state', state);
                     }
                 },
-                furnish('img[alt=Hide]', { src: IMG_URL.hide_icon_48, onclick: event => event.target.parentElement.click() }) // <img/>
+                furnish('img[alt=Hide]', { src: IMG_URL.hide_icon_48, onmouseup: event => event.target.parentElement.click() }) // <img/>
                 ),
 
                 furnish('li#wtp-refresh.list-item', {
                     tooltip: 'Reload Web to Plex',
-                    onclick: event => {
+                    onmouseup: event => {
                         let self = event.target, parent = button;
 
                         if(init)
@@ -1322,18 +1290,18 @@ function renderPlexButton(persistent) {
                             new Notification('warning', "Couldn't reload. Please refresh the page.");
                     }
                 },
-                furnish('img[alt=Reload]', { src: IMG_URL.reload_icon_48, onclick: event => event.target.parentElement.click() }) // <img/>
+                furnish('img[alt=Reload]', { src: IMG_URL.reload_icon_48, onmouseup: event => event.target.parentElement.click() }) // <img/>
                 ),
 
                 furnish('li#wtp-options.list-item', {
                     tooltip: 'Open settings',
-                    onclick: event => {
+                    onmouseup: event => {
                         let self = event.target, parent = button;
 
                         return openOptionsPage();
                     }
                 },
-                furnish('img[alt=Settings]', { src: IMG_URL.settings_icon_48, onclick: event => event.target.parentElement.click() }) // <img/>
+                furnish('img[alt=Settings]', { src: IMG_URL.settings_icon_48, onmouseup: event => event.target.parentElement.click() }) // <img/>
                 )
                 // </li>
             )
@@ -1594,7 +1562,7 @@ async function squabblePlexMedia(options, button) {
 
     results = results.filter(v => v.status == 'downloader');
 
-    let img = furnish('img', { title: 'Add to Plex It!', src: IMG_URL.plexit_icon_48, onclick: event => {let frame = document.querySelector('#plexit-bookmarklet-frame'); frame.src = frame.src.replace(/(#plexit:.*)?$/, '#plexit:' + event.target.parentElement.getAttribute('data'))} }),
+    let img = furnish('img', { title: 'Add to Plex It!', src: IMG_URL.plexit_icon_48, onmouseup: event => {let frame = document.querySelector('#plexit-bookmarklet-frame'); frame.src = frame.src.replace(/(#plexit:.*)?$/, '#plexit:' + event.target.parentElement.getAttribute('data'))} }),
         po, pi = furnish('li#plexit.list-item', { data: btoa(JSON.stringify(results)) }, img),
         op  = document.querySelector('#wtp-plexit');
 
@@ -1630,8 +1598,8 @@ function findPlexMedia(options) {
     let opt = { name: options.title, year: options.year, image: options.image || IMG_URL.nil, type: options.type, imdb: IMDbID, IMDbID, tmdb: TMDbID, TMDbID, tvdb: TVDbID, TVDbID },
         op  = document.querySelector('#wtp-plexit'),
         img = (options.image)?
-            furnish('div', { tooltip: 'Add to Plex It!', style: `background: url(${ IMG_URL.plexit_icon_16 }) top right/60% no-repeat, #0004 url(${ opt.image }) center/contain no-repeat; height: 48px; width: 34px;`, draggable: true, onclick: event => {let frame = document.querySelector('#plexit-bookmarklet-frame'); frame.src = frame.src.replace(/(#plexit:.*)?$/, '#plexit:' + event.target.parentElement.getAttribute('data'))} }):
-        furnish('img', { title: 'Add to Plex It!', src: IMG_URL.plexit_icon_48, onclick: event => {let frame = document.querySelector('#plexit-bookmarklet-frame'); frame.src = frame.src.replace(/(#plexit:.*)?$/, '#plexit:' + event.target.parentElement.getAttribute('data'))} });
+            furnish('div', { tooltip: 'Add to Plex It!', style: `background: url(${ IMG_URL.plexit_icon_16 }) top right/60% no-repeat, #0004 url(${ opt.image }) center/contain no-repeat; height: 48px; width: 34px;`, draggable: true, onmouseup: event => {let frame = document.querySelector('#plexit-bookmarklet-frame'); frame.src = frame.src.replace(/(#plexit:.*)?$/, '#plexit:' + event.target.parentElement.getAttribute('data'))} }):
+        furnish('img', { title: 'Add to Plex It!', src: IMG_URL.plexit_icon_48, onmouseup: event => {let frame = document.querySelector('#plexit-bookmarklet-frame'); frame.src = frame.src.replace(/(#plexit:.*)?$/, '#plexit:' + event.target.parentElement.getAttribute('data'))} });
 
     findPlexMedia.OPTIONS = options;
 
@@ -1822,7 +1790,40 @@ top.addEventListener('message', request => {
     }
 });
 
-String.prototype.toCaps = function toCaps(all) {
+function wait(on, then) {
+    if (on && on())
+        then && then();
+    else
+        setTimeout(() => wait(on, then), 50);
+}
+
+// the custom "on location change" event
+let locationchangecallbacks = [];
+
+function watchlocationchange(subject) {
+    watchlocationchange[subject] = watchlocationchange[subject] || location[subject];
+
+    if (watchlocationchange[subject] != location[subject]) {
+        watchlocationchange[subject] = location[subject];
+
+        for(let index = 0, length = locationchangecallbacks.length, callback; index < length; index++) {
+            callback = locationchangecallbacks[index];
+
+            if(callback && typeof callback == 'function')
+                callback(new Event('locationchange', { bubbles: true }));
+        }
+    }
+}
+
+if(!('onlocationchange' in window))
+    Object.defineProperty(window, 'onlocationchange', {
+        set: callback => locationchangecallbacks.push(callback)
+    });
+
+watchlocationchange.interval = watchlocationchange.interval || setInterval(() => watchlocationchange('href'), 1000);
+// at least 1s is needed to properly fire the event ._.
+
+String.prototype.toCaps = String.prototype.toCaps || function toCaps(all) {
     /** Titling Caplitalization
      * Articles: a, an, & the
      * Conjunctions: and, but, for, nor, or, so, & yet
@@ -1876,7 +1877,7 @@ String.prototype.toCaps = function toCaps(all) {
  <div>2</div>
  <div>3</div>
  */
-    parent.queryBy = function queryBy(selectors, container = parent) {
+    parent.queryBy = parent.queryBy || function queryBy(selectors, container = parent) {
         // Helpers
         let copy  = array => [...array],
             query = (SELECTORS, CONTAINER = container) => CONTAINER.querySelectorAll(SELECTORS);
@@ -1970,7 +1971,7 @@ String.prototype.toCaps = function toCaps(all) {
 /** Adopted from <https://github.com/crislin2046/createElement>
  * LICENSE: MIT (2018)
  */
-    parent.furnish = function furnish(TAGNAME, ATTRIBUTES = {}, ...CHILDREN) {
+    parent.furnish = parent.furnish || function furnish(TAGNAME, ATTRIBUTES = {}, ...CHILDREN) {
         let u = v => v && v.length, R = RegExp, name = TAGNAME, attributes = ATTRIBUTES, children = CHILDREN;
 
         if( !u(name) )

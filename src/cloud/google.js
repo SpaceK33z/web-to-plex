@@ -1,5 +1,6 @@
 let SHOW = '[href*="thetvdb.com/"][href*="id="], [href*="thetvdb.com/series/"], [href*="themoviedb.org/tv/"], [href*="imdb.com/title/tt"][href$="externalsites"]',
-    FILM = '#media_result_group, [href*="themoviedb.org/tv/"], [href*="imdb.com/title/tt"]';
+    FILM = '[href*="themoviedb.org/tv/"], [href*="imdb.com/title/tt"]';
+    // FILM = '#media_result_group, ...'
 
 let script = {
     "url": "*://www.google.com/search",
@@ -27,7 +28,7 @@ let script = {
             _year = { textContent: '' };
             _image = { src: '' };
         } else if(type == 'error') {
-            return {};
+            return null;
         }
 
         (_year.textContent + '').replace(/(\d{4})/);

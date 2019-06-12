@@ -430,7 +430,7 @@ function getOptionValues() {
 
         if(element) {
             if(element.type == 'checkbox')
-                options[option] = element.checked || element.getAttribute('checked') == "true";
+                options[option] = element.checked || element.getAttribute('save') == "true";
             else
                 options[option] = element.value;
         }
@@ -1286,6 +1286,8 @@ let builtins = {
     "TV Maze": "https://tvmaze.com/",
     "Google": "https://play.google.com/store/movies",
     "iTunes": "https://itunes.apple.com/",
+    "JustWatch": "https://justwatch.com/",
+    "MovieMeter": "https://moviemeter.nl/",
 
 }, builtin_array = [], builtin_sites = {}, builtinElement = $$('#builtin');
 

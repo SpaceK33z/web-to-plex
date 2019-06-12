@@ -1,12 +1,10 @@
 let script = {
-    "url": "*://*.imdb.com/(title|list)/(tt|ls)\\d+/*",
+    "url": "*://*.imdb.com/(title|list)/(tt|ls)\\d+/",
 
     "ready": () => !$('#servertime').empty,
 
     "init": (ready) => {
         let _title, _year, _image, R = RegExp;
-
-        console.log('Initiating...');
 
         let type   = script.getType(),
             IMDbID = script.getIMDbID(),
@@ -37,7 +35,7 @@ let script = {
                 title = $('.originalTitle, .title_wrapper h1').first;
                 alttitle = $('.title_wrapper h1').first;
                 reldate = $('.title_wrapper [href*="/releaseinfo"]').first;
-                date = $('title').textContent.trim();
+                date = $('title').first.textContent.trim();
                 regdate = date.match(/Series\s*\(?(\d{4})(?:[^\)]+\))?/i);
                 image = $('img[alt$="poster"i]').first;
 
@@ -52,11 +50,9 @@ let script = {
                 break;
 
             case 'list':
-                let items   = $('#main .lister-item');
+                let items = $('#main .lister-item');
 
                 options = [];
-
-                console.log('Processing list...')
 
                 if(!/[\?\&]mode=simple\b/i.test(top.location.search))
                     top.open(location.href.replace(/([\?\&]|\/$)(?:mode=\w+&*)?/, '$1mode=simple&'), '_self');
@@ -68,9 +64,9 @@ let script = {
                         options.push(option);
                 });
                 break;
-        }
 
-        console.log('Done.', options);
+            default: return null;
+        }
 
         return options;
     },
@@ -78,8 +74,6 @@ let script = {
     "getType": () => {
         let tag  = $('meta[property="og:type"]').first,
             type = 'error';
-
-        console.log('Getting type...');
 
         if(tag) {
             switch(tag.content) {
@@ -94,8 +88,6 @@ let script = {
         } else if(top.location.pathname.startsWith('/list/')) {
             type = 'list';
         }
-
-        console.log('Got type:', type);
 
         return type;
     },
@@ -113,16 +105,12 @@ let script = {
             IMDbID = title.href.replace(/^[^]*\/(tt\d+)\b[^]*$/, '$1'),
             type;
 
-        console.log('Processing list item...');
-
         title = title.textContent.trim();
         year  = script.clean(year.textContent);
         image = image.src;
         type  = (/[\-\u2010-\u2015]/.test(year)? 'show': 'movie');
 
         year = +year;
-
-        console.log('processed list item:', { type, title, year, image, IMDbID });
 
         return { type, title, year, image, IMDbID };
     },

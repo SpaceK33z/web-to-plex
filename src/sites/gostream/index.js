@@ -1,2 +1,2 @@
 /* global sendUpdate(type:string, details:object) */
-sendUpdate('SCRIPT', { script: 'gostream' });
+(init = () => sendUpdate('SCRIPT', { script: 'gostream' }))();

@@ -33,7 +33,7 @@ function RandomName(length = 16, symbol = '') {
 let running = [], instance = RandomName(), TAB, cache = {};
 
 let tabchange = tabs => {
-   let tab = tabs[0];
+    let tab = tabs[0];
 
     if(!tab || FOUND[instance]) return;
 
@@ -69,7 +69,7 @@ let tabchange = tabs => {
     if(code) {
         chrome.tabs.executeScript(id, { file: 'helpers.js' }, () => {
             // Sorry, but the instance needs to be callable multiple times
-            chrome.tabs.executeScript(id, { code }, results => handle(results, id, instance, js, type))
+            chrome.tabs.executeScript(id, { code }, results => handle(results, id, instance, js, type));
         });
 
         return setTimeout(() => cache = {}, 1e6);
@@ -77,26 +77,69 @@ let tabchange = tabs => {
 
     let name = (DISABLE_DEBUGGER? instance: `top.${ instance }`); // makes debugging easier
 
-    fetch(
-        (
-            !DISABLE_DEBUGGER && type === 'script'?
-                chrome.runtime.getURL(`cloud/${ js }.js`):
-            `https://ephellon.github.io/web.to.plex/${ type }s/${ js }.js`
-        )
-        , { mode: 'cors' })
+    let file = (!DISABLE_DEBUGGER)?
+                    (type === 'script')?
+                        chrome.runtime.getURL(`cloud/${ js }.js`):
+                    chrome.runtime.getURL(`cloud/plugin.${ js }.js`):
+                `https://ephellon.github.io/web.to.plex/${ type }s/${ js }.js`;
+
+    fetch(file, { mode: 'cors' })
         .then(response => response.text())
         .then(code => {
             chrome.tabs.executeScript(id, { file: 'helpers.js' }, () => {
                 // Sorry, but the instance needs to be callable multiple times
-                chrome.tabs.executeScript(id, { code: (LAST = cache[ali] = `${ name } = (${ name } || (${ name }$=$=>{'use strict';\n${ code }\n;onlocationchange=event=>${ type }.init();return RegExp(${ type }.url/*.replace(/\\|.*?(\\)|$)/g,'')*/.replace(/^\\*\\:/,'\\\\w{3,}:').replace(/\\*\\./g,'([^\\\\.]+\\\\.)?').replace(/\\/\\*/g,'/[^$]*'),'i').test("${ url.href }")?${ type }.ready?${ type }.ready()?${ type }.init(!0):null:${ type }.init():console.warn("The domain '${ org }' ('${ url.href }') does not match the domain pattern '"+${ type }.url+"'");\n})(document.queryBy)); console.log('[${ instance }]', ${ name }); (${ name })`) }, results => handle(results, LAST_ID = id, LAST_INSTANCE = instance, LAST_JS = js, LAST_TYPE = type))
+                chrome.tabs.executeScript(id, { code:
+                    (LAST = cache[ali] =
+`/* tabchange */
+${ name } = (${ name } || (${ name }$ = $ => {
+    'use strict';
+
+    ${ code }
+
+    ;top.onlocationchange = event => ${ type }.init();
+
+    let InjectedReadyState;
+
+    return (${ type }.RegExp = RegExp(
+        ${ type }.url
+        /*.replace(/\\|.*?(\\)|$)/g,'')*/
+        .replace(/^\\*\\:/,'\\\\w{3,}:')
+        .replace(/\\*\\./g,'([^\\\\.]+\\\\.)?')
+        .replace(/\\/\\*/g,'/[^$]*'),'i')
+    ).test
+    ("${ url.href }")?
+    /* URL matches pattern */
+        ${ type }.ready?
+        /* Injected file has the "ready" property */
+        (InjectedReadyState =
+            ${ type }.ready.constructor.name == 'AsyncFunction'?
+            /* "ready" is an async function */
+                ${ type }.ready():
+            /* "ready" is a sync (normal) function */
+            ${ type }.ready()
+        )?
+            /* Injected file is ready */
+                ${ type }.init( InjectedReadyState ):
+            /* Injected file isn't ready */
+            (${ type }.timeout || 1000):
+        /* Injected file doesn't have the "ready" property */
+        ${ type }.init():
+    /* URL doesn't match pattern */
+(    console.warn("The domain '${ org }' ('${ url.href }') does not match the domain pattern '"+${ type }.url+"' ("+${ type }.RegExp+")"), 5000);
+})(document.queryBy));
+
+console.log('[${ name }]', ${ name });
+
+;${ name };`
+                ) }, results => handle(results, LAST_ID = id, LAST_INSTANCE = instance, LAST_JS = js, LAST_TYPE = type))
             })
         })
         .then(() => running.push(id, instance))
         .catch(error => { throw error });
 };
 
-let handle = (results, tabID, instance, script, type) => {
-    let InstanceWarning = `[${ type.toUpperCase() }] Instance failed to execute @${ tabID }#${ instance }`;
+let handle = async(results, tabID, instance, script, type) => {
+    let InstanceWarning = `[${ type.toUpperCase() }:${ script }] Instance failed to execute @${ tabID }#${ instance }`;
 
     if((!results || !results[0] || !instance) && !FOUND[instance])
         try {
@@ -107,8 +150,10 @@ let handle = (results, tabID, instance, script, type) => {
             return scribe.warn(InstanceWarning);
         }
 
-    let data = results[0];
+    let data = await results[0];
 
+    if(typeof data == 'number')
+        return setTimeout(() => { let { request, sender, callback } = (processMessage.properties || {}); processMessage(request, sender, callback) }, data);
     if(typeof data != 'object')
         return /* setTimeout */;
 
@@ -140,14 +185,15 @@ chrome.tabs.onUpdated.addListener((ID, change, tab) => {
 });
 
 // listen for a page load
-chrome.runtime.onMessage.addListener((request, sender, callback) => {
-    terminal.log('From: ' + sender);
+let processMessage;
 
-    let options = request.options,
-        tab     = TAB || {},
-        id      = tab.id,
-        url     = tab.url,
+chrome.runtime.onMessage.addListener(processMessage = (request, sender, callback) => {
+    let { options } = request,
+        tab = TAB || {},
+        { id, url, href } = tab,
         org;
+
+    processMessage.properties = { request, sender, callback };
 
     if(
         !url
@@ -166,17 +212,70 @@ chrome.runtime.onMessage.addListener((request, sender, callback) => {
 
     let name = (DISABLE_DEBUGGER? instance: `top.${ instance }`); // makes debugging easier
 
-    if(request && request.options)
-        switch(request.type) {
-            case 'PLUGIN':
-                let plugin = options.plugin;
+    if(request && request.options) {
+        let { type } = request,
+            { plugin, script } = options,
+            _type = type.toLowerCase();
 
-                fetch(`https://ephellon.github.io/web.to.plex/plugins/${ plugin }.js`, { mode: 'cors' })
+        type = type.toUpperCase();
+
+        let file = (!DISABLE_DEBUGGER)?
+                        (_type === 'script')?
+                            chrome.runtime.getURL(`cloud/${ script }.js`):
+                        chrome.runtime.getURL(`cloud/plugin.${ plugin }.js`):
+                    `https://ephellon.github.io/web.to.plex/${ _type }s/${ options[_type] }.js`;
+
+        switch(type) {
+            case 'PLUGIN':
+                fetch(file, { mode: 'cors' })
                     .then(response => response.text())
                     .then(code => {
                         chrome.tabs.executeScript(id, { file: 'helpers.js' }, () => {
                             // Sorry, but the instance needs to be callable multiple times
-                            chrome.tabs.executeScript(id, { code: (LAST = cache[plugin] = `${ name } = (${ name } || (${ name }$=$=>{'use strict';\n${ code }\n;onlocationchange=event=>plugin.init();return RegExp(plugin.url/*.replace(/\\|.*?(\\)|$)/g,'')*/.replace(/^\\*\\:/,'\\\\w{3,}:').replace(/\\*\\./g,'([^\\\\.]+\\\\.)?').replace(/\\/\\*/g,'/[^$]*'),'i').test("${ url.href }")?plugin.ready?plugin.ready()?plugin.init(!0):null:plugin.init():console.warn("The domain '${ org }' ('${ url.href }') does not match the domain pattern '"+plugin.url+"'");\n})(document.queryBy)); console.log('[${ instance }]', ${ name }); (${ name })`) }, results => handle(results, LAST_ID = id, LAST_INSTANCE = instance, LAST_JS = plugin, LAST_TYPE = 'plugin'))
+                            chrome.tabs.executeScript(id, { code:
+                                (LAST = cache[plugin] =
+`/* plugin */
+${ name } = (${ name } || (${ name }$ = $ => {
+'use strict';
+
+${ code }
+
+;top.onlocationchange = event => plugin.init();
+
+let PluginReadyState;
+
+return (plugin.RegExp = RegExp(
+    plugin.url
+    /*.replace(/\\|.*?(\\)|$)/g,'')*/
+    .replace(/^\\*\\:/,'\\\\w{3,}:')
+    .replace(/\\*\\./g,'([^\\\\.]+\\\\.)?')
+    .replace(/\\/\\*/g,'/[^$]*'),'i')
+).test
+("${ url.href }")?
+/* URL matches pattern */
+    plugin.ready?
+    /* Plugin has the "ready" property */
+    (PluginReadyState =
+        plugin.ready.constructor.name == 'AsyncFunction'?
+        /* "ready" is an async function */
+            plugin.ready():
+        /* "ready" is a sync (normal) function */
+        plugin.ready()
+    )?
+        /* Plugin is ready */
+            plugin.init( PluginReadyState ):
+        /* Script isn't ready */
+        (plugin.timeout || 1000):
+    /* Plugin doesn't have the "ready" property */
+    plugin.init():
+/* URL doesn't match pattern */
+(console.warn("The domain '${ org }' ('${ url.href }') does not match the domain pattern '" + plugin.url + "' (" + plugin.RegExp + ")"), 5000);
+})(document.queryBy));
+
+console.log('[${ name }]', ${ name });
+
+;${ name };`
+) }, results => handle(results, LAST_ID = id, LAST_INSTANCE = instance, LAST_JS = plugin, LAST_TYPE = type))
                         })
                     })
                     .then(() => running.push(id, instance))
@@ -184,24 +283,59 @@ chrome.runtime.onMessage.addListener((request, sender, callback) => {
                 break;
 
             case 'SCRIPT':
-                let script = options.script;
+            fetch(file, { mode: 'cors' })
+                .then(response => response.text())
+                .then(code => {
+                    chrome.tabs.executeScript(id, { file: 'helpers.js' }, () => {
+                        // Sorry, but the instance needs to be callable multiple times
+                        chrome.tabs.executeScript(id, { code:
+                            (LAST = cache[script] =
+`/* script */
+${ name } = (${ name } || (${ name }$ = $ => {
+'use strict';
 
-                fetch(
-                    (
-                        !DISABLE_DEBUGGER?
-                            chrome.runtime.getURL(`cloud/${ script }.js`):
-                        `https://ephellon.github.io/web.to.plex/scripts/${ script }.js`
-                    )
-                    , { mode: 'cors' })
-                    .then(response => response.text())
-                    .then(code => {
-                        chrome.tabs.executeScript(id, { file: 'helpers.js' }, () => {
-                            // Sorry, but the instance needs to be callable multiple times
-                            chrome.tabs.executeScript(id, { code: (LAST = cache[script] = `${ name } = (${ name } || (${ name }$=$=>{'use strict';\n${ code }\n;onlocationchange=event=>script.init();return RegExp(script.url/*.replace(/\\|.*?(\\)|$)/g,'')*/.replace(/^\\*\\:/,'\\\\w{3,}:').replace(/\\*\\./g,'([^\\\\.]+\\\\.)?').replace(/\\/\\*/g,'/[^$]*'),'i').test("${ url.href }")?script.ready?script.ready()?script.init(!0):null:script.init():console.warn("The domain '${ org }' ('${ url.href }') does not match the domain pattern '"+script.url+"'");\n})(document.queryBy)); console.log('[${ instance }]', ${ name }); (${ name })`) }, results => handle(results, LAST_ID = id, LAST_INSTANCE = instance, LAST_JS = script, LAST_TYPE = 'script'))
-                        })
+${ code }
+
+;top.onlocationchange = event => script.init();
+
+let ScriptReadyState;
+
+return (script.RegExp = RegExp(
+    script.url
+    // .replace(/\\|.*?(\\)|$)/g,'')
+    .replace(/^\\*\\:/,'\\\\w{3,}:')
+    .replace(/\\*\\./g,'([^\\\\.]+\\\\.)?')
+    .replace(/\\/\\*/g,'/[^$]*'),'i')
+).test
+("${ url.href }")?
+/* URL matches pattern */
+    script.ready?
+    /* Script has the "ready" property */
+    (ScriptReadyState =
+        script.ready.constructor.name == 'AsyncFunction'?
+        /* "ready" is an async function */
+            script.ready():
+        /* "ready" is a sync (normal) function */
+        script.ready()
+    )?
+        /* Script is ready */
+            script.init( ScriptReadyState ):
+        /* Script isn't ready */
+        (script.timeout || 1000):
+    /* Script doesn't have the "ready" property */
+    script.init():
+/* URL doesn't match pattern */
+(console.warn("The domain '${ org }' ('${ url.href }') does not match the domain pattern '" + script.url + "' (" + script.RegExp + ")"), 5000);
+})(document.queryBy));
+
+console.log('[${ name }]', ${ name });
+
+;${ name };`
+) }, results => handle(results, LAST_ID = id, LAST_INSTANCE = instance, LAST_JS = script, LAST_TYPE = type))
                     })
-                    .then(() => running.push(id, instance))
-                    .catch(error => { throw error });
+                })
+                .then(() => running.push(id, instance))
+                .catch(error => { throw error });
                 break;
 
             case '_INIT_':
@@ -213,10 +347,10 @@ chrome.runtime.onMessage.addListener((request, sender, callback) => {
                 break;
 
             default:
+                instance = RandomName();
                 return false;
         };
-
-    instance = RandomName();
+    }
 
     return true;
 });

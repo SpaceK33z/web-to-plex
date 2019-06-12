@@ -584,7 +584,7 @@ chrome.runtime.onMessage.addListener((request, sender, callback) => {
         ITEM_TITLE = item.title,
         ITEM_YEAR = item.year,
         ITEM_TYPE = item.type,
-        ID_PROVIDER = (i=>{for(let p in i)if(/^TVDb/i.test(p)&&i[p])return'TVDb';else if(/^TMDb/i.test(p)&&i[p])return'TMDb';return'IMDb'})(item),
+        ID_PROVIDER = (i=>{for(let p in i)if(/^TV(Db)?/i.test(p)&&i[p])return'TVDb';else if(/^TM(Db)?/i.test(p)&&i[p])return'TMDb';return'IMDb'})(item),
         ITEM_URL = (item.href || ''),
         FILE_TYPE = (item.tail || 'mp4'),
         FILE_PATH = (item.path || ''),

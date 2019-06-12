@@ -218,6 +218,11 @@
 	max-width: 60% !important;
 }
 
+.web-to-plex-prompt-option h2 {
+    font-family: inherit !important;
+    font-size: initial !important;
+}
+
 .web-to-plex-prompt-option.mutable > .remove {
 	background: #ffffff40 !important;
 	border-radius: 3px !important;
@@ -314,6 +319,8 @@
     position: fixed !important;
     z-index: 999999 !important;
 
+    min-height: 0 !important;
+    min-width: 0 !important;
     height: 72px !important;
     width: 180px !important;
 
