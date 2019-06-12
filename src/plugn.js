@@ -157,6 +157,8 @@ let handle = async(results, tabID, instance, script, type) => {
     if(typeof data != 'object')
         return /* setTimeout */;
 
+    if(typeof data == 'number')
+        return setTimeout(() => { let { request, sender, callback } = (processMessage.properties || {}); processMessage(request, sender, callback) }, data);
     if(typeof data != 'object')
         return /* setTimeout */;
 
