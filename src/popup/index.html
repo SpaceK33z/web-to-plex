@@ -180,6 +180,18 @@
             box-shadow: 0 10px 128px inset #7A314E;
         }
 
+        #justwatch:hover {
+            box-shadow: 0 10px 128px inset #0E202C;
+        }
+
+        #moviemeter:hover {
+            box-shadow: 0 10px 128px inset #000000;
+        }
+
+        #allocine:hover {
+            box-shadow: 0 10px 128px inset #222222;
+        }
+
         #local-plex:hover {
             box-shadow: 0 10px 128px inset #F9BD03;
         }
@@ -379,19 +391,25 @@
                     <label>Hulu</label>
                 </a>
             </td>
+            <td id="tvdb">
+                <a href="https://thetvdb.com/" target="_blank">
+                    <img alt="The TVDb" src="../img/tvdb.png" />
+                    <label>The TVDb</label>
+                </a>
+            </td>
+        </tr>
+
+        <tr>
             <td id="flickmetrix">
                 <a href="https://flickmetrix.com/" target="_blank">
                     <img alt="Flickmetrix" src="../img/flickmetrix.png" />
                     <label>Flickmetrix</label>
                 </a>
             </td>
-        </tr>
-
-        <tr>
-            <td id="tvdb">
-                <a href="https://thetvdb.com/" target="_blank">
-                    <img alt="The TVDb" src="../img/tvdb.png" />
-                    <label>The TVDb</label>
+            <td id="justwatch">
+                <a href="https://www.justwatch.com/" target="_blank">
+                    <img alt="JustWatch" src="../img/justwatch.png" />
+                    <label>JustWatch</label>
                 </a>
             </td>
             <td id="metacritic" is-slow>
@@ -400,15 +418,15 @@
                     <label>Metacritic</label>
                 </a>
             </td>
+        </tr>
+
+        <tr>
             <td id="showrss" save-file="magnet URLs">
                 <a href="https://showrss.info/" target="_blank">
                     <img alt="showRSS" src="../img/showrss.png" />
                     <label>showRSS</label>
                 </a>
             </td>
-        </tr>
-
-        <tr>
             <td id="vudu">
                 <a href="https://vudu.com/" target="_blank">
                     <img alt="Vudu" src="../img/vudu.png" />
@@ -421,15 +439,15 @@
                     <label>Movieo</label>
                 </a>
             </td>
+        </tr>
+
+        <tr>
             <td id="gostream" save-file="video files">
                 <a href="https://gostream.site/" target="_blank">
                     <img alt="GoStream" src="../img/gostream.png" />
                     <label>GoStream</label>
                 </a>
             </td>
-        </tr>
-
-        <tr>
             <td id="tv-maze">
                 <a href="https://tvmaze.com/" target="_blank">
                     <img alt="TV Maze" src="../img/tv-maze.png" />
@@ -442,10 +460,25 @@
                     <label>Google</label>
                 </a>
             </td>
-            <td id="itunes" is-shy="Trakt, or Letterboxd">
+        </tr>
+
+        <tr>
+            <td id="itunes" is-shy="Trakt, Letterboxd or iTunes Search">
                 <a href="https://itunes.apple.com/" target="_blank">
                     <img alt="iTunes" src="../img/itunes.png" />
                     <label>iTunes</label>
+                </a>
+            </td>
+            <td id="allocine">
+                <a href="https://allocine.fr/" target="_blank">
+                    <img alt="Allocine" src="../img/allocine.png" />
+                    <label>Allocin&#0233;</label>
+                </a>
+            </td>
+            <td id="moviemeter">
+                <a href="https://moviemeter.nl/" target="_blank">
+                    <img alt="MovieMeter" src="../img/moviemeter.png" />
+                    <label>MovieMeter</label>
                 </a>
             </td>
         </tr>
