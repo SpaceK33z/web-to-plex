@@ -14,15 +14,15 @@ if(chrome.runtime.lastError)
 
 // FireFox doesn't support sync storage.
 const storage = (chrome.storage.sync || chrome.storage.local),
-      $$ = (selector, all) => (all? document.querySelectorAll(selector): document.querySelector(selector)),
-      __servers__ = $$('#plex_servers'),
-      __watcher_qualityProfile__ = $$(`[data-option="watcherQualityProfileId"]`),
-      __watcher_storagePath__    = $$(`[data-option="watcherStoragePath"]`),
-      __radarr_qualityProfile__  = $$(`[data-option="radarrQualityProfileId"]`),
-      __radarr_storagePath__     = $$(`[data-option="radarrStoragePath"]`),
-      __sonarr_qualityProfile__  = $$(`[data-option="sonarrQualityProfileId"]`),
-      __sonarr_storagePath__     = $$(`[data-option="sonarrStoragePath"]`),
-      __save__ = $$('#save'),
+      $ = (selector, all) => (all? document.querySelectorAll(selector): document.querySelector(selector)),
+      __servers__ = $('#plex_servers'),
+      __watcher_qualityProfile__ = $(`[data-option="watcherQualityProfileId"]`),
+      __watcher_storagePath__    = $(`[data-option="watcherStoragePath"]`),
+      __radarr_qualityProfile__  = $(`[data-option="radarrQualityProfileId"]`),
+      __radarr_storagePath__     = $(`[data-option="radarrStoragePath"]`),
+      __sonarr_qualityProfile__  = $(`[data-option="sonarrQualityProfileId"]`),
+      __sonarr_storagePath__     = $(`[data-option="sonarrStoragePath"]`),
+      __save__ = $('#save'),
       __options__ = [
             /* Plex Settings */
             'plexURL',
@@ -121,7 +121,7 @@ let PlexServers = [],
     ClientID = null,
     manifest = chrome.runtime.getManifest(),
     terminal = // See #3
-        (DEVELOPER_MODE = $$('[data-option="ExtensionBranchType"]').checked)?
+        (DEVELOPER_MODE = $('[data-option="ExtensionBranchType"]').checked)?
             { error: m => m, info: m => m, log: m => m, warn: m => m, group: m => m, groupEnd: m => m }:
         console;
 
@@ -349,9 +349,9 @@ function tryPlexLogin(username, password) {
 }
 
 function performPlexLogin() {
-    let u = $$('#plex_username').value,
-        p = $$('#plex_password').value,
-        s = $$('#plex_test_status');
+    let u = $('#plex_username').value,
+        p = $('#plex_password').value,
+        s = $('#plex_test_status');
 
     s.title = '';
     __servers__.innerHTML = '';
@@ -363,7 +363,7 @@ function performPlexLogin() {
                 return s.title = 'Invalid login information', null;
 
             if(response.user) {
-                let t = $$('#plex_token');
+                let t = $('#plex_token');
 
                 ClientID = t.value = t.textContent = response.user.authToken;
 
@@ -373,8 +373,8 @@ function performPlexLogin() {
 }
 
 function performPlexTest(ServerID) {
-	let plexToken = $$('#plex_token').value,
-        teststatus = $$('#plex_test_status');
+	let plexToken = $('#plex_token').value,
+        teststatus = $('#plex_test_status');
 
 	__save__.disabled = true;
 	__servers__.innerHTML = '';
@@ -424,7 +424,7 @@ function getOptionValues() {
 	let options = {};
 
 	__options__.forEach(option => {
-        let element = $$(
+        let element = $(
 			`[data-option="${ option }"]`
 		);
 
@@ -440,9 +440,9 @@ function getOptionValues() {
 }
 
 function performOmbiLogin() {
-    let l = $$('#ombi_url').value,
-        a = $$('#ombi_api').value,
-        s = $$('#plex_test_status'),
+    let l = $('#ombi_url').value,
+        a = $('#ombi_api').value,
+        s = $('#plex_test_status'),
         e = ($0, $1, $$, $_) => ($1 + (/\\/.test($_)? '\\': '/'));
 
     l = l
@@ -461,9 +461,9 @@ function performOmbiLogin() {
             /* Get Plex's details first. If it's disabled, or non-existent, then exit */
             /* Swagger API says "enable", but we'll go with "enabled" */
             if(json && (json.enable || json.enabled)) {
-                let t = $$('#plex_token'),
-                    s = $$('#plex_servers'),
-                    u = $$('[data-option="UseOmbi"]');
+                let t = $('#plex_token'),
+                    s = $('#plex_servers'),
+                    u = $('[data-option="UseOmbi"]');
 
                 json = (json && json.servers.length? json.servers[0]: {});
 
@@ -481,8 +481,8 @@ function performOmbiLogin() {
                 /* Now we can fill in the other details */
                 if(u.checked) {
                     // Ombi
-                    let L = $$('[data-option="ombiURLRoot"]'),
-                        A = $$('[data-option="ombiToken"]');
+                    let L = $('[data-option="ombiURLRoot"]'),
+                        A = $('[data-option="ombiToken"]');
 
                     L.value = L.textContent = l;
                     A.value = A.textContent = a;
@@ -495,8 +495,8 @@ function performOmbiLogin() {
                         .then( json => {
                             if(!json || (!json.enabled && !json.enable)) return;
 
-                            let k = $$('[data-option="couchpotatoToken"]'),
-                                K = $$('[data-option="couchpotatoURLRoot"]');
+                            let k = $('[data-option="couchpotatoToken"]'),
+                                K = $('[data-option="couchpotatoURLRoot"]');
 
                             k.value = k.textContent = json.apiKey;
                             K.value = K.textContent = json.ip.replace(/(?:[^\/]+\/\/)?([^\/]+)\/?/, `http${ json.ssl? 's': '' }://$1:${ json.port }/`);
@@ -511,10 +511,10 @@ function performOmbiLogin() {
                         .then( json => {
                             if(!json || (!json.enabled && !json.enable)) return;
 
-                            let k = $$('[data-option="radarrToken"]'),
-                                K = $$('[data-option="radarrURLRoot"]'),
-                                q = $$('[data-option="radarrQualityProfileId"]'),
-                                Q = $$('[data-option="radarrStoragePath"]'),
+                            let k = $('[data-option="radarrToken"]'),
+                                K = $('[data-option="radarrURLRoot"]'),
+                                q = $('[data-option="radarrQualityProfileId"]'),
+                                Q = $('[data-option="radarrStoragePath"]'),
                                 _q, _Q;
 
                             k.value = k.textContent = json.apiKey;
@@ -535,10 +535,10 @@ function performOmbiLogin() {
                         .then( json => {
                             if(!json || (!json.enabled && !json.enable)) return;
 
-                            let k = $$('[data-option="sonarrToken"]'),
-                                K = $$('[data-option="sonarrURLRoot"]'),
-                                q = $$('[data-option="sonarrQualityProfileId"]'),
-                                Q = $$('[data-option="sonarrStoragePath"]'),
+                            let k = $('[data-option="sonarrToken"]'),
+                                K = $('[data-option="sonarrURLRoot"]'),
+                                q = $('[data-option="sonarrQualityProfileId"]'),
+                                Q = $('[data-option="sonarrStoragePath"]'),
                                 _q, _Q;
 
                             k.value = k.textContent = json.apiKey;
@@ -565,11 +565,11 @@ function performOmbiLogin() {
 
 function performOmbiTest(refreshing = false) {
     let options = getOptionValues(),
-        teststatus = $$('#ombi_test_status'),
-        path = $$('[data-option="ombiURLRoot"]'),
+        teststatus = $('#ombi_test_status'),
+        path = $('[data-option="ombiURLRoot"]'),
         url,
         headers = { headers: { apikey: options.ombiToken, accept: 'text/html' } },
-        enabled = $$('#using-ombi');
+        enabled = $('#using-ombi');
 
     teststatus.textContent = '?';
     options.ombiURLRoot = url = path.value = options.ombiURLRoot.replace(/^(\:\d+)/, 'localhost$1').replace(/^(?!^http(s)?:)/, 'http$1://').replace(/\/+$/, '');
@@ -627,12 +627,12 @@ function getWatcher(options, api = "getconfig") {
 
 function performWatcherTest(QualityProfileID = 'Default', refreshing = false) {
 	let options = getOptionValues(),
-        teststatus = $$('#watcher_test_status'),
-        path = $$('[data-option="watcherURLRoot"]'),
+        teststatus = $('#watcher_test_status'),
+        path = $('[data-option="watcherURLRoot"]'),
         storagepath = __watcher_storagePath__,
         quality = __watcher_qualityProfile__,
         url,
-        enabled = $$('#using-watcher');
+        enabled = $('#using-watcher');
 
 	quality.innerHTML = '';
 	teststatus.textContent = '?';
@@ -674,7 +674,7 @@ function performWatcherTest(QualityProfileID = 'Default', refreshing = false) {
                 quality.appendChild(option);
             });
 
-            $$('[data-option="watcherQualities"i]').value = JSON.stringify(qualities);
+            $('[data-option="watcherQualities"i]').value = JSON.stringify(qualities);
 
             // Because the <select> was reset, the original value is lost.
             if(QualityProfileID)
@@ -682,7 +682,7 @@ function performWatcherTest(QualityProfileID = 'Default', refreshing = false) {
 
             storagepath.value = path || '[Default Location]';
 
-            $$('[data-option="watcherStoragePaths"i]').value = JSON.stringify(path || { path: '[Default Location]', id: 0 });
+            $('[data-option="watcherStoragePaths"i]').value = JSON.stringify(path || { path: '[Default Location]', id: 0 });
         });
 
     if(refreshing)
@@ -718,12 +718,12 @@ function getRadarr(options, api = "profile") {
 
 function performRadarrTest(QualityProfileID, StoragePath, refreshing = false) {
 	let options = getOptionValues(),
-        teststatus = $$('#radarr_test_status'),
-        path = $$('[data-option="radarrURLRoot"]'),
+        teststatus = $('#radarr_test_status'),
+        path = $('[data-option="radarrURLRoot"]'),
         storagepath = __radarr_storagePath__,
         quality = __radarr_qualityProfile__,
         url,
-        enabled = $$('#using-radarr');
+        enabled = $('#using-radarr');
 
 	quality.innerHTML = '';
 	teststatus.textContent = '?';
@@ -752,11 +752,11 @@ function performRadarrTest(QualityProfileID, StoragePath, refreshing = false) {
                 quality.appendChild(option);
             });
 
-            $$('[data-option="radarrQualities"i]').value = JSON.stringify(qualities);
+            $('[data-option="radarrQualities"i]').value = JSON.stringify(qualities);
 
             // Because the <select> was reset, the original value is lost.
             if(QualityProfileID)
-                $$('[data-option="__radarrQuality"i]').value = quality.value = QualityProfileID;
+                $('[data-option="__radarrQuality"i]').value = quality.value = QualityProfileID;
         });
 
         let StoragePaths = [];
@@ -768,13 +768,13 @@ function performRadarrTest(QualityProfileID, StoragePath, refreshing = false) {
                 storagepath.appendChild(option);
             });
 
-            $$('[data-option="radarrStoragePaths"i]').value = JSON.stringify(storagepaths);
+            $('[data-option="radarrStoragePaths"i]').value = JSON.stringify(storagepaths);
 
             // Because the <select> was reset, the original value is lost.
             if(StoragePath)
                 storagepath.value = StoragePath;
 
-            $$('[data-option="__radarrStoragePath"i]').value = StoragePaths.indexOf(StoragePath.replace(/\\/g, '/')) + 1;
+            $('[data-option="__radarrStoragePath"i]').value = StoragePaths.indexOf(StoragePath.replace(/\\/g, '/')) + 1;
         });
     };
 
@@ -811,12 +811,12 @@ function getSonarr(options, api = "profile") {
 
 function performSonarrTest(QualityProfileID, StoragePath, refreshing = false) {
 	let options = getOptionValues(),
-        teststatus = $$('#sonarr_test_status'),
-        path = $$('[data-option="sonarrURLRoot"]'),
+        teststatus = $('#sonarr_test_status'),
+        path = $('[data-option="sonarrURLRoot"]'),
         storagepath = __sonarr_storagePath__,
         quality = __sonarr_qualityProfile__,
         url,
-        enabled = $$('#using-sonarr');
+        enabled = $('#using-sonarr');
 
 	quality.innerHTML = '';
 	teststatus.textContent = '?';
@@ -845,11 +845,11 @@ function performSonarrTest(QualityProfileID, StoragePath, refreshing = false) {
                 quality.appendChild(option);
             });
 
-            $$('[data-option="sonarrQualities"i]').value = JSON.stringify(qualities);
+            $('[data-option="sonarrQualities"i]').value = JSON.stringify(qualities);
 
             // Because the <select> was reset, the original value is lost.
             if(QualityProfileID)
-                $$('[data-option="__sonarrQuality"i]').value = quality.value = QualityProfileID;
+                $('[data-option="__sonarrQuality"i]').value = quality.value = QualityProfileID;
         });
 
         let StoragePaths = [];
@@ -861,13 +861,13 @@ function performSonarrTest(QualityProfileID, StoragePath, refreshing = false) {
                 storagepath.appendChild(option);
             });
 
-            $$('[data-option="sonarrStoragePaths"i]').value = JSON.stringify(storagepaths);
+            $('[data-option="sonarrStoragePaths"i]').value = JSON.stringify(storagepaths);
 
             // Because the <select> was reset, the original value is lost.
             if(StoragePath)
                 storagepath.value = StoragePath;
 
-            $$('[data-option="__sonarrStoragePath"i]').value = StoragePaths.indexOf(StoragePath.replace(/\\/g, '/')) + 1;
+            $('[data-option="__sonarrStoragePath"i]').value = StoragePaths.indexOf(StoragePath.replace(/\\/g, '/')) + 1;
         });
     };
 
@@ -882,7 +882,7 @@ function performSonarrTest(QualityProfileID, StoragePath, refreshing = false) {
 }
 
 function enableCouchPotato() {
-    $$('#use-couchpotato').parentElement.removeAttribute('disabled');
+    $('#use-couchpotato').parentElement.removeAttribute('disabled');
 }
 
 function HandleProxySettings(data) {
@@ -1153,7 +1153,7 @@ function restoreOptions(OPTIONS) {
     if(!items) return;
 
 		__options__.forEach(option => {
-            let el = $$(`[data-option="${ option }"]`);
+            let el = $(`[data-option="${ option }"]`);
 
             if(!el) return;
 
@@ -1289,7 +1289,7 @@ let builtins = {
     "JustWatch": "https://justwatch.com/",
     "MovieMeter": "https://moviemeter.nl/",
 
-}, builtin_array = [], builtin_sites = {}, builtinElement = $$('#builtin');
+}, builtin_array = [], builtin_sites = {}, builtinElement = $('#builtin');
 
 for(let builtin in builtins)
     builtin_array.push(builtin);
@@ -1326,7 +1326,7 @@ for(let index = 0, length = builtin_array.length; builtinElement && index < leng
 
 save('builtin.sites', builtin_sites);
 
-$$('[id^="builtin_"]', true)
+$('[id^="builtin_"]', true)
     .forEach(element => element.addEventListener('click', event => {
         let self = event.target,
             bid = self.getAttribute('bid'),
@@ -1355,7 +1355,7 @@ let plugins = {
     'My Shows': 'https://myshows.me/',
 
     // Dont' forget to add to the __options__ array!
-}, plugin_array = [], plugin_sites = {}, pluginElement = $$('#plugins');
+}, plugin_array = [], plugin_sites = {}, pluginElement = $('#plugins');
 
 for(let plugin in plugins)
     plugin_array.push(plugin);
@@ -1388,7 +1388,7 @@ for(let index = 0, length = plugin_array.length; pluginElement && index < length
 
 save('optional.sites', plugin_sites);
 
-$$('[id^="plugin_"]', true)
+$('[id^="plugin_"]', true)
     .forEach(element => element.addEventListener('click', event => {
         let self = event.target,
             pid = self.getAttribute('pid'),
@@ -1414,13 +1414,13 @@ let empty = () => {};
 document.addEventListener('DOMContentLoaded', restoreOptions);
 __save__.addEventListener('click', saveOptions);
 
-$$('#plex_test')
+$('#plex_test')
 	.addEventListener('click', event => {
-        let pt = $$('#plex_token').value,
-            pu = $$('#plex_username').value,
-            pp = $$('#plex_password').value,
-            ou = $$('#ombi_url').value,
-            oa = $$('#ombi_api').value;
+        let pt = $('#plex_token').value,
+            pu = $('#plex_username').value,
+            pp = $('#plex_password').value,
+            ou = $('#ombi_url').value,
+            oa = $('#ombi_api').value;
 
         if(pt)
             performPlexTest(ServerID);
@@ -1429,15 +1429,15 @@ $$('#plex_test')
         else if(ou && oa)
             performOmbiLogin();
     });
-$$('#watcher_test', true).forEach(element => element.addEventListener('click', event => performWatcherTest()));
-$$('#radarr_test', true).forEach(element => element.addEventListener('click', event => performRadarrTest()));
-$$('#sonarr_test', true).forEach(element => element.addEventListener('click', event => performSonarrTest()));
-$$('#ombi_test', true).forEach(element => element.addEventListener('click', event => performOmbiTest()));
-$$('#enable-couchpotato', true).forEach(element => element.addEventListener('click', event => enableCouchPotato()));
+$('#watcher_test', true).forEach(element => element.addEventListener('click', event => performWatcherTest()));
+$('#radarr_test', true).forEach(element => element.addEventListener('click', event => performRadarrTest()));
+$('#sonarr_test', true).forEach(element => element.addEventListener('click', event => performSonarrTest()));
+$('#ombi_test', true).forEach(element => element.addEventListener('click', event => performOmbiTest()));
+$('#enable-couchpotato', true).forEach(element => element.addEventListener('click', event => enableCouchPotato()));
 
 /* INPUT | Get the JSON data */
-$$('#json_get').addEventListener('click', event => {
-    let data_container = $$('#json_data'),
+$('#json_get').addEventListener('click', event => {
+    let data_container = $('#json_data'),
         data = atob((data_container.value || data_container.textContent).replace(/\s*\[.+\]\s*/, ''));
 
     if(!data) return new Notification('warning', 'The data cannot be blank, null, or undefined');
@@ -1452,8 +1452,8 @@ $$('#json_get').addEventListener('click', event => {
 });
 
 /* OUTPUT | Set the JSON data */
-$$('#json_set').addEventListener('click', event => {
-    let data_container = $$('#json_data'),
+$('#json_set').addEventListener('click', event => {
+    let data_container = $('#json_data'),
         data = getOptionValues();
 
     data_container.value = data_container.textContent = `[${ (new Date).toString().slice(0, 24) }]${ btoa(JSON.stringify(data)) }`;
@@ -1462,7 +1462,7 @@ $$('#json_set').addEventListener('click', event => {
 });
 
 /* Erase Cached Searches */
-$$('#erase_cache').addEventListener('click', event => {
+$('#erase_cache').addEventListener('click', event => {
     let options = JSON.stringify(getOptionValues());
 
     storage.clear();
@@ -1474,10 +1474,10 @@ $$('#erase_cache').addEventListener('click', event => {
     setTimeout(saveOptions, 1000); // requires at least 1s for proper functioning
 });
 
-$$('#version')
+$('#version')
     .innerHTML = `Version ${ chrome.manifest.version }`;
 
-$$('[type="range"]', true)
+$('[type="range"]', true)
     .forEach((element, index, array) => {
         let sibling = element.nextElementSibling,
             symbol = element.getAttribute('symbol') || '';
@@ -1487,7 +1487,7 @@ $$('[type="range"]', true)
         element.oninput = (event, self) => (self = event.target).nextElementSibling.value = self.value + (self.getAttribute('symbol') || '');
     });
 
-$$('.checkbox', true)
+$('.checkbox', true)
     .forEach((element, index, array) => {
         element.addEventListener('click', event => {
             let self = event.target;
