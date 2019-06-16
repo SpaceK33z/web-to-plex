@@ -1,6 +1,80 @@
-(() => {
+function wait(on, then) {
+    if (on && on())
+        then && then();
+    else
+        setTimeout(() => wait(on, then), 50);
+}
 
-String.prototype.toCaps = function toCaps(all) {
+async function load(name = '') {
+    if(!name) return;
+
+    let storage = chrome.storage.sync || chrome.storage.local;
+
+    name = 'Cache-Data/' + btoa(name.toLowerCase().replace(/\s+/g, ''));
+
+    return new Promise((resolve, reject) => {
+        function LOAD(DISK) {
+            let data = JSON.parse(DISK[name] || null);
+
+            return resolve(data);
+        }
+
+        storage.get(null, DISK => {
+            if (chrome.runtime.lastError)
+                chrome.storage.local.get(null, LOAD);
+            else
+                LOAD(DISK);
+        });
+    });
+}
+
+async function save(name = '', data) {
+    if(!name) return;
+
+    let storage = chrome.storage.sync || chrome.storage.local;
+
+    name = 'Cache-Data/' + btoa(name.toLowerCase().replace(/\s+/g, ''));
+    data = JSON.stringify(data);
+
+    await storage.set({[name]: data}, () => data);
+
+    return name;
+}
+
+async function kill(name) {
+    let storage = chrome.storage.sync || chrome.storage.local;
+
+    return storage.remove(['Cache-Data/' + btoa(name.toLowerCase().replace(/\s+/g, ''))]);
+}
+
+// the custom "on location change" event
+function watchlocationchange(subject) {
+    let locationchangecallbacks = watchlocationchange.locationchangecallbacks;
+
+    watchlocationchange[subject] = watchlocationchange[subject] || location[subject];
+
+    if (watchlocationchange[subject] != location[subject]) {
+        watchlocationchange[subject] = location[subject];
+
+        for(let index = 0, length = locationchangecallbacks.length, callback; index < length; index++) {
+            callback = locationchangecallbacks[index];
+
+            if(callback && typeof callback == 'function')
+                callback(new Event('locationchange', { bubbles: true }));
+        }
+    }
+}
+watchlocationchange.locationchangecallbacks = watchlocationchange.locationchangecallbacks || [];
+
+if(!('onlocationchange' in window))
+    Object.defineProperty(window, 'onlocationchange', {
+        set: callback => watchlocationchange.locationchangecallbacks.push(callback)
+    });
+
+watchlocationchange.interval = watchlocationchange.interval || setInterval(() => watchlocationchange('href'), 1000);
+// at least 1s is needed to properly fire the event ._.
+
+String.prototype.toCaps = String.prototype.toCaps || function toCaps(all) {
     /** Titling Caplitalization
      * Articles: a, an, & the
      * Conjunctions: and, but, for, nor, or, so, & yet
@@ -10,7 +84,7 @@ String.prototype.toCaps = function toCaps(all) {
         titles = /(?!^|(?:an?|the)\s+)\b(a([st]|nd?|cross|fter|lthough)?|b(e(cause|fore|tween)?|ut|y)|during|from|in(to)?|[io][fn]|[fn]?or|the|[st]o|through|under|with(out)?|yet)(?!\s*$)\b/gi,
         cap_exceptions = /([\|\"\(]\s*[a-z]|[\:\.\!\?]\s+[a-z]|(?:^\b|[^\'\-\+]\b)[^aeiouy\d\W]+\b)/gi, // Punctuation exceptions, e.g. "And not I"
         all_exceptions = /\b((?:ww)?(?:m{1,4}(?:c?d(?:c{0,3}(?:x?l(?:x{0,3}(?:i?vi{0,3})?)?)?)?)?|c?d(?:c{0,3}(?:x?l(?:x{0,3}(?:i?vi{0,3})?)?)?)?|c{1,3}(?:x?l(?:x{0,3}(?:i?vi{0,3})?)?)?|x?l(?:x{0,3}(?:i?vi{0,3})?)?|x{1,3}(?:i?vi{0,3})?|i?vi{0,3}|i{1,3}))\b/gi, // Roman Numberals
-        cam_exceptions = /\b((?:mr?s|[sdjm]r|mx)|(?:adm|cm?dr?|chf|c[op][lmr]|cpt|gen|lt|mjr|sgt)|doc|hon|prof)\./gi; // Titles (Most Common?)
+        cam_exceptions = /\b((?:mr?s|[sdjm]r|mx)|(?:adm|cm?dr?|chf|c[op][lmr]|cpt|gen|lt|mjr|sgt)|doc|hon|prof)(?:\.|\b)/gi; // Titles (Most Common?)
 
     array = array.split(/\s+/);
 
@@ -20,7 +94,7 @@ String.prototype.toCaps = function toCaps(all) {
 
         if(word)
             string.push( word[0].toUpperCase() + word.slice(1, word.length) );
-     }
+    }
 
     string = string.join(' ');
 
@@ -29,7 +103,7 @@ String.prototype.toCaps = function toCaps(all) {
           .replace(titles, ($0, $1, $$, $_) => $1.toLowerCase())
           .replace(cap_exceptions, ($0, $1, $$, $_) => $1.toUpperCase())
           .replace(all_exceptions, ($0, $1, $$, $_) => $1.toUpperCase())
-          .replace(cam_exceptions, ($0, $1, $$, $_) => $0[0].toUpperCase() + $0.slice(1, $0.length).toLowerCase());
+          .replace(cam_exceptions, ($0, $1, $$, $_) => $1[0].toUpperCase() + $1.slice(1, $1.length).toLowerCase() + '.');
 
     return string;
 };
@@ -54,9 +128,9 @@ String.prototype.toCaps = function toCaps(all) {
  <div>2</div>
  <div>3</div>
  */
-    parent.queryBy = function queryBy(selectors, container = parent) {
+    parent.queryBy = parent.queryBy || function queryBy(selectors, container = parent) {
         // Helpers
-        let copy = array => [...array],
+        let copy  = array => [...array],
             query = (SELECTORS, CONTAINER = container) => CONTAINER.querySelectorAll(SELECTORS);
 
         // Get rid of enclosing syntaxes: [...] and (...)
@@ -94,20 +168,20 @@ String.prototype.toCaps = function toCaps(all) {
               parents = [], parent;
 
           for(; generations < 0; generations++)
-          elements.forEach( element => {
-              let P = element, Q = P.parentElement, R = (Q? Q.parentElement: {}),
-                  E = C => [...query(ancestor, C)],
-                  F, G;
+            elements.forEach( element => {
+                let P = element, Q = P.parentElement, R = (Q? Q.parentElement: {}),
+                    E = C => [...query(ancestor, C)],
+                    F, G;
 
-              for(let I = 0, L = -generations; ancestor && !!R && !!Q && !!P && I < L; I++)
-                parent = !!~E(R).indexOf(Q)? Q: G;
+                for(let I = 0, L = -generations; ancestor && !!R && !!Q && !!P && I < L; I++)
+                  parent = !!~E(R).indexOf(Q)? Q: G;
 
-              for(let I = 0, L = -generations; !!Q && !!P && I < L; I++)
-                parent = Q = (P = Q).parentElement;
+                for(let I = 0, L = -generations; !!Q && !!P && I < L; I++)
+                  parent = Q = (P = Q).parentElement;
 
-              if(!~parents.indexOf(parent))
-                parents.push(parent);
-          });
+                if(!~parents.indexOf(parent))
+                  parents.push(parent);
+            });
           media.push(parents.length? parents: elements);
         }
 
@@ -139,7 +213,7 @@ String.prototype.toCaps = function toCaps(all) {
             empty: {
                 value: !media.length,
                 ...properties
-            }
+            },
         });
 
         return media;
@@ -148,63 +222,55 @@ String.prototype.toCaps = function toCaps(all) {
 /** Adopted from <https://github.com/crislin2046/createElement>
  * LICENSE: MIT (2018)
  */
-    parent.furnish = function furnish(name, attributes = {}, ...children) {
-      let u = v => v && v.length, R = RegExp;
+    parent.furnish = parent.furnish || function furnish(TAGNAME, ATTRIBUTES = {}, ...CHILDREN) {
+        let u = v => v && v.length, R = RegExp, name = TAGNAME, attributes = ATTRIBUTES, children = CHILDREN;
 
-      if( !u(name) )
-        throw TypeError(`TAGNAME cannot be ${ (name === '')? 'empty': name }`);
+        if( !u(name) )
+            throw TypeError(`TAGNAME cannot be ${ (name === '')? 'empty': name }`);
 
-      let options = attributes.is === true? { is: true }: null;
+        let options = attributes.is === true? { is: true }: null;
 
-      delete attributes.is;
+        delete attributes.is;
 
-      name = name.split(/([#\.][^#\.\[\]]+)/).filter( u );
+        name = name.split(/([#\.][^#\.\[\]]+)/).filter( u );
 
-      if(name.length <= 1)
-        name = name[0].split(/^([^\[\]]+)(\[.+\])/).filter( u );
+        if(name.length <= 1)
+            name = name[0].split(/^([^\[\]]+)(\[.+\])/).filter( u );
 
-      if(name.length > 1)
-        for(let n = name, i = 1, l = n.length, t, v; i < l; i++)
-          if((v = n[i].slice(1, n[i].length)) && (t = n[i][0]) == '#')
-            attributes.id = v;
-          else if(t == '.')
-            attributes.classList = [].slice.call(attributes.classList || []).concat(v);
-          else if(/\[(.+)\]/.test(n[i]))
-            R.$1.split('][').forEach(N => attributes[(N = N.split('=', 2))[0]] = N[1] || '');
-      name = name[0];
+        if(name.length > 1)
+            for(let n = name, i = 1, l = n.length, t, v; i < l; i++)
+                if((v = n[i].slice(1, n[i].length)) && (t = n[i][0]) == '#')
+                    attributes.id = v;
+                else if(t == '.')
+                    attributes.classList = [].slice.call(attributes.classList || []).concat(v);
+                else if(/\[(.+)\]/.test(n[i]))
+                    R.$1.split('][').forEach(N => attributes[(N = N.split('=', 2))[0]] = N[1] || '');
+        name = name[0];
 
-      let element = document.createElement(name, options);
+        let element = document.createElement(name, options);
 
-      if(attributes.classList instanceof Array)
-        attributes.classList = attributes.classList.join(' ');
+        if(attributes.classList instanceof Array)
+            attributes.classList = attributes.classList.join(' ');
 
-      Object.entries(attributes).forEach(
-        ([name, value]) => (/^(on|(?:inner|outer)(?:HTML|Text)|textContent|class(?:List|Name)$|value)/.test(name))?
-          element[name] = value:
-        element.setAttribute(name, value)
-      );
-
-      children
-        .filter( child => child !== undefined && child !== null )
-        .forEach(
-          child =>
-            child instanceof Element?
-              element.append(child):
-            child instanceof Node?
-              element.appendChild(child):
-            element.appendChild(
-                parent.createTextNode(child)
-            )
+        Object.entries(attributes).forEach(
+            ([name, value]) => (/^(on|(?:(?:inner|outer)(?:HTML|Text)|textContent|class(?:List|Name)|value)$)/.test(name))?
+                element[name] = value:
+            element.setAttribute(name, value)
         );
 
-      return element;
+        children
+            .filter( child => child !== undefined && child !== null )
+            .forEach(
+                child =>
+                    child instanceof Element?
+                        element.append(child):
+                    child instanceof Node?
+                        element.appendChild(child):
+                    element.appendChild(
+                        parent.createTextNode(child)
+                    )
+            );
+
+        return element;
     }
 })(document);
-
-let PRIMITIVE = Symbol.toPrimitive,
-    queryBy = document.queryBy,
-    furnish = document.furnish;
-
-queryBy[PRIMITIVE] = furnish[PRIMITIVE] = String.prototype.toCaps[PRIMITIVE] = () => 'function <foreign>() { [foreign code] }';
-
-})();

@@ -11,7 +11,7 @@
 // REQUIRED [script:object]: The script object
 let script = {
     // REQUIRED [script.url]: this is what you ask Web to Plex access to; currently limited to a single domain
-    "url": "*://*.amazon.com/*",
+    "url": "*://*.amazon.com/*/video/detail/*",
 
     // PREFERRED [script.ready]: a function to determine that the page is indeed ready
     "ready": () => !$('[data-automation-id="imdb-rating-badge"], #most-recent-reviews-content > *:first-child').empty,
@@ -48,7 +48,7 @@ let script = {
 
     // OPTIONAL: the rest of this code is purely for functionality
     "getType": () => {
-        return !$('[data-automation-id*="seasons"], [class*="seasons"], [class*="episodes"], [class*="series"]').empty?
+        return !$('[data-automation-id*="season"], [class*="season"], [class*="episode"], [class*="series"]').empty?
             'tv':
         'movie'
     },

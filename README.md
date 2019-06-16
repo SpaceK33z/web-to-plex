@@ -1,10 +1,10 @@
+**We're currently in the process of making a v4 release which will contain the features listed below. The currently available version on the Chrome and Firefox webstore won't contain these features!**
+
 # Web to Plex ![Icon](src/img/48.png)
 
 ![Examples](example.png)
 
 This browser extension searches your [Plex Media Server (PMS)](https://www.plex.tv/downloads/) for matching media on sites like [IMDb](https://imdb.com), letting you immediately open the movie or TV show in Plex, if it is available. If the item isn't found on your PMS, then a download button is added instead.
-
-**We're currently in the process of making a v4 release which will contain the features listed below. The version that is available on the Chrome and Firefox webstore doesn't contain these features!**
 
 ----
 
@@ -56,29 +56,31 @@ If you don't feel like actually downloading the movie, or want a simple watchlis
 3.  [Trakt.tv](https://trakt.tv/)
 4.  [Letterboxd](https://letterboxd.com/)
 5.  [GoStream](https://gostream.site/)<sup>1</sup>
-    - Replaced Flenix
 6.  [TV Maze](http://www.tvmaze.com/)
 7.  [The TVDb](https://www.thetvdb.com/)
 8.  [The MovieDb](https://www.themoviedb.org/)
 9.  [VRV](https://vrv.co/)<sup>2</sup>
 10. [Hulu](https://hulu.com/)<sup>2/3/4</sup>
 11. [Google Play Store](https://play.google.com/store/movies/)
-    - Also runs on Google search results
-12. [iTunes](https://itunes.apple.com/)<sup>3/5</sup>
-13. [Metacritic](http://www.metacritic.com/)<sup>4</sup>
-14. [Fandango](https://www.fandango.com/)
-15. [Amazon](https://www.amazon.com/)<sup>5</sup>
-16. [Vudu](https://www.vudu.com/)
-17. [Verizon](https://www.tv.verizon.com/)
-18. [CouchPotato](http://couchpotato.life/)
-19. [Rotten Tomatoes](https://www.rottentomatoes.com/)
-20. [ShowRSS](https://showrss.info/)<sup>1</sup> (button isn't meant to appear)
-21. [Netflix](https://netflix.com/)<sup>3</sup>
-22. [Toloka](https://toloka.to/)<sup>6</sup>
-23. [Shana Project](https://www.shanaproject.com/)<sup>6</sup>
-24. [My Anime List](https://myanimelist.net/)<sup>6</sup>
-25. [YouTube](https://youtube.com/)
-26. [Flickmetrix](https://flickmetrix.com/) (formerly "Cinesift")
+12. Google Search (search results)
+13. [iTunes](https://itunes.apple.com/)<sup>3/5</sup>
+14. [Metacritic](http://www.metacritic.com/)<sup>4</sup>
+15. [Fandango](https://www.fandango.com/)
+16. [Amazon](https://www.amazon.com/)<sup>5</sup>
+17. [Vudu](https://www.vudu.com/)
+18. [Verizon](https://www.tv.verizon.com/)
+19. [CouchPotato](http://couchpotato.life/)
+20. [Rotten Tomatoes](https://www.rottentomatoes.com/)
+21. [ShowRSS](https://showrss.info/)<sup>1</sup> (button isn't meant to appear)
+22. [Netflix](https://netflix.com/)<sup>3</sup>
+23. [Toloka](https://toloka.to/)<sup>6</sup>
+24. [Shana Project](https://www.shanaproject.com/)<sup>6</sup>
+25. [My Anime List](https://myanimelist.com/)<sup>6</sup>
+26. [YouTube](https://youtube.com/)
+27. [Flickmetrix (Cinesift)](https://flickmetrix.com/)
+28. [Allociné](https://www.allocine.fr/)
+29. [MovieMeter](https://www.moviemeter.nl/)
+30. [JustWatch](https://justwatch.com/)
 
 *Notes*
 

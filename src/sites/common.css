@@ -218,7 +218,12 @@
 	max-width: 60% !important;
 }
 
-.web-to-plex-prompt-option.mutable > *:last-child {
+.web-to-plex-prompt-option h2 {
+    font-family: inherit !important;
+    font-size: initial !important;
+}
+
+.web-to-plex-prompt-option.mutable > .remove {
 	background: #ffffff40 !important;
 	border-radius: 3px !important;
 	transition: all 0.1s !important;
@@ -228,16 +233,28 @@
 
 	float: right !important;
 	margin-right: -9px !important;
-	margin-top: -9px !important;
+	margin-top: -42px !important;
 	padding: 0 !important;
 }
 
-.web-to-plex-prompt-option.mutable > *:last-child:hover {
+.web-to-plex-prompt-option.mutable > .remove:hover {
 	background: #ffffff4d !important;
 }
 
-.web-to-plex-prompt-option.mutable > *:last-child:after {
+.web-to-plex-prompt-option.mutable > .remove:after {
 	content: '\00d7' !important;
+}
+
+.web-to-plex-prompt-option.mutable > .quality {
+    width: 50% !important;
+}
+
+.web-to-plex-prompt-option.mutable > .location {
+    width: 90% !important;
+}
+
+.web-to-plex-prompt-option.mutable > .location:last-child:not(:first-child) {
+    margin-top: 5px !important;
 }
 
 .web-to-plex-prompt-footer {
@@ -302,6 +319,8 @@
     position: fixed !important;
     z-index: 999999 !important;
 
+    min-height: 0 !important;
+    min-width: 0 !important;
     height: 72px !important;
     width: 180px !important;
 
@@ -484,4 +503,89 @@
     left: 35px !important;
     padding: 3px 6px !important;
     position: absolute !important;
+}
+
+/* bbodine @CodePen - https://codepen.io/bbodine1/pen/novBm */
+.checkbox {
+    width: 80px;
+    height: 26px;
+    background: #000;
+    margin: 15px 0;
+    position: relative;
+    border-radius: 50px;
+    box-shadow: inset 0px 1px 1px rgba(0, 0, 0, 0.5), 0px 1px 0px rgba(255, 255, 255, 0.2);
+}
+
+span.checkbox {
+    display: inline-block;
+
+    margin: 0;
+    vertical-align: text-bottom;
+}
+
+.checkbox:after {
+    content: 'OFF';
+    color: #666;
+    position: absolute;
+    right: 10px;
+    z-index: 0;
+    font: 12px/26px Arial, sans-serif;
+    font-weight: bold;
+    text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.15);
+}
+
+.checkbox:before {
+    content: 'ON';
+    color: #cc7b19;
+    position: absolute;
+    left: 10px;
+    z-index: 0;
+    font: 12px/26px Arial, sans-serif;
+    font-weight: bold;
+}
+
+.checkbox[prompt-yes]:before {
+    content: attr(prompt-yes);
+    text-transform: uppercase;
+}
+
+.checkbox[prompt-no]:after {
+    content: attr(prompt-no);
+    text-transform: uppercase;
+}
+
+.checkbox[prompt="y/n"i]:before {
+    content: 'YES';
+}
+
+.checkbox[prompt="y/n"i]:after {
+    content: 'NO';
+}
+
+.checkbox label {
+    display: block;
+    width: 34px;
+    height: 20px;
+    cursor: pointer;
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    z-index: 1;
+    background: #666;
+    border-radius: 50px;
+    transition: all 0.4s ease;
+    box-shadow: 0px 2px 5px 0px rgba(0, 0, 0, 0.3);
+}
+
+.checkbox input[type=checkbox] {
+    visibility: hidden;
+}
+
+.checkbox input[type=checkbox]:checked + label {
+    left: 43px;
+    background: #cc7b19;
+}
+
+.checkbox[disabled] {
+    opacity: 0.25 !important;
 }
