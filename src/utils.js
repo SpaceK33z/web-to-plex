@@ -15,6 +15,7 @@ let YEAR = date.getFullYear(),
     NOTIFIED = false;
 
 let getURL = url => chrome.extension.getURL(url),
+    $ = (selector, container) => queryBy(selector, container),
     init;
 
 let IMG_URL = {
@@ -97,7 +98,7 @@ class Notification {
         if (last && last.done === false)
             return (last => setTimeout(() => new Notification(state, text, timeout, callback, requiresClick), +(new Date) - last.start))(last);
 
-        let element = document.furnish(`div.web-to-plex-notification.${state}`, {
+        let element = furnish(`div.web-to-plex-notification.${state}`, {
             onmouseup: event => {
                 let notification = Notification.queue[event.target.id],
                     element = notification.element;
@@ -182,9 +183,9 @@ class Prompt {
             case 'prompt':
             case 'input':
                 remove = element => {
-                    let prompter = document.queryBy('.web-to-plex-prompt').first,
-                        header = document.queryBy('.web-to-plex-prompt-header').first,
-                        counter = document.queryBy('.web-to-plex-prompt-options').first;
+                    let prompter = $('.web-to-plex-prompt').first,
+                        header = $('.web-to-plex-prompt-header').first,
+                        counter = $('.web-to-plex-prompt-options').first;
 
                     if(element === true)
                         return prompter.remove();
@@ -195,13 +196,13 @@ class Prompt {
                     header.innerText = 'Approve ' + counter.children.length + (counter.children.length == 1?' item': ' items');
                 };
 
-                prompt = document.furnish('div.web-to-plex-prompt', {},
-                    document.furnish('div.web-to-plex-prompt-body', {},
+                prompt = furnish('div.web-to-plex-prompt', {},
+                    furnish('div.web-to-plex-prompt-body', {},
                         // The prompt's title
-                        document.furnish('h1.web-to-plex-prompt-header', {}, 'Approve ' + array.length + (array.length == 1? ' item': ' items')),
+                        furnish('h1.web-to-plex-prompt-header', {}, 'Approve ' + array.length + (array.length == 1? ' item': ' items')),
 
                         // The prompt's items
-                        document.furnish('div.web-to-plex-prompt-options', {},
+                        furnish('div.web-to-plex-prompt-options', {},
                             ...(ITEMS => {
                                 let elements = [];
 
@@ -209,15 +210,15 @@ class Prompt {
                                     ITEM = ITEMS[index];
 
                                     elements.push(
-                                        document.furnish('li.web-to-plex-prompt-option.mutable', { value: index, innerHTML: `<h2>${ index + 1 } \u00b7 ${ ITEM.title }${ ITEM.year? ` (${ ITEM.year })`: '' } <em>\u2014 ${ ITEM.type }</em></h2>` },
-                                            document.furnish('button.remove', { title: `Remove "${ ITEM.title }"`, onmouseup: event => { remove(event.target.parentElement); event.target.remove() } }),
+                                        furnish('li.web-to-plex-prompt-option.mutable', { value: index, innerHTML: `<h2>${ index + 1 } \u00b7 ${ ITEM.title }${ ITEM.year? ` (${ ITEM.year })`: '' } <em>\u2014 ${ ITEM.type }</em></h2>` },
+                                            furnish('button.remove', { title: `Remove "${ ITEM.title }"`, onmouseup: event => { remove(event.target.parentElement); event.target.remove() } }),
                                             (
                                                 config.PromptQuality?
-                                                    P_QUA = document.furnish('select.quality', { index, onchange: event => data[event.target.getAttribute('index')].quality = event.target.value }, ...profiles[/(movie|film|cinema)/i.test(ITEM.type)?'movie':'show'].map(Q => document.furnish('option', { value: Q.id }, Q.name))):
+                                                    P_QUA = furnish('select.quality', { index, onchange: event => data[event.target.getAttribute('index')].quality = event.target.value }, ...profiles[/(movie|film|cinema)/i.test(ITEM.type)?'movie':'show'].map(Q => furnish('option', { value: Q.id }, Q.name))):
                                                 ''
                                             ),(
                                                 config.PromptLocation?
-                                                    P_LOC = document.furnish('select.location', { index, onchange: event => data[event.target.getAttribute('index')].location = event.target.value }, ...locations[/(movie|film|cinema)/i.test(ITEM.type)?'movie':'show'].map(Q => document.furnish('option', { value: Q.id }, Q.path))):
+                                                    P_LOC = furnish('select.location', { index, onchange: event => data[event.target.getAttribute('index')].location = event.target.value }, ...locations[/(movie|film|cinema)/i.test(ITEM.type)?'movie':'show'].map(Q => furnish('option', { value: Q.id }, Q.path))):
                                                 ''
                                             )
                                         )
@@ -234,8 +235,8 @@ class Prompt {
                         ),
 
                         // The engagers
-                        document.furnish('div.web-to-plex-prompt-footer', {},
-                            document.furnish('input.web-to-plex-prompt-input[type=text]', { placeholder: 'Add an item (enter to add): Title (Year) Type / ID Type', title: 'Solo: A Star Wars Story (2018) movie / tt3778644 m', onkeydown: async event => {
+                        furnish('div.web-to-plex-prompt-footer', {},
+                            furnish('input.web-to-plex-prompt-input[type=text]', { placeholder: 'Add an item (enter to add): Title (Year) Type / ID Type', title: 'Solo: A Star Wars Story (2018) movie / tt3778644 m', onkeydown: async event => {
                                 if (event.keyCode === 13) {
                                     let title, year, type, self = event.target, R = RegExp,
                                         movie = /^(m(?:ovies?)?|f(?:ilms?)?|c(?:inemas?)?)/i,
@@ -284,9 +285,9 @@ class Prompt {
                                     }
                                 }
                             } }),
-                            document.furnish('button.web-to-plex-prompt-decline', { onmouseup: event => { remove(true); callback([]) } }, 'Close'),
-                            document.furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { remove(true); new Prompt(prompt_type, options, callback, container) } }, 'Reset'),
-                            document.furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { remove(true); callback(data.filter(value => value !== null && value !== undefined)) } }, 'Continue')
+                            furnish('button.web-to-plex-prompt-decline', { onmouseup: event => { remove(true); callback([]) }, title: 'Close' }, '\u2718'),
+                            furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { remove(true); new Prompt(prompt_type, options, callback, container) }, title: 'Reset' }, '\u21BA'),
+                            furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { remove(true); callback(data.filter(value => value !== null && value !== undefined)) }, title: 'Continue' }, '\u2714')
                         )
                     )
                 );
@@ -295,9 +296,9 @@ class Prompt {
             /* Allows the user to remove predetermined items */
             case 'select':
                 remove = element => {
-                    let prompter = document.queryBy('.web-to-plex-prompt').first,
-                        header = document.queryBy('.web-to-plex-prompt-header').first,
-                        counter = document.queryBy('.web-to-plex-prompt-options').first;
+                    let prompter = $('.web-to-plex-prompt').first,
+                        header = $('.web-to-plex-prompt-header').first,
+                        counter = $('.web-to-plex-prompt-options').first;
 
                     if(element === true)
                         return prompter.remove();
@@ -308,13 +309,13 @@ class Prompt {
                     header.innerText = 'Approve ' + counter.children.length + (counter.children.length == 1?' item': ' items');
                 };
 
-                prompt = document.furnish('div.web-to-plex-prompt', {},
-                    document.furnish('div.web-to-plex-prompt-body', {},
+                prompt = furnish('div.web-to-plex-prompt', {},
+                    furnish('div.web-to-plex-prompt-body', {},
                         // The prompt's title
-                        document.furnish('h1.web-to-plex-prompt-header', {}, 'Approve ' + array.length + (array.length == 1? ' item': ' items')),
+                        furnish('h1.web-to-plex-prompt-header', {}, 'Approve ' + array.length + (array.length == 1? ' item': ' items')),
 
                         // The prompt's items
-                        document.furnish('div.web-to-plex-prompt-options', {},
+                        furnish('div.web-to-plex-prompt-options', {},
                             ...(ITEMS => {
                                 let elements = [];
 
@@ -322,15 +323,15 @@ class Prompt {
                                     ITEM = ITEMS[index];
 
                                     elements.push(
-                                        document.furnish('li.web-to-plex-prompt-option.mutable', { value: index, innerHTML: `<h2>${ index + 1 } \u00b7 ${ ITEM.title }${ ITEM.year? ` (${ ITEM.year })`: '' } <em>\u2014 ${ ITEM.type }</em></h2>` },
-                                            document.furnish('button.remove', { title: `Remove "${ ITEM.title }"`, onmouseup: event => { remove(event.target.parentElement); event.target.remove() } }),
+                                        furnish('li.web-to-plex-prompt-option.mutable', { value: index, innerHTML: `<h2>${ index + 1 } \u00b7 ${ ITEM.title }${ ITEM.year? ` (${ ITEM.year })`: '' } <em>\u2014 ${ ITEM.type }</em></h2>` },
+                                            furnish('button.remove', { title: `Remove "${ ITEM.title }"`, onmouseup: event => { remove(event.target.parentElement); event.target.remove() } }),
                                             (
                                                 config.PromptQuality?
-                                                    P_QUA = document.furnish('select.quality', { index, onchange: event => data[event.target.getAttribute('index')].quality = event.target.value }, ...profiles[/(movie|film|cinema)/i.test(ITEM.type)?'movie':'show'].map(Q => document.furnish('option', { value: Q.id }, Q.name))):
+                                                    P_QUA = furnish('select.quality', { index, onchange: event => data[event.target.getAttribute('index')].quality = event.target.value }, ...profiles[/(movie|film|cinema)/i.test(ITEM.type)?'movie':'show'].map(Q => furnish('option', { value: Q.id }, Q.name))):
                                                 ''
                                             ),(
                                                 config.PromptLocation?
-                                                    P_LOC = document.furnish('select.location', { index, onchange: event => data[event.target.getAttribute('index')].location = event.target.value }, ...locations[/(movie|film|cinema)/i.test(ITEM.type)?'movie':'show'].map(Q => document.furnish('option', { value: Q.id }, Q.path))):
+                                                    P_LOC = furnish('select.location', { index, onchange: event => data[event.target.getAttribute('index')].location = event.target.value }, ...locations[/(movie|film|cinema)/i.test(ITEM.type)?'movie':'show'].map(Q => furnish('option', { value: Q.id }, Q.path))):
                                                 ''
                                             )
                                         )
@@ -347,10 +348,10 @@ class Prompt {
                         ),
 
                         // The engagers
-                        document.furnish('div.web-to-plex-prompt-footer', {},
-                            document.furnish('button.web-to-plex-prompt-decline', { onmouseup: event => { remove(true); callback([]) } }, 'Close'),
-                            document.furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { remove(true); new Prompt(prompt_type, options, callback, container) } }, 'Reset'),
-                            document.furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { remove(true); callback(data.filter(value => value !== null && value !== undefined)) } }, 'Continue')
+                        furnish('div.web-to-plex-prompt-footer', {},
+                            furnish('button.web-to-plex-prompt-decline', { onmouseup: event => { remove(true); callback([]) }, title: 'Close' }, '\u2718'),
+                            furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { remove(true); new Prompt(prompt_type, options, callback, container) }, title: 'Reset' }, '\u21BA'),
+                            furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { remove(true); callback(data.filter(value => value !== null && value !== undefined)) }, title: 'Continue' }, '\u2714')
                         )
                     )
                 );
@@ -1257,9 +1258,10 @@ function renderPlexButton(persistent) {
                 furnish('li#wtp-hide.list-item', {
                     tooltip: 'Hide Web to Plex',
                     onmouseup: event => {
-                        let self = event.target, parent = button, state = self.getAttribute('state') || 'show';
+                        let self = $('#wtp-hide').first, state = self.getAttribute('state') || 'show';
 
-                        parent.classList.remove(state);
+                        button.classList.remove(state);
+
                         self.setAttribute('tooltip', state.toCaps() + ' Web to Plex');
 
                         let img = self.querySelector('img');
@@ -1272,7 +1274,7 @@ function renderPlexButton(persistent) {
                             state = 'show';
                         }
 
-                        parent.classList.add(state);
+                        button.classList.add(state);
                         self.setAttribute('state', state);
                     }
                 },
