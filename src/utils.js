@@ -19,26 +19,26 @@ let getURL = url => chrome.extension.getURL(url),
     init;
 
 let IMG_URL = {
+    'nil':              getURL('img/null.png'),
     'icon_16':          getURL('img/16.png'),
     'icon_48':          getURL('img/48.png'),
-    'icon_white_16':    getURL('img/_16.png'),
-    'icon_white_48':    getURL('img/_48.png'),
-    'icon_outline_16':  getURL('img/o16.png'),
-    'icon_outline_48':  getURL('img/o48.png'),
     'hide_icon_16':     getURL('img/hide.16.png'),
     'hide_icon_48':     getURL('img/hide.48.png'),
     'show_icon_16':     getURL('img/show.16.png'),
     'show_icon_48':     getURL('img/show.48.png'),
+    'close_icon_16':    getURL('img/close.16.png'),
+    'close_icon_48':    getURL('img/close.48.png'),
+    'icon_white_16':    getURL('img/_16.png'),
+    'icon_white_48':    getURL('img/_48.png'),
     'plexit_icon_16':   getURL('img/plexit.16.png'),
     'plexit_icon_48':   getURL('img/plexit.48.png'),
     'reload_icon_16':   getURL('img/reload.16.png'),
     'reload_icon_48':   getURL('img/reload.48.png'),
-    'close_icon_16':    getURL('img/close.16.png'),
-    'close_icon_48':    getURL('img/close.48.png'),
+    'icon_outline_16':  getURL('img/o16.png'),
+    'icon_outline_48':  getURL('img/o48.png'),
+    'noise_background': getURL('img/noise.png'),
     'settings_icon_16': getURL('img/settings.16.png'),
     'settings_icon_48': getURL('img/settings.48.png'),
-    'noise_background': getURL('img/noise.png'),
-    'nil':              getURL('img/null.png'),
 };
 
 // the storage
@@ -90,7 +90,7 @@ class Notification {
         let queue = (Notification.queue = Notification.queue || { list: [] }),
             last = queue.list[queue.list.length - 1];
 
-        if((config.NotifyNewOnly && /\balready (exists|(been )?added)\b/.test(text)) || (config.NotifyOnlyOnce && NOTIFIED && state === 'info'))
+        if((state == 'error' && config.NotifyNewOnly && /\balready (exists|(been )?added)\b/.test(text)) || (config.NotifyOnlyOnce && NOTIFIED && state === 'info'))
             return /* Don't match /.../i as to not match item titles */;
 
         NOTIFIED = true;
@@ -1995,7 +1995,7 @@ String.prototype.toCaps = String.prototype.toCaps || function toCaps(all) {
                 else if(t == '.')
                     attributes.classList = [].slice.call(attributes.classList || []).concat(v);
                 else if(/\[(.+)\]/.test(n[i]))
-                    R.$1.split('][').forEach(N => attributes[(N = N.split('=', 2))[0]] = N[1] || '');
+                    R.$1.split('][').forEach(N => attributes[(N = N.replace(/\s*=\s*(?:("?)([^]*)\1)?/, '=$2').split('=', 2))[0]] = N[1] || '');
         name = name[0];
 
         let element = document.createElement(name, options);
@@ -2005,6 +2005,20 @@ String.prototype.toCaps = String.prototype.toCaps || function toCaps(all) {
 
         Object.entries(attributes).forEach(
             ([name, value]) => (/^(on|(?:(?:inner|outer)(?:HTML|Text)|textContent|class(?:List|Name)|value)$)/.test(name))?
+				(typeof value == 'string' && /^on/.test(name))?
+					(() => {
+                        try {
+                            /* Can't make a new function (eval) */
+                            element[name] = new Function('', value);
+                        } catch (__error) {
+                            try {
+                                /* Not a Chrome (extension) state */
+                                chrome.tabs.getCurrent(tab => chrome.tabs.executeScript(tab.id, { code: `document.furnish.__cache__ = () => {${ value }}` }, __cache__ => element[name] = __cache__[0] || parent.furnish.__cache__ || value));
+                            } catch (_error) {
+                                throw __error, _error;
+                            }
+                        }
+                	})():
                 element[name] = value:
             element.setAttribute(name, value)
         );
