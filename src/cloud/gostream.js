@@ -1,3 +1,5 @@
+return 'error: GoStream support has been disabled.';
+
 let script = {
     "url": "*://*.gostream.site/(?!genre|most-viewed|top-imdb|contact)",
 
@@ -10,8 +12,6 @@ let script = {
             year   = $('.mvic-desc [href*="year/"]').first,
             image  = $('.hiddenz, [itemprop="image"]').first,
             type   = 'movie';
-
-        new Notification('update', 'Select the Openload (OL) server');
 
         title = title.textContent.trim();
         year = (year? year.textContent.trim(): 0);

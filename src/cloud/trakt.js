@@ -93,7 +93,7 @@ let script = {
         ).first;
 
         if(link)
-            return link.href.replace(/^.*?thetvdb.com\/.+(?:(?:series\/?(?:\?id=)?)(\d+)\b).*?$/, '$1');
+            return link.href.replace(/^.*?thetvdb.com\/.+\/(\d+)\b.*?$/, '$1');
     },
 
     "process": (element, elements) => {

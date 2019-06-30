@@ -1,2 +1,2 @@
 /* global sendUpdate(type:string, details:object) */
-(init = () => sendUpdate('SCRIPT', { script: 'play.google' }))();
+(init = () => sendUpdate('SCRIPT', { script: 'google.play' }))();

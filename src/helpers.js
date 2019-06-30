@@ -54,24 +54,46 @@ function watchlocationchange(subject) {
     watchlocationchange[subject] = watchlocationchange[subject] || location[subject];
 
     if (watchlocationchange[subject] != location[subject]) {
+        let from = watchlocationchange[subject],
+            to = location[subject],
+            properties = { from, to },
+            sign = code => btoa((code + '').replace(/\s+/g, ''));
+
         watchlocationchange[subject] = location[subject];
 
-        for(let index = 0, length = locationchangecallbacks.length, callback; index < length; index++) {
+        for(let index = 0, length = locationchangecallbacks.length, callback, called; length > 0 && index < length; index++) {
             callback = locationchangecallbacks[index];
+            called = locationchangecallbacks.called[sign(callback)];
 
-            if(callback && typeof callback == 'function')
-                callback(new Event('locationchange', { bubbles: true }));
+            let event = new Event('locationchange', { bubbles: true });
+
+            if(!called && callback && typeof callback == 'function') {
+                locationchangecallbacks.called[sign(callback)] = true;
+                window.addEventListener('beforeunload', event => {
+                    event.preventDefault(false);
+
+                    callback({ event, ...properties });
+                });
+
+                callback({ event, ...properties });
+
+                open(to, '_self');
+            } else {
+                return /* The eventlistener was already called */;
+            }
         }
     }
 }
 watchlocationchange.locationchangecallbacks = watchlocationchange.locationchangecallbacks || [];
+watchlocationchange.locationchangecallbacks.called = watchlocationchange.locationchangecallbacks.called || {};
 
 if(!('onlocationchange' in window))
     Object.defineProperty(window, 'onlocationchange', {
-        set: callback => watchlocationchange.locationchangecallbacks.push(callback)
+        set: callback => (typeof callback == 'function'? watchlocationchange.locationchangecallbacks.push(callback): null),
+        get: () => watchlocationchange.locationchangecallbacks
     });
 
-watchlocationchange.interval = watchlocationchange.interval || setInterval(() => watchlocationchange('href'), 1000);
+watchlocationchange.onlocationchangeinterval = watchlocationchange.onlocationchangeinterval || setInterval(() => watchlocationchange('href'), 1);
 // at least 1s is needed to properly fire the event ._.
 
 String.prototype.toCaps = String.prototype.toCaps || function toCaps(all) {

@@ -218,9 +218,14 @@
 	max-width: 60% !important;
 }
 
-.web-to-plex-prompt-option h2 {
+.web-to-plex-prompt-option.mutable > h2 {
+    background: #0000 !important;
+    color: inherit !important;
     font-family: inherit !important;
     font-size: initial !important;
+    text-align: inherit !important;
+
+    margin: inherit !important;
 }
 
 .web-to-plex-prompt-option.mutable > .remove {

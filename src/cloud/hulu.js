@@ -1,31 +1,29 @@
 let script = {
-    "url": "*://*.hulu.com/*",
+    "url": "*://*.hulu.com/watch/*",
 
-    "ready": () => !$('#content [class$="__meta"]').empty,
+    "ready": () => !$('[class$="__meta"]').empty,
 
     "init": (ready) => {
         let _title, _year, _image, R = RegExp;
 
-        let title  = $('#content [class$="__name"]').first,
-            year   = $('#content [class$="__meta"] [class$="segment"]:last-child').first,
+        let title = $('[class$="__second-line"]').first,
+            year  = (new Date).getFullYear(),
             image,
-            type   = script.getType();
+            type  = script.getType();
 
-        title = title.textContent.replace(/^\s+|\s+$/g, '').toCaps();
-        year  = +year.textContent.replace(/.*\((\d{4})\).*/, '$1');
+        title = title.textContent;
+
+        if(!title)
+            return 5000;
 
         return { type, title, year, image };
     },
 
     "getType": () => {
-        let { pathname } = top.location;
+        let tl = $('[class$="__third-line"]').first;
 
-        return pathname.startsWith('/movie/')?
+        return /^\s*$/.test(tl.textContent)?
             'movie':
-        pathname.startsWith('/series/')?
-            'show':
-        'error';
+        'show';
     },
 };
-
-window.onlocationchange = script.init;

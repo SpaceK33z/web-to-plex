@@ -90,45 +90,47 @@ let tabchange = tabs => {
                 // Sorry, but the instance needs to be callable multiple times
                 chrome.tabs.executeScript(id, { code:
                     (LAST = cache[ali] =
-`/* tabchange */
+`/* ${ type }* (${ (DISABLE_DEBUGGER? 'on':'off') }line) - "${ url.href }" */
 ${ name } = (${ name } || (${ name }$ = $ => {
-    'use strict';
+'use strict';
 
-    ${ code }
+/* Start Injected */
+${ code }
+/* End Injected */
 
-    ;top.onlocationchange = event => ${ type }.init();
+let InjectedReadyState;
 
-    let InjectedReadyState;
-
-    return (${ type }.RegExp = RegExp(
-        ${ type }.url
-        /*.replace(/\\|.*?(\\)|$)/g,'')*/
-        .replace(/^\\*\\:/,'\\\\w{3,}:')
-        .replace(/\\*\\./g,'([^\\\\.]+\\\\.)?')
-        .replace(/\\/\\*/g,'/[^$]*'),'i')
-    ).test
-    ("${ url.href }")?
-    /* URL matches pattern */
-        ${ type }.ready?
-        /* Injected file has the "ready" property */
-        (InjectedReadyState =
-            ${ type }.ready.constructor.name == 'AsyncFunction'?
-            /* "ready" is an async function */
-                ${ type }.ready():
-            /* "ready" is a sync (normal) function */
-            ${ type }.ready()
-        )?
-            /* Injected file is ready */
-                ${ type }.init( InjectedReadyState ):
-            /* Injected file isn't ready */
-            (${ type }.timeout || 1000):
-        /* Injected file doesn't have the "ready" property */
-        ${ type }.init():
-    /* URL doesn't match pattern */
-(    console.warn("The domain '${ org }' ('${ url.href }') does not match the domain pattern '"+${ type }.url+"' ("+${ type }.RegExp+")"), 5000);
+return (${ type }.RegExp = RegExp(
+    ${ type }.url
+    /*.replace(/\\|.*?(\\)|$)/g,'')*/
+    .replace(/^\\*\\:/,'\\\\w{3,}:')
+    .replace(/\\*\\./g,'([^\\\\.]+\\\\.)?')
+    .replace(/\\/\\*/g,'/[^$]*'),'i')
+).test
+(location.href)?
+/* URL matches pattern */
+    ${ type }.ready?
+    /* Injected file has the "ready" property */
+    (InjectedReadyState =
+        ${ type }.ready.constructor.name == 'AsyncFunction'?
+        /* "ready" is an async function */
+            ${ type }.ready():
+        /* "ready" is a sync (normal) function */
+        ${ type }.ready()
+    )?
+        /* Injected file is ready */
+            ${ type }.init( InjectedReadyState ):
+        /* Injected file isn't ready */
+        (${ type }.timeout || 1000):
+    /* Injected file doesn't have the "ready" property */
+    ${ type }.init():
+/* URL doesn't match pattern */
+(console.warn("The domain '${ org }' (" + location.href + ") does not match the domain pattern '" + ${ type }.url + "' (" + ${ type }.RegExp + ")"), 5000);
 })(document.queryBy));
 
 console.log('[${ name }]', ${ name });
+
+top.onlocationchange = (event) => chrome.runtime.sendMessage({ type: '$INIT$', options: { ${ type }: '${ js }' } }, callback => callback);
 
 ;${ name };`
                 ) }, results => handle(results, LAST_ID = id, LAST_INSTANCE = instance, LAST_JS = js, LAST_TYPE = type))
@@ -152,10 +154,15 @@ let handle = async(results, tabID, instance, script, type) => {
 
     let data = await results[0];
 
-    if(typeof data == 'number')
-        return setTimeout(() => { let { request, sender, callback } = (processMessage.properties || {}); processMessage(request, sender, callback) }, data);
+    if(typeof data == 'number') {
+        if(handle.timeout)
+            return /* already running */;
+
+        return handle.timeout = setTimeout(() => { let { request, sender, callback } = (processMessage.properties || {}); handle.timeout = null; processMessage(request, sender, callback) }, data);
+    }
+
     if(typeof data != 'object')
-        return /* setTimeout */;
+        return /* timeout */;
 
     if(typeof data == 'number')
         return setTimeout(() => { let { request, sender, callback } = (processMessage.properties || {}); processMessage(request, sender, callback) }, data);
@@ -180,13 +187,15 @@ chrome.tabs.onActivated.addListener(change => {
     chrome.tabs.get(change.tabId, tab => tabchange([ tab ]));
 });
 
-chrome.tabs.onUpdated.addListener((ID, change, tab) => {
+let refresh;
+
+chrome.tabs.onUpdated.addListener(refresh = (ID, change, tab) => {
     instance = RandomName();
 
     if(change.status == 'complete' && !tab.discarded)
         tabchange([ tab ]);
     else if(!tab.discarded)
-        setTimeout(() => tabchange([ tab ]), 1000);
+        setTimeout(() => refresh(ID, change, tab), 1000);
 });
 
 // workaround for the above
@@ -255,13 +264,13 @@ chrome.runtime.onMessage.addListener(processMessage = (request, sender, callback
                             // Sorry, but the instance needs to be callable multiple times
                             chrome.tabs.executeScript(id, { code:
                                 (LAST = cache[plugin] =
-`/* plugin */
+`/* plugin (${ (DISABLE_DEBUGGER? 'on':'off') }line) - "${ url.href }" */
 ${ name } = (${ name } || (${ name }$ = $ => {
 'use strict';
 
+/* Start Injected */
 ${ code }
-
-;top.onlocationchange = event => plugin.init();
+/* End Injected */
 
 let PluginReadyState;
 
@@ -272,7 +281,7 @@ return (plugin.RegExp = RegExp(
     .replace(/\\*\\./g,'([^\\\\.]+\\\\.)?')
     .replace(/\\/\\*/g,'/[^$]*'),'i')
 ).test
-("${ url.href }")?
+(location.href)?
 /* URL matches pattern */
     plugin.ready?
     /* Plugin has the "ready" property */
@@ -290,10 +299,12 @@ return (plugin.RegExp = RegExp(
     /* Plugin doesn't have the "ready" property */
     plugin.init():
 /* URL doesn't match pattern */
-(console.warn("The domain '${ org }' ('${ url.href }') does not match the domain pattern '" + plugin.url + "' (" + plugin.RegExp + ")"), 5000);
+(console.warn("The domain '${ org }' (" + location.href + ") does not match the domain pattern '" + plugin.url + "' (" + plugin.RegExp + ")"), 5000);
 })(document.queryBy));
 
 console.log('[${ name }]', ${ name });
+
+top.onlocationchange = (event) => chrome.runtime.sendMessage({ type: '$INIT$', options: { plugin: '${ plugin }' } }, callback => callback);
 
 ;${ name };`
 ) }, results => handle(results, LAST_ID = id, LAST_INSTANCE = instance, LAST_JS = plugin, LAST_TYPE = type))
@@ -311,13 +322,13 @@ console.log('[${ name }]', ${ name });
                         // Sorry, but the instance needs to be callable multiple times
                         chrome.tabs.executeScript(id, { code:
                             (LAST = cache[script] =
-`/* script */
+`/* script (${ (DISABLE_DEBUGGER? 'on':'off') }line) - "${ url.href }" */
 ${ name } = (${ name } || (${ name }$ = $ => {
 'use strict';
 
+/* Start Injected */
 ${ code }
-
-;top.onlocationchange = event => script.init();
+/* End Injected */
 
 let ScriptReadyState;
 
@@ -328,7 +339,7 @@ return (script.RegExp = RegExp(
     .replace(/\\*\\./g,'([^\\\\.]+\\\\.)?')
     .replace(/\\/\\*/g,'/[^$]*'),'i')
 ).test
-("${ url.href }")?
+(location.href)?
 /* URL matches pattern */
     script.ready?
     /* Script has the "ready" property */
@@ -346,10 +357,12 @@ return (script.RegExp = RegExp(
     /* Script doesn't have the "ready" property */
     script.init():
 /* URL doesn't match pattern */
-(console.warn("The domain '${ org }' ('${ url.href }') does not match the domain pattern '" + script.url + "' (" + script.RegExp + ")"), 5000);
+(console.warn("The domain '${ org }' (" + location.href + ") does not match the domain pattern '" + script.url + "' (" + script.RegExp + ")"), 5000);
 })(document.queryBy));
 
 console.log('[${ name }]', ${ name });
+
+top.onlocationchange = (event) => chrome.runtime.sendMessage({ type: '$INIT$', options: { script: '${ script }' } }, callback => callback);
 
 ;${ name };`
 ) }, results => handle(results, LAST_ID = id, LAST_INSTANCE = instance, LAST_JS = script, LAST_TYPE = type))
@@ -361,6 +374,14 @@ console.log('[${ name }]', ${ name });
 
             case '_INIT_':
                 chrome.tabs.executeScript(id, { code: LAST }, results => handle(results, LAST_ID, LAST_INSTANCE, LAST_JS, LAST_TYPE));
+                break;
+
+            case '$INIT$':
+                chrome.tabs.getCurrent(tab => {
+                    instance = RandomName();
+
+                    setTimeout(() => tabchange([ tab ]), 5000);
+                });
                 break;
 
             case 'FOUND':

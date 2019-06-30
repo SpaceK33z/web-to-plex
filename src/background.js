@@ -647,6 +647,7 @@ chrome.runtime.onMessage.addListener((request, sender, callback) => {
             case 'PLUGIN':
             case 'SCRIPT':
             case '_INIT_':
+            case '$INIT$':
             case 'FOUND':
                 /* These are meant to be handled by plugn.js */
                 return false;
