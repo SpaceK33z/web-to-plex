@@ -1788,7 +1788,7 @@ let config, init, sendUpdate;
 
     /* Listen for events */
     chrome.runtime.onMessage.addListener(async(request, sender) => {
-        terminal.log(`Listener event [${ request.instance_type }#${ request[request.instance_type] }]:`, request);
+        terminal.log(`Listener event [${ request.instance_type }#${ request[request.instance_type.toLowerCase()] }]:`, request);
 
         let data = request.data,
             LOCATION = `${ request.name || 'anonymous' } @ instance ${ request.instance }`,

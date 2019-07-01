@@ -161,6 +161,10 @@ function parseConfiguration() {
     return getConfiguration().then(options => (configuration = options), error => { throw error });
 }
 
+chrome.storage.onChanged.addListener(async(changes, namespace) => {
+    await parseConfiguration();
+});
+
 (async() => {
     await parseConfiguration();
 })();
