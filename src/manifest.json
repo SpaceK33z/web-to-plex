@@ -135,7 +135,11 @@
 			"matches": ["*://*.allocine.fr/*"],
 			"js": ["utils.js", "sites/allocine/index.js"],
 			"css": ["sites/allocine/index.css", "sites/common.css"]
-		}
+		},{
+            "matches": ["*://*.gostream.site/*"],
+            "js": ["utils.js", "sites/gostream/index.js"],
+            "css": ["sites/gostream/index.css", "sites/common.css"]
+        }
 	],
 
 	"background": {

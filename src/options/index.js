@@ -137,6 +137,7 @@ const storage = (chrome.storage.sync || chrome.storage.local),
             'builtin_vumoo',
             'builtin_youtube',
             'builtin_itunes',
+            'builtin_gostream',
 
             // Plugins - End of file, before "let empty = ..."
             'plugin_toloka',
@@ -1318,6 +1319,7 @@ let builtins = {
     "iTunes": "https://itunes.apple.com/",
     "JustWatch": "https://justwatch.com/",
     "MovieMeter": "https://moviemeter.nl/",
+    "GoStream": "https://gostream.site/",
 
 }, builtin_array = [], builtin_sites = {}, builtinElement = $('#builtin');
 

@@ -23,7 +23,7 @@ let script = {
 
         if(servers.length > 1 && type != 'show') {
             OLOAD_EVENTS.push(setTimeout(
-                () => top.postMessage({ type: 'NOTIFICATION', data: { state: 'update', text: 'Finding download links...', timeout: 3000 } }, '*'),
+                () => Notify('update', 'Finding download links...', 3000),
                 500
             ));
 
@@ -34,7 +34,7 @@ let script = {
 
                     if(index == servers.length -1)
                         OLOAD_EVENTS.push(setTimeout(
-                            () => top.postMessage({ type: 'NOTIFICATION', data: { state: 'update', text: 'No download links found' } }, '*'),
+                            () => Notify('update', 'No download links found'),
                             7000
                         ));
                 },

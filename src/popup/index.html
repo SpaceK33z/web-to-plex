@@ -192,6 +192,10 @@
             box-shadow: 0 10px 128px inset #222222;
         }
 
+        #gostream:hover {
+            box-shadow: 0 10px 128px inset #028CC9;
+        }
+
         #local-plex:hover {
             box-shadow: 0 10px 128px inset #F9BD03;
         }
@@ -241,13 +245,18 @@
             float: right;
         }
 
-        [is-shy] label:after {
+        [is-shy] label:after, [is-dead] label:after {
             content: " \1f910";
             float: right;
         }
 
         [save-file]:after {
             background: url("../img/48.png") no-repeat center;
+        }
+
+        [not-safe] label:after {
+            content: " \1F527";
+            float: right;
         }
 
         /* $1 - $10 */
@@ -301,7 +310,7 @@
                     <label>Netflix</label>
                 </a>
             </td>
-            <td id="verizon">
+            <td id="verizon" not-safe>
                 <a href="https://tv.verizon.com/" target="_blank">
                     <img alt="Verizon" src="../img/verizon.png" />
                     <label>Verizon</label>
@@ -316,13 +325,13 @@
         </tr>
 
         <tr>
-            <td id="shana-project" save-file="magnet URLs">
+            <td id="shana-project" is-dead save-file="magnet URLs">
                 <a href="https://shanaproject.com/" target="_blank">
                     <img alt="Shana Project" src="../img/shanaproject.png" />
                     <label>Shana Project</label>
                 </a>
             </td>
-            <td id="youtube">
+            <td id="youtube" is-slow>
                 <a href="https://youtube.com/" target="_blank">
                     <img alt="YouTube" src="../img/youtube.png" />
                     <label>YouTube</label>
@@ -349,7 +358,7 @@
                     <label>Fandango</label>
                 </a>
             </td>
-            <td id="amazon">
+            <td id="amazon" not-safe>
                 <a href="https://www.amazon.com/Amazon-Video/s/browse/ref=web_to_plex?node=2858778011" target="_blank">
                     <img alt="Amazon" src="../img/amazon.png" />
                     <label>Amazon</label>
@@ -391,7 +400,7 @@
                     <label>Letterboxd</label>
                 </a>
             </td>
-            <td id="hulu" is-slow cost-cash-low="$7.99/month">
+            <td id="hulu" not-safe is-slow cost-cash-low="$7.99/month">
                 <a href="https://hulu.com/" target="_blank">
                     <img alt="Hulu" src="../img/hulu.png" />
                     <label>Hulu</label>
@@ -427,7 +436,7 @@
                     <label>Metacritic</label>
                 </a>
             </td>
-            <td id="showrss" save-file="magnet URLs">
+            <td id="showrss" save-file="magnet URLs" is-dead>
                 <a href="https://showrss.info/" target="_blank">
                     <img alt="showRSS" src="../img/showrss.png" />
                     <label>showRSS</label>
@@ -479,6 +488,15 @@
                 <a href="https://moviemeter.nl/" target="_blank">
                     <img alt="MovieMeter" src="../img/moviemeter.png" />
                     <label>MovieMeter</label>
+                </a>
+            </td>
+        </tr>
+
+        <tr>
+            <td id="gostream" save-file="video files" not-safe>
+                <a href="https://gostream.site/" target="_blank">
+                    <img alt="GoStream" src="../img/gostream.png" />
+                    <label>GoStream</label>
                 </a>
             </td>
         </tr>

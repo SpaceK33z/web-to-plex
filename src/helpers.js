@@ -47,6 +47,10 @@ async function kill(name) {
     return storage.remove(['Cache-Data/' + btoa(name.toLowerCase().replace(/\s+/g, ''))]);
 }
 
+function Notify(state, text, timeout = 7000, requiresClick = true) {
+    return top.postMessage({ type: 'NOTIFICATION', data: { state, text, timeout, requiresClick } }, '*');
+}
+
 // the custom "on location change" event
 function watchlocationchange(subject) {
     let locationchangecallbacks = watchlocationchange.locationchangecallbacks;
