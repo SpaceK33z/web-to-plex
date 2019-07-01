@@ -1282,7 +1282,7 @@ let builtins = {
     "ShowRSS": "https://showrss.info/",
     "Vudu": "https://vudu.com/",
     "Movieo": "https://movieo.me/",
-    "GoStream": "https://gostream.site/",
+    "Vumoo": "https://vumoo.to/",
     "TV Maze": "https://tvmaze.com/",
     "Google Play": "https://play.google.com/store/movies",
     "Google": "https://google.com/",
@@ -1466,13 +1466,12 @@ $('#json_set').addEventListener('click', event => {
 $('#erase_cache').addEventListener('click', event => {
     let options = JSON.stringify(getOptionValues());
 
-    storage.clear();
-
-    restoreOptions(options);
-
     new Notification('info', 'Clearing...', 3000);
-
-    setTimeout(saveOptions, 1000); // requires at least 1s for proper functioning
+    storage.get(null, items => {
+        for(let item in items)
+            if(/^cache-data\//i.test(item))
+                storage.remove(item);
+    });
 });
 
 $('#version')

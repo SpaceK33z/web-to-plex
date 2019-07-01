@@ -55,7 +55,7 @@ If you don't feel like actually downloading the movie, or want a simple watchlis
 2.  [IMDb](http://imdb.com/)
 3.  [Trakt.tv](https://trakt.tv/)
 4.  [Letterboxd](https://letterboxd.com/)
-5.  [GoStream](https://gostream.site/)<sup>1</sup>
+5.  [Vumoo](https://vumoo.to/)<sup>1</sup>
 6.  [TV Maze](http://www.tvmaze.com/)
 7.  [The TVDb](https://www.thetvdb.com/)
 8.  [The MovieDb](https://www.themoviedb.org/)

@@ -439,7 +439,7 @@ let config, init, sendUpdate;
     }
 
     // Send an update query to background.js
-    sendUpdate = (type, options = {}) => {
+    sendUpdate = (type, options = {}, postToo) => {
         if(config)
             terminal.log(`Requesting update: ${ type }`, options);
 
@@ -447,6 +447,9 @@ let config, init, sendUpdate;
             type,
             options
         });
+
+        if(postToo)
+            top.postMessage(options);
     };
 
     // get the saved options
@@ -1294,6 +1297,7 @@ let config, init, sendUpdate;
     }
 
     // make the button
+    let MASTER_BUTTON;
     function renderPlexButton(persistent) {
     	let existingButtons = document.querySelectorAll('.web-to-plex-button'),
             firstButton = existingButtons[0];
@@ -1397,7 +1401,7 @@ let config, init, sendUpdate;
 
         document.body.appendChild(button);
 
-        return button;
+        return MASTER_BUTTON = button;
     }
 
     function modifyPlexButton(button, action, title, options = {}) {
@@ -1498,10 +1502,12 @@ let config, init, sendUpdate;
                 element.href = getPlexMediaURL(config.server.id, options.key);
                 element.setAttribute(hov, `Watch "${options.title} (${options.year})" on Plex`);
                 button.classList.add('wtp--found');
+
+                new Notification('success', `Watch "${ nice_title }"`, 7000, e => element.click(e));
             } else if(action == 'downloader' || options.remote) {
 
                 switch(options.remote) {
-                    /* GoStream */
+                    /* Vumoo */
                     case 'oload':
                         let href = options.href, path = '';
 
@@ -1844,7 +1850,7 @@ let config, init, sendUpdate;
                     year = +(year || Db.year || 0);
 
                     let found = await findPlexMedia({ type, title, year, image, button, IMDbID, TMDbID, TVDbID });
-                    sendUpdate('FOUND', { ...request, found });
+                    sendUpdate('FOUND', { ...request, found }, true);
                 }
                 return true;
 
@@ -1863,7 +1869,14 @@ let config, init, sendUpdate;
                 case 'SEND_VIDEO_LINK':
                     let options = { ...findPlexMedia.OPTIONS, href: request.href, remote: request.from };
 
-                    modifyPlexButton(options.button, 'downloader', 'Download', options);
+                    terminal.log('oload Event:', options);
+
+                    modifyPlexButton(MASTER_BUTTON, 'downloader', 'Download', options);
+                    return true;
+
+                case 'NOTIFICATION':
+                    let { state, text, timeout = 7000, callback = () => {}, requiresClick = true } = request.data;
+                    new Notification(state, text, timeout, callback, requiresClick);
                     return true;
 
                 default:

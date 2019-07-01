@@ -116,6 +116,11 @@
     background: #2A2AFF !important;
 }
 
+/* Web to Plex success notifications */
+.web-to-plex-notification.success {
+    background: #03BDF9 !important;
+}
+
 /* Web to Plex warning notifications */
 .web-to-plex-notification.warning {
 	background: #FF2A2A !important;
