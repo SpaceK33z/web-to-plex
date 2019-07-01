@@ -64,7 +64,7 @@ function ChangeStatus({ ITEM_ID, ITEM_TITLE, ITEM_TYPE, ID_PROVIDER, ITEM_YEAR, 
             // File friendly title
         SEARCH_TITLE = ITEM_TITLE.replace(/[\-\s]+/g, '-').replace(/[^\w\-]+/g, ''),
             // Search friendly title
-        SEARCH_PROVIDER = /[it]m/i.test(ID_PROVIDER)? 'VO': 'GG';
+        SEARCH_PROVIDER = /^im/i.test(ID_PROVIDER)? 'VO': /^tm/i.test(ID_PROVIDER)? 'GX': 'GG';
 
     ITEM_ID = (ITEM_ID && !/^tt$/i.test(ITEM_ID)? ITEM_ID: '') + '';
     ITEM_ID = ITEM_ID.replace(/^.*\b(tt\d+)\b.*$/, '$1').replace(/^.*\bid=(\d+)\b.*$/, '$1').replace(/^.*(?:movie|tv|(?:tv-?)?(?:shows?|series|episodes?))\/(\d+).*$/, '$1');
@@ -94,7 +94,7 @@ function ChangeStatus({ ITEM_ID, ITEM_TITLE, ITEM_TYPE, ID_PROVIDER, ITEM_YEAR, 
         });
 
     chrome.contextMenus.update('W2P-XX', {
-        title: `Find on ${ (SEARCH_PROVIDER == 'VO'? 'Vumoo': 'Google') }`,
+        title: `Find on ${ (SEARCH_PROVIDER == 'VO'? 'Vumoo': SEARCH_PROVIDER == 'GX'? 'GoStream': 'Google') }`,
         checked: false
     });
 }
@@ -551,6 +551,8 @@ chrome.contextMenus.onClicked.addListener(item => {
         case 'xx':
             url = external.SEARCH_PROVIDER == 'VO'?
                 `google.com/search?q=${ p(tl) }+site:vumoo.to`:
+            external.SEARCH_PROVIDER == 'GX'?
+                `gostream.site/?s=${ p(tl) }`:
             `google.com/search?q="${ p(tl, ' ') } ${ yr }"+${ pv }db`;
             break;
         case 'dl':
