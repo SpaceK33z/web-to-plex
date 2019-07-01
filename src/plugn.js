@@ -1,5 +1,5 @@
 /* plugn.js (Plugin) - Web to Plex */
-/* global config */
+/* global configuration */
 
 let DISABLE_DEBUGGER = false;
 
@@ -10,6 +10,9 @@ let scribe =
 
 let LAST, LAST_JS, LAST_INSTANCE, LAST_ID, LAST_TYPE, FOUND = {};
 
+let storage = chrome.storage.sync || chrome.storage.local;
+let configuration;
+
 function load(name) {
     return JSON.parse(localStorage.getItem(btoa(name)));
 }
@@ -18,9 +21,149 @@ function save(name, data) {
     return localStorage.setItem(btoa(name), JSON.stringify(data));
 }
 
-function GetConsent(origin) {
-    return load('permission:' + origin);
+async function Load(name = '') {
+    if(!name)
+        return /* invalid name */;
+
+    name = 'Cache-Data/' + btoa(name.toLowerCase().replace(/\s+/g, ''));
+
+    return new Promise((resolve, reject) => {
+        function LOAD(DISK) {
+            let data = JSON.parse(DISK[name] || null);
+
+            return resolve(data);
+        }
+
+        storage.get(null, DISK => {
+            if(chrome.runtime.lastError)
+                chrome.storage.local.get(null, LOAD);
+            else
+                LOAD(DISK);
+        });
+    });
 }
+
+async function Save(name = '', data) {
+    if(!name)
+        return /* invalid name */;
+
+    name = 'Cache-Data/' + btoa(name.toLowerCase().replace(/\s+/g, ''));
+    data = JSON.stringify(data);
+
+    await storage.set({[name]: data}, () => data);
+
+    return name;
+}
+
+function GetConsent(name, builtin) {
+    return configuration[`${ (builtin? 'builtin': 'plugin') }_${ name }`];
+}
+
+// get the saved options
+function getConfiguration() {
+    return new Promise((resolve, reject) => {
+        function handleConfiguration(options) {
+            if((!options.plexToken || !options.servers) && !options.DO_NOT_USE)
+                return reject(new Error('Required options are missing')),
+                    null;
+
+            let server, o;
+
+            if(!options.DO_NOT_USE) {
+                // For now we support only one Plex server, but the options already
+                // allow multiple for easy migration in the future.
+                server = options.servers[0];
+                o = {
+                    server: {
+                        ...server,
+                        // Compatibility for users who have not updated their settings yet.
+                        connections: server.connections || [{ uri: server.url }]
+                    },
+                    ...options
+                };
+
+                options.plexURL = o.plexURL?
+                    `${ o.plexURL }web#!/server/${ o.server.id }/`:
+                `https://app.plex.tv/web/app#!/server/${ o.server.id }/`;
+            } else {
+                o = options;
+            }
+
+            if(o.couchpotatoBasicAuthUsername)
+                o.couchpotatoBasicAuth = {
+                    username: o.couchpotatoBasicAuthUsername,
+                    password: o.couchpotatoBasicAuthPassword
+                };
+
+            // TODO: stupid copy/pasta
+            if(o.watcherBasicAuthUsername)
+                o.watcherBasicAuth = {
+                    username: o.watcherBasicAuthUsername,
+                    password: o.watcherBasicAuthPassword
+                };
+
+            if(o.radarrBasicAuthUsername)
+                o.radarrBasicAuth = {
+                    username: o.radarrBasicAuthUsername,
+                    password: o.radarrBasicAuthPassword
+                };
+
+            if(o.sonarrBasicAuthUsername)
+                o.sonarrBasicAuth = {
+                    username: o.sonarrBasicAuthUsername,
+                    password: o.sonarrBasicAuthPassword
+                };
+
+            if(o.usingOmbi && o.ombiURLRoot && o.ombiToken) {
+                o.ombiURL = o.ombiURLRoot;
+            } else {
+                delete o.ombiURL; // prevent variable ghosting
+            }
+
+            if(o.usingCouchPotato && o.couchpotatoURLRoot && o.couchpotatoToken) {
+                o.couchpotatoURL = `${ items.couchpotatoURLRoot }/api/${encodeURIComponent(o.couchpotatoToken)}`;
+            } else {
+                delete o.couchpotatoURL; // prevent variable ghosting
+            }
+
+            if(o.usingWatcher && o.watcherURLRoot && o.watcherToken) {
+                o.watcherURL = o.watcherURLRoot;
+            } else {
+                delete o.watcherURL; // prevent variable ghosting
+            }
+
+            if(o.usingRadarr && o.radarrURLRoot && o.radarrToken) {
+                o.radarrURL = o.radarrURLRoot;
+            } else {
+                delete o.radarrURL; // prevent variable ghosting
+            }
+
+            if(o.usingSonarr && o.sonarrURLRoot && o.sonarrToken) {
+                o.sonarrURL = o.sonarrURLRoot;
+            } else {
+                delete o.sonarrURL; // prevent variable ghosting
+            }
+
+            resolve(o);
+        }
+
+        storage.get(null, options => {
+            if(chrome.runtime.lastError)
+                chrome.storage.local.get(null, handleOptions);
+            else
+                handleConfiguration(options);
+        });
+    });
+}
+
+// self explanatory, returns an object; sets the configuration variable
+function parseConfiguration() {
+    return getConfiguration().then(options => (configuration = options), error => { throw error });
+}
+
+(async() => {
+    await parseConfiguration();
+})();
 
 function RandomName(length = 16, symbol = '') {
     let values = [];
@@ -32,7 +175,7 @@ function RandomName(length = 16, symbol = '') {
 
 let running = [], instance = RandomName(), TAB, cache = {};
 
-let tabchange = tabs => {
+let tabchange = async tabs => {
     let tab = tabs[0];
 
     if(!tab || FOUND[instance]) return;
@@ -42,7 +185,8 @@ let tabchange = tabs => {
     let id  = tab.id,
         url = tab.url,
         org, ali, js,
-        type, cached;
+        type, cached,
+        allowed;
 
     if(
         !url
@@ -59,12 +203,12 @@ let tabchange = tabs => {
     url  = new URL(url);
     org  = url.origin;
     ali  = url.host.replace(/^(ww\w+\.|\w{2}\.)/i, '');
-    can  = GetConsent(ali);
     type = (load(`builtin:${ ali }`) + '') == 'true'? 'script': 'plugin';
     js   = load(`${ type }:${ ali }`);
     code = cache[ali];
+    allowed = await GetConsent(ali, type == 'script');
 
-    if(!can || !js) return;
+    if(!allowed || !js) return;
 
     if(code) {
         chrome.tabs.executeScript(id, { file: 'helpers.js' }, () => {
@@ -93,6 +237,9 @@ let tabchange = tabs => {
 `/* ${ type }* (${ (DISABLE_DEBUGGER? 'on':'off') }line) - "${ url.href }" */
 ${ name } = (${ name } || (${ name }$ = $ => {
 'use strict';
+
+if(${ allowed } === false)
+    return '<allowed>';
 
 /* Start Injected */
 ${ code }
@@ -159,6 +306,19 @@ let handle = async(results, tabID, instance, script, type) => {
             return /* already running */;
 
         return handle.timeout = setTimeout(() => { let { request, sender, callback } = (processMessage.properties || {}); handle.timeout = null; processMessage(request, sender, callback) }, data);
+    } else if(typeof data == 'string') {
+        let R = RegExp;
+
+        if(/^<([^<>]+)>$/.test(data))
+            return scribe.warn(`The instance requires the "${ R.$1 }" permission: ${ instance }`);
+
+        data.replace(/^([^]+?)\s*\((\d{4})\):([\w\-]+)$/);
+
+        let title = R.$1,
+            year  = R.$2,
+            type  = R.$3;
+
+        data = { type, title, year };
     }
 
     if(typeof data != 'object')
@@ -171,7 +331,7 @@ let handle = async(results, tabID, instance, script, type) => {
 
     try {
         chrome.tabs.insertCSS(tabID, { file: 'sites/common.css' });
-        chrome.tabs.sendMessage(tabID, { data, script, instance, instance_type: 'script', type: 'POPULATE' });
+        chrome.tabs.sendMessage(tabID, { data, script, instance, instance_type: type, type: 'POPULATE' });
     } catch(error) {
         throw new Error(InstanceWarning + ' - ' + String(error));
     }
@@ -217,7 +377,7 @@ chrome.tabs.onUpdated.addListener((ID, change, tab) => {
 // listen for a page load
 let processMessage;
 
-chrome.runtime.onMessage.addListener(processMessage = (request, sender, callback) => {
+chrome.runtime.onMessage.addListener(processMessage = async(request, sender, callback) => {
     let { options } = request,
         tab = TAB || {},
         { id, url, href } = tab,
@@ -245,7 +405,8 @@ chrome.runtime.onMessage.addListener(processMessage = (request, sender, callback
     if(request && request.options) {
         let { type } = request,
             { plugin, script } = options,
-            _type = type.toLowerCase();
+            _type = type.toLowerCase(),
+            allowed;
 
         type = type.toUpperCase();
 
@@ -257,6 +418,8 @@ chrome.runtime.onMessage.addListener(processMessage = (request, sender, callback
 
         switch(type) {
             case 'PLUGIN':
+                allowed = await GetConsent(plugin, false);
+
                 fetch(file, { mode: 'cors' })
                     .then(response => response.text())
                     .then(code => {
@@ -267,6 +430,9 @@ chrome.runtime.onMessage.addListener(processMessage = (request, sender, callback
 `/* plugin (${ (DISABLE_DEBUGGER? 'on':'off') }line) - "${ url.href }" */
 ${ name } = (${ name } || (${ name }$ = $ => {
 'use strict';
+
+if(${ allowed } === false)
+    return '<allowed>';
 
 /* Start Injected */
 ${ code }
@@ -315,6 +481,8 @@ top.onlocationchange = (event) => chrome.runtime.sendMessage({ type: '$INIT$', o
                 break;
 
             case 'SCRIPT':
+            allowed = await GetConsent(script, true);
+
             fetch(file, { mode: 'cors' })
                 .then(response => response.text())
                 .then(code => {
@@ -325,6 +493,9 @@ top.onlocationchange = (event) => chrome.runtime.sendMessage({ type: '$INIT$', o
 `/* script (${ (DISABLE_DEBUGGER? 'on':'off') }line) - "${ url.href }" */
 ${ name } = (${ name } || (${ name }$ = $ => {
 'use strict';
+
+if(${ allowed } === false)
+    return '<allowed>';
 
 /* Start Injected */
 ${ code }

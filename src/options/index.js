@@ -109,6 +109,35 @@ const storage = (chrome.storage.sync || chrome.storage.local),
             '__radarrStoragePath',
             '__sonarrStoragePath',
 
+            // Builtins
+            'builtin_amazon',
+            'builtin_couchpotato',
+            'builtin_fandango',
+            'builtin_flickmetrix',
+            'builtin_google',
+            'builtin_googleplay',
+            'builtin_hulu',
+            'builtin_imdb',
+            'builtin_justwatch',
+            'builtin_letterboxd',
+            'builtin_metacritic',
+            'builtin_moviemeter',
+            'builtin_movieo',
+            'builtin_netflix',
+            'builtin_rottentomatoes',
+            'builtin_shanaproject',
+            'builtin_showrss',
+            'builtin_tmdb',
+            'builtin_tvmaze',
+            'builtin_tvdb',
+            'builtin_trakt',
+            'builtin_vrv',
+            'builtin_verizon',
+            'builtin_vudu',
+            'builtin_vumoo',
+            'builtin_youtube',
+            'builtin_itunes',
+
             // Plugins - End of file, before "let empty = ..."
             'plugin_toloka',
             'plugin_shanaproject',
@@ -1335,7 +1364,7 @@ $('[id^="builtin_"]', true)
 
         if(self.checked) {
             terminal.log(bid, builtins[bid]);
-            requestURLPermissions(sites[pid].replace(/https?:\/\/(ww\w+\.)?/i, '*://*.').replace(/\/?$/, '/*'), granted => {
+            requestURLPermissions(builtins[bid].replace(/https?:\/\/(ww\w+\.)?/i, '*://*.').replace(/\/?$/, '/*'), granted => {
                 save(`permission:${ bid }`, granted);
                 save(`script:${ bid }`, granted? js: null);
             });
@@ -1396,8 +1425,8 @@ $('[id^="plugin_"]', true)
             js = self.getAttribute('js');
 
         if(self.checked) {
-            terminal.log(pid, sites[pid]);
-            requestURLPermissions(sites[pid].replace(/https?:\/\/(ww\w+\.)?/i, '*://*.').replace(/\/?$/, '/*'), granted => {
+            terminal.log(pid, plugins[pid]);
+            requestURLPermissions(plugins[pid].replace(/https?:\/\/(ww\w+\.)?/i, '*://*.').replace(/\/?$/, '/*'), granted => {
                 save(`permission:${ pid }`, granted);
                 save(`script:${ pid }`, granted? js: null);
             });
