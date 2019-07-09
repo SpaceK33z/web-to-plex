@@ -121,8 +121,8 @@
     background: #03BDF9 !important;
 }
 
-/* Web to Plex warning notifications */
-.web-to-plex-notification.warning {
+/* Web to Plex error/warning notifications */
+.web-to-plex-notification.warning, .web-to-plex-notification.error {
 	background: #FF2A2A !important;
 }
 

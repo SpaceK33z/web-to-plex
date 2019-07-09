@@ -110,7 +110,8 @@ String.prototype.toCaps = String.prototype.toCaps || function toCaps(all) {
         titles = /(?!^|(?:an?|the)\s+)\b(a([st]|nd?|cross|fter|lthough)?|b(e(cause|fore|tween)?|ut|y)|during|from|in(to)?|[io][fn]|[fn]?or|the|[st]o|through|under|with(out)?|yet)(?!\s*$)\b/gi,
         cap_exceptions = /([\|\"\(]\s*[a-z]|[\:\.\!\?]\s+[a-z]|(?:^\b|[^\'\-\+]\b)[^aeiouy\d\W]+\b)/gi, // Punctuation exceptions, e.g. "And not I"
         all_exceptions = /\b((?:ww)?(?:m{1,4}(?:c?d(?:c{0,3}(?:x?l(?:x{0,3}(?:i?vi{0,3})?)?)?)?)?|c?d(?:c{0,3}(?:x?l(?:x{0,3}(?:i?vi{0,3})?)?)?)?|c{1,3}(?:x?l(?:x{0,3}(?:i?vi{0,3})?)?)?|x?l(?:x{0,3}(?:i?vi{0,3})?)?|x{1,3}(?:i?vi{0,3})?|i?vi{0,3}|i{1,3}))\b/gi, // Roman Numberals
-        cam_exceptions = /\b((?:mr?s|[sdjm]r|mx)|(?:adm|cm?dr?|chf|c[op][lmr]|cpt|gen|lt|mjr|sgt)|doc|hon|prof)(?:\.|\b)/gi; // Titles (Most Common?)
+        cam_exceptions = /\b((?:mr?s|[sdjm]r|mx)|(?:adm|cm?dr?|chf|c[op][lmr]|cpt|gen|lt|mjr|sgt)|doc|hon|prof)(?:\.|\b)/gi, // Titles (Most Common?)
+        low_exceptions = /'([\w]+)/gi; // Apostrphe cases
 
     array = array.split(/\s+/);
 
@@ -126,10 +127,11 @@ String.prototype.toCaps = String.prototype.toCaps || function toCaps(all) {
 
     if(!all)
         string = string
-          .replace(titles, ($0, $1, $$, $_) => $1.toLowerCase())
-          .replace(cap_exceptions, ($0, $1, $$, $_) => $1.toUpperCase())
-          .replace(all_exceptions, ($0, $1, $$, $_) => $1.toUpperCase())
-          .replace(cam_exceptions, ($0, $1, $$, $_) => $1[0].toUpperCase() + $1.slice(1, $1.length).toLowerCase() + '.');
+        .replace(titles, ($0, $1, $$, $_) => $1.toLowerCase())
+        .replace(all_exceptions, ($0, $1, $$, $_) => $1.toUpperCase())
+        .replace(cap_exceptions, ($0, $1, $$, $_) => $1.toUpperCase())
+        .replace(low_exceptions, ($0, $1, $$, $_) => $0.toLowerCase())
+        .replace(cam_exceptions, ($0, $1, $$, $_) => $1[0].toUpperCase() + $1.slice(1, $1.length).toLowerCase() + '.');
 
     return string;
 };

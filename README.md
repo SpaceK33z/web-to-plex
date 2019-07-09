@@ -46,6 +46,7 @@ Optionally, you can configure your download manager(s) (see support table) in th
 | [Radarr](https://radarr.video/)                 | Yes           |                 | Yes
 | [Sonarr](https://sonarr.tv/)                    |               | Yes             | Yes
 | [Ombi](https://ombi.io/)                        | Yes           | Yes             | Yes
+| [Medusa](https://pymedusa.com/)                 |               | Yes             | Yes
 
 If you don't feel like actually downloading the movie, or want a simple watchlist, you can also use the built-in "Plex It!" feature to bookmark the current page.
 

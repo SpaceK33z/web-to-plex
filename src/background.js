@@ -62,7 +62,7 @@ function ChangeStatus({ ITEM_ID, ITEM_TITLE, ITEM_TYPE, ID_PROVIDER, ITEM_YEAR, 
 
     let FILE_TITLE = ITEM_TITLE.replace(/\-/g, ' ').replace(/[\s\:]{2,}/g, ' - ').replace(/[^\w\s\-\']+/g, ''),
             // File friendly title
-        SEARCH_TITLE = ITEM_TITLE.replace(/[\-\s]+/g, '-').replace(/[^\w\-]+/g, ''),
+        SEARCH_TITLE = ITEM_TITLE.replace(/[\-\s]+/g, '-').replace(/[^\w\-\'\*\#]+/g, ''),
             // Search friendly title
         SEARCH_PROVIDER = /^im/i.test(ID_PROVIDER)? 'VO': /^tm/i.test(ID_PROVIDER)? 'GX': 'GG';
 
@@ -342,6 +342,80 @@ function addSonarr(request, sendResponse) {
         });
 }
 
+/** Medusa - TV Shows **/
+function addMedusa(request, sendResponse) {
+    let headers = {
+            'Content-Type': 'application/json',
+            'X-Api-Key': request.token,
+            ...(new Headers(request.basicAuth))
+        },
+        id = request.tvdbId,
+        query = request.title.replace(/\s+/g, '+'),
+        debug = { headers, query, request };
+            // setup stack trace for debugging
+
+    fetch(debug.url = `${ request.root }internal/searchIndexersForShowName?api_key=${ request.token }&indexerId=0&query=${ query }`)
+        .then(response => response.json())
+        .catch(error => sendResponse({ error: 'TV Show not found', location: 'addMedusa => fetch.then.catch', silent: true }))
+        .then(data => {
+            data = data.results;
+
+            if (!data instanceof Array || !data.length)
+                throw new Error('TV Show not found');
+
+            // Monitor, search, and download series ASAP
+            let body = data[0].join('|');
+
+            terminal.group('Generated URL');
+              terminal.log('URL', request.url);
+              terminal.log('Head', headers);
+              terminal.log('Body', body);
+            terminal.groupEnd();
+
+            return debug.body = body;
+        })
+        .then(body => {
+            return fetch(`${ request.url }`, debug.requestHeaders = {
+                method: 'POST',
+                mode: cors(request.url),
+                body: JSON.stringify({ id: { tvdb: request.tvdbId } }),
+                headers
+            });
+        })
+        .then(response => response.text())
+        .then(data => {
+            let path = request.StoragePath.replace(/\\?$/, '\\');
+
+            debug.data =
+            data = JSON.parse(data || `{"path":"${ path }${ request.title } (${ request.year })"}`);
+
+            if (data && data.error) {
+                sendResponse({
+                    error: data.error,
+                    location: `addMedusa => fetch("${ request.url }", { headers }).then(data => { if })`,
+                    debug
+                });
+            } else if (data && data.id) {
+                sendResponse({
+                    success: `Added to ${ path }${ request.title }(${ request.year })`
+                });
+            } else {
+                sendResponse({
+                    error: 'Unknown error',
+                    location: `addMedusa => fetch("${ request.url }", { headers }).then(data => { else })`,
+                    debug
+                });
+            }
+        })
+        .catch(error => {
+            sendResponse({
+                error: String(error),
+                location: `addMedusa => fetch("${ request.url }", { headers }).catch(error => { sendResponse })`,
+                debug
+            });
+        });
+}
+
 /** Ombi* - TV Shows/Movies **/
 function addOmbi(request, sendResponse) {
     let headers = {
@@ -536,12 +610,12 @@ chrome.contextMenus.onClicked.addListener(item => {
         case 'im':
             url = (qu && pv == 'im')?
                 `imdb.com/title/${ qu }/`:
-            `imdb.com/find?ref_=nv_sr_fn&s=all&q=${ tl }`;
+            `imdb.com/find?ref_=nv_sr_fn&s=all&q=${ tt }`;
             break;
         case 'tm':
             url = (qu && pv == 'tm')?
                 `themoviedb.org/${ external.ITEM_TYPE == 'show'? 'tv': 'movie' }/${ qu }`:
-            `themoviedb.org/search?query=${ tl }`;
+            `themoviedb.org/search?query=${ tt }`;
             break;
         case 'tv':
             url = (qu && pv == 'tv')?
@@ -608,6 +682,9 @@ chrome.runtime.onMessage.addListener((request, sender, callback) => {
                 return true;
             case 'ADD_SONARR':
                 addSonarr(request, callback);
+                return true;
+            case 'ADD_MEDUSA':
+                addMedusa(request, callback);
                 return true;
             case 'ADD_WATCHER':
                 addWatcher(request, callback);

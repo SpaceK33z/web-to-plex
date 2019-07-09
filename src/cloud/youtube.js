@@ -4,6 +4,8 @@ let openedByUser = false,
 let script = {
     "url": "*://www.youtube.com/*",
 
+    "timeout": 5000,
+
     "init": (ready) => {
         let _title, _year, _image, R = RegExp;
 
@@ -11,15 +13,15 @@ let script = {
             close = () => $('.less-button').first.click(),
             options, type;
 
-        if($('.more-button, .less-button').empty)
-            return 1000;
+        if($('.more-button, .less-button').empty || !$('.opened').empty)
+            return script.timeout;
 
         open(); // show the year and other information, fails otherwise
 
         type = script.getType();
 
         if(type == 'error')
-            return close(), 1000;
+            return close(), script.timeout;
 
         if(type == 'movie' || type == 'show') {
             let title = $((type == 'movie'? '.title': '#owner-container')).first,

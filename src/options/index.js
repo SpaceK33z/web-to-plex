@@ -16,6 +16,8 @@ if(chrome.runtime.lastError)
 const storage = (chrome.storage.sync || chrome.storage.local),
       $ = (selector, all) => (all? document.querySelectorAll(selector): document.querySelector(selector)),
       __servers__ = $('#plex_servers'),
+      __medusa_qualityProfile__  = $(`[data-option="medusaQualityProfileId"]`),
+      __medusa_storagePath__     = $(`[data-option="medusaStoragePath"]`),
       __watcher_qualityProfile__ = $(`[data-option="watcherQualityProfileId"]`),
       __watcher_storagePath__    = $(`[data-option="watcherStoragePath"]`),
       __radarr_qualityProfile__  = $(`[data-option="radarrQualityProfileId"]`),
@@ -34,6 +36,15 @@ const storage = (chrome.storage.sync || chrome.storage.local),
             'usingOmbi',
             'ombiURLRoot',
             'ombiToken',
+
+            // Medusa
+            'usingMedusa',
+            'medusaURLRoot',
+            'medusaToken',
+            'medusaBasicAuthUsername',
+            'medusaBasicAuthPassword',
+            'medusaStoragePath',
+            'medusaQualityProfileId',
 
             // Watcher
             'usingWatcher',
@@ -101,13 +112,17 @@ const storage = (chrome.storage.sync || chrome.storage.local),
             'watcherQualities',
             'radarrQualities',
             'sonarrQualities',
+            'medusaQualities',
             'watcherStoragePaths',
             'radarrStoragePaths',
             'sonarrStoragePaths',
+            'medusaStoragePaths',
             '__radarrQuality',
             '__sonarrQuality',
+            '__medusaQuality',
             '__radarrStoragePath',
             '__sonarrStoragePath',
+            '__medusaStoragePath',
 
             // Builtins
             'builtin_amazon',
@@ -138,6 +153,7 @@ const storage = (chrome.storage.sync || chrome.storage.local),
             'builtin_youtube',
             'builtin_itunes',
             'builtin_gostream',
+            'builtin_tubi',
 
             // Plugins - End of file, before "let empty = ..."
             'plugin_toloka',
@@ -801,10 +817,10 @@ function performRadarrTest(QualityProfileID, StoragePath, refreshing = false) {
             $('[data-option="radarrStoragePaths"i]').value = JSON.stringify(storagepaths);
 
             // Because the <select> was reset, the original value is lost.
-            if(StoragePath)
+            if(StoragePath) {
                 storagepath.value = StoragePath;
-
-            $('[data-option="__radarrStoragePath"i]').value = StoragePaths.indexOf(StoragePath.replace(/\\/g, '/')) + 1;
+                $('[data-option="__radarrStoragePath"i]').value = StoragePaths.indexOf(StoragePath.replace(/\\/g, '/')) + 1;
+            }
         });
     };
 
@@ -894,10 +910,10 @@ function performSonarrTest(QualityProfileID, StoragePath, refreshing = false) {
             $('[data-option="sonarrStoragePaths"i]').value = JSON.stringify(storagepaths);
 
             // Because the <select> was reset, the original value is lost.
-            if(StoragePath)
+            if(StoragePath) {
                 storagepath.value = StoragePath;
-
-            $('[data-option="__sonarrStoragePath"i]').value = StoragePaths.indexOf(StoragePath.replace(/\\/g, '/')) + 1;
+                $('[data-option="__sonarrStoragePath"i]').value = StoragePaths.indexOf(StoragePath.replace(/\\/g, '/')) + 1;
+            }
         });
     };
 
@@ -908,6 +924,107 @@ function performSonarrTest(QualityProfileID, StoragePath, refreshing = false) {
             (allowed)?
                 Get():
             new Notification('error', 'The user refused permission to access Sonarr')
+        );
+}
+
+function getMedusa(options, api = "config") {
+    if(!options.medusaToken)
+        return new Notification('error', 'Invalid Medusa token');
+
+	let headers = {
+		'Accept': 'application/json',
+		'Content-Type': 'application/json',
+		'X-Api-Key': options.medusaToken
+	};
+
+	if(options.medusaBasicAuthUsername)
+		headers.Authorization = `Basic ${ btoa(`${ options.medusaBasicAuthUsername }:${ options.medusaBasicAuthPassword }`) }`;
+
+	return fetch(`${ options.medusaURLRoot }/api/v2/${ api }`, { headers })
+		.then(response => response.json())
+		.catch(error => {
+			return new Notification('error', 'Medusa failed to connect with error:' + String(error)),
+              [];
+		});
+}
+
+function performMedusaTest(QualityProfileID, StoragePath, refreshing = false) {
+	let options = getOptionValues(),
+        teststatus = $('#medusa_test_status'),
+        path = $('[data-option="medusaURLRoot"]'),
+        storagepath = __medusa_storagePath__,
+        quality = __medusa_qualityProfile__,
+        url,
+        enabled = $('#using-medusa');
+
+	quality.innerHTML = '';
+	teststatus.textContent = '?';
+    storagepath.textContent = '';
+    options.medusaURLRoot = url = path.value = options.medusaURLRoot.replace(/^(\:\d+)/, 'localhost$1').replace(/^(?!^http(s)?:)/, 'http$1://').replace(/\/+$/, '');
+
+    let Get = () => {
+        getMedusa(options, 'config').then(config => {
+            if(!config) return new Notification('error', 'Failed to get Medusa configuration');
+
+            let { qualities } = config.consts,
+                profileType = $('[data-option="medusaQualityProfileType"i]').selectedIndex,
+                profiles = (profileType == 0? 'presets': profileType == 1? 'values': 'anySets');
+
+            profiles = qualities[profiles];
+
+            teststatus.textContent = '!';
+            teststatus.classList = enabled.checked = !!profiles.length;
+
+            if(!profiles.length)
+                return teststatus.title = 'Failed to communicate with Medusa';
+            enabled.parentElement.removeAttribute('disabled');
+
+            profiles.forEach(profile => {
+                let option = document.createElement('option');
+                let { value, name } = profile;
+
+                option.value = value;
+                option.textContent = name;
+                quality.appendChild(option);
+            });
+
+            $('[data-option="medusaQualities"i]').value = JSON.stringify(profiles);
+
+            // Because the <select> was reset, the original value is lost.
+            if(QualityProfileID)
+                $('[data-option="__medusaQuality"i]').value = quality.value = QualityProfileID;
+        });
+
+        let StoragePaths = [];
+        getMedusa(options, 'config').then(config => {
+            let storagepaths = config.main.rootDirs.filter(d => d.length > 1);
+
+            if(storagepaths.length < 1) return new Notification('error', 'Medusa has no usable storage paths');
+
+            storagepaths.forEach(path => {
+                let option = document.createElement('option');
+
+                StoragePaths.push((option.value = option.textContent = path).replace(/\\/g, '/').replace(/\/+$/, ''));
+                storagepath.appendChild(option);
+            });
+
+            $('[data-option="medusaStoragePaths"i]').value = JSON.stringify(storagepaths.map(path => ({ path, id: path })));
+
+            // Because the <select> was reset, the original value is lost.
+            if(StoragePath) {
+                $('[data-option="__medusaStoragePath"i]').value = StoragePath;
+                storagepath.selectedIndex = StoragePaths.indexOf(StoragePath.replace(/\\/g, '/').replace(/\/+$/, ''));
+            }
+        });
+    };
+
+    if(refreshing)
+        Get();
+    else if(url && url.length)
+        requestURLPermissions(url + '/*', allowed =>
+            (allowed)?
+                Get():
+            new Notification('error', 'The user refused permission to access Medusa')
         );
 }
 
@@ -964,15 +1081,16 @@ function saveOptions() {
         s, S = 'Sonarr',
         w, W = 'Watcher',
         c, C = 'CouchPotato',
-        o, O = 'Ombi';
+        o, O = 'Ombi',
+        m, M = 'Medusa';
 
-    let who = () => (r? R: s? S: w? W: c? C: o? O: 'manager');
+    let who = () => (r? R: s? S: w? W: c? C: o? O: m? M: 'manager');
 
     // Instead of having the user be so wordy, complete the URL ourselves here
-    if((r = !options.radarrURLRoot && options.radarrToken) || (s = !options.sonarrURLRoot && options.sonarrToken) || (w = !options.watcherURLRoot && options.watcherToken) || (o = !options.ombiURLRoot && options.ombiToken)) {
+    if((r = !options.radarrURLRoot && options.radarrToken) || (s = !options.sonarrURLRoot && options.sonarrToken) || (w = !options.watcherURLRoot && options.watcherToken) || (o = !options.ombiURLRoot && options.ombiToken) || (o = !options.medusaURLRoot && options.medusaToken)) {
       return new Notification('error', `Please enter a valid URL for ${ who() }`),
           null;
-    } if((options.radarrURLRoot && !options.radarrStoragePath) && (options.sonarrURLRoot && !options.sonarrStoragePath)) {
+    } if((options.radarrURLRoot && !options.radarrStoragePath) && (options.sonarrURLRoot && !options.sonarrStoragePath) && (options.medusaURLRoot && !options.medusaStoragePath)) {
       return new Notification('error', `Please enter a valid storage path for ${ who() }`),
           null;
     } if(options.watcherURLRoot && !options.watcherQualityProfileId) {
@@ -983,6 +1101,9 @@ function saveOptions() {
             null;
     } if(options.sonarrURLRoot && !options.sonarrQualityProfileId) {
         return new Notification('error', 'Select a quality profile for Sonarr'),
+            null;
+    } if(options.medusaURLRoot && !options.medusaQualityProfileId) {
+        return new Notification('error', 'Select a quality profile for Medusa'),
             null;
     } if(!ClientID) {
         ClientID = window.crypto.getRandomValues(new Uint32Array(5))
@@ -996,6 +1117,10 @@ function saveOptions() {
         .replace(/^(?!^http(s)?:\/\/)(.+)/, 'http$1://$2');
 
     options.ombiURLRoot = (options.ombiURLRoot || "")
+        .replace(/([^\\\/])$/, endingSlash)
+        .replace(/^(?!^http(s)?:\/\/)(.+)/, 'http$1://$2');
+
+    options.medusaURLRoot = (options.medusaURLRoot || "")
         .replace(/([^\\\/])$/, endingSlash)
         .replace(/^(?!^http(s)?:\/\/)(.+)/, 'http$1://$2');
 
@@ -1017,7 +1142,10 @@ function saveOptions() {
     options.sonarrStoragePath = options.sonarrStoragePath
         .replace(/([^\\\/])$/, endingSlash);
 
-    for(let index = 0, array = 'plex ombi watcher radarr sonarr couchpotato'.split(' '), item = save('URLs', array); index < array.length; index++)
+    options.medusaStoragePath = options.medusaStoragePath
+        .replace(/([^\\\/])$/, endingSlash);
+
+    for(let index = 0, array = 'plex ombi medusa watcher radarr sonarr couchpotato'.split(' '), item = save('URLs', array); index < array.length; index++)
         save(`${ item = array[index] }.url`, options[`${ item }URLRoot`]);
 
 	// Dynamically asking permissions
@@ -1025,6 +1153,7 @@ function saveOptions() {
 	requestURLPermissions(options.watcherURLRoot);
 	requestURLPermissions(options.radarrURLRoot);
 	requestURLPermissions(options.sonarrURLRoot);
+	requestURLPermissions(options.medusaURLRoot);
 	requestURLPermissions(options.ombiURLRoot);
 
     // Handle the proxy settings
@@ -1069,15 +1198,16 @@ function saveOptionsWithoutPlex() {
         s, S = 'Sonarr',
         w, W = 'Watcher',
         c, C = 'CouchPotato',
-        o, O = 'Ombi';
+        o, O = 'Ombi',
+        m, M = 'Medusa';
 
-    let who = () => (r? R: s? S: w? W: c? C: o? O: 'manager');
+    let who = () => (r? R: s? S: w? W: c? C: o? O: m? M: 'manager');
 
     // Instead of having the user be so wordy, complete the URL ourselves here
-    if((r = !options.radarrURLRoot && options.radarrToken) || (s = !options.sonarrURLRoot && options.sonarrToken) || (w = !options.watcherURLRoot && options.watcherToken) || (o = !options.ombiURLRoot && options.ombiToken)) {
+    if((r = !options.radarrURLRoot && options.radarrToken) || (s = !options.sonarrURLRoot && options.sonarrToken) || (w = !options.watcherURLRoot && options.watcherToken) || (o = !options.ombiURLRoot && options.ombiToken) || (o = !options.medusaURLRoot && options.medusaToken)) {
       return new Notification('error', `Please enter a valid URL for ${ who() }`),
           null;
-    } if((options.radarrURLRoot && !options.radarrStoragePath) && (options.sonarrURLRoot && !options.sonarrStoragePath)) {
+    } if((options.radarrURLRoot && !options.radarrStoragePath) && (options.sonarrURLRoot && !options.sonarrStoragePath) && (options.medusaURLRoot && !options.medusaStoragePath)) {
       return new Notification('error', `Please enter a valid storage path for ${ who() }`),
           null;
     } if(options.watcherURLRoot && !options.watcherQualityProfileId) {
@@ -1089,6 +1219,9 @@ function saveOptionsWithoutPlex() {
     } if(options.sonarrURLRoot && !options.sonarrQualityProfileId) {
         return new Notification('error', 'Select a quality profile for Sonarr'),
             null;
+    } if(options.medusaURLRoot && !options.medusaQualityProfileId) {
+        return new Notification('error', 'Select a quality profile for Medusa'),
+            null;
     } if(!ClientID) {
         ClientID = 'web-to-plex:client';
         storage.set({ ClientID });
@@ -1098,6 +1231,10 @@ function saveOptionsWithoutPlex() {
     options.plexURL = options.plexURLRoot = "https://ephellon.github.io/web.to.plex/no.server/";
 
     options.ombiURLRoot = (options.ombiURLRoot || "")
+        .replace(/([^\\\/])$/, endingSlash)
+        .replace(/^(?!^http(s)?:\/\/)(.+)/, 'http$1://$2');
+
+    options.medusaURLRoot = (options.medusaURLRoot || "")
         .replace(/([^\\\/])$/, endingSlash)
         .replace(/^(?!^http(s)?:\/\/)(.+)/, 'http$1://$2');
 
@@ -1119,7 +1256,10 @@ function saveOptionsWithoutPlex() {
     options.sonarrStoragePath = options.sonarrStoragePath
         .replace(/([^\\\/])$/, endingSlash);
 
-    for(let index = 0, array = 'ombi watcher radarr sonarr couchpotato'.split(' '), item = save('URLs', array); index < array.length; index++)
+    options.medusaStoragePath = options.medusaStoragePath
+        .replace(/([^\\\/])$/, endingSlash);
+
+    for(let index = 0, array = 'ombi medusa watcher radarr sonarr couchpotato'.split(' '), item = save('URLs', array); index < array.length; index++)
         save(`${ item = array[index] }.url`, options[`${ item }URLRoot`]);
 
 	// Dynamically asking permissions
@@ -1127,6 +1267,7 @@ function saveOptionsWithoutPlex() {
 	requestURLPermissions(options.watcherURLRoot);
 	requestURLPermissions(options.radarrURLRoot);
 	requestURLPermissions(options.sonarrURLRoot);
+	requestURLPermissions(options.medusaURLRoot);
 	requestURLPermissions(options.ombiURLRoot);
 
     // Handle the proxy settings
@@ -1214,6 +1355,8 @@ function restoreOptions(OPTIONS) {
 			performWatcherTest(items.watcherQualityProfileId, true);
         if(items.ombiURLRoot)
             performOmbiTest(true);
+        if(items.medusaURLRoot)
+			performMedusaTest(items.medusaQualityProfileId, items.medusaStoragePath, true);
         if(items.radarrURLRoot)
 			performRadarrTest(items.radarrQualityProfileId, items.radarrStoragePath, true);
         if(items.sonarrURLRoot)
@@ -1237,6 +1380,16 @@ function restoreOptions(OPTIONS) {
                 setOptions(items);
         });
     }
+
+    setTimeout(() => {
+        $('.checkbox:not([disabled]) input', true)
+            .forEach((element, index, array) => {
+                let options = getOptionValues(),
+                    using   = element.getAttribute('checked');
+
+                element.checked = using === 'true';
+            })
+    }, 250);
 }
 
 // Helpers
@@ -1320,6 +1473,7 @@ let builtins = {
     "JustWatch": "https://justwatch.com/",
     "MovieMeter": "https://moviemeter.nl/",
     "GoStream": "https://gostream.site/",
+    "Tubi": "https://tubitv.com/",
 
 }, builtin_array = [], builtin_sites = {}, builtinElement = $('#builtin');
 
@@ -1464,6 +1618,7 @@ $('#plex_test')
 $('#watcher_test', true).forEach(element => element.addEventListener('click', event => performWatcherTest()));
 $('#radarr_test', true).forEach(element => element.addEventListener('click', event => performRadarrTest()));
 $('#sonarr_test', true).forEach(element => element.addEventListener('click', event => performSonarrTest()));
+$('#medusa_test', true).forEach(element => element.addEventListener('click', event => performMedusaTest()));
 $('#ombi_test', true).forEach(element => element.addEventListener('click', event => performOmbiTest()));
 $('#enable-couchpotato', true).forEach(element => element.addEventListener('click', event => enableCouchPotato()));
 
@@ -1529,5 +1684,18 @@ $('.checkbox', true)
             if('disabled' in self.attributes)
                 return event.preventDefault(true);
             /* Stop the event from further processing */
+        });
+    });
+
+$('.test', true)
+    .forEach((element, idnex, array) => {
+        element.addEventListener('click', async event => {
+            event.preventDefault(true);
+
+            let self = event.target;
+
+            await saveOptions(event);
+
+            open(self.href, self.target);
         });
     });

@@ -334,6 +334,18 @@ let handle = async(results, tabID, instance, script, type) => {
         return /* setTimeout */;
 
     try {
+
+        let { type, title, year } = data;
+
+        title = title
+            .replace(/[\u2010-\u2015]/g, '-') // fancy hyphen
+            .replace(/[\u201a\u275f]/g, ',') // fancy comma
+            .replace(/[\u2018\u2019\u201b\u275b\u275c]/g, "'") // fancy apostrophe
+            .replace(/[\u201c-\u201f\u275d\u275e]/g, '"'); // fancy quotation marks
+        year = +year;
+
+        data = { ...data, type, title, year };
+
         chrome.tabs.insertCSS(tabID, { file: 'sites/common.css' });
         chrome.tabs.sendMessage(tabID, { data, script, instance, instance_type: type, type: 'POPULATE' });
     } catch(error) {

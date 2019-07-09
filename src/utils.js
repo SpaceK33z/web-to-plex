@@ -84,16 +84,17 @@ let config, init, sendUpdate;
 
     /* Notifications */
     // create and/or queue a notification
-    // state = "error"  - red
-    // state = "update" - blue
-    // state = "info"   - grey
+    // state = "warning" - red
+    // state = "error"
+    // state = "update"  - blue
+    // state = "info"    - grey
     // anything else for state will show as orange
     class Notification {
         constructor(state, text, timeout = 7000, callback = () => {}, requiresClick = true) {
             let queue = (Notification.queue = Notification.queue || { list: [] }),
                 last = queue.list[queue.list.length - 1];
 
-            if((state == 'error' && config.NotifyNewOnly && /\balready (exists|(been )?added)\b/.test(text)) || (config.NotifyOnlyOnce && NOTIFIED && state === 'info'))
+            if(((state == 'error' || state == 'warning') && config.NotifyNewOnly && /\balready\s+(exists?|(been\s+)?added)\b/.test(text)) || (config.NotifyOnlyOnce && NOTIFIED && state === 'info'))
                 return /* Don't match /.../i as to not match item titles */;
             NOTIFIED = true;
 
@@ -150,6 +151,8 @@ let config, init, sendUpdate;
                     show: JSON.parse(
                         config.usingSonarr?
                             config.sonarrQualities:
+                        config.usingMedusa?
+                            config.medusaQualities:
                         '[]'
                     )
                 },
@@ -164,6 +167,8 @@ let config, init, sendUpdate;
                     show: JSON.parse(
                         config.usingSonarr?
                             config.sonarrStoragePaths:
+                        config.usingMedusa?
+                            config.medusaStoragePaths:
                         '[]'
                     )
                 },
@@ -176,6 +181,8 @@ let config, init, sendUpdate;
                     show: (
                         config.usingSonarr?
                             { quality: config.__sonarrQuality, location: config.__sonarrStoragePath }:
+                        config.usingMedusa?
+                            { quality: config.__medusaQuality, location: config.__medusaStoragePath }:
                         {}
                     )
                 };
@@ -393,7 +400,7 @@ let config, init, sendUpdate;
 
                             // The prompt's items
                             furnish('div.web-to-plex-prompt-options', {},
-                                furnish('div.web-to-plex-prompt-option', { innerHTML: `${ i? `<a href="https://imdb.com/title/${i}/?ref=web_to_plex" ${s}>${i}</a>`: '/' } \u2014 ${ t? `<a href="https://themoviedb.org/${type=='show'?'tv':type}/${t}" ${s}>${t}</a>`: '/' } \u2014 ${ v? `<a href="https://themoviedb.org/series/${v}" ${s}>${v}</a>`: '/' }` }),
+                                furnish('div.web-to-plex-prompt-option', { innerHTML: `${ i? `<a href="https://imdb.com/title/${i}/?ref=web_to_plex" ${s}>${i}</a>`: '/' } \u2014 ${ t? `<a href="https://themoviedb.org/${type=='show'?'tv':type}/${t}" ${s}>${t}</a>`: '/' } \u2014 ${ v? `<a href="https://thetvdb.com/series/${title.replace(/\s+/g,'-').replace(/&/g,'and').replace(/[^\w\-]+/g,'')}#${v}" ${s}>${v}</a>`: '/' }` }),
                                 (
                                     config.PromptQuality?
                                         P_QUA = furnish('select.quality', { onchange: event => options.quality = event.target.value }, ...profiles[type].map(Q => furnish('option', { value: Q.id }, Q.name))):
@@ -507,6 +514,12 @@ let config, init, sendUpdate;
                         password: o.sonarrBasicAuthPassword
                     };
 
+                if(o.medusaBasicAuthUsername)
+                    o.medusaBasicAuth = {
+                        username: o.medusaBasicAuthUsername,
+                        password: o.medusaBasicAuthPassword
+                    };
+
                 if(o.usingOmbi && o.ombiURLRoot && o.ombiToken) {
                     o.ombiURL = o.ombiURLRoot;
                 } else {
@@ -535,6 +548,12 @@ let config, init, sendUpdate;
                     o.sonarrURL = o.sonarrURLRoot;
                 } else {
                     delete o.sonarrURL; // prevent variable ghosting
+                }
+
+                if(o.usingMedusa && o.medusaURLRoot && o.medusaToken) {
+                    o.medusaURL = o.medusaURLRoot;
+                } else {
+                    delete o.medusaURL; // prevent variable ghosting
                 }
 
                 resolve(o);
@@ -578,7 +597,7 @@ let config, init, sendUpdate;
                 { error: m => m, info: m => m, log: m => m, warn: m => m, group: m => m, groupEnd: m => m }:
             console;
 
-    console.log('DISABLE_DEBUGGER:', DISABLE_DEBUGGER, config);
+    terminal.log('DISABLE_DEBUGGER:', DISABLE_DEBUGGER, config);
 
     // parse the formatted headers and URL
     function HandleProxyHeaders(Headers = "", URL = "") {
@@ -624,7 +643,8 @@ let config, init, sendUpdate;
             mid  = TMDbID  || null, // TMDbID
             tid  = TVDbID  || null, // TVDbID
             rqut = apit, // request type: tmdb, imdb, or tvdb
-            manable = config.ManagerSearch && !(rerun & 0b1000); // is the user's "Manager Searches" option enabled?
+            manable = config.ManagerSearch && !(rerun & 0b1000), // is the user's "Manager Searches" option enabled?
+            UTF_16 = /[^0\u0020-\u007e, 1\u00a1\u00bf-\u00ff, 2\u0100-\u017f, 3\u0180-\u024f, 4\u0300-\u036f, 5\u0370-\u03ff, 6\u0400-\u04ff, 7\u0500-\u052f, 8\u20a0-\u20bf]+/g;
 
         type = type || null;
         meta = { ...meta, mode: 'cors' };
@@ -634,12 +654,25 @@ let config, init, sendUpdate;
         /(movie|film|cinema)s?/i.test(rqut)?
             'tmdb':
         rqut || '*';
-        manable = manable && (config.usingOmbi || (config.usingRadarr && rqut == 'tmdb') || (config.usingSonarr && rqut == 'tvdb'));
+        manable = manable && (config.usingOmbi || (config.usingRadarr && rqut == 'tmdb') || ((config.usingSonarr || config.usingMedusa) && rqut == 'tvdb'));
         title = (title? title.replace(/\s*[\:,]\s*seasons?\s+\d+.*$/i, '').toCaps(): "")
-            .replace(/\u201a/g, ',') // fancy comma
-            .replace(/[\u2019\u201b]/g, "'") // fancy apostrophe
-            .replace(/[\u201c\u201d]/g, '"') // fancy quotation marks
-            .replace(/[^\u0000-\u00ff]+/g, ''); // only accept UTF-8 characters
+            .replace(/[\u2010-\u2015]/g, '-') // fancy hyphen
+            .replace(/[\u201a\u275f]/g, ',') // fancy comma
+            .replace(/[\u2018\u2019\u201b\u275b\u275c]/g, "'") // fancy apostrophe
+            .replace(/[\u201c-\u201f\u275d\u275e]/g, '"') // fancy quotation marks
+            .replace(UTF_16, ''); // only accept "usable" characters
+            /* 0[ -~], 1[¡¿-ÿ], 2[Ā-ſ], 3[ƀ-ɏ], 4[ò-oͯ], 5[Ͱ-Ͽ], 6[Ѐ-ӿ], 7[Ԁ-ԯ], 8[₠-₿] */
+            /** Symbol Classes
+             0) Basic Latin, and standard characters
+             1) Latin (Supplement)
+             2) Latin Extended I
+             3) Latin Extended II
+             4) Diatrical Marks
+             5) Greek & Coptic
+             6) Basic Cyrillic
+             7) Cyrillic (Supplement)
+             8) Currency Symbols
+             */
         year = year? (year + '').replace(/\D+/g, ''): year;
 
         let plus = (string, character = '+') => string.replace(/\s+/g, character);
@@ -664,16 +697,22 @@ let config, init, sendUpdate;
         let url =
             (manable && title && config.usingOmbi)?
                 `${ config.ombiURLRoot }api/v1/Search/${ (rqut == 'imdb' || rqut == 'tmdb' || apit == 'movie')? 'movie': 'tv' }/${ plus(title, '%20') }/?apikey=${ api.ombi }`:
-            (manable && (config.usingRadarr || config.usingSonarr))?
+            (manable && (config.usingRadarr || config.usingSonarr || config.usingMedusa))?
                 (config.usingRadarr && (rqut == 'imdb' || rqut == 'tmdb'))?
                     (mid)?
                         `${ config.radarrURLRoot }api/movie/lookup/tmdb?tmdbId=${ mid }&apikey=${ config.radarrToken }`:
                     (iid)?
                         `${ config.radarrURLRoot }api/movie/lookup/imdb?imdbId=${ iid }&apikey=${ config.radarrToken }`:
                     `${ config.radarrURLRoot }api/movie/lookup?term=${ plus(title, '%20') }&apikey=${ config.radarrToken }`:
-                (tid)?
-                    `${ config.sonarrURLRoot }api/series/lookup?term=tvdb:${ tid }&apikey=${ config.sonarrToken }`:
-                `${ config.sonarrURLRoot }api/series/lookup?term=${ plus(title, '%20') }&apikey=${ config.sonarrToken }`:
+                (config.usingSonarr)?
+                    (tid)?
+                        `${ config.sonarrURLRoot }api/series/lookup?term=tvdb:${ tid }&apikey=${ config.sonarrToken }`:
+                    `${ config.sonarrURLRoot }api/series/lookup?term=${ plus(title, '%20') }&apikey=${ config.sonarrToken }`:
+                (config.usingMedusa)?
+                    (tid)?
+                        `${ config.medusarURLRoot }api/v2/series/tvdb${ tid }?detailed=true&${ tid }&api_key=${ config.medusaToken }`:
+                    `${ config.medusaURLRoot }api/v2/internal/searchIndexersForShowName?query=${ plus(title) }&indexerId=0&api_key=${ config.medusaToken }`:
+                null:
             (rqut == 'imdb' || (rqut == '*' && !iid && title) || (rqut == 'tvdb' && !iid && title && !(rerun & 0b1000)) && (rerun |= 0b1000))?
                 (iid)?
                     `https://www.omdbapi.com/?i=${ iid }&apikey=${ api.omdb }`:
@@ -737,7 +776,7 @@ let config, init, sendUpdate;
         if(json instanceof Array) {
             let b = { release_date: '', year: '' },
                 t = (s = "") => s.toLowerCase(),
-                c = (s = "") => t(s).replace(/\&/g, 'and').replace(/\W+/g, ''),
+                c = (s = "") => t(s).replace(/\&/g, 'and').replace(UTF_16, ''),
                 k = (s = "") => {
 
                     let r = [
@@ -756,8 +795,13 @@ let config, init, sendUpdate;
                     return c(s);
                 },
                 R = (s = "", S = "", n = !0) => {
-                    let score = 100 * ((S.match(RegExp(`\\b(${k(s)})\\b`, 'i')) || [null]).length / (S.split(' ').length || 1)),
+                    let l = s.split(' ').length, L = S.split(' ').length,
+                        score = 100 * (((S.match(RegExp(`\\b(${k(s)})\\b`, 'i')) || [null]).length) / (L || 1)),
                         passing = config.UseLooseScore | 0;
+
+                    terminal.log(`=> "${ s }"/"${ S }" = ${ score }`);
+                    score *= (l > L? (L||1)/l: L > l? (l||1)/L: 1);
+                    terminal.log(`~> ... = ${ score }`);
 
                     return (S != '' && score >= passing) || (n? R(S, s, !n): n);
                 },
@@ -771,11 +815,18 @@ let config, init, sendUpdate;
                 let altt = $data.alternativeTitles,
                     $alt = (altt && altt.length? altt.filter(v => t(v) == t(title))[0]: null);
 
-                // Radarr & Sonarr
+                // Managers
                 if(manable)
-                    found = ((t($data.title) == t(title) || $alt) && +year === +$data.year)?
-                        $alt || $data:
-                    found;
+                    // Medusa
+                    if(config.usingMedusa && $data instanceof Array)
+                        found = ((t($data[4]) == t(title) || $alt) && +year === +$data[5].slice(0, 4))?
+                            $alt || $data:
+                        found;
+                    // Radarr & Sonarr
+                    else if(config.usingRadarr || config.usingSonarr)
+                        found = ((t($data.title) == t(title) || $alt) && +year === +$data.year)?
+                            $alt || $data:
+                        found;
                 //api.tvmaze.com/
                 else if(('externals' in ($data = $data.show || $data) || 'show' in $data) && $data.premiered)
                     found = (iid == $data.externals.imdb || t($data.name) == t(title) && year == $data.premiered.slice(0, 4))?
@@ -821,11 +872,18 @@ let config, init, sendUpdate;
                 let altt = $data.alternativeTitles,
                     $alt = (altt && altt.length? altt.filter(v => c(v) == c(title)): null);
 
-                // Radarr & Sonarr
+                // Managers
                 if(manable)
-                    found = (c($data.title) == c(title) || $alt)?
-                        $alt || $data:
-                    found;
+                    // Medusa
+                    if(config.usingMedusa && $data instanceof Array)
+                        found = (c($data[4]) == c(title) || $alt)?
+                            $alt || $data:
+                        found;
+                    // Radarr & Sonarr
+                    if(config.usingRadarr || config.usingSonarr)
+                        found = (c($data.title) == c(title) || $alt)?
+                            $alt || $data:
+                        found;
                 //api.tvmaze.com/
                 else if('externals' in ($data = $data.show || $data) || 'show' in $data)
                     found =
@@ -887,11 +945,18 @@ let config, init, sendUpdate;
                 let altt = $data.alternativeTitles,
                     $alt = (altt && altt.length? altt.filter(v => R(v, title)): null);
 
-                // Radarr & Sonarr
+                // Managers
                 if(manable)
-                    found = (R($data.name, title) || $alt)?
-                        $alt || $data:
-                    found;
+                    // Medusa
+                    if(config.usingMedusa && $data instanceof Array)
+                        found = (R($data[4], title) || $alt)?
+                            $alt || $data:
+                        found;
+                    // Radarr & Sonarr
+                    if(config.usingRadarr || config.usingSonarr)
+                        found = (R($data.name || $data.title, title) || $alt)?
+                            $alt || $data:
+                        found;
                 //api.tvmaze.com/
                 else if('externals' in ($data = $data.show || $data) || 'show' in $data)
                     found =
@@ -943,21 +1008,31 @@ let config, init, sendUpdate;
 
         json = json && mr in json? json[mr].length > json[tr].length? json[mr]: json[tr]: json;
 
-        if(json instanceof Array)
+        if(json instanceof Array && (!config.usingMedusa? true: (config.usingSonarr || config.usingOmbi)))
             json = json[0];
 
         if(!json)
             json = { IMDbID, TMDbID, TVDbID };
 
-        // Ombi, Radarr and Sonarr
+        // Ombi, Medusa, Radarr and Sonarr
         if(manable)
-            data = {
-                imdb: iid || json.imdbId || ei,
-                tmdb: mid || json.tmdbId || json.theMovieDbId | 0,
-                tvdb: tid || json.tvdbId || json.theTvDbId    | 0,
-                title: json.title || title,
-                year: +(json.year || year)
-            };
+            data = (
+                (config.usingMedusa && !(config.usingSonarr || config.usingOmbi))?
+                    {
+                        imdb: iid || ei,
+                        tmdb: mid |  0,
+                        tvdb: tid || json[3] || (json[8]? json[8][1]: 0),
+                        title: json.title || title,
+                        year: +(json.year || year)
+                    }:
+                {
+                    imdb: iid || json.imdbId || ei,
+                    tmdb: mid || json.tmdbId || json.theMovieDbId | 0,
+                    tvdb: tid || json.tvdbId || json.theTvDbId | 0,
+                    title: json.title || title,
+                    year: +(json.year || year)
+                }
+            );
         //api.tvmaze.com/
         else if('externals' in (json = json.show || json))
             data = {
@@ -1296,6 +1371,58 @@ let config, init, sendUpdate;
         );
     }
 
+    function pushMedusaRequest(options, prompted) {
+        if(!options.TVDbID)
+            return (!prompted)? new Notification(
+                'warning',
+                'Stopped adding to Medusa: No TVDb ID'
+            ): null;
+
+        let PromptValues = {},
+            { PromptQuality, PromptLocation } = config;
+
+        if(!prompted && (PromptQuality || PromptLocation))
+            return new Prompt('modify', options, refined => pushMedusaRequest(refined, true));
+
+        if(PromptQuality && +options.quality > 0)
+            PromptValues.QualityID = +options.quality;
+        if(PromptLocation && options.location)
+            PromptValues.StoragePath = JSON.parse(config.medusaStoragePaths).map(item => item.id == options.location? item: null).filter(n => n)[0].path.replace(/\\/g, '\\\\');
+
+        new Notification('info', `Adding "${ options.title }" to Medusa`, 3000);
+
+        chrome.runtime.sendMessage({
+                type: 'ADD_MEDUSA',
+                url: `${ config.medusaURL }api/v2/series`,
+                root: `${ config.medusaURL }api/v2/`,
+                token: config.medusaToken,
+                StoragePath: config.medusaStoragePath,
+                QualityID: config.medusaQualityProfileId,
+                basicAuth: config.medusaBasicAuth,
+                title: options.title,
+                year: options.year,
+                tvdbId: options.TVDbID,
+                ...PromptValues
+            },
+            response => {
+                terminal.log('Pushing to Medusa', response);
+
+                if(response && response.error) {
+                    return new Notification('warning', `Could not add "${ options.title }" to Medusa: ${ response.error }`) ||
+                        (!response.silent && terminal.error('Error adding to Medusa: ' + String(response.error), response.location, response.debug));
+                } else if(response && response.success) {
+                    let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-{2,}/g, '-').toLowerCase();
+
+                    terminal.log('Successfully pushed', options);
+                    new Notification('update', `Added "${ options.title }" to Medusa`, 7000, () => window.open(`${config.medusaURL}home/displayShow?indexername=tvdb&seriesid=${options.TVDbID}`, '_blank'));
+                } else {
+                    new Notification('warning', `Could not add "${ options.title }" to Medusa: Unknown Error`) ||
+                    (!response.silent && terminal.error('Error adding to Medusa: ' + String(response)));
+                }
+            }
+        );
+    }
+
     // make the button
     let MASTER_BUTTON;
     function renderPlexButton(persistent) {
@@ -1467,6 +1594,8 @@ let config, init, sendUpdate;
                             pushRadarrRequest(option);
                         else if(config.usingSonarr && tv.test(option.type))
                             pushSonarrRequest(option);
+                        else if(config.usingMedusa && tv.test(option.type))
+                            pushMedusaRequest(option);
                         else if(config.usingCouchPotato)
                             $pushAddToCouchpotato(option);
                     } catch(error) {
@@ -1519,6 +1648,8 @@ let config, init, sendUpdate;
                             path = config.radarrStoragePath;
                         } else if(config.usingSonarr && tv.test(options.type)) {
                             path = config.sonarrStoragePath;
+                        } else if(config.usingMedusa && tv.test(options.type)) {
+                            path = config.medusaStoragePath;
                         } else if(config.usingCouchPotato) {
                             path = '';
                         }
@@ -1559,6 +1690,8 @@ let config, init, sendUpdate;
                                 pushRadarrRequest(options);
                             } else if(config.usingSonarr && tv.test(options.type)) {
                                 pushSonarrRequest(options);
+                            } else if(config.usingMedusa && tv.test(options.type)) {
+                                pushMedusaRequest(options);
                             } else if(config.usingCouchPotato) {
                                 $pushAddToCouchpotato(options);
                             }
@@ -1635,7 +1768,7 @@ let config, init, sendUpdate;
                                     if(found) {
                                         // ignore found items, we only want new items
                                     } else {
-                                        let available = (config.usingOmbi || config.usingWatcher || config.usingRadarr || config.usingSonarr || config.usingCouchPotato),
+                                        let available = (config.usingOmbi || config.usingWatcher || config.usingRadarr || config.usingSonarr || config.usingMedusa || config.usingCouchPotato),
                                             action = (available ? 'downloader' : 'notfound'),
                                             title = available ?
                                                 'Not on Plex (download available)':
@@ -1726,7 +1859,7 @@ let config, init, sendUpdate;
                                         options.button.querySelector('ul').insertBefore(pi, op);
                                     } catch(e) { /* Don't do anything */ }
                                 } else {
-                                    let available = (config.usingOmbi || config.usingWatcher || config.usingRadarr || config.usingSonarr || config.usingCouchPotato),
+                                    let available = (config.usingOmbi || config.usingWatcher || config.usingRadarr || config.usingSonarr || config.usingMedusa || config.usingCouchPotato),
                                         action = (available ? 'downloader' : 'notfound'),
                                         title = available ?
                                             'Not on Plex (download available)':
@@ -1959,7 +2092,8 @@ String.prototype.toCaps = String.prototype.toCaps || function toCaps(all) {
         titles = /(?!^|(?:an?|the)\s+)\b(a([st]|nd?|cross|fter|lthough)?|b(e(cause|fore|tween)?|ut|y)|during|from|in(to)?|[io][fn]|[fn]?or|the|[st]o|through|under|with(out)?|yet)(?!\s*$)\b/gi,
         cap_exceptions = /([\|\"\(]\s*[a-z]|[\:\.\!\?]\s+[a-z]|(?:^\b|[^\'\-\+]\b)[^aeiouy\d\W]+\b)/gi, // Punctuation exceptions, e.g. "And not I"
         all_exceptions = /\b((?:ww)?(?:m{1,4}(?:c?d(?:c{0,3}(?:x?l(?:x{0,3}(?:i?vi{0,3})?)?)?)?)?|c?d(?:c{0,3}(?:x?l(?:x{0,3}(?:i?vi{0,3})?)?)?)?|c{1,3}(?:x?l(?:x{0,3}(?:i?vi{0,3})?)?)?|x?l(?:x{0,3}(?:i?vi{0,3})?)?|x{1,3}(?:i?vi{0,3})?|i?vi{0,3}|i{1,3}))\b/gi, // Roman Numberals
-        cam_exceptions = /\b((?:mr?s|[sdjm]r|mx)|(?:adm|cm?dr?|chf|c[op][lmr]|cpt|gen|lt|mjr|sgt)|doc|hon|prof)(?:\.|\b)/gi; // Titles (Most Common?)
+        cam_exceptions = /\b((?:mr?s|[sdjm]r|mx)|(?:adm|cm?dr?|chf|c[op][lmr]|cpt|gen|lt|mjr|sgt)|doc|hon|prof)(?:\.|\b)/gi, // Titles (Most Common?)
+        low_exceptions = /'([\w]+)/gi; // Apostrphe cases
 
     array = array.split(/\s+/);
 
@@ -1975,10 +2109,11 @@ String.prototype.toCaps = String.prototype.toCaps || function toCaps(all) {
 
     if(!all)
         string = string
-          .replace(titles, ($0, $1, $$, $_) => $1.toLowerCase())
-          .replace(cap_exceptions, ($0, $1, $$, $_) => $1.toUpperCase())
-          .replace(all_exceptions, ($0, $1, $$, $_) => $1.toUpperCase())
-          .replace(cam_exceptions, ($0, $1, $$, $_) => $1[0].toUpperCase() + $1.slice(1, $1.length).toLowerCase() + '.');
+        .replace(titles, ($0, $1, $$, $_) => $1.toLowerCase())
+        .replace(all_exceptions, ($0, $1, $$, $_) => $1.toUpperCase())
+        .replace(cap_exceptions, ($0, $1, $$, $_) => $1.toUpperCase())
+        .replace(low_exceptions, ($0, $1, $$, $_) => $0.toLowerCase())
+        .replace(cam_exceptions, ($0, $1, $$, $_) => $1[0].toUpperCase() + $1.slice(1, $1.length).toLowerCase() + '.');
 
     return string;
 };
