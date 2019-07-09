@@ -18,6 +18,7 @@ This browser extension searches your [Plex Media Server (PMS)](https://www.plex.
   - [CouchPotato](https://couchpota.to/)
   - [Watcher 3](https://nosmokingbandit.github.io/)
   - [Ombi](https://ombi.io/)
+	- [Medusa](https://pymedusa.com/)
 - Offers search options via right-click (context menu)
   - Right-click | Web to Plex | Find "Show/Movie (Year)"
 - Offers a Plex-like GUI
