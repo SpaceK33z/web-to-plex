@@ -116,6 +116,29 @@
                 width: 75%;
             }
 
+            #description {
+                color: #FFF;
+                font-size: 20px;
+                text-indent: 5%;
+                overflow: overlay;
+
+                left: 0;
+                padding-left: 1%;
+                position: absolute;
+                top: 0;
+
+                width: 30%;
+                height: 100%;
+            }
+
+            #frame[content=false] + #description {
+                opacity: 1 !important;
+            }
+
+            #frame[content=true] + #description {
+                display: none;
+            }
+
             /* Foot */
             #foot {
                 background: #0008;
@@ -166,11 +189,13 @@
             }
 
             #loading {
-                transition: all 0.5s;
-
                 left: calc(50% - 24px);
                 position: absolute;
                 top: calc(50% - 24px);
+            }
+
+            [loading] {
+                transition: all 0.5s;
             }
 
             [loading=true] {
@@ -204,9 +229,12 @@
                 <a id="tvdb" target="frame"></a>
             </div>
 
+
             <iframe id="frame" name="frame" srcdoc="<style>html,body{margin:0;padding:0;overflow:hidden}</style>">
-                Frames not supported
+                iFrames are not supported by your device
             </iframe>
+
+            <div id="description"></div>
         </div>
 
         <div id="foot">

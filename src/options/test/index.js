@@ -46,6 +46,7 @@ function as(type) {
                 'runtime':      "1:53",
                 'genre':        "Comedy, Drama, Fantasy",
                 'release-date': "December 3, 1999 (USA)",
+                'description':  `One day at work, unsuccessful puppeteer Craig finds a portal into the head of actor John Malkovich. The portal soon becomes a passion for anybody who enters it's mad and controlling world of overtaking another human body.`,
 
                 'imdb': "tt0120601",
                 'IMDB': "vi3568894233",
@@ -65,6 +66,7 @@ function as(type) {
                 'runtime':      "0:15",
                 'genre':        "Animation, Comedy, Fantasy, Horror, Science-Fiction",
                 'release-date': "May 15, 2019 (USA)",
+                'description':  `Terrifying creatures, wicked surprises and dark comedy converge in this NSFW anthology of animated stories presented by Tim Miller and David Fincher.`,
 
                 'imdb': "tt9561862",
                 'IMDB': "vi1035648281",
@@ -81,6 +83,8 @@ document.querySelectorAll('#movie, #tv-show').forEach(element => {
     element.onmouseup = event => {
         let self = event.target;
 
+        $('#frame').setAttribute('content', false);
+
         as(self.id);
     };
 });
@@ -88,16 +92,26 @@ document.querySelectorAll('#movie, #tv-show').forEach(element => {
 document.querySelectorAll('[target="frame"]').forEach(element => {
     let body = document.body,
         frame = $('#frame'),
-        loading = $('#loading');
+        loading = $('#loading'),
+        description = $('#description');
 
     element.onmouseup = event => {
-        loading.setAttribute('loading', true);
-        loading.removeAttribute('style');
+        frame.setAttribute('content', true);
+
+        [loading, description]
+            .forEach(element => {
+                element.setAttribute('loading', true);
+                element.removeAttribute('style');
+            });
     }
 
     frame.onload = frame.onerror = event => {
-        loading.setAttribute('loading', false);
-        setTimeout(() => loading.setAttribute('style', 'display:none'), 500);
+
+        [loading]
+            .forEach(element => {
+                element.setAttribute('loading', false);
+                setTimeout(() => element.setAttribute('style', 'display:none'), 500);
+            });
     }
 });
 
