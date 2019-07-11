@@ -18,7 +18,7 @@ let script = {
                 image = $('img.poster').first;
 
                 title = title.textContent.trim();
-                year  = year.textContent.trim();
+                year  = +year.textContent.replace(/\(|\)/g, '').trim();
                 image = (image || {}).src;
 
                 if(type != 'movie')

@@ -25,9 +25,16 @@
 	"content_scripts": [
         // Allows media downloads
         {
-            "matches": ["*://*.openload.co/*", "*://*.openload.com/*", "*://*.oload.fun/*"],
+            "matches": ["*://*.openload.co/*", "*://*.openload.com/*", "*://*.oload.fun/*", "*://*.oload.biz/*"],
             "js": ["download/oload.js"],
             "all_frames": true
+        },
+
+        // Testing purposes only
+        {
+            "matches": ["*://ephellon.github.io/web.to.plex/test/*"],
+            "js": ["utils.js", "sites/__test__.js"],
+            "css": ["sites/common.css"]
         },
 
         // The sites
@@ -56,7 +63,7 @@
 			"js": ["utils.js", "sites/tvdb/index.js"],
 			"css": ["sites/tvdb/index.css", "sites/common.css"]
 		},{
-			"matches": ["*://*.themoviedb.org/movie/*", "https://*.themoviedb.org/tv/*"],
+			"matches": ["*://*.themoviedb.org/movie/*", "*://*.themoviedb.org/tv/*"],
 			"js": ["utils.js", "sites/tmdb/index.js"],
 			"css": ["sites/tmdb/index.css", "sites/common.css"]
 		},{
@@ -108,9 +115,9 @@
 			"js": ["utils.js", "sites/netflix/index.js"],
 			"css": ["sites/netflix/index.css", "sites/common.css"]
 		},{
-            "matches": ["*://*.gostream.site/*"],
-            "js": ["utils.js", "sites/gostream/index.js"],
-            "css": ["sites/gostream/index.css", "sites/common.css"]
+            "matches": ["*://*.vumoo.to/*"],
+            "js": ["utils.js", "sites/vumoo/index.js"],
+            "css": ["sites/vumoo/index.css", "sites/common.css"]
         },{
 			"matches": ["*://www.google.com/*"],
 			"js": ["utils.js", "sites/google/index.js"],
@@ -135,7 +142,15 @@
 			"matches": ["*://*.allocine.fr/*"],
 			"js": ["utils.js", "sites/allocine/index.js"],
 			"css": ["sites/allocine/index.css", "sites/common.css"]
-		}
+		},{
+            "matches": ["*://*.gostream.site/*"],
+            "js": ["utils.js", "sites/gostream/index.js"],
+            "css": ["sites/gostream/index.css", "sites/common.css"]
+        },{
+            "matches": ["*://*.tubitv.com/*"],
+            "js": ["utils.js", "sites/tubi/index.js"],
+            "css": ["sites/tubi/index.css", "sites/common.css"]
+        }
 	],
 
 	"background": {
@@ -165,5 +180,5 @@
         "contextMenus",
         "<all_urls>"
 	],
-    "web_accessible_resources": ["img/*"]
+    "web_accessible_resources": ["img/*", "options/test/*"]
 }

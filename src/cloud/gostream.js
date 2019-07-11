@@ -11,7 +11,7 @@ let script = {
             image  = $('.hiddenz, [itemprop="image"]').first,
             type   = 'movie';
 
-        new Notification('update', 'Select the Openload (OL) server');
+        Notify('update', 'Select the Openload (OL) server');
 
         title = title.textContent.trim();
         year = (year? year.textContent.trim(): 0);

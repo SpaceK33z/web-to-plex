@@ -1,5 +1,5 @@
 let script = {
-    "url": "*://*.fandango.com/movie-overview/*",
+    "url": "*://*.fandango.com/[\\w\\-]+/movie-overview",
 
     "init": (ready) => {
         let _title, _year, _image, R = RegExp;
@@ -11,7 +11,9 @@ let script = {
 
         title = title.textContent.trim().split(/\n+/)[0].trim();
         year  = year.textContent.replace(/.*(\d{4}).*/, '$1').trim();
-        image = image.empty? '': image.first.src;
+        image = image.empty? '': image.src;
+
+        title = title.replace(RegExp(`\\s*\\((${ year })\\)`), '');
 
         return { type, title, year, image };
     },

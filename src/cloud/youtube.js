@@ -1,5 +1,10 @@
+let openedByUser = false,
+    listenersSet = false;
+
 let script = {
     "url": "*://www.youtube.com/*",
+
+    "timeout": 5000,
 
     "init": (ready) => {
         let _title, _year, _image, R = RegExp;
@@ -8,15 +13,15 @@ let script = {
             close = () => $('.less-button').first.click(),
             options, type;
 
-        if($('.more-button, .less-button').empty)
-            return 1000;
+        if($('.more-button, .less-button').empty || !$('.opened').empty)
+            return script.timeout;
 
         open(); // show the year and other information, fails otherwise
 
         type = script.getType();
 
         if(type == 'error')
-            return close(), 1000;
+            return close(), script.timeout;
 
         if(type == 'movie' || type == 'show') {
             let title = $((type == 'movie'? '.title': '#owner-container')).first,
@@ -27,6 +32,8 @@ let script = {
 
             title = title.textContent.trim();
             year  = +year.textContent.replace(/[^]*(?:release|air) date\s+(?:(?:\d+\/\d+\/)?(\d{2,4}))[^]*/i, ($0, $1, $$, $_) => +$1 < 1000? 2000 + +$1: $1);
+
+            title = title.replace(RegExp(`\\s*(\\(\\s*)?${ year }\\s*(\\))?`), '');
 
             options = { type, title, year };
         } else if(type == 'list') {
@@ -46,6 +53,26 @@ let script = {
         }
 
         close(); // close the meta-information
+
+        if(!listenersSet) {
+            setInterval(() => {
+                let closed = 'collapsed' in $('ytd-expander').first.attributes;
+
+                if(closed && !openedByUser)
+                    script.init(true);
+            }, 10);
+
+            $('ytd-expander').first.addEventListener('mouseup', event => {
+                let closed = 'collapsed' in $('ytd-expander').first.attributes;
+
+                if(!closed)
+                    openedByUser = true;
+                else
+                    openedByUser = false;
+            });
+
+            listenersSet = true;
+        }
 
         return options;
     },
@@ -71,3 +98,5 @@ let script = {
 
 top.addEventListener('popstate', script.init);
 top.addEventListener('pushstate-changed', script.init);
+
+// $('a[href*="/watch?v="]').forEach(element => element.onclick = event => open(event.target.href, '_self'));

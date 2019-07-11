@@ -116,8 +116,13 @@
     background: #2A2AFF !important;
 }
 
-/* Web to Plex warning notifications */
-.web-to-plex-notification.warning {
+/* Web to Plex success notifications */
+.web-to-plex-notification.success {
+    background: #03BDF9 !important;
+}
+
+/* Web to Plex error/warning notifications */
+.web-to-plex-notification.warning, .web-to-plex-notification.error {
 	background: #FF2A2A !important;
 }
 
@@ -218,9 +223,14 @@
 	max-width: 60% !important;
 }
 
-.web-to-plex-prompt-option h2 {
+.web-to-plex-prompt-option.mutable > h2 {
+    background: #0000 !important;
+    color: inherit !important;
     font-family: inherit !important;
     font-size: initial !important;
+    text-align: inherit !important;
+
+    margin: inherit !important;
 }
 
 .web-to-plex-prompt-option.mutable > .remove {
