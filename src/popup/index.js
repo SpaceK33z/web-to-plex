@@ -55,7 +55,9 @@ document.body.onload = function() {
             "disabled": "Not yet implemented",
             "is-shy": "Can only be accessed via: {*}",
             "is-slow": "Resource intensive (loads slowly)",
+            "is-dead": "Isn't meant to show the Web to Plex button",
             "local": "Opens a link to ^{*}",
+            "not-safe": "Updated irregularly, may drop support",
             "pop-ups": "Contains annoying/intrusive ads and/or pop-ups",
             "save-file": "Uses {*} before using your manager(s)",
             // $0.99 one time; $0.99 - $9.99/mon
@@ -81,8 +83,10 @@ document.body.onload = function() {
 
     let elements = document.querySelectorAll(selectors.join(','));
 
-    for(let element, index = 0, length = elements.length; index < length; index++)
+    for(let element, index = 0, length = elements.length; index < length; index++) {
+        let number = 1;
         for(let attribute in messages)
             if(attribute in (element = elements[index]).attributes)
-                element.title = `${ parse(messages[attribute], attribute, element) }. ${ element.title }`;
+                element.title += `\n${(number++)}) ${ parse(messages[attribute], attribute, element) }.`;
+    }
 }

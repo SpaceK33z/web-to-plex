@@ -2,54 +2,65 @@
 
 # Web to Plex ![Icon](src/img/48.png)
 
-![Examples](example.png)
+![Examples](https://github.com/SpaceK33z/web-to-plex/blob/master/example.png)
 
 This browser extension searches your [Plex Media Server (PMS)](https://www.plex.tv/downloads/) for matching media on sites like [IMDb](https://imdb.com), letting you immediately open the movie or TV show in Plex, if it is available. If the item isn't found on your PMS, then a download button is added instead.
 
 ----
 
-## Features:
+# NZB Managers
 
-- Can save media directly from noted sites (file downloads/magnet URLs)
-  - Right-click | Web to Plex | Save as "Show/Movie (Year)"
-- Can push requests to your chosen download manager
-  - [Radarr](https://radarr.video/)
-  - [Sonarr](https://sonarr.tv/)
-  - [CouchPotato](https://couchpota.to/)
-  - [Watcher 3](https://nosmokingbandit.github.io/)
-  - [Ombi](https://ombi.io/)
-- Offers search options via right-click (context menu)
-  - Right-click | Web to Plex | Find "Show/Movie (Year)"
-- Offers a Plex-like GUI
-  - Web to Plex button
-  - Settings page
-  - Pop-up page
-- Offers a status via the browser badge and button
-  - Orange/Yellow: item is on Plex
-  - Blue (button): item isn't on Plex, but can be sent for
-  - Grey (badge)/Red (button): item is unavailable/not found
-  - Grey (button): item is loading
-- Offers an easy login feature
-  - Offers an API login feature
-- Offers a "Direct Plex URL" feature
-  - i.e. you can specify `localhost:32400` as your Plex URL to avoid bandwidth usage for Plex requests
-
-# Download Managers
-
-Optionally, you can configure your download manager(s) (see support table) in the extension's options. After that, you can immediately add a TV show or movie with one click, right from your favorite site.
+Optionally, you can configure NZB Manager (see support table) in the extension's options. After that, you can immediately add a TV show or movie with one click, right from your favorite site.
 
 ## Supported Managers
 | Manager                                         | Movie Support | TV Show Support | Searchable
-| ----------------------------------------------- | ------------- | --------------- | ----------
-| [Watcher 3](https://nosmokingbandit.github.io/) | Yes           |                 |
-| [CouchPotato](https://couchpota.to/)            | Yes           | Yes             |
-| [Radarr](https://radarr.video/)                 | Yes           |                 | Yes
-| [Sonarr](https://sonarr.tv/)                    |               | Yes             | Yes
-| [Ombi](https://ombi.io/)                        | Yes           | Yes             | Yes
+| ----------------------------------------------- |:-------------:|:---------------:|:----------:
+| [Watcher 3](https://nosmokingbandit.github.io/) | ✔             | ❌             | ❌
+| [CouchPotato](https://couchpota.to/)            | ✔             | ✔              | ❌
+| [Radarr](https://radarr.video/)                 | ✔             | ❌             | ✔
+| [Sonarr](https://sonarr.tv/)                    | ❌            | ✔              | ✔
+| [Ombi](https://ombi.io/)                        | ❔             | ❔              | ✔
+| [Medusa](https://pymedusa.com/)                 | ❌            | ✔              | ✔
 
-If you don't feel like actually downloading the movie, or want a simple watchlist, you can also use the built-in "Plex It!" feature to bookmark the current page.
+### Key
+
+| ✔ | ❌ | ❔ |
+| - | - | - |
+| yes | no | yes (with help) |
+
+----
+
+## Features
+### Easy login
+You can log into Plex using either an access token, your credentials, or Ombi (if setup).
+
+### Download (![download icon](https://github.com/SpaceK33z/web-to-plex/blob/master/src/img/16.png))
+On certain sites (denoted with the "download" icon), the user can choose to save/engage media directly, instead of waiting for their NZB manager to find the item.
+
+### Plex It! (![plex it icon](https://github.com/SpaceK33z/web-to-plex/blob/master/src/img/plexit.16.png))
+Click the icon to open **Plex It!** (left sidebar), click it again to add the current item(s) to your list.
+
+It's primary purpose is to provide a watchlist service on sites that don't support watchlists.
+
+### Hide Web to Plex (![hide icon](https://github.com/SpaceK33z/web-to-plex/blob/master/src/img/hide.16.png))
+Use this to hide the **Web to Plex** button. It changes the button's opacity to 10% to make it almost invisible so that it isn't as distracting on sites like Netflix.
+
+### Reload Web to Plex (![reload icon](https://github.com/SpaceK33z/web-to-plex/blob/master/src/img/reload.16.png))
+Use this to reload **Web to Plex** on the current page. This can sometimes fix loading issues or cache errors.
+
+### Plex URL
+This is a *moderately advance* setting, but is very useful to know. If you know your Plex server's URL (e.g. `https://localhost:32400`), then you can specify this and avoid bandwidth usage, as the extension will communicate with Plex on your device instead of `https://app.plex.tv/`.
+
+### Find this | Right Click
+If you aren't satisfied with a found item, or it is incorrect, you can right click the page and use the **Web to Plex | Find "XYZ"** feature to search for the item.
+
+The sites used as search engines (IMDb, TMDb, and TVDb) will automatically create a cached version of the information (for "Local Search" results).
+
+--------
 
 ## Supported sites
+
+*Given in order of completion*
 
 1.  [Movieo](http://movieo.me/)
 2.  [IMDb](http://imdb.com/)
@@ -76,11 +87,13 @@ If you don't feel like actually downloading the movie, or want a simple watchlis
 23. [Toloka](https://toloka.to/)<sup>6</sup>
 24. [Shana Project](https://www.shanaproject.com/)<sup>6</sup>
 25. [My Anime List](https://myanimelist.com/)<sup>6</sup>
-26. [YouTube](https://youtube.com/)
-27. [Flickmetrix (Cinesift)](https://flickmetrix.com/)
-28. [Allociné](https://www.allocine.fr/)
-29. [MovieMeter](https://www.moviemeter.nl/)
-30. [JustWatch](https://justwatch.com/)
+26. [My Shows](https://en.myshows.me/)
+27. [YouTube](https://youtube.com/)
+28. [Flickmetrix (Cinesift)](https://flickmetrix.com/)
+29. [Allociné](https://www.allocine.fr/)
+30. [MovieMeter](https://www.moviemeter.nl/)
+31. [JustWatch](https://justwatch.com/)
+32. [Vumoo](https://vumoo.to/)<sup>1</sup>
 
 *Notes*
 

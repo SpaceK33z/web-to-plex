@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Web To Plex Options</title>
+	<title>Web To Plex | Options</title>
 	<style>
         html, body {
             height: 100%;
@@ -92,7 +92,7 @@
             z-index: 18 !important;
         }
 
-        button, input[type="button"i] {
+        button, input[type="button"i], .button {
             padding: 10px 18px !important;
             font-size: 16px !important;
             line-height: 1.33 !important;
@@ -114,7 +114,7 @@
 			transition: all 0.1s;
         }
 
-		button:hover, input[type="button"i]:hover {
+		button:hover, input[type="button"i]:hover, .button:hover {
 			background: #e59029 !important;
 		}
 
@@ -384,7 +384,19 @@
 
         details[open] > summary, h1, h2, h3, h4, h5, h6 {
             color: #cc7b19 !important;
+			text-shadow: 0 0 5px #000;
+
+			z-index: 999;
         }
+
+		.test {
+			background: #197bcc !important;
+			font-family: monospace;
+		}
+
+		.test:hover {
+			background: #298bdc !important;
+		}
 
         /* bbodine @CodePen - https://codepen.io/bbodine1/pen/novBm */
         .checkbox {
@@ -652,9 +664,8 @@ div
                 <div>
                     Your Ombi <a href="https://support.plex.tv/hc/en-us/articles/204059436-Finding-your-account-token-X-Plex-Token" title="How to find your token?" target="_blank">Plex token</a> will be shared by this extension.
                 </div>
-                <br>
             </section>
-
+			<hr><br>
             <section>
                 <button type="button" id="plex_test">Test <span id="plex_test_status">?</span></button>
             </section>
@@ -667,7 +678,7 @@ div
         </details>
 
         <details>
-            <summary>Advanced</summary>
+            <summary>Advance</summary>
 
             <h2>Plex Server Options</h2>
             <section>
@@ -726,7 +737,71 @@ div
             <section>
                 <button type="button" id="ombi_test">Test <span id="ombi_test_status">?</span></button>
             </section>
+			<hr><br>
+			<section>
+				<a class="button test" target="_blank" href="https://ephellon.github.io/web.to.plex/test/">try out ombi</a>
+			</section>
         </details>
+
+        <details id="couchpotato">
+            <summary>CouchPotato (Movies/TV Shows) <span class="checkbox" disabled prompt-yes="use" prompt-no="skip"><input id="use-couchpotato" type="checkbox" data-option="usingCouchPotato" checked="false" /><label for="use-couchpotato"></label></span></summary>
+
+            <h2>Connection Settings</h2>
+            <section>
+                <label>CouchPotato URL</label>
+                <input type="text" data-option="couchpotatoURLRoot" placeholder="What's your CouchPotato URL?"/>
+                <div>
+                    Such as <em>https://example.com/couchpotato</em> or <em>http://192.168.1.100:5050</em>
+                </div>
+            </section>
+
+            <section>
+                <label>CouchPotato API Key</label>
+                <input type="text" data-option="couchpotatoToken" placeholder="What's your CouchPotato API key?"/>
+                <div>
+                    1. Go to CouchPotato | Settings<br/>
+                    2. Copy/Paste the "API Key."<br/>
+                    Such as <em>aa756d33242f6g8ffbca2b3963586f21</em>
+                </div>
+            </section>
+
+            <h3>Login <em>(saved)</em></h3>
+            <section>
+                <label>Username</label>
+                <input type="text" data-option="couchpotatoBasicAuthUsername" placeholder="Enter your CouchPotato username"/>
+                <div>Only use this if you setup a CouchPotato username.</div>
+            </section>
+            <section>
+                <label>Password</label>
+                <input type="text" data-option="couchpotatoBasicAuthPassword" placeholder="Enter your CouchPotato password"/>
+                <div>Only use this if you setup a CouchPotato password.</div>
+                <div class="hidden-help">Your password will be hidden once saved.</div>
+            </section>
+
+            <section>
+                <div>This information will be used for <a href="https://wikipedia.org/wiki/Basic_access_authentication" target="_blank">Basic Access Authentication</a> only. This will allow the extension to ask Couchpotato for your list of videos, or to add to your list of videos.</div>
+            </section>
+<!--
+            <section>
+                <button type="button" id="couchpotato_test" disabled="true">Test <span id="couchpotato_test_status">?</span></button>
+            </section>
+            <section>
+                <label>Quality Profile</label>
+                <select data-option="couchpotatoQualityProfileId" disabled="true">
+                    <option value="">Press "Test [?]" first</option>
+                </select>
+            </section>
+-->
+			<section>
+				<button id="enable-couchpotato" data-option="enableCouchPotato">Enable CouchPotato</button>
+			</section>
+			<hr><br>
+			<section>
+				<a class="button test" target="_blank" href="https://ephellon.github.io/web.to.plex/test/">try out couchpotato</a>
+			</section>
+        </details>
+
+		<hr>
 
         <details id="watcher">
             <summary>Watcher (Movies) <span class="checkbox" disabled prompt-yes="use" prompt-no="skip"><input id="using-watcher" type="checkbox" data-option="usingWatcher" checked="false" /><label for="using-watcher"></label></span></summary>
@@ -782,6 +857,10 @@ div
                     <option value="">Press "Test [?]" first</option>
                 </select>
             </section>
+			<hr><br>
+			<section>
+				<a class="button test" target="_blank" href="https://ephellon.github.io/web.to.plex/test/#movie">try out watcher</a>
+			</section>
         </details>
 
         <details id="radarr">
@@ -801,7 +880,7 @@ div
                 <input type="text" data-option="radarrToken" placeholder="What's your Radarr API key?"/>
                 <div>
                     1. Go to Radarr | Settings | General<br/>
-                    2. Click on "Show advanced," then copy/paste the "API Key."<br/>
+                    2. Click on "Show advance," then copy/paste the "API Key."<br/>
                     Such as <em>aa756d33242f6g8ffbca2b3963586f21</em>
                 </div>
             </section>
@@ -840,7 +919,80 @@ div
                     <option value="">Press "Test [?]" first</option>
                 </select>
             </section>
+			<hr><br>
+			<section>
+				<a class="button test" target="_blank" href="https://ephellon.github.io/web.to.plex/test/#movie">try out radarr</a>
+			</section>
         </details>
+
+		<hr>
+
+		<details id="medusa">
+		    <summary>Medusa (TV Shows) <span class="checkbox" disabled prompt-yes="use" prompt-no="skip"><input id="using-medusa" type="checkbox" data-option="usingMedusa" checked="false" /><label for="using-medusa"></label></span></summary>
+
+		    <h2>Connection Settings</h2>
+		    <section>
+		        <label>Medusa URL</label>
+		        <input type="text" data-option="medusaURLRoot" placeholder="What's your Medusa URL?"/>
+		        <div>
+		            Such as <em>https://example.com/medusa</em> or <em>http://192.168.1.100:8081</em>
+		        </div>
+		    </section>
+
+		    <section>
+		        <label>Medusa API Key</label>
+		        <input type="text" data-option="medusaToken" placeholder="What's your Medusa API key?"/>
+		        <div>
+		            1. Go to Medusa | Settings | General | Interface | Web Interface<br/>
+		            2. Copy/Paste the "API key."<br/>
+		            Such as <em>aa756d33242f6g8ffbca2b3963586f21</em>
+		        </div>
+		    </section>
+
+		    <h3>Login <em>(saved)</em></h3>
+		    <section>
+		        <label>Username</label>
+		        <input type="text" data-option="medusaBasicAuthUsername" placeholder="Enter your Medusa (HTTP) username"/>
+		    </section>
+		    <section>
+		        <label>Password</label>
+		        <input type="text" data-option="medusaBasicAuthPassword" placeholder="Enter your Medusa (HTTP) password"/>
+		        <div class="hidden-help">Your password will be hidden once saved.</div>
+		        <br>
+		        <div>This information will be used for <a href="https://wikipedia.org/wiki/Basic_access_authentication" target="_blank">Basic Access Authentication</a> only. This will allow the extension to ask Medusa for your list of films, or to add to your list of films.</div>
+		    </section>
+
+		    <section>
+		        <button type="button" id="medusa_test">Test <span id="medusa_test_status">?</span></button>
+		    </section>
+
+            <section>
+                <label>Medusa Storage Path</label>
+                <select data-option="medusaStoragePath">
+                    <option value="">Press "Test [?]" first</option>
+                </select>
+				<div>
+					This should be the same path (verbatim) used in Medusa.
+				</div>
+            </section>
+            <section>
+				<label>Quality Profile Type</label>
+				<select data-option="medusaQualityProfileType">
+					<option>Default</option>
+					<option>User Defined</option>
+					<option>Any Defined Type</option>
+				</select>
+				<hr/>
+                <label>Quality Profile</label>
+                <select data-option="medusaQualityProfileId">
+                    <option value="">Press "Test [?]" first</option>
+				</select>
+            </section>
+			<hr><br>
+			<section>
+				<a class="button test" target="_blank" href="https://ephellon.github.io/web.to.plex/test/#tv-show">try out medusa</a>
+			</section>
+		</details>
 
         <details id="sonarr">
             <summary>Sonarr (TV Shows) <span class="checkbox" disabled prompt-yes="use" prompt-no="skip"><input id="using-sonarr" type="checkbox" data-option="usingSonarr" checked="false" /><label for="using-sonarr"></label></span></summary>
@@ -859,7 +1011,7 @@ div
                 <input type="text" data-option="sonarrToken" placeholder="What's your Sonarr API key?"/>
                 <div>
                     1. Go to Sonarr | Settings | General<br/>
-                    2. Click on "Show advanced," then copy/paste the "API Key."<br/>
+                    2. Click on "Show advance," then copy/paste the "API Key."<br/>
                     Such as <em>aa756d33242f6g8ffbca2b3963586f21</em>
                 </div>
             </section>
@@ -898,59 +1050,9 @@ div
                     <option value="">Press "Test [?]" first</option>
                 </select>
             </section>
-        </details>
-
-        <details id="couchpotato">
-            <summary>CouchPotato (Movies/TV Shows) <span class="checkbox" disabled prompt-yes="use" prompt-no="skip"><input id="use-couchpotato" type="checkbox" data-option="usingCouchPotato" checked="false" /><label for="use-couchpotato"></label></span></summary>
-
-            <h2>Connection Settings</h2>
-            <section>
-                <label>CouchPotato URL</label>
-                <input type="text" data-option="couchpotatoURLRoot" placeholder="What's your CouchPotato URL?"/>
-                <div>
-                    Such as <em>https://example.com/couchpotato</em> or <em>http://192.168.1.100:5050</em>
-                </div>
-            </section>
-
-            <section>
-                <label>CouchPotato API Key</label>
-                <input type="text" data-option="couchpotatoToken" placeholder="What's your CouchPotato API key?"/>
-                <div>
-                    1. Go to CouchPotato | Settings<br/>
-                    2. Copy/Paste the "API Key."<br/>
-                    Such as <em>aa756d33242f6g8ffbca2b3963586f21</em>
-                </div>
-            </section>
-
-            <h3>Login <em>(saved)</em></h3>
-            <section>
-                <label>Username</label>
-                <input type="text" data-option="couchpotatoBasicAuthUsername" placeholder="Enter your CouchPotato username"/>
-                <div>Only use this if you setup a CouchPotato username.</div>
-            </section>
-            <section>
-                <label>Password</label>
-                <input type="text" data-option="couchpotatoBasicAuthPassword" placeholder="Enter your CouchPotato password"/>
-                <div>Only use this if you setup a CouchPotato password.</div>
-                <div class="hidden-help">Your password will be hidden once saved.</div>
-            </section>
-
-            <section>
-                <div>This information will be used for <a href="https://wikipedia.org/wiki/Basic_access_authentication" target="_blank">Basic Access Authentication</a> only. This will allow the extension to ask Couchpotato for your list of videos, or to add to your list of videos.</div>
-            </section>
-<!--
-            <section>
-                <button type="button" id="couchpotato_test" disabled="true">Test <span id="couchpotato_test_status">?</span></button>
-            </section>
-            <section>
-                <label>Quality Profile</label>
-                <select data-option="couchpotatoQualityProfileId" disabled="true">
-                    <option value="">Press "Test [?]" first</option>
-                </select>
-            </section>
--->
+			<hr><br>
 			<section>
-				<button id="enable-couchpotato" data-option="enableCouchPotato">Enable CouchPotato</button>
+				<a class="button test" target="_blank" href="https://ephellon.github.io/web.to.plex/test/#tv-show">try out sonarr</a>
 			</section>
         </details>
     </article>
@@ -1002,7 +1104,7 @@ div
 					If your proxy requires a special syntax, enter that information in as well.
 					<br>
 					<ul>
-						<li><code>{url}</code> <em>OR</em> <code>{raw-url}</code> &mdash; the raw, uneditied URL</li>
+						<li><code>{raw-url}</code> <em>OR</em> <code>{url}</code> &mdash; the raw, uneditied URL</li>
 						<li><code>{enc-url}</code> <em>OR</em> <code>{encode-url}</code> &mdash; an encoded URL</li>
 						<li><code>{b64-url}</code> <em>OR</em> <code>{base64-url}</code> &mdash; a Base-64 encoded URL</li>
 					</ul>
@@ -1056,7 +1158,7 @@ div
 				<div>
 					When the user presses the Grab button should the save location be asked for?
 					<br>
-					<em>Only supports Radarr and Sonarr.</em>
+					<em>Only supports Medusa, Radarr, and Sonarr.</em>
 				</div>
 			</section>
 			<hr>
@@ -1071,7 +1173,7 @@ div
 				<div>
 					When the user presses the Grab button should the quality be asked for?
 					<br>
-					<em>Only supports Radarr and Sonarr.</em>
+					<em>Only supports Medusa, Radarr, and Sonarr.</em>
 				</div>
 			</section>
 		</details>
@@ -1136,7 +1238,7 @@ div
 				</h3>
                 <div>
                     Allows the extension to use your manager(s) to find media.<br>
-                    Currently supports: Ombi, Radarr, and Sonarr.
+                    Currently supports: Medusa, Ombi, Radarr, and Sonarr.
                 </div>
             </section>
 		</details>
@@ -1144,7 +1246,7 @@ div
 
     <article>
         <details>
-            <summary>Advanced Settings</summary>
+            <summary>Advance Settings</summary>
             <h2>API Keys</h2>
             <section>
                 <label>OMDb</label>
@@ -1250,6 +1352,13 @@ div
                     Download, and/or find more information for <a href="https://ombi.io/" target="_blank">Ombi</a>.
                 </div>
             </section>
+
+            <section>
+                <label>Medusa's Website</label>
+                <div>
+                    Download, and/or find more information for <a href="https://pymedusa.com/" target="_blank">Medusa</a>.
+                </div>
+            </section>
         </details>
     </article>
 </div>
@@ -1264,13 +1373,17 @@ div
 		<input data-option="watcherQualities" value />
 		<input data-option="radarrQualities" value />
 		<input data-option="sonarrQualities" value />
+		<input data-option="medusaQualities" value />
 		<input data-option="watcherStoragePaths" value />
 		<input data-option="radarrStoragePaths" value />
 		<input data-option="sonarrStoragePaths" value />
+		<input data-option="medusaStoragePaths" value />
 		<input data-option="__radarrQuality" value />
 		<input data-option="__sonarrQuality" value />
+		<input data-option="__medusaQuality" value />
 		<input data-option="__radarrStoragePath" value />
 		<input data-option="__sonarrStoragePath" value />
+		<input data-option="__medusaStoragePath" value />
 	</div>
 
     <footer id="version"></footer>

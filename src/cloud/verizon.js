@@ -35,8 +35,8 @@ let script = {
         if(!title)
             return 1000;
 
-        title = title.textContent.trim();
         year  = +year.textContent.slice(0, 4).trim();
+        title = title.textContent.replace(RegExp(`\\s*\\(${ year }\\).*`), '').trim();
         image = (image || {}).src;
 
         return { type, title, year, image };

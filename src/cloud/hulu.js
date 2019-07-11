@@ -1,18 +1,33 @@
 let script = {
-    "url": "*://*.hulu.com/*",
+    "url": "*://*.hulu.com/(watch|series|movie)/*",
 
-    "ready": () => !$('#content [class$="__meta"]').empty,
+    "ready": () => !$('[class$="__meta"]').empty,
 
     "init": (ready) => {
         let _title, _year, _image, R = RegExp;
+        let { pathname } = top.location;
+        let type, title, year, image;
 
-        let title  = $('#content [class$="__name"]').first,
-            year   = $('#content [class$="__meta"] [class$="segment"]:last-child').first,
-            image,
-            type   = script.getType();
+        if(/^\/(series|movie)\//.test(pathname)) {
+            type = R.$1;
+            title = $('[class~="masthead__title"i]').first;
+            year  = $('[class~="masthead__meta"i]').child(type == 'series'? 4: 3);
+            image = $('[class~="masthead__artwork"i]').first;
 
-        title = title.textContent.replace(/^\s+|\s+$/g, '').toCaps();
-        year  = +year.textContent.replace(/.*\((\d{4})\).*/, '$1');
+            title = title.textContent;
+            year  = +year.textContent;
+            type  = /\b(tv|show|season|series)\b/i.test(type)? 'show': 'movie';
+            image = image? image.src: null;
+        } else {
+            title = $('[class$="__second-line"]').first;
+            year  = (new Date).getFullYear();
+            type  = script.getType();
+
+            title = title.textContent;
+        }
+
+        if(!title)
+            return 5000;
 
         return { type, title, year, image };
     },
@@ -20,12 +35,14 @@ let script = {
     "getType": () => {
         let { pathname } = top.location;
 
-        return pathname.startsWith('/movie/')?
-            'movie':
-        pathname.startsWith('/series/')?
-            'show':
-        'error';
+        if(/^\/series\//.test(pathname)) {
+            return 'show';
+        } else {
+            let tl = $('[class$="__third-line"]').first;
+
+            return /^\s*$/.test(tl.textContent)?
+                'movie':
+            'show';
+        }
     },
 };
-
-window.onlocationchange = script.init;
