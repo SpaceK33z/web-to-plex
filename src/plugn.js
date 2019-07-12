@@ -292,7 +292,8 @@ top.onlocationchange = (event) => chrome.runtime.sendMessage({ type: '$INIT$', o
 };
 
 let handle = async(results, tabID, instance, script, type) => {
-    let InstanceWarning = `[${ type.toUpperCase() }:${ script }] Instance failed to execute @${ tabID }#${ instance }`;
+    let InstanceWarning = `[${ type.toUpperCase() }:${ script }] Instance failed to execute @${ tabID }#${ instance }`,
+        InstanceType = type;
 
     if((!results || !results[0] || !instance) && !FOUND[instance])
         try {
@@ -325,15 +326,23 @@ let handle = async(results, tabID, instance, script, type) => {
         data = { type, title, year };
     }
 
-    if(typeof data != 'object')
-        return /* timeout */;
-
     if(typeof data == 'number')
         return setTimeout(() => { let { request, sender, callback } = (processMessage.properties || {}); processMessage(request, sender, callback) }, data);
     if(typeof data != 'object')
         return /* setTimeout */;
 
     try {
+        if(data instanceof Array) {
+            data = data.filter(d => d);
+
+            if(data.length > 1) {
+                chrome.tabs.sendMessage(tabID, { data, script, instance, instance_type: InstanceType, type: 'POPULATE' });
+                return /* done */;
+            }
+
+            /* the array is too small to parse, set it as a single item */
+            data = data[0];
+        }
 
         let { type, title, year } = data;
 
@@ -347,7 +356,7 @@ let handle = async(results, tabID, instance, script, type) => {
         data = { ...data, type, title, year };
 
         chrome.tabs.insertCSS(tabID, { file: 'sites/common.css' });
-        chrome.tabs.sendMessage(tabID, { data, script, instance, instance_type: type, type: 'POPULATE' });
+        chrome.tabs.sendMessage(tabID, { data, script, instance, instance_type: InstanceType, type: 'POPULATE' });
     } catch(error) {
         throw new Error(InstanceWarning + ' - ' + String(error));
     }

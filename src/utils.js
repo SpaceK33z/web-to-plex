@@ -1587,17 +1587,17 @@ let config, init, sendUpdate;
 
                     try {
                         if(config.usingOmbi)
-                            pushOmbiRequest(option);
+                            pushOmbiRequest(option, true);
                         else if(config.usingWatcher && !tv.test(option.type))
-                            pushWatcherRequest(option);
+                            pushWatcherRequest(option, true);
                         else if(config.usingRadarr && !tv.test(option.type))
-                            pushRadarrRequest(option);
+                            pushRadarrRequest(option, true);
                         else if(config.usingSonarr && tv.test(option.type))
-                            pushSonarrRequest(option);
+                            pushSonarrRequest(option, true);
                         else if(config.usingMedusa && tv.test(option.type))
-                            pushMedusaRequest(option);
+                            pushMedusaRequest(option, true);
                         else if(config.usingCouchPotato)
-                            $pushAddToCouchpotato(option);
+                            $pushAddToCouchpotato(option, true);
                     } catch(error) {
                         terminal.error(`Failed to get "${ option.title }" (Error #${ ++fail })`)
                     }
