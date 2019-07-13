@@ -99,12 +99,12 @@ function ChangeStatus({ ITEM_ID, ITEM_TITLE, ITEM_TYPE, ID_PROVIDER, ITEM_YEAR, 
     });
 }
 
-/** CouchPotato - TV Shows/Movies? **/
+/** CouchPotato - TV Shows **/
 // At this point you might want to think, WHY would you want to do
 // these requests in a background page instead of the content script?
 // This is because Movieo is served over HTTPS, so it won't accept requests to
 // HTTP servers. Unfortunately, many people use CouchPotato over HTTP.
-function viewCouchPotato(request, sendResponse) {
+function Open_CouchPotato(request, sendResponse) {
 	fetch(`${ request.url }?id=${ request.imdbId }`, {
 		headers: new Headers(request.basicAuth),
         mode: cors(request.url)
@@ -114,27 +114,27 @@ function viewCouchPotato(request, sendResponse) {
         sendResponse({ success, status: (success? json.media.status: null) });
     })
     .catch(error => {
-        sendResponse({ error: String(error), location: '@0B-116/*: viewCouchPotato' });
+        sendResponse({ error: String(error), location: '@0B-116/*: Open_CouchPotato' });
     });
 }
 
-function addCouchpotato(request, sendResponse) {
+function Push_CouchPotato(request, sendResponse) {
 	fetch(`${ request.url }?identifier=${ request.imdbId }`, {
 		headers: new Headers(request.basicAuth),
         mode: cors(request.url)
 	})
     .then(response => response.json())
-    .catch(error => sendResponse({ error: 'Item not found', location: '@0B-127/*: addCouchpotato => fetch.then.catch', silent: true }))
+    .catch(error => sendResponse({ error: 'Item not found', location: '@0B-127/*: Push_CouchPotato => fetch.then.catch', silent: true }))
     .then(response => {
         sendResponse({ success: response.success });
     })
     .catch(error => {
-        sendResponse({ error: String(error) , location: '@0B-132/*: addCouchPotato'});
+        sendResponse({ error: String(error) , location: '@0B-132/*: Push_CouchPotato'});
     });
 }
 
 /** Watcher - Movies **/
-function addWatcher(request, sendResponse) {
+function Push_Watcher(request, sendResponse) {
     let headers = {
             'Content-Type': 'application/json',
             'X-Api-Key': request.token,
@@ -151,7 +151,7 @@ function addWatcher(request, sendResponse) {
 
     fetch(debug.url = `${ request.url }?apikey=${ request.token }&mode=addmovie&${ query }=${ id }`)
         .then(response => response.json())
-        .catch(error => sendResponse({ error: 'Movie not found', location: '@0B-154/*: addWatcher => fetch.then.catch', silent: true }))
+        .catch(error => sendResponse({ error: 'Movie not found', location: '@0B-154/*: Push_Watcher => fetch.then.catch', silent: true }))
         .then(response => {
             if((response.response + "") == "true")
                 return sendResponse({
@@ -163,14 +163,14 @@ function addWatcher(request, sendResponse) {
         .catch(error => {
             sendResponse({
                 error: String(error),
-                location: `@0B-166/*: addWatcher => fetch("${ request.url }", { headers }).catch(error => { sendResponse })`,
+                location: `@0B-166/*: Push_Watcher => fetch("${ request.url }", { headers }).catch(error => { sendResponse })`,
                 debug
             });
         });
 }
 
 /** Radarr - Movies **/
-function addRadarr(request, sendResponse) {
+function Push_Radarr(request, sendResponse) {
     let headers = {
             'Content-Type': 'application/json',
             'X-Api-Key': request.token,
@@ -187,7 +187,7 @@ function addRadarr(request, sendResponse) {
 
     fetch(debug.url = `${ request.url }lookup/${ query }=${ id }&apikey=${ request.token }`)
         .then(response => response.json())
-        .catch(error => sendResponse({ error: 'Movie not found', location: '@0B-190/*: addRadarr => fetch.then.catch', silent: true }))
+        .catch(error => sendResponse({ error: 'Movie not found', location: '@0B-190/*: Push_Radarr => fetch.then.catch', silent: true }))
         .then(data => {
             let body,
                 // Monitor, search, and download movie ASAP
@@ -239,7 +239,7 @@ function addRadarr(request, sendResponse) {
             if (data && data[0] && data[0].errorMessage) {
                 sendResponse({
                     error: data[0].errorMessage,
-                    location: `@0B-242/*: addRadarr => fetch("${ request.url }", { headers }).then(data => { if })`,
+                    location: `@0B-242/*: Push_Radarr => fetch("${ request.url }", { headers }).then(data => { if })`,
                     debug
                 });
             } else if (data && data.path) {
@@ -249,7 +249,7 @@ function addRadarr(request, sendResponse) {
             } else {
                 sendResponse({
                     error: 'Unknown error',
-                    location: `@0B-252/*: addRadarr => fetch("${ request.url }", { headers }).then(data => { else })`,
+                    location: `@0B-252/*: Push_Radarr => fetch("${ request.url }", { headers }).then(data => { else })`,
                     debug
                 });
             }
@@ -257,14 +257,14 @@ function addRadarr(request, sendResponse) {
         .catch(error => {
             sendResponse({
                 error: String(error),
-                location: `@0B-260/*: addRadarr => fetch("${ request.url }", { headers }).catch(error => { sendResponse })`,
+                location: `@0B-260/*: Push_Radarr => fetch("${ request.url }", { headers }).catch(error => { sendResponse })`,
                 debug
             });
         });
 }
 
 /** Sonarr - TV Shows **/
-function addSonarr(request, sendResponse) {
+function Push_Sonarr(request, sendResponse) {
     let headers = {
             'Content-Type': 'application/json',
             'X-Api-Key': request.token,
@@ -277,7 +277,7 @@ function addSonarr(request, sendResponse) {
 
     fetch(debug.url = `${ request.url }lookup?apikey=${ request.token }&term=${ query }`)
         .then(response => response.json())
-        .catch(error => sendResponse({ error: 'TV Show not found', location: '@0B-280/*: addSonarr => fetch.then.catch', silent: true }))
+        .catch(error => sendResponse({ error: 'TV Show not found', location: '@0B-280/*: Push_Sonarr => fetch.then.catch', silent: true }))
         .then(data => {
             if (!data instanceof Array || !data.length)
                 throw new Error('TV Show not found');
@@ -318,7 +318,7 @@ function addSonarr(request, sendResponse) {
             if (data && data[0] && data[0].errorMessage) {
                 sendResponse({
                     error: data[0].errorMessage,
-                    location: `@0B-321/*: addSonarr => fetch("${ request.url }", { headers }).then(data => { if })`,
+                    location: `@0B-321/*: Push_Sonarr => fetch("${ request.url }", { headers }).then(data => { if })`,
                     debug
                 });
             } else if (data && data.path) {
@@ -328,7 +328,7 @@ function addSonarr(request, sendResponse) {
             } else {
                 sendResponse({
                     error: 'Unknown error',
-                    location: `@0B-331/*: addSonarr => fetch("${ request.url }", { headers }).then(data => { else })`,
+                    location: `@0B-331/*: Push_Sonarr => fetch("${ request.url }", { headers }).then(data => { else })`,
                     debug
                 });
             }
@@ -336,14 +336,14 @@ function addSonarr(request, sendResponse) {
         .catch(error => {
             sendResponse({
                 error: String(error),
-                location: `@0B-339/*: addSonarr => fetch("${ request.url }", { headers }).catch(error => { sendResponse })`,
+                location: `@0B-339/*: Push_Sonarr => fetch("${ request.url }", { headers }).catch(error => { sendResponse })`,
                 debug
             });
         });
 }
 
 /** Medusa - TV Shows **/
-function addMedusa(request, sendResponse) {
+function Push_Medusa(request, sendResponse) {
     let headers = {
             'Content-Type': 'application/json',
             'X-Api-Key': request.token,
@@ -356,7 +356,7 @@ function addMedusa(request, sendResponse) {
 
     fetch(debug.url = `${ request.root }internal/searchIndexersForShowName?api_key=${ request.token }&indexerId=0&query=${ query }`)
         .then(response => response.json())
-        .catch(error => sendResponse({ error: 'TV Show not found', location: '@0B-359/*: addMedusa => fetch.then.catch', silent: true }))
+        .catch(error => sendResponse({ error: 'TV Show not found', location: '@0B-359/*: Push_Medusa => fetch.then.catch', silent: true }))
         .then(data => {
             data = data.results;
 
@@ -392,7 +392,7 @@ function addMedusa(request, sendResponse) {
             if (data && data.error) {
                 sendResponse({
                     error: data.error,
-                    location: `@0B-395/*: addMedusa => fetch("${ request.url }", { headers }).then(data => { if })`,
+                    location: `@0B-395/*: Push_Medusa => fetch("${ request.url }", { headers }).then(data => { if })`,
                     debug
                 });
             } else if (data && data.id) {
@@ -402,7 +402,7 @@ function addMedusa(request, sendResponse) {
             } else {
                 sendResponse({
                     error: 'Unknown error',
-                    location: `@0B-405/*: addMedusa => fetch("${ request.url }", { headers }).then(data => { else })`,
+                    location: `@0B-405/*: Push_Medusa => fetch("${ request.url }", { headers }).then(data => { else })`,
                     debug
                 });
             }
@@ -410,14 +410,14 @@ function addMedusa(request, sendResponse) {
         .catch(error => {
             sendResponse({
                 error: String(error),
-                location: `@0B-413/*: addMedusa => fetch("${ request.url }", { headers }).catch(error => { sendResponse })`,
+                location: `@0B-413/*: Push_Medusa => fetch("${ request.url }", { headers }).catch(error => { sendResponse })`,
                 debug
             });
         });
 }
 
 /** Ombi* - TV Shows/Movies **/
-function addOmbi(request, sendResponse) {
+function Push_Ombi(request, sendResponse) {
     let headers = {
             'Content-Type': 'application/json',
             'ApiKey': request.token,
@@ -430,9 +430,9 @@ function addOmbi(request, sendResponse) {
             // setup stack trace for debugging
 
     if(request.contentType == 'movie' && (id || null) === null)
-        sendResponse({ error: 'Invalid TMDbID', location: '@0B-433/*: addOmbi => if', silent: true });
+        sendResponse({ error: 'Invalid TMDbID', location: '@0B-433/*: Push_Ombi => if', silent: true });
     else if((id || null) === null)
-        sendResponse({ error: 'Invalid TVDbID', location: '@0B-435/*: addOmbi => else if', silent: true });
+        sendResponse({ error: 'Invalid TVDbID', location: '@0B-435/*: Push_Ombi => else if', silent: true });
 
     fetch(debug.url = request.url, {
             method: 'POST',
@@ -440,7 +440,7 @@ function addOmbi(request, sendResponse) {
             body: JSON.stringify(body),
             headers
         })
-        .catch(error => sendResponse({ error: `${ type } not found`, location: '@0B-443/*: addOmbi => fetch.then.catch', silent: true }))
+        .catch(error => sendResponse({ error: `${ type } not found`, location: '@0B-443/*: Push_Ombi => fetch.then.catch', silent: true }))
         .then(response => response.text())
         .then(data => {
             debug.data =
@@ -454,7 +454,7 @@ function addOmbi(request, sendResponse) {
                 else
                     sendResponse({
                         error: data.errorMessage,
-                        location: `@0B-457/*: addOmbi => fetch("${ request.url }", { headers }).then(data => { if })`,
+                        location: `@0B-457/*: Push_Ombi => fetch("${ request.url }", { headers }).then(data => { if })`,
                         debug
                     });
             } else if (data && data.path) {
@@ -464,7 +464,7 @@ function addOmbi(request, sendResponse) {
             } else {
                 sendResponse({
                     error: 'Unknown error',
-                    location: `@0B-467/*: addOmbi => fetch("${ request.url }", { headers }).then(data => { else })`,
+                    location: `@0B-467/*: Push_Ombi => fetch("${ request.url }", { headers }).then(data => { else })`,
                     debug
                 });
             }
@@ -472,7 +472,7 @@ function addOmbi(request, sendResponse) {
         .catch(error => {
             sendResponse({
                 error: String(error),
-                location: `@0B-475/*: addOmbi => fetch("${ request.url }", { headers }).catch(error => { sendResponse })`,
+                location: `@0B-475/*: Push_Ombi => fetch("${ request.url }", { headers }).catch(error => { sendResponse })`,
                 debug
             });
         });
@@ -481,7 +481,7 @@ function addOmbi(request, sendResponse) {
 // Unfortunately the native Promise.race does not work as you would suspect.
 // If one promise (Plex request) fails, we still want the other requests to continue racing.
 // See https://www.jcore.com/2016/12/18/promise-me-you-wont-use-promise-race/ for an explanation
-function promiseRace(promises) {
+function PromiseRace(promises) {
     if (!~promises.length) {
         return Promise.reject('Cannot start a race without promises!');
     }
@@ -500,11 +500,11 @@ function promiseRace(promises) {
             let promise = promises.splice(index, 1)[0];
 
             promise.catch(error => terminal.log(`Plex request #${ index } failed:`, error));
-            return promiseRace(promises);
+            return PromiseRace(promises);
         });
 }
 
-function $searchPlex(connection, headers, options) {
+function $Search_Plex(connection, headers, options) {
     let type = options.type || 'movie',
         url = `${ connection.uri }/hubs/search`,
         field = options.field || 'title';
@@ -565,7 +565,7 @@ function $searchPlex(connection, headers, options) {
         .catch(error => { throw error });
 }
 
-async function searchPlex(request, sendResponse) {
+async function Search_Plex(request, sendResponse) {
     let { options, serverConfig } = request,
         headers = {
             'X-Plex-Token': serverConfig.token,
@@ -574,17 +574,17 @@ async function searchPlex(request, sendResponse) {
 
     // Try all Plex connection URLs
     let requests = serverConfig.connections.map(connection =>
-        $searchPlex(connection, headers, options)
+        $Search_Plex(connection, headers, options)
     );
 
     try {
         // See what connection URL finishes the request first and pick that one.
         // TODO: optimally, as soon as the first request is finished, all other requests would be cancelled using AbortController.
-        let result = await promiseRace(requests);
+        let result = await PromiseRace(requests);
 
         sendResponse(result);
     } catch (error) {
-        sendResponse({ error: String(error), location: '@0B-587/*: searchPlex' });
+        sendResponse({ error: String(error), location: '@0B-587/*: Search_Plex' });
     }
 }
 
@@ -669,28 +669,28 @@ chrome.runtime.onMessage.addListener((request, sender, callback) => {
     try {
         switch (request.type) {
             case 'SEARCH_PLEX':
-                searchPlex(request, callback);
+                Search_Plex(request, callback);
                 return true;
             case 'VIEW_COUCHPOTATO':
-                viewCouchPotato(request, callback);
+                Open_CouchPotato(request, callback);
                 return true;
-            case 'ADD_COUCHPOTATO':
-                addCouchpotato(request, callback);
+            case 'PUSH_COUCHPOTATO':
+                Push_CouchPotato(request, callback);
                 return true;
-            case 'ADD_RADARR':
-                addRadarr(request, callback);
+            case 'PUSH_RADARR':
+                Push_Radarr(request, callback);
                 return true;
-            case 'ADD_SONARR':
-                addSonarr(request, callback);
+            case 'PUSH_SONARR':
+                Push_Sonarr(request, callback);
                 return true;
-            case 'ADD_MEDUSA':
-                addMedusa(request, callback);
+            case 'PUSH_MEDUSA':
+                Push_Medusa(request, callback);
                 return true;
-            case 'ADD_WATCHER':
-                addWatcher(request, callback);
+            case 'PUSH_WATCHER':
+                Push_Watcher(request, callback);
                 return true;
-            case 'ADD_OMBI':
-                addOmbi(request, callback);
+            case 'PUSH_OMBI':
+                Push_Ombi(request, callback);
                 return true;
             case 'OPEN_OPTIONS':
                 chrome.runtime.openOptionsPage();
@@ -705,7 +705,6 @@ chrome.runtime.onMessage.addListener((request, sender, callback) => {
                 });
                 return true;
             case 'DOWNLOAD_FILE':
-
                 let FILE_TITLE = ITEM_TITLE.replace(/\-/g, ' ').replace(/[\s\:]{2,}/g, ' - ').replace(/[^\w\s\-\']+/g, '');
 
                 // no try/catch, use callback for that

@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
-/* global config, init, sendUpdate, "Helpers" */
+/* global config, init, Update, "Helpers" */
 
-let config, init, sendUpdate;
+let config, init, Update;
 
 (async date => {
 
@@ -262,7 +262,7 @@ let config, init, sendUpdate;
 
                                             type = movie.test(type)? 'movie': 'show';
 
-                                            Db = await getIDs({ type, APIID, APIType });
+                                            Db = await Identify({ type, APIID, APIType });
                                             IMDbID = Db.imdb;
                                             TMDbID = Db.tmdb;
                                             TVDbID = Db.tvdb;
@@ -277,7 +277,7 @@ let config, init, sendUpdate;
                                             year = +year.replace(/\D/g, '').replace(/^\d{2}$/, '20$&');
                                             type = movie.test(type)? 'movie': 'show';
 
-                                            Db = await getIDs({ type, title, year });
+                                            Db = await Identify({ type, title, year });
                                             IMDbID = Db.imdb;
                                             TMDbID = Db.tmdb;
                                             TVDbID = Db.tvdb;
@@ -438,15 +438,15 @@ let config, init, sendUpdate;
         }
     }
 
-    // self explanatory
-    function openOptionsPage() {
+    // open up the options page
+    function Options() {
         chrome.runtime.sendMessage({
             type: 'OPEN_OPTIONS'
         });
     }
 
     // Send an update query to background.js
-    sendUpdate = (type, options = {}, postToo) => {
+    Update = (type, options = {}, postToo) => {
         if(config)
             terminal.log(`Requesting update: ${ type }`, options);
 
@@ -460,7 +460,7 @@ let config, init, sendUpdate;
     };
 
     // get the saved options
-    function __getOptions__() {
+    function options() {
         return new Promise((resolve, reject) => {
             function handleOptions(options) {
                 if((!options.plexToken || !options.servers) && !options.DO_NOT_USE)
@@ -569,8 +569,8 @@ let config, init, sendUpdate;
     }
 
     // self explanatory, returns an object; sets the config variable
-    function parseOptions() {
-        return __getOptions__()
+    function ParsedOptions() {
+        return options()
             .then(
                 options => (config = options),
                 error => {
@@ -578,14 +578,14 @@ let config, init, sendUpdate;
                         'warning',
                         'Fill in missing Web to Plex options',
                         15000,
-                        openOptionsPage
+                        Options
                     );
                     throw error;
                 }
             );
     }
 
-    await parseOptions();
+    await ParsedOptions();
 
     let AUTO_GRAB = {
             ENABLED: config.UseAutoGrab,
@@ -628,7 +628,7 @@ let config, init, sendUpdate;
 
     // fetch/search for the item's media ID(s)
     // rerun enum - [0bWXYZ] - [Tried Different URL | Tried Matching Title | Tried Loose Searching | Tried Rerunning Altogether]
-    async function getIDs({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APIID, meta, rerun }) {
+    async function Identify({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APIID, meta, rerun }) {
         let json = {}, // returned object
             data = {}, // mutated object
             promise,   // query promise
@@ -998,7 +998,7 @@ let config, init, sendUpdate;
         }
 
         if((json === undefined || json === null || json === false) && (rerun & 0b0001))
-            return rerun |= 0b0001, json = getIDs({ title, year: YEAR, type, IMDbID, TMDbID, TVDbID, APIType, APIID, meta, rerun });
+            return rerun |= 0b0001, json = Identify({ title, year: YEAR, type, IMDbID, TMDbID, TVDbID, APIType, APIID, meta, rerun });
         else if((json === undefined || json === null))
             json = { IMDbID, TMDbID, TVDbID };
 
@@ -1109,7 +1109,7 @@ let config, init, sendUpdate;
         return data;
     }
 
-    function $pushAddToCouchpotato(options) {
+    function __Request_CouchPotato__(options) {
     	// TODO: this does not work anymore!
     	if(!options.IMDbID)
     		return new Notification(
@@ -1136,7 +1136,7 @@ let config, init, sendUpdate;
     				(!response.silent && terminal.error('Error viewing CouchPotato: ' + String(response.error)));
     			}
     			if(!movieExists) {
-    				pushCouchPotatoRequest(options);
+    				Request_CouchPotato(options);
     				return;
     			}
     			new Notification(
@@ -1148,7 +1148,7 @@ let config, init, sendUpdate;
     }
 
     // Movies/TV Shows
-    function pushOmbiRequest(options) {
+    function Request_Ombi(options) {
         new Notification('info', `Adding "${ options.title }" to Ombi`, 3000);
 
         if((!options.IMDbID && !options.TMDbID) && !options.TVDbID) {
@@ -1161,7 +1161,7 @@ let config, init, sendUpdate;
         let contentType = (/movies?|film/i.test(options.type)? 'movie': 'tv');
 
         chrome.runtime.sendMessage({
-                type: 'ADD_OMBI',
+                type: 'PUSH_OMBI',
                 url: `${ config.ombiURL }api/v1/Request/${ contentType }`,
                 token: config.ombiToken,
                 title: options.title,
@@ -1191,12 +1191,12 @@ let config, init, sendUpdate;
     }
 
     // Movies/TV Shows
-    function pushCouchPotatoRequest(options) {
+    function Request_CouchPotato(options) {
         new Notification('info', `Adding "${ options.title }" to CouchPotato`, 3000);
 
     	chrome.runtime.sendMessage(
     		{
-    			type: 'ADD_COUCHPOTATO',
+    			type: 'PUSH_COUCHPOTATO',
     			url: `${ config.couchpotatoURL }/movie.add`,
                 IMDbID: options.IMDbID,
                 TMDbID: options.TMDbID,
@@ -1224,7 +1224,7 @@ let config, init, sendUpdate;
     }
 
     // Movies
-    function pushWatcherRequest(options) {
+    function Request_Watcher(options) {
         new Notification('info', `Adding "${ options.title }" to Watcher`, 3000);
 
         if(!options.IMDbID && !options.TMDbID) {
@@ -1235,7 +1235,7 @@ let config, init, sendUpdate;
         }
 
         chrome.runtime.sendMessage({
-                type: 'ADD_WATCHER',
+                type: 'PUSH_WATCHER',
                 url: `${ config.watcherURL }api/`,
                 token: config.watcherToken,
                 StoragePath: config.watcherStoragePath,
@@ -1266,7 +1266,7 @@ let config, init, sendUpdate;
     }
 
     // Movies
-    function pushRadarrRequest(options, prompted) {
+    function Request_Radarr(options, prompted) {
         if(!options.IMDbID && !options.TMDbID)
             return (!prompted)? new Notification(
                 'warning',
@@ -1277,7 +1277,7 @@ let config, init, sendUpdate;
             { PromptQuality, PromptLocation } = config;
 
         if(!prompted && (PromptQuality || PromptLocation))
-            return new Prompt('modify', options, refined => pushRadarrRequest(refined, true));
+            return new Prompt('modify', options, refined => Request_Radarr(refined, true));
 
         if(PromptQuality && +options.quality > 0)
             PromptValues.QualityID = +options.quality;
@@ -1287,7 +1287,7 @@ let config, init, sendUpdate;
         new Notification('info', `Adding "${ options.title }" to Radarr`, 3000);
 
         chrome.runtime.sendMessage({
-                type: 'ADD_RADARR',
+                type: 'PUSH_RADARR',
                 url: `${ config.radarrURL }api/movie/`,
                 token: config.radarrToken,
                 StoragePath: config.radarrStoragePath,
@@ -1320,7 +1320,7 @@ let config, init, sendUpdate;
     }
 
     // TV Shows
-    function pushSonarrRequest(options, prompted) {
+    function Request_Sonarr(options, prompted) {
         if(!options.TVDbID)
             return (!prompted)? new Notification(
                 'warning',
@@ -1331,7 +1331,7 @@ let config, init, sendUpdate;
             { PromptQuality, PromptLocation } = config;
 
         if(!prompted && (PromptQuality || PromptLocation))
-            return new Prompt('modify', options, refined => pushSonarrRequest(refined, true));
+            return new Prompt('modify', options, refined => Request_Sonarr(refined, true));
 
         if(PromptQuality && +options.quality > 0)
             PromptValues.QualityID = +options.quality;
@@ -1341,7 +1341,7 @@ let config, init, sendUpdate;
         new Notification('info', `Adding "${ options.title }" to Sonarr`, 3000);
 
         chrome.runtime.sendMessage({
-                type: 'ADD_SONARR',
+                type: 'PUSH_SONARR',
                 url: `${ config.sonarrURL }api/series/`,
                 token: config.sonarrToken,
                 StoragePath: config.sonarrStoragePath,
@@ -1371,7 +1371,8 @@ let config, init, sendUpdate;
         );
     }
 
-    function pushMedusaRequest(options, prompted) {
+    // TV Shows
+    function Request_Medusa(options, prompted) {
         if(!options.TVDbID)
             return (!prompted)? new Notification(
                 'warning',
@@ -1382,7 +1383,7 @@ let config, init, sendUpdate;
             { PromptQuality, PromptLocation } = config;
 
         if(!prompted && (PromptQuality || PromptLocation))
-            return new Prompt('modify', options, refined => pushMedusaRequest(refined, true));
+            return new Prompt('modify', options, refined => Request_Medusa(refined, true));
 
         if(PromptQuality && +options.quality > 0)
             PromptValues.QualityID = +options.quality;
@@ -1392,7 +1393,7 @@ let config, init, sendUpdate;
         new Notification('info', `Adding "${ options.title }" to Medusa`, 3000);
 
         chrome.runtime.sendMessage({
-                type: 'ADD_MEDUSA',
+                type: 'PUSH_MEDUSA',
                 url: `${ config.medusaURL }api/v2/series`,
                 root: `${ config.medusaURL }api/v2/`,
                 token: config.medusaToken,
@@ -1425,7 +1426,7 @@ let config, init, sendUpdate;
 
     // make the button
     let MASTER_BUTTON;
-    function renderPlexButton(persistent) {
+    function RenderButton(persistent) {
     	let existingButtons = document.querySelectorAll('.web-to-plex-button'),
             firstButton = existingButtons[0];
 
@@ -1515,7 +1516,7 @@ let config, init, sendUpdate;
                         onmouseup: event => {
                             let self = event.target, parent = button;
 
-                            return openOptionsPage();
+                            return Options();
                         }
                     },
                     furnish('img[alt=Settings]', { src: IMG_URL.settings_icon_48, onmouseup: event => event.target.parentElement.click() }) // <img/>
@@ -1531,7 +1532,7 @@ let config, init, sendUpdate;
         return MASTER_BUTTON = button;
     }
 
-    function modifyPlexButton(button, action, title, options = {}) {
+    function UpdateButton(button, action, title, options = {}) {
         let multiple = (action == 'multiple' || options instanceof Array),
             element = button.querySelector('.w2p-action, .list-action'),
             delimeter = '<!---->',
@@ -1544,7 +1545,7 @@ let config, init, sendUpdate;
             button = element.parentElement;
         };
 
-        sendUpdate('SEARCH_FOR', { ...options, button });
+        Update('SEARCH_FOR', { ...options, button });
 
         /* Handle a list of items */
         if(multiple) {
@@ -1587,17 +1588,17 @@ let config, init, sendUpdate;
 
                     try {
                         if(config.usingOmbi)
-                            pushOmbiRequest(option, true);
+                            Request_Ombi(option, true);
                         else if(config.usingWatcher && !tv.test(option.type))
-                            pushWatcherRequest(option, true);
+                            Request_Watcher(option, true);
                         else if(config.usingRadarr && !tv.test(option.type))
-                            pushRadarrRequest(option, true);
+                            Request_Radarr(option, true);
                         else if(config.usingSonarr && tv.test(option.type))
-                            pushSonarrRequest(option, true);
+                            Request_Sonarr(option, true);
                         else if(config.usingMedusa && tv.test(option.type))
-                            pushMedusaRequest(option, true);
+                            Request_Medusa(option, true);
                         else if(config.usingCouchPotato)
-                            $pushAddToCouchpotato(option, true);
+                            __Request_CouchPotato__(option, true);
                     } catch(error) {
                         terminal.error(`Failed to get "${ option.title }" (Error #${ ++fail })`)
                     }
@@ -1628,7 +1629,7 @@ let config, init, sendUpdate;
             }
 
             if(action == 'found') {
-                element.href = getPlexMediaURL(config.server.id, options.key);
+                element.href = Request_PlexURL(config.server.id, options.key);
                 element.setAttribute(hov, `Watch "${options.title} (${options.year})" on Plex`);
                 button.classList.add('wtp--found');
 
@@ -1660,12 +1661,12 @@ let config, init, sendUpdate;
                         element.addEventListener('click', element.ON_DOWNLOAD = e => {
                             e.preventDefault();
 
-                            sendUpdate('DOWNLOAD_FILE', { ...options, button, href, path });
+                            Update('DOWNLOAD_FILE', { ...options, button, href, path });
                             new Notification('update', 'Opening prompt (may take a while)...');
                         });
 
                         element.setAttribute(hov, `Download "${ nice_title }" | ${ty}`);
-                        sendUpdate('SAVE_AS', { ...options, button, href, path });
+                        Update('SAVE_AS', { ...options, button, href, path });
                         new Notification('update', `"${ nice_title }" can be downloaded`, 7000, e => element.click(e));
                         return;
 
@@ -1676,24 +1677,24 @@ let config, init, sendUpdate;
 
                         /* Failed */
                         if(/#tt-0-0/i.test(url))
-                            return modifyPlexButton(button, 'notfound', title, options);
+                            return UpdateButton(button, 'notfound', title, options);
 
                         element.href = url;
                         button.classList.add('wtp--download');
                         element.addEventListener('click', element.ON_CLICK = e => {
                             e.preventDefault();
                             if(config.usingOmbi) {
-                                pushOmbiRequest(options);
+                                Request_Ombi(options);
                             } else if(config.usingWatcher && !tv.test(options.type)) {
-                                pushWatcherRequest(options);
+                                Request_Watcher(options);
                             } else if(config.usingRadarr && !tv.test(options.type)) {
-                                pushRadarrRequest(options);
+                                Request_Radarr(options);
                             } else if(config.usingSonarr && tv.test(options.type)) {
-                                pushSonarrRequest(options);
+                                Request_Sonarr(options);
                             } else if(config.usingMedusa && tv.test(options.type)) {
-                                pushMedusaRequest(options);
+                                Request_Medusa(options);
                             } else if(config.usingCouchPotato) {
-                                $pushAddToCouchpotato(options);
+                                __Request_CouchPotato__(options);
                             }
                         });
                 }
@@ -1719,15 +1720,16 @@ let config, init, sendUpdate;
         }
     }
 
-    async function squabblePlexMedia(options, button) {
+    // Find media on Plex
+    async function FindMediaItems(options, button) {
         if(!(options && options.length && button))
             return;
 
         let results = [],
             length = options.length,
-            queries = (squabblePlexMedia.queries = squabblePlexMedia.queries || {});
+            queries = (FindMediaItems.queries = FindMediaItems.queries || {});
 
-        squabblePlexMedia.OPTIONS = options;
+        FindMediaItems.OPTIONS = options;
 
         let query = JSON.stringify(options);
 
@@ -1741,7 +1743,7 @@ let config, init, sendUpdate;
             new Notification('update', `Welcome back. ${ multiple } new ${ items } can be grabbed`, 7000, (event, target = button.querySelector('.list-action')) => target.click({ ...event, target }));
 
             if(multiple)
-                modifyPlexButton(button, 'multiple', `Download ${ multiple } ${ items }`, results);
+                UpdateButton(button, 'multiple', `Download ${ multiple } ${ items }`, results);
 
             return;
         }
@@ -1756,14 +1758,14 @@ let config, init, sendUpdate;
             opt = { name: option.title, title: option.title, year: option.year, image: options.image, type: option.type, imdb: IMDbID, IMDbID, tmdb: TMDbID, TMDbID, tvdb: TVDbID, TVDbID };
 
             try {
-                await getPlexMediaRequest(option)
+                await Request_Plex(option)
                     .then(async({ found, key }) => {
                         if(found) {
                             // ignore found items, we only want new items
                         } else {
                             option.field = 'original_title';
 
-                            return await getPlexMediaRequest(option)
+                            return await Request_Plex(option)
                                 .then(({ found, key }) => {
                                     if(found) {
                                         // ignore found items, we only want new items
@@ -1808,10 +1810,10 @@ let config, init, sendUpdate;
         query.items = items;
 
         if(multiple)
-            modifyPlexButton(button, 'multiple', `Download ${ multiple } ${ items }`, results);
+            UpdateButton(button, 'multiple', `Download ${ multiple } ${ items }`, results);
     }
 
-    function findPlexMedia(options) {
+    async function FindMediaItem(options) {
         if(!(options && options.title))
             return;
 
@@ -1826,13 +1828,13 @@ let config, init, sendUpdate;
                 furnish('div', { tooltip: 'Add to Plex It!', style: `background: url(${ IMG_URL.plexit_icon_16 }) top right/60% no-repeat, #0004 url(${ opt.image }) center/contain no-repeat; height: 48px; width: 34px;`, draggable: true, onmouseup: event => {let frame = document.querySelector('#plexit-bookmarklet-frame'); frame.src = frame.src.replace(/(#plexit:.*)?$/, '#plexit:' + event.target.parentElement.getAttribute('data'))} }):
             furnish('img', { title: 'Add to Plex It!', src: IMG_URL.plexit_icon_48, onmouseup: event => {let frame = document.querySelector('#plexit-bookmarklet-frame'); frame.src = frame.src.replace(/(#plexit:.*)?$/, '#plexit:' + event.target.parentElement.getAttribute('data'))} });
 
-        findPlexMedia.OPTIONS = options;
+        FindMediaItem.OPTIONS = options;
 
         try {
-            return getPlexMediaRequest(options)
+            return Request_Plex(options)
                 .then(({ found, key }) => {
                     if(found) {
-                            modifyPlexButton(options.button, 'found', 'On Plex', { ...options, key });
+                            UpdateButton(options.button, 'found', 'On Plex', { ...options, key });
                             opt = { ...opt, url: options.button.href, found: true, status: 'found' };
 
                             let po, pi = furnish('li#plexit.list-item', { data: btoa(JSON.stringify(opt)) }, img);
@@ -1845,10 +1847,10 @@ let config, init, sendUpdate;
                     } else {
                         options.field = 'original_title';
 
-                        return getPlexMediaRequest(options)
+                        return Request_Plex(options)
                             .then(({ found, key }) => {
                                 if(found) {
-                                    modifyPlexButton(options.button, 'found', 'On Plex', { ...options, key });
+                                    UpdateButton(options.button, 'found', 'On Plex', { ...options, key });
                                     opt = { ...opt, url: options.button.href, found: true, status: 'found' };
 
                                     let po, pi = furnish('li#plexit.list-item', { data: btoa(JSON.stringify(opt)) }, img);
@@ -1865,7 +1867,7 @@ let config, init, sendUpdate;
                                             'Not on Plex (download available)':
                                         'Not on Plex (download not available)';
 
-                                    modifyPlexButton(options.button, action, title, options);
+                                    UpdateButton(options.button, action, title, options);
                                     opt = { ...opt, found: false, status: action };
 
                                     let po, pi = furnish('li#plexit.list-item', { data: btoa(JSON.stringify(opt)) }, img);
@@ -1883,7 +1885,7 @@ let config, init, sendUpdate;
                     return found;
                 })
             } catch(error) {
-                return modifyPlexButton(
+                return UpdateButton(
                         options.button,
                         'error',
                         'Request to Plex Media Server failed',
@@ -1895,7 +1897,7 @@ let config, init, sendUpdate;
             }
     }
 
-    function getPlexMediaRequest(options) {
+    function Request_Plex(options) {
         if(!(config.plexURL && config.plexToken) || config.DO_NOT_USE)
             return new Promise((resolve, reject) => resolve({ found: false, key: null }));
 
@@ -1915,7 +1917,7 @@ let config, init, sendUpdate;
             });
     }
 
-    function getPlexMediaURL(PlexUIID, key) {
+    function Request_PlexURL(PlexUIID, key) {
         return config.plexURL.replace(RegExp(`\/(${ config.server.id })?$`), `/web#!/server/` + PlexUIID) + `/details?key=${encodeURIComponent( key )}`;
     }
 
@@ -1931,7 +1933,7 @@ let config, init, sendUpdate;
 
         if(!data)
             return terminal.warn(EMPTY_REQUEST);
-        let button = renderPlexButton();
+        let button = RenderButton();
 
         if(!button)
             return terminal.warn(BUTTON_ERROR);
@@ -1952,7 +1954,7 @@ let config, init, sendUpdate;
                         if(!item.title || !item.type)
                             continue;
 
-                        let Db = await getIDs(item);
+                        let Db = await Identify(item);
 
                         IMDbID = IMDbID || Db.imdb || 'tt';
                         TMDbID = TMDbID || Db.tmdb || 0;
@@ -1967,13 +1969,13 @@ let config, init, sendUpdate;
                     if(!data.length)
                         return terminal.error(PARSING_ERROR);
                     else
-                        squabblePlexMedia(data, button);
+                        FindMediaItems(data, button);
                 } else {
                     if(!data || !data.title || !data.type)
                         return terminal.error(PARSING_ERROR);
 
                     let { image, type, title, year, IMDbID, TMDbID, TVDbID } = data;
-                    let Db = await getIDs(data);
+                    let Db = await Identify(data);
 
                     IMDbID = IMDbID || Db.imdb || 'tt';
                     TMDbID = TMDbID || Db.tmdb || 0;
@@ -1982,8 +1984,8 @@ let config, init, sendUpdate;
                     title = title || Db.title;
                     year = +(year || Db.year || 0);
 
-                    let found = await findPlexMedia({ type, title, year, image, button, IMDbID, TMDbID, TVDbID });
-                    sendUpdate('FOUND', { ...request, found }, true);
+                    let found = await FindMediaItem({ type, title, year, image, button, IMDbID, TMDbID, TVDbID });
+                    Update('FOUND', { ...request, found }, true);
                 }
                 return true;
 
@@ -2000,11 +2002,11 @@ let config, init, sendUpdate;
 
             switch(request.type) {
                 case 'SEND_VIDEO_LINK':
-                    let options = { ...findPlexMedia.OPTIONS, href: request.href, remote: request.from };
+                    let options = { ...FindMediaItem.OPTIONS, href: request.href, remote: request.from };
 
                     terminal.log('oload Event:', options);
 
-                    modifyPlexButton(MASTER_BUTTON, 'downloader', 'Download', options);
+                    UpdateButton(MASTER_BUTTON, 'downloader', 'Download', options);
                     return true;
 
                 case 'NOTIFICATION':

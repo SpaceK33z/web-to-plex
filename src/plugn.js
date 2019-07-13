@@ -177,8 +177,80 @@ function RandomName(length = 16, symbol = '') {
     return values.join(symbol).replace(/^[^a-z]+/i, '');
 };
 
+let handle = async(results, tabID, instance, script, type) => {
+    let InstanceWarning = `[${ type.toUpperCase() }:${ script }] Instance failed to execute @${ tabID }#${ instance }`,
+        InstanceType = type;
+
+    if((!results || !results[0] || !instance) && !FOUND[instance])
+        try {
+            instance = RandomName();
+            tabchange([ TAB ]);
+            return;
+        } catch(error) {
+            return scribe.warn(InstanceWarning);
+        }
+
+    let data = await results[0];
+
+    if(typeof data == 'number') {
+        if(handle.timeout)
+            return /* already running */;
+
+        return handle.timeout = setTimeout(() => { let { request, sender, callback } = (processMessage.properties || {}); handle.timeout = null; processMessage(request, sender, callback) }, data);
+    } else if(typeof data == 'string') {
+        let R = RegExp;
+
+        if(/^<([^<>]+)>$/.test(data))
+            return scribe.warn(`The instance requires the "${ R.$1 }" permission: ${ instance }`);
+
+        data.replace(/^([^]+?)\s*\((\d{4})\):([\w\-]+)$/);
+
+        let title = R.$1,
+            year  = R.$2,
+            type  = R.$3;
+
+        data = { type, title, year };
+    }
+
+    if(typeof data == 'number')
+        return setTimeout(() => { let { request, sender, callback } = (processMessage.properties || {}); processMessage(request, sender, callback) }, data);
+    if(typeof data != 'object')
+        return /* setTimeout */;
+
+    try {
+        if(data instanceof Array) {
+            data = data.filter(d => d);
+
+            if(data.length > 1) {
+                chrome.tabs.sendMessage(tabID, { data, script, instance, instance_type: InstanceType, type: 'POPULATE' });
+                return /* done */;
+            }
+
+            /* the array is too small to parse, set it as a single item */
+            data = data[0];
+        }
+
+        let { type, title, year } = data;
+
+        title = title
+            .replace(/[\u2010-\u2015]/g, '-') // fancy hyphen
+            .replace(/[\u201a\u275f]/g, ',') // fancy comma
+            .replace(/[\u2018\u2019\u201b\u275b\u275c]/g, "'") // fancy apostrophe
+            .replace(/[\u201c-\u201f\u275d\u275e]/g, '"'); // fancy quotation marks
+        year = +year;
+
+        data = { ...data, type, title, year };
+
+        chrome.tabs.insertCSS(tabID, { file: 'sites/common.css' });
+        chrome.tabs.sendMessage(tabID, { data, script, instance, instance_type: InstanceType, type: 'POPULATE' });
+    } catch(error) {
+        throw new Error(InstanceWarning + ' - ' + String(error));
+    }
+};
+
 let running = [], instance = RandomName(), TAB, cache = {};
 
+/* Handle script/plugin events */
 let tabchange = async tabs => {
     let tab = tabs[0];
 
@@ -291,115 +363,7 @@ top.onlocationchange = (event) => chrome.runtime.sendMessage({ type: '$INIT$', o
         .catch(error => { throw error });
 };
 
-let handle = async(results, tabID, instance, script, type) => {
-    let InstanceWarning = `[${ type.toUpperCase() }:${ script }] Instance failed to execute @${ tabID }#${ instance }`,
-        InstanceType = type;
-
-    if((!results || !results[0] || !instance) && !FOUND[instance])
-        try {
-            instance = RandomName();
-            tabchange([ TAB ]);
-            return;
-        } catch(error) {
-            return scribe.warn(InstanceWarning);
-        }
-
-    let data = await results[0];
-
-    if(typeof data == 'number') {
-        if(handle.timeout)
-            return /* already running */;
-
-        return handle.timeout = setTimeout(() => { let { request, sender, callback } = (processMessage.properties || {}); handle.timeout = null; processMessage(request, sender, callback) }, data);
-    } else if(typeof data == 'string') {
-        let R = RegExp;
-
-        if(/^<([^<>]+)>$/.test(data))
-            return scribe.warn(`The instance requires the "${ R.$1 }" permission: ${ instance }`);
-
-        data.replace(/^([^]+?)\s*\((\d{4})\):([\w\-]+)$/);
-
-        let title = R.$1,
-            year  = R.$2,
-            type  = R.$3;
-
-        data = { type, title, year };
-    }
-
-    if(typeof data == 'number')
-        return setTimeout(() => { let { request, sender, callback } = (processMessage.properties || {}); processMessage(request, sender, callback) }, data);
-    if(typeof data != 'object')
-        return /* setTimeout */;
-
-    try {
-        if(data instanceof Array) {
-            data = data.filter(d => d);
-
-            if(data.length > 1) {
-                chrome.tabs.sendMessage(tabID, { data, script, instance, instance_type: InstanceType, type: 'POPULATE' });
-                return /* done */;
-            }
-
-            /* the array is too small to parse, set it as a single item */
-            data = data[0];
-        }
-
-        let { type, title, year } = data;
-
-        title = title
-            .replace(/[\u2010-\u2015]/g, '-') // fancy hyphen
-            .replace(/[\u201a\u275f]/g, ',') // fancy comma
-            .replace(/[\u2018\u2019\u201b\u275b\u275c]/g, "'") // fancy apostrophe
-            .replace(/[\u201c-\u201f\u275d\u275e]/g, '"'); // fancy quotation marks
-        year = +year;
-
-        data = { ...data, type, title, year };
-
-        chrome.tabs.insertCSS(tabID, { file: 'sites/common.css' });
-        chrome.tabs.sendMessage(tabID, { data, script, instance, instance_type: InstanceType, type: 'POPULATE' });
-    } catch(error) {
-        throw new Error(InstanceWarning + ' - ' + String(error));
-    }
-};
-
-// this doesn't actually work...
-//chrome.tabs.onActiveChanged.addListener(tabchange);
-
-// workaround for the above
-chrome.tabs.onActivated.addListener(change => {
-    instance = RandomName();
-
-    chrome.tabs.get(change.tabId, tab => tabchange([ tab ]));
-});
-
-let refresh;
-
-chrome.tabs.onUpdated.addListener(refresh = (ID, change, tab) => {
-    instance = RandomName();
-
-    if(change.status == 'complete' && !tab.discarded)
-        tabchange([ tab ]);
-    else if(!tab.discarded)
-        setTimeout(() => refresh(ID, change, tab), 1000);
-});
-
-// workaround for the above
-chrome.tabs.onActivated.addListener(change => {
-    instance = RandomName();
-
-    chrome.tabs.get(change.tabId, tab => tabchange([ tab ]));
-});
-
-chrome.tabs.onUpdated.addListener((ID, change, tab) => {
-    instance = RandomName();
-
-    if(change.status == 'complete' && !tab.discarded)
-        tabchange([ tab ]);
-    else if(!tab.discarded)
-        setTimeout(() => tabchange([ tab ]), 1000);
-});
-
-// listen for a page load
+// listen for message event
 let processMessage;
 
 chrome.runtime.onMessage.addListener(processMessage = async(request, sender, callback) => {
@@ -591,4 +555,41 @@ top.onlocationchange = (event) => chrome.runtime.sendMessage({ type: '$INIT$', o
     }
 
     return true;
+});
+
+// this doesn't actually work...
+//chrome.tabs.onActiveChanged.addListener(tabchange);
+
+// workaround for the above
+chrome.tabs.onActivated.addListener(change => {
+    instance = RandomName();
+
+    chrome.tabs.get(change.tabId, tab => tabchange([ tab ]));
+});
+
+let refresh;
+
+chrome.tabs.onUpdated.addListener(refresh = (ID, change, tab) => {
+    instance = RandomName();
+
+    if(change.status == 'complete' && !tab.discarded)
+        tabchange([ tab ]);
+    else if(!tab.discarded)
+        setTimeout(() => refresh(ID, change, tab), 1000);
+});
+
+// workaround for the above
+chrome.tabs.onActivated.addListener(change => {
+    instance = RandomName();
+
+    chrome.tabs.get(change.tabId, tab => tabchange([ tab ]));
+});
+
+chrome.tabs.onUpdated.addListener((ID, change, tab) => {
+    instance = RandomName();
+
+    if(change.status == 'complete' && !tab.discarded)
+        tabchange([ tab ]);
+    else if(!tab.discarded)
+        setTimeout(() => tabchange([ tab ]), 1000);
 });

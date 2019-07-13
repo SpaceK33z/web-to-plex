@@ -1,2 +1,2 @@
-/* global sendUpdate(type:string, details:object) */
-(init = () => sendUpdate('SCRIPT', { script: 'tubi' }))();
+/* global Update(type:string, details:object) */
+(init = () => Update('SCRIPT', { script: 'tubi' }))();
