@@ -927,7 +927,7 @@ function performSonarrTest(QualityProfileID, StoragePath, refreshing = false) {
         );
 }
 
-function getMedusa(options, api = "configuration") {
+function getMedusa(options, api = 'config') {
     if(!options.medusaToken)
         return new Notification('error', 'Invalid Medusa token');
 
@@ -963,7 +963,7 @@ function performMedusaTest(QualityProfileID, StoragePath, refreshing = false) {
     options.medusaURLRoot = url = path.value = options.medusaURLRoot.replace(/^(\:\d+)/, 'localhost$1').replace(/^(?!^http(s)?:)/, 'http$1://').replace(/\/+$/, '');
 
     let Get = () => {
-        getMedusa(options, 'configuration').then(configuration => {
+        getMedusa(options, 'config').then(configuration => {
             if(!configuration) return new Notification('error', 'Failed to get Medusa configuration');
 
             let { qualities } = configuration.consts,
@@ -996,7 +996,7 @@ function performMedusaTest(QualityProfileID, StoragePath, refreshing = false) {
         });
 
         let StoragePaths = [];
-        getMedusa(options, 'configuration').then(configuration => {
+        getMedusa(options, 'config').then(configuration => {
             let storagepaths = configuration.main.rootDirs.filter(d => d.length > 1);
 
             if(storagepaths.length < 1) return new Notification('error', 'Medusa has no usable storage paths');
