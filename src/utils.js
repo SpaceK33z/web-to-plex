@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
-/* global config, init, Update, "Helpers" */
+/* global configuration, init, Update, "Helpers" */
 
-let config, init, Update;
+let configuration, init, Update;
 
 (async date => {
 
@@ -94,7 +94,7 @@ let config, init, Update;
             let queue = (Notification.queue = Notification.queue || { list: [] }),
                 last = queue.list[queue.list.length - 1];
 
-            if(((state == 'error' || state == 'warning') && config.NotifyNewOnly && /\balready\s+(exists?|(been\s+)?added)\b/.test(text)) || (config.NotifyOnlyOnce && NOTIFIED && state === 'info'))
+            if(((state == 'error' || state == 'warning') && configuration.NotifyNewOnly && /\balready\s+(exists?|(been\s+)?added)\b/.test(text)) || (configuration.NotifyOnlyOnce && NOTIFIED && state === 'info'))
                 return /* Don't match /.../i as to not match item titles */;
             NOTIFIED = true;
 
@@ -142,47 +142,47 @@ let config, init, Update;
                 data = [...array],
                 profiles = {
                     movie: JSON.parse(
-                        config.usingRadarr?
-                            config.radarrQualities:
-                        config.usingWatcher?
-                            config.watcherQualities:
+                        configuration.usingRadarr?
+                            configuration.radarrQualities:
+                        configuration.usingWatcher?
+                            configuration.watcherQualities:
                         '[]'
                     ),
                     show: JSON.parse(
-                        config.usingSonarr?
-                            config.sonarrQualities:
-                        config.usingMedusa?
-                            config.medusaQualities:
+                        configuration.usingSonarr?
+                            configuration.sonarrQualities:
+                        configuration.usingMedusa?
+                            configuration.medusaQualities:
                         '[]'
                     )
                 },
                 locations = {
                     movie: JSON.parse(
-                        config.usingRadarr?
-                            config.radarrStoragePaths:
-                        config.usingWatcher?
-                            config.watcherStoragePaths:
+                        configuration.usingRadarr?
+                            configuration.radarrStoragePaths:
+                        configuration.usingWatcher?
+                            configuration.watcherStoragePaths:
                         '[]'
                     ),
                     show: JSON.parse(
-                        config.usingSonarr?
-                            config.sonarrStoragePaths:
-                        config.usingMedusa?
-                            config.medusaStoragePaths:
+                        configuration.usingSonarr?
+                            configuration.sonarrStoragePaths:
+                        configuration.usingMedusa?
+                            configuration.medusaStoragePaths:
                         '[]'
                     )
                 },
                 defaults = {
                     movie: (
-                        config.usingRadarr?
-                            { quality: config.__radarrQuality, location: config.__radarrStoragePath }:
+                        configuration.usingRadarr?
+                            { quality: configuration.__radarrQuality, location: configuration.__radarrStoragePath }:
                         {}
                     ),
                     show: (
-                        config.usingSonarr?
-                            { quality: config.__sonarrQuality, location: config.__sonarrStoragePath }:
-                        config.usingMedusa?
-                            { quality: config.__medusaQuality, location: config.__medusaStoragePath }:
+                        configuration.usingSonarr?
+                            { quality: configuration.__sonarrQuality, location: configuration.__sonarrStoragePath }:
+                        configuration.usingMedusa?
+                            { quality: configuration.__medusaQuality, location: configuration.__medusaStoragePath }:
                         {}
                     )
                 };
@@ -222,11 +222,11 @@ let config, init, Update;
                                             furnish('li.web-to-plex-prompt-option.mutable', { value: index, innerHTML: `<h2>${ index + 1 } \u00b7 ${ ITEM.title }${ ITEM.year? ` (${ ITEM.year })`: '' } <em>\u2014 ${ ITEM.type }</em></h2>` },
                                                 furnish('button.remove', { title: `Remove "${ ITEM.title }"`, onmouseup: event => { remove(event.target.parentElement); event.target.remove() } }),
                                                 (
-                                                    config.PromptQuality?
+                                                    configuration.PromptQuality?
                                                         P_QUA = furnish('select.quality', { index, onchange: event => data[event.target.getAttribute('index')].quality = event.target.value }, ...profiles[/(movie|film|cinema)/i.test(ITEM.type)?'movie':'show'].map(Q => furnish('option', { value: Q.id }, Q.name))):
                                                     ''
                                                 ),(
-                                                    config.PromptLocation?
+                                                    configuration.PromptLocation?
                                                         P_LOC = furnish('select.location', { index, onchange: event => data[event.target.getAttribute('index')].location = event.target.value }, ...locations[/(movie|film|cinema)/i.test(ITEM.type)?'movie':'show'].map(Q => furnish('option', { value: Q.id }, Q.path))):
                                                     ''
                                                 )
@@ -335,11 +335,11 @@ let config, init, Update;
                                             furnish('li.web-to-plex-prompt-option.mutable', { value: index, innerHTML: `<h2>${ index + 1 } \u00b7 ${ ITEM.title }${ ITEM.year? ` (${ ITEM.year })`: '' } <em>\u2014 ${ ITEM.type }</em></h2>` },
                                                 furnish('button.remove', { title: `Remove "${ ITEM.title }"`, onmouseup: event => { remove(event.target.parentElement); event.target.remove() } }),
                                                 (
-                                                    config.PromptQuality?
+                                                    configuration.PromptQuality?
                                                         P_QUA = furnish('select.quality', { index, onchange: event => data[event.target.getAttribute('index')].quality = event.target.value }, ...profiles[/(movie|film|cinema)/i.test(ITEM.type)?'movie':'show'].map(Q => furnish('option', { value: Q.id }, Q.name))):
                                                     ''
                                                 ),(
-                                                    config.PromptLocation?
+                                                    configuration.PromptLocation?
                                                         P_LOC = furnish('select.location', { index, onchange: event => data[event.target.getAttribute('index')].location = event.target.value }, ...locations[/(movie|film|cinema)/i.test(ITEM.type)?'movie':'show'].map(Q => furnish('option', { value: Q.id }, Q.path))):
                                                     ''
                                                 )
@@ -402,13 +402,13 @@ let config, init, Update;
                             furnish('div.web-to-plex-prompt-options', {},
                                 furnish('div.web-to-plex-prompt-option', { innerHTML: `${ i? `<a href="https://imdb.com/title/${i}/?ref=web_to_plex" ${s}>${i}</a>`: '/' } \u2014 ${ t? `<a href="https://themoviedb.org/${type=='show'?'tv':type}/${t}" ${s}>${t}</a>`: '/' } \u2014 ${ v? `<a href="https://thetvdb.com/series/${title.replace(/\s+/g,'-').replace(/&/g,'and').replace(/[^\w\-]+/g,'')}#${v}" ${s}>${v}</a>`: '/' }` }),
                                 (
-                                    config.PromptQuality?
+                                    configuration.PromptQuality?
                                         P_QUA = furnish('select.quality', { onchange: event => options.quality = event.target.value }, ...profiles[type].map(Q => furnish('option', { value: Q.id }, Q.name))):
                                     ''
                                 ),
                                 furnish('br'),
                                 (
-                                    config.PromptLocation?
+                                    configuration.PromptLocation?
                                         P_LOC = furnish('select.location', { onchange: event => options.location = event.target.value }, ...locations[type].map(Q => furnish('option', { value: Q.id }, Q.path))):
                                     ''
                                 )
@@ -447,7 +447,7 @@ let config, init, Update;
 
     // Send an update query to background.js
     Update = (type, options = {}, postToo) => {
-        if(config)
+        if(configuration)
             terminal.log(`Requesting update: ${ type }`, options);
 
         chrome.runtime.sendMessage({
@@ -568,11 +568,11 @@ let config, init, Update;
         });
     }
 
-    // self explanatory, returns an object; sets the config variable
+    // self explanatory, returns an object; sets the configuration variable
     function ParsedOptions() {
         return options()
             .then(
-                options => (config = options),
+                options => (configuration = options),
                 error => {
                     new Notification(
                         'warning',
@@ -588,16 +588,16 @@ let config, init, Update;
     await ParsedOptions();
 
     let AUTO_GRAB = {
-            ENABLED: config.UseAutoGrab,
-            LIMIT:   config.AutoGrabLimit,
+            ENABLED: configuration.UseAutoGrab,
+            LIMIT:   configuration.AutoGrabLimit,
         },
-        DISABLE_DEBUGGER = !config.ExtensionBranchType, // = { false: Developer Mode, true: Standard Mode }
+        DISABLE_DEBUGGER = !configuration.ExtensionBranchType, // = { false: Developer Mode, true: Standard Mode }
         terminal =
             DISABLE_DEBUGGER?
                 { error: m => m, info: m => m, log: m => m, warn: m => m, group: m => m, groupEnd: m => m }:
             console;
 
-    terminal.log('DISABLE_DEBUGGER:', DISABLE_DEBUGGER, config);
+    terminal.log('DISABLE_DEBUGGER:', DISABLE_DEBUGGER, configuration);
 
     // parse the formatted headers and URL
     function HandleProxyHeaders(Headers = "", URL = "") {
@@ -628,14 +628,14 @@ let config, init, Update;
 
     // fetch/search for the item's media ID(s)
     // rerun enum - [0bWXYZ] - [Tried Different URL | Tried Matching Title | Tried Loose Searching | Tried Rerunning Altogether]
-    async function Identify({ title, year, type, IMDbID, TMDbID, TVDbID, APIType, APIID, meta, rerun }) {
+    async function Identify({ title, alttitle, year, type, IMDbID, TMDbID, TVDbID, APIType, APIID, meta, rerun }) {
         let json = {}, // returned object
             data = {}, // mutated object
             promise,   // query promise
             api = {
-                tmdb: config.TMDbAPI || 'bcb95f026f9a01ffa707fcff71900e94',
-                omdb: config.OMDbAPI || 'PlzBanMe',
-                ombi: config.ombiToken,
+                tmdb: configuration.TMDbAPI || 'bcb95f026f9a01ffa707fcff71900e94',
+                omdb: configuration.OMDbAPI || 'PlzBanMe',
+                ombi: configuration.ombiToken,
             },
             apit = APIType || type, // api type (depends on "rqut")
             apid = APIID   || null, // api id
@@ -643,7 +643,7 @@ let config, init, Update;
             mid  = TMDbID  || null, // TMDbID
             tid  = TVDbID  || null, // TVDbID
             rqut = apit, // request type: tmdb, imdb, or tvdb
-            manable = config.ManagerSearch && !(rerun & 0b1000), // is the user's "Manager Searches" option enabled?
+            manable = configuration.ManagerSearch && !(rerun & 0b1000), // is the user's "Manager Searches" option enabled?
             UTF_16 = /[^0\u0020-\u007e, 1\u00a1\u00bf-\u00ff, 2\u0100-\u017f, 3\u0180-\u024f, 4\u0300-\u036f, 5\u0370-\u03ff, 6\u0400-\u04ff, 7\u0500-\u052f, 8\u20a0-\u20bf]+/g;
 
         type = type || null;
@@ -654,7 +654,7 @@ let config, init, Update;
         /(movie|film|cinema)s?/i.test(rqut)?
             'tmdb':
         rqut || '*';
-        manable = manable && (config.usingOmbi || (config.usingRadarr && rqut == 'tmdb') || ((config.usingSonarr || config.usingMedusa) && rqut == 'tvdb'));
+        manable = manable && (configuration.usingOmbi || (configuration.usingRadarr && rqut == 'tmdb') || ((configuration.usingSonarr || configuration.usingMedusa) && rqut == 'tvdb'));
         title = (title? title.replace(/\s*[\:,]\s*seasons?\s+\d+.*$/i, '').toCaps(): "")
             .replace(/[\u2010-\u2015]/g, '-') // fancy hyphen
             .replace(/[\u201a\u275f]/g, ',') // fancy comma
@@ -695,23 +695,23 @@ let config, init, Update;
 
         /* the rest of this function is a beautiful mess that will need to be dealt with later... but it works */
         let url =
-            (manable && title && config.usingOmbi)?
-                `${ config.ombiURLRoot }api/v1/Search/${ (rqut == 'imdb' || rqut == 'tmdb' || apit == 'movie')? 'movie': 'tv' }/${ plus(title, '%20') }/?apikey=${ api.ombi }`:
-            (manable && (config.usingRadarr || config.usingSonarr || config.usingMedusa))?
-                (config.usingRadarr && (rqut == 'imdb' || rqut == 'tmdb'))?
+            (manable && title && configuration.usingOmbi)?
+                `${ configuration.ombiURLRoot }api/v1/Search/${ (rqut == 'imdb' || rqut == 'tmdb' || apit == 'movie')? 'movie': 'tv' }/${ plus(title, '%20') }/?apikey=${ api.ombi }`:
+            (manable && (configuration.usingRadarr || configuration.usingSonarr || configuration.usingMedusa))?
+                (configuration.usingRadarr && (rqut == 'imdb' || rqut == 'tmdb'))?
                     (mid)?
-                        `${ config.radarrURLRoot }api/movie/lookup/tmdb?tmdbId=${ mid }&apikey=${ config.radarrToken }`:
+                        `${ configuration.radarrURLRoot }api/movie/lookup/tmdb?tmdbId=${ mid }&apikey=${ configuration.radarrToken }`:
                     (iid)?
-                        `${ config.radarrURLRoot }api/movie/lookup/imdb?imdbId=${ iid }&apikey=${ config.radarrToken }`:
-                    `${ config.radarrURLRoot }api/movie/lookup?term=${ plus(title, '%20') }&apikey=${ config.radarrToken }`:
-                (config.usingSonarr)?
+                        `${ configuration.radarrURLRoot }api/movie/lookup/imdb?imdbId=${ iid }&apikey=${ configuration.radarrToken }`:
+                    `${ configuration.radarrURLRoot }api/movie/lookup?term=${ plus(title, '%20') }&apikey=${ configuration.radarrToken }`:
+                (configuration.usingSonarr)?
                     (tid)?
-                        `${ config.sonarrURLRoot }api/series/lookup?term=tvdb:${ tid }&apikey=${ config.sonarrToken }`:
-                    `${ config.sonarrURLRoot }api/series/lookup?term=${ plus(title, '%20') }&apikey=${ config.sonarrToken }`:
-                (config.usingMedusa)?
+                        `${ configuration.sonarrURLRoot }api/series/lookup?term=tvdb:${ tid }&apikey=${ configuration.sonarrToken }`:
+                    `${ configuration.sonarrURLRoot }api/series/lookup?term=${ plus(title, '%20') }&apikey=${ configuration.sonarrToken }`:
+                (configuration.usingMedusa)?
                     (tid)?
-                        `${ config.medusarURLRoot }api/v2/series/tvdb${ tid }?detailed=true&${ tid }&api_key=${ config.medusaToken }`:
-                    `${ config.medusaURLRoot }api/v2/internal/searchIndexersForShowName?query=${ plus(title) }&indexerId=0&api_key=${ config.medusaToken }`:
+                        `${ configuration.medusarURLRoot }api/v2/series/tvdb${ tid }?detailed=true&${ tid }&api_key=${ configuration.medusaToken }`:
+                    `${ configuration.medusaURLRoot }api/v2/internal/searchIndexersForShowName?query=${ plus(title) }&indexerId=0&api_key=${ configuration.medusaToken }`:
                 null:
             (rqut == 'imdb' || (rqut == '*' && !iid && title) || (rqut == 'tvdb' && !iid && title && !(rerun & 0b1000)) && (rerun |= 0b1000))?
                 (iid)?
@@ -739,7 +739,7 @@ let config, init, Update;
 
         if(url === null) return null;
 
-        let proxy = config.proxy,
+        let proxy = configuration.proxy,
             cors = proxy.url, // if cors is requried and not uspported, proxy through this URL
             headers = HandleProxyHeaders(proxy.headers, url);
 
@@ -797,11 +797,11 @@ let config, init, Update;
                 R = (s = "", S = "", n = !0) => {
                     let l = s.split(' ').length, L = S.split(' ').length,
                         score = 100 * (((S.match(RegExp(`\\b(${k(s)})\\b`, 'i')) || [null]).length) / (L || 1)),
-                        passing = config.UseLooseScore | 0;
+                        passing = configuration.UseLooseScore | 0;
 
-                    terminal.log(`=> "${ s }"/"${ S }" = ${ score }`);
+                    terminal.log(`\tQuick Match => "${ s }"/"${ S }" = ${ score }%`);
                     score *= (l > L? (L||1)/l: L > l? (l||1)/L: 1);
-                    terminal.log(`~> ... = ${ score }`);
+                    terminal.log(`\tActual Match (${ passing }% to pass) ~> ... = ${ score }%`);
 
                     return (S != '' && score >= passing) || (n? R(S, s, !n): n);
                 },
@@ -818,12 +818,12 @@ let config, init, Update;
                 // Managers
                 if(manable)
                     // Medusa
-                    if(config.usingMedusa && $data instanceof Array)
+                    if(configuration.usingMedusa && $data instanceof Array)
                         found = ((t($data[4]) == t(title) || $alt) && +year === +$data[5].slice(0, 4))?
                             $alt || $data:
                         found;
                     // Radarr & Sonarr
-                    else if(config.usingRadarr || config.usingSonarr)
+                    else if(configuration.usingRadarr || configuration.usingSonarr)
                         found = ((t($data.title) == t(title) || $alt) && +year === +$data.year)?
                             $alt || $data:
                         found;
@@ -875,12 +875,12 @@ let config, init, Update;
                 // Managers
                 if(manable)
                     // Medusa
-                    if(config.usingMedusa && $data instanceof Array)
+                    if(configuration.usingMedusa && $data instanceof Array)
                         found = (c($data[4]) == c(title) || $alt)?
                             $alt || $data:
                         found;
                     // Radarr & Sonarr
-                    if(config.usingRadarr || config.usingSonarr)
+                    if(configuration.usingRadarr || configuration.usingSonarr)
                         found = (c($data.title) == c(title) || $alt)?
                             $alt || $data:
                         found;
@@ -939,7 +939,7 @@ let config, init, Update;
             // BAD, not found: "Gun Show Showdown" vs. "Gundarr"
                 // /\b(gun|showdown)\b/i.test('gundarr') === false
                 // this should not match; the '\b' (border between \w and \W) keeps them from matching
-            for(index = 0; config.UseLoose && title && index < json.length && (!found || lastscore > 0); rerun |= 0b0010, index++) {
+            for(index = 0; configuration.UseLoose && title && index < json.length && (!found || lastscore > 0); rerun |= 0b0010, index++) {
                 $data = json[index];
 
                 let altt = $data.alternativeTitles,
@@ -948,12 +948,12 @@ let config, init, Update;
                 // Managers
                 if(manable)
                     // Medusa
-                    if(config.usingMedusa && $data instanceof Array)
+                    if(configuration.usingMedusa && $data instanceof Array)
                         found = (R($data[4], title) || $alt)?
                             $alt || $data:
                         found;
                     // Radarr & Sonarr
-                    if(config.usingRadarr || config.usingSonarr)
+                    if(configuration.usingRadarr || configuration.usingSonarr)
                         found = (R($data.name || $data.title, title) || $alt)?
                             $alt || $data:
                         found;
@@ -997,8 +997,8 @@ let config, init, Update;
             json = found;
         }
 
-        if((json === undefined || json === null || json === false) && (rerun & 0b0001))
-            return rerun |= 0b0001, json = Identify({ title, year: YEAR, type, IMDbID, TMDbID, TVDbID, APIType, APIID, meta, rerun });
+        if((json === undefined || json === null || json === false) && !(rerun & 0b0001))
+            return terminal.warn(`Trying to find "${ title }" again (as "${ (alttitle || title) }")`), rerun |= 0b0001, json = Identify({ title: (alttitle || title), year: YEAR, type, IMDbID, TMDbID, TVDbID, APIType, APIID, meta, rerun });
         else if((json === undefined || json === null))
             json = { IMDbID, TMDbID, TVDbID };
 
@@ -1008,7 +1008,7 @@ let config, init, Update;
 
         json = json && mr in json? json[mr].length > json[tr].length? json[mr]: json[tr]: json;
 
-        if(json instanceof Array && (!config.usingMedusa? true: (config.usingSonarr || config.usingOmbi)))
+        if(json instanceof Array && (!configuration.usingMedusa? true: (configuration.usingSonarr || configuration.usingOmbi)))
             json = json[0];
 
         if(!json)
@@ -1017,7 +1017,7 @@ let config, init, Update;
         // Ombi, Medusa, Radarr and Sonarr
         if(manable)
             data = (
-                (config.usingMedusa && !(config.usingSonarr || config.usingOmbi))?
+                (configuration.usingMedusa && !(configuration.usingSonarr || configuration.usingOmbi))?
                     {
                         imdb: iid || ei,
                         tmdb: mid |  0,
@@ -1120,11 +1120,11 @@ let config, init, Update;
     	chrome.runtime.sendMessage(
     		{
     			type: 'VIEW_COUCHPOTATO',
-    			url: `${ config.couchpotatoURL }/media.get`,
+    			url: `${ configuration.couchpotatoURL }/media.get`,
                 IMDbID: options.IMDbID,
                 TMDbID: options.TMDbID,
                 TVDbID: options.TVDbID,
-    			basicAuth: config.couchpotatoBasicAuth,
+    			basicAuth: configuration.couchpotatoBasicAuth,
     		},
     		response => {
     			let movieExists = response.success;
@@ -1162,8 +1162,8 @@ let config, init, Update;
 
         chrome.runtime.sendMessage({
                 type: 'PUSH_OMBI',
-                url: `${ config.ombiURL }api/v1/Request/${ contentType }`,
-                token: config.ombiToken,
+                url: `${ configuration.ombiURL }api/v1/Request/${ contentType }`,
+                token: configuration.ombiToken,
                 title: options.title,
                 year: options.year,
                 imdbId: options.IMDbID,
@@ -1181,7 +1181,7 @@ let config, init, Update;
                     let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-{2,}/g, '-').toLowerCase();
 
                     terminal.log('Successfully pushed', options);
-                    new Notification('update', `Added "${ options.title }" to Ombi`, 7000, () => window.open(config.ombiURL, '_blank'));
+                    new Notification('update', `Added "${ options.title }" to Ombi`, 7000, () => window.open(configuration.ombiURL, '_blank'));
                 } else {
                     new Notification('warning', `Could not add "${ options.title }" to Ombi: Unknown Error`) ||
                     (!response.silent && terminal.error('Error adding to Ombi: ' + String(response)));
@@ -1197,11 +1197,11 @@ let config, init, Update;
     	chrome.runtime.sendMessage(
     		{
     			type: 'PUSH_COUCHPOTATO',
-    			url: `${ config.couchpotatoURL }/movie.add`,
+    			url: `${ configuration.couchpotatoURL }/movie.add`,
                 IMDbID: options.IMDbID,
                 TMDbID: options.TMDbID,
                 TVDbID: options.TVDbID,
-    			basicAuth: config.couchpotatoBasicAuth,
+    			basicAuth: configuration.couchpotatoBasicAuth,
     		},
     		response => {
                 terminal.log('Pushing to CouchPotato', response);
@@ -1236,10 +1236,10 @@ let config, init, Update;
 
         chrome.runtime.sendMessage({
                 type: 'PUSH_WATCHER',
-                url: `${ config.watcherURL }api/`,
-                token: config.watcherToken,
-                StoragePath: config.watcherStoragePath,
-                basicAuth: config.watcherBasicAuth,
+                url: `${ configuration.watcherURL }api/`,
+                token: configuration.watcherToken,
+                StoragePath: configuration.watcherStoragePath,
+                basicAuth: configuration.watcherBasicAuth,
                 title: options.title,
                 year: options.year,
                 imdbId: options.IMDbID,
@@ -1256,7 +1256,7 @@ let config, init, Update;
                         TMDbID = options.TMDbID || response.tmdbId;
 
                     terminal.log('Successfully pushed', options);
-                    new Notification('update', `Added "${ options.title }" to Watcher`, 7000, () => window.open(`${config.watcherURL}library/status${TMDbID? `#${title}-${TMDbID}`: '' }`, '_blank'));
+                    new Notification('update', `Added "${ options.title }" to Watcher`, 7000, () => window.open(`${configuration.watcherURL}library/status${TMDbID? `#${title}-${TMDbID}`: '' }`, '_blank'));
                 } else {
                     new Notification('warning', `Could not add "${ options.title }" to Watcher: Unknown Error`) ||
                     (!response.silent && terminal.error('Error adding to Watcher: ' + String(response)));
@@ -1274,7 +1274,7 @@ let config, init, Update;
             ): null;
 
         let PromptValues = {},
-            { PromptQuality, PromptLocation } = config;
+            { PromptQuality, PromptLocation } = configuration;
 
         if(!prompted && (PromptQuality || PromptLocation))
             return new Prompt('modify', options, refined => Request_Radarr(refined, true));
@@ -1282,17 +1282,17 @@ let config, init, Update;
         if(PromptQuality && +options.quality > 0)
             PromptValues.QualityID = +options.quality;
         if(PromptLocation && options.location)
-            PromptValues.StoragePath = JSON.parse(config.radarrStoragePaths).map(item => item.id == options.location? item: null).filter(n => n)[0].path.replace(/\\/g, '\\\\');
+            PromptValues.StoragePath = JSON.parse(configuration.radarrStoragePaths).map(item => item.id == options.location? item: null).filter(n => n)[0].path.replace(/\\/g, '\\\\');
 
         new Notification('info', `Adding "${ options.title }" to Radarr`, 3000);
 
         chrome.runtime.sendMessage({
                 type: 'PUSH_RADARR',
-                url: `${ config.radarrURL }api/movie/`,
-                token: config.radarrToken,
-                StoragePath: config.radarrStoragePath,
-                QualityID: config.radarrQualityProfileId,
-                basicAuth: config.radarrBasicAuth,
+                url: `${ configuration.radarrURL }api/movie/`,
+                token: configuration.radarrToken,
+                StoragePath: configuration.radarrStoragePath,
+                QualityID: configuration.radarrQualityProfileId,
+                basicAuth: configuration.radarrBasicAuth,
                 title: options.title,
                 year: options.year,
                 imdbId: options.IMDbID,
@@ -1310,7 +1310,7 @@ let config, init, Update;
                         TMDbID = options.TMDbID || response.tmdbId;
 
                     terminal.log('Successfully pushed', options);
-                    new Notification('update', `Added "${ options.title }" to Radarr`, 7000, () => window.open(`${config.radarrURL}${TMDbID? `movies/${title}-${TMDbID}`: '' }`, '_blank'));
+                    new Notification('update', `Added "${ options.title }" to Radarr`, 7000, () => window.open(`${configuration.radarrURL}${TMDbID? `movies/${title}-${TMDbID}`: '' }`, '_blank'));
                 } else {
                     new Notification('warning', `Could not add "${ options.title }" to Radarr: Unknown Error`) ||
                     (!response.silent && terminal.error('Error adding to Radarr: ' + String(response)));
@@ -1328,7 +1328,7 @@ let config, init, Update;
             ): null;
 
         let PromptValues = {},
-            { PromptQuality, PromptLocation } = config;
+            { PromptQuality, PromptLocation } = configuration;
 
         if(!prompted && (PromptQuality || PromptLocation))
             return new Prompt('modify', options, refined => Request_Sonarr(refined, true));
@@ -1336,17 +1336,17 @@ let config, init, Update;
         if(PromptQuality && +options.quality > 0)
             PromptValues.QualityID = +options.quality;
         if(PromptLocation && options.location)
-            PromptValues.StoragePath = JSON.parse(config.sonarrStoragePaths).map(item => item.id == options.location? item: null).filter(n => n)[0].path.replace(/\\/g, '\\\\');
+            PromptValues.StoragePath = JSON.parse(configuration.sonarrStoragePaths).map(item => item.id == options.location? item: null).filter(n => n)[0].path.replace(/\\/g, '\\\\');
 
         new Notification('info', `Adding "${ options.title }" to Sonarr`, 3000);
 
         chrome.runtime.sendMessage({
                 type: 'PUSH_SONARR',
-                url: `${ config.sonarrURL }api/series/`,
-                token: config.sonarrToken,
-                StoragePath: config.sonarrStoragePath,
-                QualityID: config.sonarrQualityProfileId,
-                basicAuth: config.sonarrBasicAuth,
+                url: `${ configuration.sonarrURL }api/series/`,
+                token: configuration.sonarrToken,
+                StoragePath: configuration.sonarrStoragePath,
+                QualityID: configuration.sonarrQualityProfileId,
+                basicAuth: configuration.sonarrBasicAuth,
                 title: options.title,
                 year: options.year,
                 tvdbId: options.TVDbID,
@@ -1362,7 +1362,7 @@ let config, init, Update;
                     let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-{2,}/g, '-').toLowerCase();
 
                     terminal.log('Successfully pushed', options);
-                    new Notification('update', `Added "${ options.title }" to Sonarr`, 7000, () => window.open(`${config.sonarrURL}series/${title}`, '_blank'));
+                    new Notification('update', `Added "${ options.title }" to Sonarr`, 7000, () => window.open(`${configuration.sonarrURL}series/${title}`, '_blank'));
                 } else {
                     new Notification('warning', `Could not add "${ options.title }" to Sonarr: Unknown Error`) ||
                     (!response.silent && terminal.error('Error adding to Sonarr: ' + String(response)));
@@ -1380,7 +1380,7 @@ let config, init, Update;
             ): null;
 
         let PromptValues = {},
-            { PromptQuality, PromptLocation } = config;
+            { PromptQuality, PromptLocation } = configuration;
 
         if(!prompted && (PromptQuality || PromptLocation))
             return new Prompt('modify', options, refined => Request_Medusa(refined, true));
@@ -1388,18 +1388,18 @@ let config, init, Update;
         if(PromptQuality && +options.quality > 0)
             PromptValues.QualityID = +options.quality;
         if(PromptLocation && options.location)
-            PromptValues.StoragePath = JSON.parse(config.medusaStoragePaths).map(item => item.id == options.location? item: null).filter(n => n)[0].path.replace(/\\/g, '\\\\');
+            PromptValues.StoragePath = JSON.parse(configuration.medusaStoragePaths).map(item => item.id == options.location? item: null).filter(n => n)[0].path.replace(/\\/g, '\\\\');
 
         new Notification('info', `Adding "${ options.title }" to Medusa`, 3000);
 
         chrome.runtime.sendMessage({
                 type: 'PUSH_MEDUSA',
-                url: `${ config.medusaURL }api/v2/series`,
-                root: `${ config.medusaURL }api/v2/`,
-                token: config.medusaToken,
-                StoragePath: config.medusaStoragePath,
-                QualityID: config.medusaQualityProfileId,
-                basicAuth: config.medusaBasicAuth,
+                url: `${ configuration.medusaURL }api/v2/series`,
+                root: `${ configuration.medusaURL }api/v2/`,
+                token: configuration.medusaToken,
+                StoragePath: configuration.medusaStoragePath,
+                QualityID: configuration.medusaQualityProfileId,
+                basicAuth: configuration.medusaBasicAuth,
                 title: options.title,
                 year: options.year,
                 tvdbId: options.TVDbID,
@@ -1415,7 +1415,7 @@ let config, init, Update;
                     let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-{2,}/g, '-').toLowerCase();
 
                     terminal.log('Successfully pushed', options);
-                    new Notification('update', `Added "${ options.title }" to Medusa`, 7000, () => window.open(`${config.medusaURL}home/displayShow?indexername=tvdb&seriesid=${options.TVDbID}`, '_blank'));
+                    new Notification('update', `Added "${ options.title }" to Medusa`, 7000, () => window.open(`${configuration.medusaURL}home/displayShow?indexername=tvdb&seriesid=${options.TVDbID}`, '_blank'));
                 } else {
                     new Notification('warning', `Could not add "${ options.title }" to Medusa: Unknown Error`) ||
                     (!response.silent && terminal.error('Error adding to Medusa: ' + String(response)));
@@ -1587,17 +1587,17 @@ let config, init, Update;
                     option = options[index];
 
                     try {
-                        if(config.usingOmbi)
+                        if(configuration.usingOmbi)
                             Request_Ombi(option, true);
-                        else if(config.usingWatcher && !tv.test(option.type))
+                        else if(configuration.usingWatcher && !tv.test(option.type))
                             Request_Watcher(option, true);
-                        else if(config.usingRadarr && !tv.test(option.type))
+                        else if(configuration.usingRadarr && !tv.test(option.type))
                             Request_Radarr(option, true);
-                        else if(config.usingSonarr && tv.test(option.type))
+                        else if(configuration.usingSonarr && tv.test(option.type))
                             Request_Sonarr(option, true);
-                        else if(config.usingMedusa && tv.test(option.type))
+                        else if(configuration.usingMedusa && tv.test(option.type))
                             Request_Medusa(option, true);
-                        else if(config.usingCouchPotato)
+                        else if(configuration.usingCouchPotato)
                             __Request_CouchPotato__(option, true);
                     } catch(error) {
                         terminal.error(`Failed to get "${ option.title }" (Error #${ ++fail })`)
@@ -1629,7 +1629,7 @@ let config, init, Update;
             }
 
             if(action == 'found') {
-                element.href = Request_PlexURL(config.server.id, options.key);
+                element.href = Request_PlexURL(configuration.server.id, options.key);
                 element.setAttribute(hov, `Watch "${options.title} (${options.year})" on Plex`);
                 button.classList.add('wtp--found');
 
@@ -1641,17 +1641,17 @@ let config, init, Update;
                     case 'oload':
                         let href = options.href, path = '';
 
-                        if(config.usingOmbi) {
+                        if(configuration.usingOmbi) {
                             path = '';
-                        } else if(config.usingWatcher && !tv.test(options.type)) {
+                        } else if(configuration.usingWatcher && !tv.test(options.type)) {
                             path = '';
-                        } else if(config.usingRadarr && !tv.test(options.type)) {
-                            path = config.radarrStoragePath;
-                        } else if(config.usingSonarr && tv.test(options.type)) {
-                            path = config.sonarrStoragePath;
-                        } else if(config.usingMedusa && tv.test(options.type)) {
-                            path = config.medusaStoragePath;
-                        } else if(config.usingCouchPotato) {
+                        } else if(configuration.usingRadarr && !tv.test(options.type)) {
+                            path = configuration.radarrStoragePath;
+                        } else if(configuration.usingSonarr && tv.test(options.type)) {
+                            path = configuration.sonarrStoragePath;
+                        } else if(configuration.usingMedusa && tv.test(options.type)) {
+                            path = configuration.medusaStoragePath;
+                        } else if(configuration.usingCouchPotato) {
                             path = '';
                         }
 
@@ -1683,17 +1683,17 @@ let config, init, Update;
                         button.classList.add('wtp--download');
                         element.addEventListener('click', element.ON_CLICK = e => {
                             e.preventDefault();
-                            if(config.usingOmbi) {
+                            if(configuration.usingOmbi) {
                                 Request_Ombi(options);
-                            } else if(config.usingWatcher && !tv.test(options.type)) {
+                            } else if(configuration.usingWatcher && !tv.test(options.type)) {
                                 Request_Watcher(options);
-                            } else if(config.usingRadarr && !tv.test(options.type)) {
+                            } else if(configuration.usingRadarr && !tv.test(options.type)) {
                                 Request_Radarr(options);
-                            } else if(config.usingSonarr && tv.test(options.type)) {
+                            } else if(configuration.usingSonarr && tv.test(options.type)) {
                                 Request_Sonarr(options);
-                            } else if(config.usingMedusa && tv.test(options.type)) {
+                            } else if(configuration.usingMedusa && tv.test(options.type)) {
                                 Request_Medusa(options);
-                            } else if(config.usingCouchPotato) {
+                            } else if(configuration.usingCouchPotato) {
                                 __Request_CouchPotato__(options);
                             }
                         });
@@ -1770,7 +1770,7 @@ let config, init, Update;
                                     if(found) {
                                         // ignore found items, we only want new items
                                     } else {
-                                        let available = (config.usingOmbi || config.usingWatcher || config.usingRadarr || config.usingSonarr || config.usingMedusa || config.usingCouchPotato),
+                                        let available = (configuration.usingOmbi || configuration.usingWatcher || configuration.usingRadarr || configuration.usingSonarr || configuration.usingMedusa || configuration.usingCouchPotato),
                                             action = (available ? 'downloader' : 'notfound'),
                                             title = available ?
                                                 'Not on Plex (download available)':
@@ -1861,7 +1861,7 @@ let config, init, Update;
                                         options.button.querySelector('ul').insertBefore(pi, op);
                                     } catch(e) { /* Don't do anything */ }
                                 } else {
-                                    let available = (config.usingOmbi || config.usingWatcher || config.usingRadarr || config.usingSonarr || config.usingMedusa || config.usingCouchPotato),
+                                    let available = (configuration.usingOmbi || configuration.usingWatcher || configuration.usingRadarr || configuration.usingSonarr || configuration.usingMedusa || configuration.usingCouchPotato),
                                         action = (available ? 'downloader' : 'notfound'),
                                         title = available ?
                                             'Not on Plex (download available)':
@@ -1898,14 +1898,14 @@ let config, init, Update;
     }
 
     function Request_Plex(options) {
-        if(!(config.plexURL && config.plexToken) || config.DO_NOT_USE)
+        if(!(configuration.plexURL && configuration.plexToken) || configuration.DO_NOT_USE)
             return new Promise((resolve, reject) => resolve({ found: false, key: null }));
 
         return new Promise((resolve, reject) => {
             chrome.runtime.sendMessage({
                     type: 'SEARCH_PLEX',
                     options,
-                    serverConfig: config.server
+                    serverConfig: configuration.server
                 },
                 response =>
                     (response && response.error)?
@@ -1918,7 +1918,7 @@ let config, init, Update;
     }
 
     function Request_PlexURL(PlexUIID, key) {
-        return config.plexURL.replace(RegExp(`\/(${ config.server.id })?$`), `/web#!/server/` + PlexUIID) + `/details?key=${encodeURIComponent( key )}`;
+        return configuration.plexURL.replace(RegExp(`\/(${ configuration.server.id })?$`), `/web#!/server/` + PlexUIID) + `/details?key=${encodeURIComponent( key )}`;
     }
 
     /* Listen for events */

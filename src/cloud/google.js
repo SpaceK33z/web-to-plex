@@ -59,6 +59,3 @@ let script = {
         'error'
     ),
 };
-
-addEventListener('popstate', script.init);
-addEventListener('pushstate-changed', script.init);

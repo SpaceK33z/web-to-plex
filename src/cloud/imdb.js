@@ -15,38 +15,38 @@ let script = {
 
         switch(type) {
             case 'movie':
-                title = $('.originalTitle, .title_wrapper h1').first;
-                alttitle = $('.title_wrapper h1').first;
+                title = $('.originalTitle, .title_wrapper h1');
+                alttitle = title.first;
                 reldate = $('.title_wrapper [href*="/releaseinfo"]').first;
                 year = $('.title_wrapper #titleYear').first;
                 image = $('img[alt$="poster"i]').first;
 
                 // TODO: Less risky way to accompilsh this?
-                title = title.childNodes[0].textContent.trim();
+                title = title.last.childNodes[0].textContent.trim();
                 alttitle = (alttitle == title? title: alttitle.childNodes[0].textContent.trim());
                 title = usa.test(country)? title: alttitle;
                 country = reldate.textContent.replace(/[^]+\((\w+)\)[^]*?$/, '$1');
                 year = +script.clean(year.textContent);
                 image = (image || {}).src;
-                options = { type, title, year, image };
+                options = { type, title, alttitle, year, image };
                 break;
 
             case 'show':
-                title = $('.originalTitle, .title_wrapper h1').first;
-                alttitle = $('.title_wrapper h1').first;
+                title = $('.originalTitle, .title_wrapper h1');
+                alttitle = title.first;
                 reldate = $('.title_wrapper [href*="/releaseinfo"]').first;
                 date = $('title').first.textContent.trim();
                 regdate = date.match(/Series\s*\(?(\d{4})(?:[^\)]+\))?/i);
                 image = $('img[alt$="poster"i]').first;
 
                 // TODO: Less risky way to accompilsh this?
-                title = title.textContent.trim();
+                title = title.last.textContent.trim();
                 alttitle = (alttitle == title? title: alttitle.childNodes[0].textContent.trim());
                 title = usa.test(country)? title: alttitle;
                 country = reldate.textContent.replace(/[^]+\((\w+)\)[^]*?$/, '$1');
                 year = parseInt(regdate[1]);
                 image = (image || {}).src;
-                options = { type, title, year, image };
+                options = { type, title, alttitle, year, image };
                 break;
 
             case 'list':

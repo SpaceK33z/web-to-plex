@@ -323,6 +323,9 @@ ${ code }
 
 let InjectedReadyState;
 
+top.addEventListener('popstate', ${ type }.init);
+top.addEventListener('pushstate-changed', ${ type }.init);
+
 return (${ type }.RegExp = RegExp(
     ${ type }.url
     /*.replace(/\\|.*?(\\)|$)/g,'')*/
@@ -429,6 +432,9 @@ ${ code }
 
 let PluginReadyState;
 
+top.addEventListener('popstate', plugin.init);
+top.addEventListener('pushstate-changed', plugin.init);
+
 return (plugin.RegExp = RegExp(
     plugin.url
     /*.replace(/\\|.*?(\\)|$)/g,'')*/
@@ -491,6 +497,9 @@ ${ code }
 /* End Injected */
 
 let ScriptReadyState;
+
+top.addEventListener('popstate', script.init);
+top.addEventListener('pushstate-changed', script.init);
 
 return (script.RegExp = RegExp(
     script.url

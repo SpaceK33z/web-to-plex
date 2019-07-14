@@ -25,6 +25,3 @@ let script = {
         return pathname.replace(/\/shows\/(\d+).*/, '$1');
     },
 };
-
-top.addEventListener('popstate', script.init);
-top.addEventListener('pushstate-changed', script.init);
