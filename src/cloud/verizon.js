@@ -56,6 +56,3 @@ let script = {
 
     watch: /\bwatch\b/i.test(top.location.pathname),
 };
-
-top.addEventListener('popstate', script.init);
-top.addEventListener('pushstate-changed', script.init);

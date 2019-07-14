@@ -96,7 +96,4 @@ let script = {
     },
 };
 
-top.addEventListener('popstate', script.init);
-top.addEventListener('pushstate-changed', script.init);
-
 // $('a[href*="/watch?v="]').forEach(element => element.onclick = event => open(event.target.href, '_self'));

@@ -686,11 +686,11 @@ function performWatcherTest(QualityProfileID = 'Default', refreshing = false) {
     options.watcherURLRoot = url = path.value = options.watcherURLRoot.replace(/^(\:\d+)/, 'localhost$1').replace(/^(?!^http(s)?:)/, 'http$1://').replace(/\/+$/, '');
 
     let Get = () =>
-        getWatcher(options, 'getconfig').then(config => {
-            if(!config || !config.config) return new Notification('error', 'Failed to get Watcher configuration');
+        getWatcher(options, 'getconfig').then(configuration => {
+            if(!configuration || !configuration.configuration) return new Notification('error', 'Failed to get Watcher configuration');
 
-            let names = config.config.Quality.Profiles,
-                path = config.config.Postprocessing.moverpath,
+            let names = configuration.configuration.Quality.Profiles,
+                path = configuration.configuration.Postprocessing.moverpath,
                 syntax = path.replace(/\/([\w\s\/\\\{\}]+)$/, '$1'),
                 profiles = [];
 
@@ -927,7 +927,7 @@ function performSonarrTest(QualityProfileID, StoragePath, refreshing = false) {
         );
 }
 
-function getMedusa(options, api = "config") {
+function getMedusa(options, api = "configuration") {
     if(!options.medusaToken)
         return new Notification('error', 'Invalid Medusa token');
 
@@ -963,10 +963,10 @@ function performMedusaTest(QualityProfileID, StoragePath, refreshing = false) {
     options.medusaURLRoot = url = path.value = options.medusaURLRoot.replace(/^(\:\d+)/, 'localhost$1').replace(/^(?!^http(s)?:)/, 'http$1://').replace(/\/+$/, '');
 
     let Get = () => {
-        getMedusa(options, 'config').then(config => {
-            if(!config) return new Notification('error', 'Failed to get Medusa configuration');
+        getMedusa(options, 'configuration').then(configuration => {
+            if(!configuration) return new Notification('error', 'Failed to get Medusa configuration');
 
-            let { qualities } = config.consts,
+            let { qualities } = configuration.consts,
                 profileType = $('[data-option="medusaQualityProfileType"i]').selectedIndex,
                 profiles = (profileType == 0? 'presets': profileType == 1? 'values': 'anySets');
 
@@ -996,8 +996,8 @@ function performMedusaTest(QualityProfileID, StoragePath, refreshing = false) {
         });
 
         let StoragePaths = [];
-        getMedusa(options, 'config').then(config => {
-            let storagepaths = config.main.rootDirs.filter(d => d.length > 1);
+        getMedusa(options, 'configuration').then(configuration => {
+            let storagepaths = configuration.main.rootDirs.filter(d => d.length > 1);
 
             if(storagepaths.length < 1) return new Notification('error', 'Medusa has no usable storage paths');
 

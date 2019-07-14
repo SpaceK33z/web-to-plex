@@ -6,14 +6,14 @@ let script = {
     "init": (ready) => {
         let _title, _year, _image, R = RegExp;
 
-        let title = $('h1').first,
-            year  = $('.Col .Col').first,
-            image = $('.Col img').first,
+        let title = $('._1mbQP').first,
+            year  = $('._3BhXb').first,
+            image = $('._2TykB').first,
             type  = script.getType(); // described below
 
         title = title.textContent.trim();
         year  = +year.textContent.replace(/[^]*\((\d+)\)[^]*/g, '$1').trim();
-        image = image.src;
+        image = image.getAttribute('style').replace(/[^]+url\('([^]+?)'\)/, '$1');
 
         return { type, title, year, image };
     },

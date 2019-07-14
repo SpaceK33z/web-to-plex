@@ -22,6 +22,3 @@ let script = {
         'show'
     ),
 };
-
-addEventListener('popstate', script.init);
-addEventListener('pushstate-changed', script.init);

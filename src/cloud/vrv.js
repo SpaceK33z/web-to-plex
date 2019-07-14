@@ -78,6 +78,3 @@ let script = {
         return { type, title, image };
     },
 };
-
-top.addEventListener('popstate', script.init);
-top.addEventListener('pushstate-changed', script.init);
