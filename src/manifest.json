@@ -29,6 +29,11 @@
             "js": ["download/oload.js"],
             "all_frames": true
         },
+        {
+            "matches": ["*://*.consistent.stream/titles/*"],
+            "js": ["download/consistent.js"],
+            "all_frames": true
+        },
 
         // Testing purposes only
         {

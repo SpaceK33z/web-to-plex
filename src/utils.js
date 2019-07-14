@@ -1637,8 +1637,9 @@ let configuration, init, Update;
             } else if(action == 'downloader' || options.remote) {
 
                 switch(options.remote) {
-                    /* Vumoo */
+                    /* Vumoo & GoStream */
                     case 'oload':
+                    case 'consistent':
                         let href = options.href, path = '';
 
                         if(configuration.usingOmbi) {
@@ -2004,7 +2005,7 @@ let configuration, init, Update;
                 case 'SEND_VIDEO_LINK':
                     let options = { ...FindMediaItem.OPTIONS, href: request.href, remote: request.from };
 
-                    terminal.log('oload Event:', options);
+                    terminal.log(`Download Event [${ options.remote }]:`, options);
 
                     UpdateButton(MASTER_BUTTON, 'downloader', 'Download', options);
                     return true;
