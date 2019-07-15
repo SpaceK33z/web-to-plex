@@ -567,7 +567,7 @@ top.onlocationchange = (event) => chrome.runtime.sendMessage({ type: '$INIT$', o
 });
 
 // this doesn't actually work...
-//chrome.tabs.onActiveChanged.addListener(tabchange);
+chrome.tabs.onActiveChanged.addListener(tabchange);
 
 // workaround for the above
 chrome.tabs.onActivated.addListener(change => {
@@ -585,20 +585,4 @@ chrome.tabs.onUpdated.addListener(refresh = (ID, change, tab) => {
         tabchange([ tab ]);
     else if(!tab.discarded)
         setTimeout(() => refresh(ID, change, tab), 1000);
-});
-
-// workaround for the above
-chrome.tabs.onActivated.addListener(change => {
-    instance = RandomName();
-
-    chrome.tabs.get(change.tabId, tab => tabchange([ tab ]));
-});
-
-chrome.tabs.onUpdated.addListener((ID, change, tab) => {
-    instance = RandomName();
-
-    if(change.status == 'complete' && !tab.discarded)
-        tabchange([ tab ]);
-    else if(!tab.discarded)
-        setTimeout(() => tabchange([ tab ]), 1000);
 });

@@ -155,6 +155,10 @@
             "matches": ["*://*.tubitv.com/*"],
             "js": ["utils.js", "sites/tubi/index.js"],
             "css": ["sites/tubi/index.css", "sites/common.css"]
+        },{
+            "matches": ["*://ephellon.github.io/web.to.plex/*"],
+            "js": ["utils.js", "sites/webtoplex/index.js"],
+            "css": ["sites/webtoplex/index.css", "sites/common.css"]
         }
 	],
 

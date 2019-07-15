@@ -154,6 +154,7 @@ const storage = (chrome.storage.sync || chrome.storage.local),
             'builtin_itunes',
             'builtin_gostream',
             'builtin_tubi',
+            'builtin_webtoplex',
 
             // Plugins - End of file, before "let empty = ..."
             'plugin_toloka',
@@ -1474,6 +1475,7 @@ let builtins = {
     "MovieMeter": "https://moviemeter.nl/",
     "GoStream": "https://gostream.site/",
     "Tubi": "https://tubitv.com/",
+    "Web to Plex": "https://ephellon.github.io/web.to.plex/",
 
 }, builtin_array = [], builtin_sites = {}, builtinElement = $('#builtin');
 
