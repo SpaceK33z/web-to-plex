@@ -6,15 +6,35 @@ let script = {
 
     "timeout": 5000,
 
-    "init": (ready) => {
+    "init": (ready, rerun = false) => {
         let _title, _year, _image, R = RegExp;
 
         let open  = () => $('.more-button').first.click(),
             close = () => $('.less-button').first.click(),
-            options, type;
+            options, type,
+            alternative = $('#offer-module-container[class*="movie-offer"], #offer-module-container[class*="unlimited-offer"]');
 
         if($('.more-button, .less-button').empty || !$('.opened').empty)
             return script.timeout;
+
+        // try to not bug the page content too much, use an alternative method first (if applicable)
+        if(!alternative.empty && !rerun) {
+            alternative = alternative.first;
+
+            let title = $('#title', alternative).first,
+                year  = $('#info p', alternative).child(2).lastElementChild,
+                image = $('#img img', alternative).first,
+                type  = /\bmovie-offer\b/i.test(alternative.classList)? 'movie': 'show';
+
+            if(!title || !year || !type)
+                return script.init(ready, true);
+
+            title = title.textContent;
+            year  = year.textContent|0;
+            image = image.src;
+
+            return { type, title, year, image };
+        }
 
         open(); // show the year and other information, fails otherwise
 
@@ -78,7 +98,7 @@ let script = {
     },
 
     "getType": () => {
-        let title = $('.super-title, #title').first,
+        let title = $('.super-title, #title').filter(e => e.textContent)[0],
             owner = $('#owner-container');
 
         if(owner.empty)
