@@ -2,7 +2,7 @@
 
 # Web to Plex ![Icon](src/img/48.png)
 
-![Examples](https://github.com/SpaceK33z/web-to-plex/blob/master/example.png)
+![Examples](example.png)
 
 This browser extension searches your [Plex Media Server (PMS)](https://www.plex.tv/downloads/) for matching media on sites like [IMDb](https://imdb.com), letting you immediately open the movie or TV show in Plex, if it is available. If the item isn't found on your PMS, then a download button is added instead.
 
@@ -94,6 +94,7 @@ The sites used as search engines (IMDb, TMDb, and TVDb) will automatically creat
 30. [MovieMeter](https://www.moviemeter.nl/)
 31. [JustWatch](https://justwatch.com/)
 32. [Vumoo](https://vumoo.to/)<sup>1</sup>
+33. [Web to Plex](https://ephellon.github.io/web.to.plex/)<sup>2/3/4/5</sup>
 
 *Notes*
 
@@ -110,7 +111,7 @@ The sites used as search engines (IMDb, TMDb, and TVDb) will automatically creat
 
 **Download on [FireFox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/web-to-plex/).**
 
-**Download the [SRC](https://github.com/Ephellon/web-to-plex/archive/master.zip)**
+**Download the [SRC](archive/master.zip)**
 
 ## Requirements
 
