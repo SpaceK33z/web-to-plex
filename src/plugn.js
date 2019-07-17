@@ -1,17 +1,17 @@
 /* plugn.js (Plugin) - Web to Plex */
-/* global configuration */
+/* global chrome */
 
-let DISABLE_DEBUGGER = false;
+let PLUGN_DEVELOPER = false;
 
-let scribe =
-    DISABLE_DEBUGGER?
-        { error: m => m, info: m => m, log: m => m, warn: m => m, group: m => m, groupEnd: m => m }:
-    console;
+let PLUGN_TERMINAL =
+    PLUGN_DEVELOPER?
+        console:
+    { error: m => m, info: m => m, log: m => m, warn: m => m, group: m => m, groupEnd: m => m };
 
 let LAST, LAST_JS, LAST_INSTANCE, LAST_ID, LAST_TYPE, FOUND = {};
 
-let storage = chrome.storage.sync || chrome.storage.local;
-let configuration;
+let PLUGN_STORAGE = chrome.storage.sync || chrome.storage.local;
+let PLUGN_CONFIGURATION;
 
 function load(name) {
     return JSON.parse(localStorage.getItem(btoa(name)));
@@ -34,7 +34,7 @@ async function Load(name = '') {
             return resolve(data);
         }
 
-        storage.get(null, DISK => {
+        PLUGN_STORAGE.get(null, DISK => {
             if(chrome.runtime.lastError)
                 chrome.storage.local.get(null, LOAD);
             else
@@ -50,13 +50,13 @@ async function Save(name = '', data) {
     name = 'Cache-Data/' + btoa(name.toLowerCase().replace(/\s+/g, ''));
     data = JSON.stringify(data);
 
-    await storage.set({[name]: data}, () => data);
+    await PLUGN_STORAGE.set({[name]: data}, () => data);
 
     return name;
 }
 
 function GetConsent(name, builtin) {
-    return configuration[`${ (builtin? 'builtin': 'plugin') }_${ name }`];
+    return PLUGN_CONFIGURATION[`${ (builtin? 'builtin': 'plugin') }_${ name }`];
 }
 
 // get the saved options
@@ -147,7 +147,7 @@ function getConfiguration() {
             resolve(o);
         }
 
-        storage.get(null, options => {
+        PLUGN_STORAGE.get(null, options => {
             if(chrome.runtime.lastError)
                 chrome.storage.local.get(null, handleOptions);
             else
@@ -158,7 +158,21 @@ function getConfiguration() {
 
 // self explanatory, returns an object; sets the configuration variable
 function parseConfiguration() {
-    return getConfiguration().then(options => (configuration = options), error => { throw error });
+    return getConfiguration().then(options => {
+        PLUGN_CONFIGURATION = options;
+
+        if((PLUGN_DEVELOPER = options.ExtensionBranchType) && !parseConfiguration.gotConfig) {
+            parseConfiguration.gotConfig = true;
+            PLUGN_TERMINAL =
+                PLUGN_DEVELOPER?
+                    console:
+                { error: m => m, info: m => m, log: m => m, warn: m => m, group: m => m, groupEnd: m => m };
+
+            PLUGN_TERMINAL.warn(`PLUGN_DEVELOPER: ${PLUGN_DEVELOPER}`);
+        }
+
+        return options;
+    }, error => { throw error });
 }
 
 chrome.storage.onChanged.addListener(async(changes, namespace) => {
@@ -187,7 +201,7 @@ let handle = async(results, tabID, instance, script, type) => {
             tabchange([ TAB ]);
             return;
         } catch(error) {
-            return scribe.warn(InstanceWarning);
+            return PLUGN_TERMINAL.warn(InstanceWarning);
         }
 
     let data = await results[0];
@@ -201,7 +215,7 @@ let handle = async(results, tabID, instance, script, type) => {
         let R = RegExp;
 
         if(/^<([^<>]+)>$/.test(data))
-            return scribe.warn(`The instance requires the "${ R.$1 }" permission: ${ instance }`);
+            return PLUGN_TERMINAL.warn(`The instance requires the "${ R.$1 }" permission: ${ instance }`);
 
         data.replace(/^([^]+?)\s*\((\d{4})\):([\w\-]+)$/);
 
@@ -295,9 +309,9 @@ let tabchange = async tabs => {
         return setTimeout(() => cache = {}, 1e6);
     }
 
-    let name = (DISABLE_DEBUGGER? instance: `top.${ instance }`); // makes debugging easier
+    let name = (!PLUGN_DEVELOPER? instance: `top.${ instance }`); // makes debugging easier
 
-    let file = (!DISABLE_DEBUGGER)?
+    let file = (PLUGN_DEVELOPER)?
                     (type === 'script')?
                         chrome.runtime.getURL(`cloud/${ js }.js`):
                     chrome.runtime.getURL(`cloud/plugin.${ js }.js`):
@@ -310,7 +324,7 @@ let tabchange = async tabs => {
                 // Sorry, but the instance needs to be callable multiple times
                 chrome.tabs.executeScript(id, { code:
                     (LAST = cache[ali] =
-`/* ${ type }* (${ (DISABLE_DEBUGGER? 'on':'off') }line) - "${ url.href }" */
+`/* ${ type }* (${ (!PLUGN_DEVELOPER? 'on':'off') }line) - "${ url.href }" */
 ${ name } = (${ name } || (${ name }$ = $ => {
 'use strict';
 
@@ -392,7 +406,7 @@ chrome.runtime.onMessage.addListener(processMessage = async(request, sender, cal
     url = new URL(url);
     org = url.origin;
 
-    let name = (DISABLE_DEBUGGER? instance: `top.${ instance }`); // makes debugging easier
+    let name = (!PLUGN_DEVELOPER? instance: `top.${ instance }`); // makes debugging easier
 
     if(request && request.options) {
         let { type } = request,
@@ -402,7 +416,7 @@ chrome.runtime.onMessage.addListener(processMessage = async(request, sender, cal
 
         type = type.toUpperCase();
 
-        let file = (!DISABLE_DEBUGGER)?
+        let file = (PLUGN_DEVELOPER)?
                         (_type === 'script')?
                             chrome.runtime.getURL(`cloud/${ script }.js`):
                         chrome.runtime.getURL(`cloud/plugin.${ plugin }.js`):
@@ -419,7 +433,7 @@ chrome.runtime.onMessage.addListener(processMessage = async(request, sender, cal
                             // Sorry, but the instance needs to be callable multiple times
                             chrome.tabs.executeScript(id, { code:
                                 (LAST = cache[plugin] =
-`/* plugin (${ (DISABLE_DEBUGGER? 'on':'off') }line) - "${ url.href }" */
+`/* plugin (${ (!PLUGN_DEVELOPER? 'on':'off') }line) - "${ url.href }" */
 ${ name } = (${ name } || (${ name }$ = $ => {
 'use strict';
 
@@ -485,7 +499,7 @@ top.onlocationchange = (event) => chrome.runtime.sendMessage({ type: '$INIT$', o
                         // Sorry, but the instance needs to be callable multiple times
                         chrome.tabs.executeScript(id, { code:
                             (LAST = cache[script] =
-`/* script (${ (DISABLE_DEBUGGER? 'on':'off') }line) - "${ url.href }" */
+`/* script (${ (!PLUGN_DEVELOPER? 'on':'off') }line) - "${ url.href }" */
 ${ name } = (${ name } || (${ name }$ = $ => {
 'use strict';
 
