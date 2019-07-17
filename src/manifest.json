@@ -1,9 +1,9 @@
 {
-    "update_url": "https://github.com/Ephellon/web-to-plex/",
+//  "update_url": "https://ephellon.github.com/web.to.plex/update.xml",
 
 	"name": "Web to Plex",
 	"description": "Adds a button on various movie & TV show sites to open the item in Plex, or send to your designated NZB manager for download.",
-    "homepage_url": "https://github.com/Ephellon/web-to-plex/",
+    "homepage_url": "https://github.com/SpaceK33z/web-to-plex/",
 
 	"manifest_version": 2,
     "version": "4.1",
@@ -27,6 +27,11 @@
         {
             "matches": ["*://*.openload.co/*", "*://*.openload.com/*", "*://*.oload.fun/*", "*://*.oload.biz/*"],
             "js": ["download/oload.js"],
+            "all_frames": true
+        },
+        {
+            "matches": ["*://*.consistent.stream/titles/*"],
+            "js": ["download/consistent.js"],
             "all_frames": true
         },
 
@@ -150,6 +155,10 @@
             "matches": ["*://*.tubitv.com/*"],
             "js": ["utils.js", "sites/tubi/index.js"],
             "css": ["sites/tubi/index.css", "sites/common.css"]
+        },{
+            "matches": ["*://ephellon.github.io/web.to.plex/?*", "*://ephellon.github.io/web.to.plex/index.html?*"],
+            "js": ["utils.js", "sites/webtoplex/index.js"],
+            "css": ["sites/webtoplex/index.css", "sites/common.css"]
         }
 	],
 

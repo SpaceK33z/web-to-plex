@@ -1,18 +1,21 @@
 /* global chrome */
-let NO_DEBUGGER = false;
+let BACKGROUND_DEVELOPER = false;
 
 let external = {},
     __context_parent__,
     __context_save_element__,
-    terminal =
-        NO_DEBUGGER?
-            { error: m => m, info: m => m, log: m => m, warn: m => m, group: m => m, groupEnd: m => m }:
-        console;
+    BACKGROUND_TERMINAL =
+        BACKGROUND_DEVELOPER?
+            console:
+        { error: m => m, info: m => m, log: m => m, warn: m => m, group: m => m, groupEnd: m => m };
 
 let date  = (new Date),
     YEAR  = date.getFullYear(),
     MONTH = date.getMonth() + 1,
     DATE  = date.getDate();
+
+let BACKGROUND_STORAGE = chrome.storage.sync || chrome.storage.local;
+let BACKGROUND_CONFIGURATION;
 
 // returns the proper CORS mode of the URL
 let cors = url => ((/^(https|sftp)\b/i.test(url) || /\:(443|22)\b/? '': 'no-') + 'cors');
@@ -98,6 +101,68 @@ function ChangeStatus({ ITEM_ID, ITEM_TITLE, ITEM_TYPE, ID_PROVIDER, ITEM_YEAR, 
         checked: false
     });
 }
+
+
+// get the saved options
+function getConfiguration() {
+    return new Promise((resolve, reject) => {
+        function handleConfiguration(options) {
+            if((!options.plexToken || !options.servers) && !options.DO_NOT_USE)
+                return reject(new Error('Required options are missing')),
+                    null;
+
+            let server, o;
+
+            if(!options.DO_NOT_USE) {
+                // For now we support only one Plex server, but the options already
+                // allow multiple for easy migration in the future.
+                server = options.servers[0];
+                o = {
+                    server: {
+                        ...server,
+                        // Compatibility for users who have not updated their settings yet.
+                        connections: server.connections || [{ uri: server.url }]
+                    },
+                    ...options
+                };
+            } else {
+                o = options;
+            }
+
+            resolve(o);
+        }
+
+        BACKGROUND_STORAGE.get(null, options => {
+            if(chrome.runtime.lastError)
+                chrome.storage.local.get(null, handleOptions);
+            else
+                handleConfiguration(options);
+        });
+    });
+}
+
+// self explanatory, returns an object; sets the configuration variable
+function parseConfiguration() {
+    return getConfiguration().then(options => {
+        BACKGROUND_CONFIGURATION = options;
+
+        if((BACKGROUND_DEVELOPER = options.ExtensionBranchType) && !parseConfiguration.gotConfig) {
+            parseConfiguration.gotConfig = true;
+            BACKGROUND_TERMINAL =
+                BACKGROUND_DEVELOPER?
+                    console:
+                { error: m => m, info: m => m, log: m => m, warn: m => m, group: m => m, groupEnd: m => m };
+
+            BACKGROUND_TERMINAL.warn(`BACKGROUND_DEVELOPER: ${BACKGROUND_DEVELOPER}`);
+        }
+
+        return options;
+    }, error => { throw error });
+}
+
+(async() => {
+    await parseConfiguration();
+})();
 
 /** CouchPotato - TV Shows **/
 // At this point you might want to think, WHY would you want to do
@@ -215,11 +280,11 @@ function Push_Radarr(request, sendResponse) {
                 };
             }
 
-            terminal.group('Generated URL');
-              terminal.log('URL', request.url);
-              terminal.log('Head', headers);
-              terminal.log('Body', body);
-            terminal.groupEnd();
+            BACKGROUND_TERMINAL.group('Generated URL');
+              BACKGROUND_TERMINAL.log('URL', request.url);
+              BACKGROUND_TERMINAL.log('Head', headers);
+              BACKGROUND_TERMINAL.log('Body', body);
+            BACKGROUND_TERMINAL.groupEnd();
 
             return debug.body = body;
         })
@@ -294,11 +359,11 @@ function Push_Sonarr(request, sendResponse) {
                 }
             };
 
-            terminal.group('Generated URL');
-              terminal.log('URL', request.url);
-              terminal.log('Head', headers);
-              terminal.log('Body', body);
-            terminal.groupEnd();
+            BACKGROUND_TERMINAL.group('Generated URL');
+              BACKGROUND_TERMINAL.log('URL', request.url);
+              BACKGROUND_TERMINAL.log('Head', headers);
+              BACKGROUND_TERMINAL.log('Body', body);
+            BACKGROUND_TERMINAL.groupEnd();
 
             return debug.body = body;
         })
@@ -366,11 +431,11 @@ function Push_Medusa(request, sendResponse) {
             // Monitor, search, and download series ASAP
             let body = data[0].join('|');
 
-            terminal.group('Generated URL');
-              terminal.log('URL', request.url);
-              terminal.log('Head', headers);
-              terminal.log('Body', body);
-            terminal.groupEnd();
+            BACKGROUND_TERMINAL.group('Generated URL');
+              BACKGROUND_TERMINAL.log('URL', request.url);
+              BACKGROUND_TERMINAL.log('Head', headers);
+              BACKGROUND_TERMINAL.log('Body', body);
+            BACKGROUND_TERMINAL.groupEnd();
 
             return debug.body = body;
         })
@@ -411,6 +476,80 @@ function Push_Medusa(request, sendResponse) {
             sendResponse({
                 error: String(error),
                 location: `@0B-413/*: Push_Medusa => fetch("${ request.url }", { headers }).catch(error => { sendResponse })`,
+                debug
+            });
+        });
+}
+
+/** Medusa - TV Shows **/
+function addMedusa(request, sendResponse) {
+    let headers = {
+            'Content-Type': 'application/json',
+            'X-Api-Key': request.token,
+            ...(new Headers(request.basicAuth))
+        },
+        id = request.tvdbId,
+        query = request.title.replace(/\s+/g, '+'),
+        debug = { headers, query, request };
+            // setup stack trace for debugging
+
+    fetch(debug.url = `${ request.root }internal/searchIndexersForShowName?api_key=${ request.token }&indexerId=0&query=${ query }`)
+        .then(response => response.json())
+        .catch(error => sendResponse({ error: 'TV Show not found', location: 'addMedusa => fetch.then.catch', silent: true }))
+        .then(data => {
+            data = data.results;
+
+            if (!data instanceof Array || !data.length)
+                throw new Error('TV Show not found');
+
+            // Monitor, search, and download series ASAP
+            let body = data[0].join('|');
+
+            BACKGROUND_TERMINAL.group('Generated URL');
+              BACKGROUND_TERMINAL.log('URL', request.url);
+              BACKGROUND_TERMINAL.log('Head', headers);
+              BACKGROUND_TERMINAL.log('Body', body);
+            BACKGROUND_TERMINAL.groupEnd();
+
+            return debug.body = body;
+        })
+        .then(body => {
+            return fetch(`${ request.url }`, debug.requestHeaders = {
+                method: 'POST',
+                mode: cors(request.url),
+                body: JSON.stringify({ id: { tvdb: request.tvdbId } }),
+                headers
+            });
+        })
+        .then(response => response.text())
+        .then(data => {
+            let path = request.StoragePath.replace(/\\?$/, '\\');
+
+            debug.data =
+            data = JSON.parse(data || `{"path":"${ path }${ request.title } (${ request.year })"}`);
+
+            if (data && data.error) {
+                sendResponse({
+                    error: data.error,
+                    location: `addMedusa => fetch("${ request.url }", { headers }).then(data => { if })`,
+                    debug
+                });
+            } else if (data && data.id) {
+                sendResponse({
+                    success: `Added to ${ path }${ request.title }(${ request.year })`
+                });
+            } else {
+                sendResponse({
+                    error: 'Unknown error',
+                    location: `addMedusa => fetch("${ request.url }", { headers }).then(data => { else })`,
+                    debug
+                });
+            }
+        })
+        .catch(error => {
+            sendResponse({
+                error: String(error),
+                location: `addMedusa => fetch("${ request.url }", { headers }).catch(error => { sendResponse })`,
                 debug
             });
         });
@@ -499,7 +638,7 @@ function PromiseRace(promises) {
             // The promise has rejected, remove it from the list of promises and just continue the race.
             let promise = promises.splice(index, 1)[0];
 
-            promise.catch(error => terminal.log(`Plex request #${ index } failed:`, error));
+            promise.catch(error => BACKGROUND_TERMINAL.log(`Plex request #${ index } failed:`, error));
             return PromiseRace(promises);
         });
 }
@@ -521,7 +660,7 @@ function $Search_Plex(connection, headers, options) {
     let title = encodeURIComponent(options.title.replace(/\s+/g, ' ')),
         finalURL = `${ url }?query=${ field }:${ title }`;
 
-    // terminal.warn(`Fetching <${ JSON.stringify(headers) } ${ finalURL } >`);
+    // BACKGROUND_TERMINAL.warn(`Fetching <${ JSON.stringify(headers) } ${ finalURL } >`);
     return fetch(finalURL, { headers })
         .then(response => response.json())
         .then(data => {
@@ -654,7 +793,7 @@ chrome.contextMenus.onClicked.addListener(item => {
 });
 
 chrome.runtime.onMessage.addListener((request, sender, callback) => {
-    terminal.log('From: ' + sender);
+    BACKGROUND_TERMINAL.log('From: ' + sender);
 
     let item = (request? request.options || request: {}),
         ITEM_TITLE = item.title,
@@ -730,7 +869,7 @@ chrome.runtime.onMessage.addListener((request, sender, callback) => {
                 /* These are meant to be handled by plugn.js */
                 return false;
             default:
-                terminal.warn(`Unknown event [${ request.type }]`);
+                BACKGROUND_TERMINAL.warn(`Unknown event [${ request.type }]`);
                 return false;
         }
     } catch (error) {

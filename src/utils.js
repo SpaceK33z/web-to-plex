@@ -39,7 +39,7 @@ let configuration, init, Update;
     };
 
     // the storage - priority to sync
-    const storage = chrome.storage.sync || chrome.storage.local;
+    const UTILS_STORAGE = chrome.storage.sync || chrome.storage.local;
 
     async function load(name = '') {
         if(!name)
@@ -54,7 +54,7 @@ let configuration, init, Update;
                 return resolve(data);
             }
 
-            storage.get(null, DISK => {
+            UTILS_STORAGE.get(null, DISK => {
                 if(chrome.runtime.lastError)
                     chrome.storage.local.get(null, LOAD);
                 else
@@ -70,7 +70,7 @@ let configuration, init, Update;
         name = 'Cache-Data/' + btoa(name.toLowerCase().replace(/\s+/g, ''));
         data = JSON.stringify(data);
 
-        await storage.set({[name]: data}, () => data);
+        await UTILS_STORAGE.set({[name]: data}, () => data);
 
         return name;
     }
@@ -79,7 +79,7 @@ let configuration, init, Update;
         if(!name)
             return /* invalid name */;
 
-        return await storage.remove(['Cache-Data/' + btoa(name.toLowerCase().replace(/\s+/g, ''))]);
+        return await UTILS_STORAGE.remove(['Cache-Data/' + btoa(name.toLowerCase().replace(/\s+/g, ''))]);
     }
 
     /* Notifications */
@@ -430,7 +430,7 @@ let configuration, init, Update;
                     break;
 
                 default:
-                    return terminal.warn(`Unknown prompt type "${ prompt_type }"`);
+                    return UTILS_TERMINAL.warn(`Unknown prompt type "${ prompt_type }"`);
                     break;
             }
 
@@ -448,7 +448,7 @@ let configuration, init, Update;
     // Send an update query to background.js
     Update = (type, options = {}, postToo) => {
         if(configuration)
-            terminal.log(`Requesting update: ${ type }`, options);
+            UTILS_TERMINAL.log(`Requesting update: ${ type }`, options);
 
         chrome.runtime.sendMessage({
             type,
@@ -559,7 +559,7 @@ let configuration, init, Update;
                 resolve(o);
             }
 
-            storage.get(null, options => {
+            UTILS_STORAGE.get(null, options => {
                 if(chrome.runtime.lastError)
                     chrome.storage.local.get(null, handleOptions);
                 else
@@ -591,13 +591,13 @@ let configuration, init, Update;
             ENABLED: configuration.UseAutoGrab,
             LIMIT:   configuration.AutoGrabLimit,
         },
-        DISABLE_DEBUGGER = !configuration.ExtensionBranchType, // = { false: Developer Mode, true: Standard Mode }
-        terminal =
-            DISABLE_DEBUGGER?
-                { error: m => m, info: m => m, log: m => m, warn: m => m, group: m => m, groupEnd: m => m }:
-            console;
+        UTILS_DEVELOPER = configuration.ExtensionBranchType, // = { true: Developer Mode, fase: Standard Mode }
+        UTILS_TERMINAL =
+            UTILS_DEVELOPER?
+                console:
+            { error: m => m, info: m => m, log: m => m, warn: m => m, group: m => m, groupEnd: m => m };
 
-    terminal.log('DISABLE_DEBUGGER:', DISABLE_DEBUGGER, configuration);
+    UTILS_TERMINAL.log('UTILS_DEVELOPER:', UTILS_DEVELOPER, configuration);
 
     // parse the formatted headers and URL
     function HandleProxyHeaders(Headers = "", URL = "") {
@@ -689,7 +689,7 @@ let configuration, init, Update;
         }
 
         if(local) {
-            terminal.log('[LOCAL] Search results', local);
+            UTILS_TERMINAL.log('[LOCAL] Search results', local);
             return local;
         }
 
@@ -749,10 +749,10 @@ let configuration, init, Update;
                 .replace(/\{enc(ode)?-url\}/gi, encodeURIComponent(url))
                 .replace(/\{(raw-)?url\}/gi, url);
 
-            terminal.log({ proxy, url, headers });
+            UTILS_TERMINAL.log({ proxy, url, headers });
         }
 
-        terminal.log(`Searching for "${ title } (${ year })" in ${ type || apit }/${ rqut }${ proxy.enabled? '[PROXY]': '' } => ${ url }`);
+        UTILS_TERMINAL.log(`Searching for "${ title } (${ year })" in ${ type || apit }/${ rqut }${ proxy.enabled? '[PROXY]': '' } => ${ url }`);
 
         await(proxy.enabled? fetch(url, { mode: "cors", headers }): fetch(url))
             .then(response => response.text())
@@ -761,14 +761,14 @@ let configuration, init, Update;
                     if(data)
                         json = JSON.parse(data);
                 } catch(error) {
-                    terminal.error(`Failed to parse JSON: "${ data }"`);
+                    UTILS_TERMINAL.error(`Failed to parse JSON: "${ data }"`);
                 }
             })
             .catch(error => {
                 throw error;
             });
 
-        terminal.log('Search results', { title, year, url, json });
+        UTILS_TERMINAL.log('Search results', { title, year, url, json });
 
         if('results' in json)
             json = json.results;
@@ -799,9 +799,9 @@ let configuration, init, Update;
                         score = 100 * (((S.match(RegExp(`\\b(${k(s)})\\b`, 'i')) || [null]).length) / (L || 1)),
                         passing = configuration.UseLooseScore | 0;
 
-                    terminal.log(`\tQuick Match => "${ s }"/"${ S }" = ${ score }%`);
+                    UTILS_TERMINAL.log(`\tQuick Match => "${ s }"/"${ S }" = ${ score }%`);
                     score *= (l > L? (L||1)/l: L > l? (l||1)/L: 1);
-                    terminal.log(`\tActual Match (${ passing }% to pass) ~> ... = ${ score }%`);
+                    UTILS_TERMINAL.log(`\tActual Match (${ passing }% to pass) ~> ... = ${ score }%`);
 
                     return (S != '' && score >= passing) || (n? R(S, s, !n): n);
                 },
@@ -862,7 +862,7 @@ let configuration, init, Update;
                         $data:
                     found;
 
-               terminal.log(`Strict Matching: ${ !!found }`, !!found? found: null);
+               UTILS_TERMINAL.log(`Strict Matching: ${ !!found }`, !!found? found: null);
             }
 
             // Find a close match: Title
@@ -924,7 +924,7 @@ let configuration, init, Update;
                         $data:
                     found;
 
-               terminal.log(`Title Matching: ${ !!found }`, !!found? found: null);
+               UTILS_TERMINAL.log(`Title Matching: ${ !!found }`, !!found? found: null);
             }
 
             // Find an OK match (Loose Searching): Title ~ Title
@@ -961,7 +961,7 @@ let configuration, init, Update;
                 else if('externals' in ($data = $data.show || $data) || 'show' in $data)
                     found =
                         // ignore language barriers
-                        (R($data.name, title) || terminal.log('Matching:', [$data.name, title], R($data.name, title)))?
+                        (R($data.name, title) || UTILS_TERMINAL.log('Matching:', [$data.name, title], R($data.name, title)))?
                             $data:
                         // trust the api matching
                         ($data.score > lastscore)?
@@ -991,14 +991,14 @@ let configuration, init, Update;
                         $data:
                     found;
 
-               terminal.log(`Loose Matching: ${ !!found }`, !!found? found: null);
+               UTILS_TERMINAL.log(`Loose Matching: ${ !!found }`, !!found? found: null);
             }
 
             json = found;
         }
 
         if((json === undefined || json === null || json === false) && !(rerun & 0b0001))
-            return terminal.warn(`Trying to find "${ title }" again (as "${ (alttitle || title) }")`), rerun |= 0b0001, json = Identify({ title: (alttitle || title), year: YEAR, type, IMDbID, TMDbID, TVDbID, APIType, APIID, meta, rerun });
+            return UTILS_TERMINAL.warn(`Trying to find "${ title }" again (as "${ (alttitle || title) }")`), rerun |= 0b0001, json = Identify({ title: (alttitle || title), year: YEAR, type, IMDbID, TMDbID, TVDbID, APIType, APIID, meta, rerun });
         else if((json === undefined || json === null))
             json = { IMDbID, TMDbID, TVDbID };
 
@@ -1093,16 +1093,16 @@ let configuration, init, Update;
 
         let best = { title, year, data, type, rqut, score: json.score | 0 };
 
-        terminal.log('Best match:', url, { best, json });
+        UTILS_TERMINAL.log('Best match:', url, { best, json });
 
         if(best.data.imdb == ei && best.data.tmdb == 0 && best.data.tvdb == 0)
-            return terminal.log(`No information was found for "${ title } (${ year })"`), {};
+            return UTILS_TERMINAL.log(`No information was found for "${ title } (${ year })"`), {};
 
         save(savename, data); // e.g. "Coco (0)" on Netflix before correction / no repeat searches
         save(savename = `${title} (${year}).${rqut}`.toLowerCase(), data); // e.g. "Coco (2017)" on Netflix after correction / no repeat searches
         save(`${title}.${rqut}`.toLowerCase(), year);
 
-        terminal.log(`Saved as "${ savename }"`, data);
+        UTILS_TERMINAL.log(`Saved as "${ savename }"`, data);
 
         rerun |= 0b00001;
 
@@ -1133,7 +1133,7 @@ let configuration, init, Update;
     					'warning',
     					'CouchPotato request failed (see your console)'
     				) ||
-    				(!response.silent && terminal.error('Error viewing CouchPotato: ' + String(response.error)));
+    				(!response.silent && UTILS_TERMINAL.error('Error viewing CouchPotato: ' + String(response.error)));
     			}
     			if(!movieExists) {
     				Request_CouchPotato(options);
@@ -1172,19 +1172,19 @@ let configuration, init, Update;
                 contentType,
             },
             response => {
-                terminal.log('Pushing to Ombi', response);
+                UTILS_TERMINAL.log('Pushing to Ombi', response);
 
                 if(response && response.error) {
                     return new Notification('warning', `Could not add "${ options.title }" to Ombi: ${ response.error }`) ||
-                        (!response.silent && terminal.error('Error adding to Ombi: ' + String(response.error), response.location, response.debug));
+                        (!response.silent && UTILS_TERMINAL.error('Error adding to Ombi: ' + String(response.error), response.location, response.debug));
                 } else if(response && response.success) {
                     let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-{2,}/g, '-').toLowerCase();
 
-                    terminal.log('Successfully pushed', options);
+                    UTILS_TERMINAL.log('Successfully pushed', options);
                     new Notification('update', `Added "${ options.title }" to Ombi`, 7000, () => window.open(configuration.ombiURL, '_blank'));
                 } else {
                     new Notification('warning', `Could not add "${ options.title }" to Ombi: Unknown Error`) ||
-                    (!response.silent && terminal.error('Error adding to Ombi: ' + String(response)));
+                    (!response.silent && UTILS_TERMINAL.error('Error adding to Ombi: ' + String(response)));
                 }
             }
         );
@@ -1204,17 +1204,17 @@ let configuration, init, Update;
     			basicAuth: configuration.couchpotatoBasicAuth,
     		},
     		response => {
-                terminal.log('Pushing to CouchPotato', response);
+                UTILS_TERMINAL.log('Pushing to CouchPotato', response);
 
     			if(response.error) {
     				return new Notification(
     					'warning',
     					`Could not add "${ options.title }" to CouchPotato (see your console)`
     				) ||
-    				(!response.silent && terminal.error('Error adding to CouchPotato: ' + String(response.error), response.location, response.debug));
+    				(!response.silent && UTILS_TERMINAL.error('Error adding to CouchPotato: ' + String(response.error), response.location, response.debug));
     			}
     			if(response.success) {
-                    terminal.log('Successfully pushed', options);
+                    UTILS_TERMINAL.log('Successfully pushed', options);
     				new Notification('update', `Added "${ options.title }" to CouchPotato`);
     			} else {
     				new Notification('warning', `Could not add "${ options.title }" to CouchPotato`);
@@ -1246,20 +1246,20 @@ let configuration, init, Update;
                 tmdbId: options.TMDbID,
             },
             response => {
-                terminal.log('Pushing to Watcher', response);
+                UTILS_TERMINAL.log('Pushing to Watcher', response);
 
                 if(response && response.error) {
                     return new Notification('warning', `Could not add "${ options.title }" to Watcher: ${ response.error }`) ||
-                        (!response.silent && terminal.error('Error adding to Watcher: ' + String(response.error), response.location, response.debug));
+                        (!response.silent && UTILS_TERMINAL.error('Error adding to Watcher: ' + String(response.error), response.location, response.debug));
                 } else if(response && (response.success || (response.response + "") == "true")) {
                     let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-{2,}/g, '-').toLowerCase(),
                         TMDbID = options.TMDbID || response.tmdbId;
 
-                    terminal.log('Successfully pushed', options);
+                    UTILS_TERMINAL.log('Successfully pushed', options);
                     new Notification('update', `Added "${ options.title }" to Watcher`, 7000, () => window.open(`${configuration.watcherURL}library/status${TMDbID? `#${title}-${TMDbID}`: '' }`, '_blank'));
                 } else {
                     new Notification('warning', `Could not add "${ options.title }" to Watcher: Unknown Error`) ||
-                    (!response.silent && terminal.error('Error adding to Watcher: ' + String(response)));
+                    (!response.silent && UTILS_TERMINAL.error('Error adding to Watcher: ' + String(response)));
                 }
             }
         );
@@ -1300,20 +1300,20 @@ let configuration, init, Update;
                 ...PromptValues
             },
             response => {
-                terminal.log('Pushing to Radarr', response);
+                UTILS_TERMINAL.log('Pushing to Radarr', response);
 
                 if(response && response.error) {
                     return new Notification('warning', `Could not add "${ options.title }" to Radarr: ${ response.error }`) ||
-                        (!response.silent && terminal.error('Error adding to Radarr: ' + String(response.error), response.location, response.debug));
+                        (!response.silent && UTILS_TERMINAL.error('Error adding to Radarr: ' + String(response.error), response.location, response.debug));
                 } else if(response && response.success) {
                     let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-{2,}/g, '-').toLowerCase(),
                         TMDbID = options.TMDbID || response.tmdbId;
 
-                    terminal.log('Successfully pushed', options);
+                    UTILS_TERMINAL.log('Successfully pushed', options);
                     new Notification('update', `Added "${ options.title }" to Radarr`, 7000, () => window.open(`${configuration.radarrURL}${TMDbID? `movies/${title}-${TMDbID}`: '' }`, '_blank'));
                 } else {
                     new Notification('warning', `Could not add "${ options.title }" to Radarr: Unknown Error`) ||
-                    (!response.silent && terminal.error('Error adding to Radarr: ' + String(response)));
+                    (!response.silent && UTILS_TERMINAL.error('Error adding to Radarr: ' + String(response)));
                 }
             }
         );
@@ -1353,19 +1353,19 @@ let configuration, init, Update;
                 ...PromptValues
             },
             response => {
-                terminal.log('Pushing to Sonarr', response);
+                UTILS_TERMINAL.log('Pushing to Sonarr', response);
 
                 if(response && response.error) {
                     return new Notification('warning', `Could not add "${ options.title }" to Sonarr: ${ response.error }`) ||
-                        (!response.silent && terminal.error('Error adding to Sonarr: ' + String(response.error), response.location, response.debug));
+                        (!response.silent && UTILS_TERMINAL.error('Error adding to Sonarr: ' + String(response.error), response.location, response.debug));
                 } else if(response && response.success) {
                     let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-{2,}/g, '-').toLowerCase();
 
-                    terminal.log('Successfully pushed', options);
+                    UTILS_TERMINAL.log('Successfully pushed', options);
                     new Notification('update', `Added "${ options.title }" to Sonarr`, 7000, () => window.open(`${configuration.sonarrURL}series/${title}`, '_blank'));
                 } else {
                     new Notification('warning', `Could not add "${ options.title }" to Sonarr: Unknown Error`) ||
-                    (!response.silent && terminal.error('Error adding to Sonarr: ' + String(response)));
+                    (!response.silent && UTILS_TERMINAL.error('Error adding to Sonarr: ' + String(response)));
                 }
             }
         );
@@ -1406,19 +1406,19 @@ let configuration, init, Update;
                 ...PromptValues
             },
             response => {
-                terminal.log('Pushing to Medusa', response);
+                UTILS_TERMINAL.log('Pushing to Medusa', response);
 
                 if(response && response.error) {
                     return new Notification('warning', `Could not add "${ options.title }" to Medusa: ${ response.error }`) ||
-                        (!response.silent && terminal.error('Error adding to Medusa: ' + String(response.error), response.location, response.debug));
+                        (!response.silent && UTILS_TERMINAL.error('Error adding to Medusa: ' + String(response.error), response.location, response.debug));
                 } else if(response && response.success) {
                     let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-{2,}/g, '-').toLowerCase();
 
-                    terminal.log('Successfully pushed', options);
+                    UTILS_TERMINAL.log('Successfully pushed', options);
                     new Notification('update', `Added "${ options.title }" to Medusa`, 7000, () => window.open(`${configuration.medusaURL}home/displayShow?indexername=tvdb&seriesid=${options.TVDbID}`, '_blank'));
                 } else {
                     new Notification('warning', `Could not add "${ options.title }" to Medusa: Unknown Error`) ||
-                    (!response.silent && terminal.error('Error adding to Medusa: ' + String(response)));
+                    (!response.silent && UTILS_TERMINAL.error('Error adding to Medusa: ' + String(response)));
                 }
             }
         );
@@ -1600,7 +1600,7 @@ let configuration, init, Update;
                         else if(configuration.usingCouchPotato)
                             __Request_CouchPotato__(option, true);
                     } catch(error) {
-                        terminal.error(`Failed to get "${ option.title }" (Error #${ ++fail })`)
+                        UTILS_TERMINAL.error(`Failed to get "${ option.title }" (Error #${ ++fail })`)
                     }
                 }
                 NOTIFIED = false;
@@ -1637,8 +1637,9 @@ let configuration, init, Update;
             } else if(action == 'downloader' || options.remote) {
 
                 switch(options.remote) {
-                    /* Vumoo */
+                    /* Vumoo & GoStream */
                     case 'oload':
+                    case 'consistent':
                         let href = options.href, path = '';
 
                         if(configuration.usingOmbi) {
@@ -1783,7 +1784,7 @@ let configuration, init, Update;
                         }
                     })
             } catch(error) {
-                terminal.error('Request to Plex failed: ' + String(error));
+                UTILS_TERMINAL.error('Request to Plex failed: ' + String(error));
                 // new Notification('error', 'Failed to query item #' + (index + 1));
             }
         }
@@ -1892,7 +1893,7 @@ let configuration, init, Update;
                         'Request to Plex Media Server failed',
                         options
                     ),
-                    terminal.error(`Request to Plex failed: ${ String(error) }`),
+                    UTILS_TERMINAL.error(`Request to Plex failed: ${ String(error) }`),
                     false;
                     // new Notification('Failed to communicate with Plex');
             }
@@ -1924,7 +1925,7 @@ let configuration, init, Update;
 
     /* Listen for events */
     chrome.runtime.onMessage.addListener(async(request, sender) => {
-        terminal.log(`Listener event [${ request.instance_type }#${ request[request.instance_type.toLowerCase()] }]:`, request);
+        UTILS_TERMINAL.log(`Listener event [${ request.instance_type }#${ request[request.instance_type.toLowerCase()] }]:`, request);
 
         let data = request.data,
             LOCATION = `${ request.name || 'anonymous' } @ instance ${ request.instance }`,
@@ -1933,11 +1934,11 @@ let configuration, init, Update;
             EMPTY_REQUEST = `The given request is empty. ${ LOCATION }`;
 
         if(!data)
-            return terminal.warn(EMPTY_REQUEST);
+            return UTILS_TERMINAL.warn(EMPTY_REQUEST);
         let button = RenderButton();
 
         if(!button)
-            return terminal.warn(BUTTON_ERROR);
+            return UTILS_TERMINAL.warn(BUTTON_ERROR);
 
         switch(request.type) {
             case 'POPULATE':
@@ -1968,12 +1969,12 @@ let configuration, init, Update;
                     }
 
                     if(!data.length)
-                        return terminal.error(PARSING_ERROR);
+                        return UTILS_TERMINAL.error(PARSING_ERROR);
                     else
                         FindMediaItems(data, button);
                 } else {
                     if(!data || !data.title || !data.type)
-                        return terminal.error(PARSING_ERROR);
+                        return UTILS_TERMINAL.error(PARSING_ERROR);
 
                     let { image, type, title, year, IMDbID, TMDbID, TVDbID } = data;
                     let Db = await Identify(data);
@@ -1991,7 +1992,7 @@ let configuration, init, Update;
                 return true;
 
             default:
-    //            terminal.warn(`Unknown event [${ request.type }]`);
+    //            UTILS_TERMINAL.warn(`Unknown event [${ request.type }]`);
                 return false;
         }
     });
@@ -2005,7 +2006,7 @@ let configuration, init, Update;
                 case 'SEND_VIDEO_LINK':
                     let options = { ...FindMediaItem.OPTIONS, href: request.href, remote: request.from };
 
-                    terminal.log('oload Event:', options);
+                    UTILS_TERMINAL.log(`Download Event [${ options.remote }]:`, options);
 
                     UpdateButton(MASTER_BUTTON, 'downloader', 'Download', options);
                     return true;
@@ -2016,7 +2017,7 @@ let configuration, init, Update;
                     return true;
 
                 default:
-        //            terminal.warn(`Unknown event [${ request.type }]`);
+        //            UTILS_TERMINAL.warn(`Unknown event [${ request.type }]`);
                     return false;
             }
         } catch(error) {

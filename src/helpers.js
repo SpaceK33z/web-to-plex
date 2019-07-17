@@ -8,7 +8,7 @@ function wait(on, then) {
 async function load(name = '') {
     if(!name) return;
 
-    let storage = chrome.storage.sync || chrome.storage.local;
+    let HELPERS_STORAGE = chrome.storage.sync || chrome.storage.local;
 
     name = 'Cache-Data/' + btoa(name.toLowerCase().replace(/\s+/g, ''));
 
@@ -19,7 +19,7 @@ async function load(name = '') {
             return resolve(data);
         }
 
-        storage.get(null, DISK => {
+        HELPERS_STORAGE.get(null, DISK => {
             if (chrome.runtime.lastError)
                 chrome.storage.local.get(null, LOAD);
             else
@@ -31,20 +31,20 @@ async function load(name = '') {
 async function save(name = '', data) {
     if(!name) return;
 
-    let storage = chrome.storage.sync || chrome.storage.local;
+    let HELPERS_STORAGE = chrome.storage.sync || chrome.storage.local;
 
     name = 'Cache-Data/' + btoa(name.toLowerCase().replace(/\s+/g, ''));
     data = JSON.stringify(data);
 
-    await storage.set({[name]: data}, () => data);
+    await HELPERS_STORAGE.set({[name]: data}, () => data);
 
     return name;
 }
 
 async function kill(name) {
-    let storage = chrome.storage.sync || chrome.storage.local;
+    let HELPERS_STORAGE = chrome.storage.sync || chrome.storage.local;
 
-    return storage.remove(['Cache-Data/' + btoa(name.toLowerCase().replace(/\s+/g, ''))]);
+    return HELPERS_STORAGE.remove(['Cache-Data/' + btoa(name.toLowerCase().replace(/\s+/g, ''))]);
 }
 
 function Notify(state, text, timeout = 7000, requiresClick = true) {
