@@ -164,7 +164,7 @@ function parseConfiguration() {
     await parseConfiguration();
 })();
 
-/** CouchPotato - TV Shows **/
+/** CouchPotato - Movies **/
 // At this point you might want to think, WHY would you want to do
 // these requests in a background page instead of the content script?
 // This is because Movieo is served over HTTPS, so it won't accept requests to
