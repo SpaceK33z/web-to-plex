@@ -351,6 +351,7 @@ function Push_Sonarr(request, sendResponse) {
             let body = {
                 ...data[0],
                 monitored: true,
+                seasonFolder: true,
                 minimumAvailability: 'preDB',
                 qualityProfileId: request.QualityID,
                 rootFolderPath: request.StoragePath,
