@@ -1,24 +1,27 @@
 /* global chrome */
-let NO_DEBUGGER = false;
+let BACKGROUND_DEVELOPER = false;
 
 let external = {},
-    parentItem,
-    saveItem,
-    terminal =
-        NO_DEBUGGER?
-            { error: m => m, info: m => m, log: m => m, warn: m => m, group: m => m, groupEnd: m => m }:
-        console;
+    __context_parent__,
+    __context_save_element__,
+    BACKGROUND_TERMINAL =
+        BACKGROUND_DEVELOPER?
+            console:
+        { error: m => m, info: m => m, log: m => m, warn: m => m, group: m => m, groupEnd: m => m };
 
 let date  = (new Date),
     YEAR  = date.getFullYear(),
     MONTH = date.getMonth() + 1,
     DATE  = date.getDate();
 
+let BACKGROUND_STORAGE = chrome.storage.sync || chrome.storage.local;
+let BACKGROUND_CONFIGURATION;
+
 // returns the proper CORS mode of the URL
 let cors = url => ((/^(https|sftp)\b/i.test(url) || /\:(443|22)\b/? '': 'no-') + 'cors');
 
 // Create a Crypto-Key
-// new Key(number:integer, string) -> string
+// new Key(number:integer, string:symbol) -> string
 class Key {
     constructor(length = 8, symbol = '') {
         let values = [];
@@ -29,9 +32,7 @@ class Key {
     }
 
     rehash(length, symbol) {
-        if(length)
-            /* Do nothing */;
-        else
+        if(length <= 0)
             length = this.length;
 
         return this.value = new Key(length, symbol);
@@ -63,10 +64,10 @@ class Headers {
 function ChangeStatus({ ITEM_ID, ITEM_TITLE, ITEM_TYPE, ID_PROVIDER, ITEM_YEAR, ITEM_URL = '', FILE_TYPE = '', FILE_PATH }) {
 
     let FILE_TITLE = ITEM_TITLE.replace(/\-/g, ' ').replace(/[\s\:]{2,}/g, ' - ').replace(/[^\w\s\-\']+/g, ''),
-    // File friendly title
-        SEARCH_TITLE = ITEM_TITLE.replace(/[\-\s]+/g, '-').replace(/[^\w\-]+/g, ''),
-    // Search friendly title
-        SEARCH_PROVIDER = /[it]m/i.test(ID_PROVIDER)? 'GX': 'GG';
+            // File friendly title
+        SEARCH_TITLE = ITEM_TITLE.replace(/[\-\s]+/g, '-').replace(/\s*&\s*/g, ' and ').replace(/[^\w\-\'\*\#]+/g, ''),
+            // Search friendly title
+        SEARCH_PROVIDER = /\b(tv|show|series)\b/i.test(ITEM_TYPE)? 'GG': /^im/i.test(ID_PROVIDER)? 'VO': /^tm/i.test(ID_PROVIDER)? 'GX': 'GG';
 
     ITEM_ID = (ITEM_ID && !/^tt$/i.test(ITEM_ID)? ITEM_ID: '') + '';
     ITEM_ID = ITEM_ID.replace(/^.*\b(tt\d+)\b.*$/, '$1').replace(/^.*\bid=(\d+)\b.*$/, '$1').replace(/^.*(?:movie|tv|(?:tv-?)?(?:shows?|series|episodes?))\/(\d+).*$/, '$1');
@@ -85,27 +86,90 @@ function ChangeStatus({ ITEM_ID, ITEM_TITLE, ITEM_TYPE, ID_PROVIDER, ITEM_YEAR, 
         title: `Find "${ ITEM_TITLE } (${ ITEM_YEAR || YEAR })"`
     });
 
-    for(let array = 'IM TM TV'.split(' '), length = array.length, index = 0, item; index < length; index++)
-        chrome.contextMenus.update('W2P-' + (item = array[index]), {
+    for(let databases = 'IM TM TV'.split(' '), length = databases.length, index = 0, database; index < length; index++)
+        chrome.contextMenus.update('W2P-' + (database = databases[index]), {
             title: (
-                ((ID_PROVIDER == (item += 'Db')) && ITEM_ID)?
-                    `Open in ${ item } (${ (+ITEM_ID? '#': '') + ITEM_ID })`:
-                `Find in ${ item }`
+                ((ID_PROVIDER == (database += 'Db')) && ITEM_ID)?
+                    `Open in ${ database } (${ (+ITEM_ID? '#': '') + ITEM_ID })`:
+                `Find in ${ database }`
             ),
             checked: false
         });
 
     chrome.contextMenus.update('W2P-XX', {
-        title: `Find on ${ (SEARCH_PROVIDER == 'GX'? 'GoStream': 'Google') }`,
+        title: `Find on ${ (SEARCH_PROVIDER == 'VO'? 'Vumoo': SEARCH_PROVIDER == 'GX'? 'GoStream': 'Google') }`,
         checked: false
     });
 }
 
+
+// get the saved options
+function getConfiguration() {
+    return new Promise((resolve, reject) => {
+        function handleConfiguration(options) {
+            if((!options.plexToken || !options.servers) && !options.DO_NOT_USE)
+                return reject(new Error('Required options are missing')),
+                    null;
+
+            let server, o;
+
+            if(!options.DO_NOT_USE) {
+                // For now we support only one Plex server, but the options already
+                // allow multiple for easy migration in the future.
+                server = options.servers[0];
+                o = {
+                    server: {
+                        ...server,
+                        // Compatibility for users who have not updated their settings yet.
+                        connections: server.connections || [{ uri: server.url }]
+                    },
+                    ...options
+                };
+            } else {
+                o = options;
+            }
+
+            resolve(o);
+        }
+
+        BACKGROUND_STORAGE.get(null, options => {
+            if(chrome.runtime.lastError)
+                chrome.storage.local.get(null, handleOptions);
+            else
+                handleConfiguration(options);
+        });
+    });
+}
+
+// self explanatory, returns an object; sets the configuration variable
+function parseConfiguration() {
+    return getConfiguration().then(options => {
+        BACKGROUND_CONFIGURATION = options;
+
+        if((BACKGROUND_DEVELOPER = options.ExtensionBranchType) && !parseConfiguration.gotConfig) {
+            parseConfiguration.gotConfig = true;
+            BACKGROUND_TERMINAL =
+                BACKGROUND_DEVELOPER?
+                    console:
+                { error: m => m, info: m => m, log: m => m, warn: m => m, group: m => m, groupEnd: m => m };
+
+            BACKGROUND_TERMINAL.warn(`BACKGROUND_DEVELOPER: ${BACKGROUND_DEVELOPER}`);
+        }
+
+        return options;
+    }, error => { throw error });
+}
+
+(async() => {
+    await parseConfiguration();
+})();
+
+/** CouchPotato - Movies **/
 // At this point you might want to think, WHY would you want to do
 // these requests in a background page instead of the content script?
 // This is because Movieo is served over HTTPS, so it won't accept requests to
 // HTTP servers. Unfortunately, many people use CouchPotato over HTTP.
-function viewCouchPotato(request, sendResponse) {
+function Open_CouchPotato(request, sendResponse) {
 	fetch(`${ request.url }?id=${ request.imdbId }`, {
 		headers: new Headers(request.basicAuth),
         mode: cors(request.url)
@@ -115,26 +179,27 @@ function viewCouchPotato(request, sendResponse) {
         sendResponse({ success, status: (success? json.media.status: null) });
     })
     .catch(error => {
-        sendResponse({ error: String(error), location: 'viewCouchPotato' });
+        sendResponse({ error: String(error), location: '@0B-116/*: Open_CouchPotato' });
     });
 }
 
-function addCouchpotato(request, sendResponse) {
+function Push_CouchPotato(request, sendResponse) {
 	fetch(`${ request.url }?identifier=${ request.imdbId }`, {
 		headers: new Headers(request.basicAuth),
         mode: cors(request.url)
 	})
     .then(response => response.json())
-    .catch(error => sendResponse({ error: 'Item not found', location: 'addCouchpotato => fetch.then.catch', silent: true }))
+    .catch(error => sendResponse({ error: 'Item not found', location: '@0B-127/*: Push_CouchPotato => fetch.then.catch', silent: true }))
     .then(response => {
         sendResponse({ success: response.success });
     })
     .catch(error => {
-        sendResponse({ error: String(error) , location: 'addCouchPotato'});
+        sendResponse({ error: String(error) , location: '@0B-132/*: Push_CouchPotato'});
     });
 }
 
-function addWatcher(request, sendResponse) {
+/** Watcher - Movies **/
+function Push_Watcher(request, sendResponse) {
     let headers = {
             'Content-Type': 'application/json',
             'X-Api-Key': request.token,
@@ -151,7 +216,7 @@ function addWatcher(request, sendResponse) {
 
     fetch(debug.url = `${ request.url }?apikey=${ request.token }&mode=addmovie&${ query }=${ id }`)
         .then(response => response.json())
-        .catch(error => sendResponse({ error: 'Movie not found', location: 'addWatcher => fetch.then.catch', silent: true }))
+        .catch(error => sendResponse({ error: 'Movie not found', location: '@0B-154/*: Push_Watcher => fetch.then.catch', silent: true }))
         .then(response => {
             if((response.response + "") == "true")
                 return sendResponse({
@@ -163,13 +228,14 @@ function addWatcher(request, sendResponse) {
         .catch(error => {
             sendResponse({
                 error: String(error),
-                location: `addWatcher => fetch("${ request.url }", { headers }).catch(error => { sendResponse })`,
+                location: `@0B-166/*: Push_Watcher => fetch("${ request.url }", { headers }).catch(error => { sendResponse })`,
                 debug
             });
         });
 }
 
-function addRadarr(request, sendResponse) {
+/** Radarr - Movies **/
+function Push_Radarr(request, sendResponse) {
     let headers = {
             'Content-Type': 'application/json',
             'X-Api-Key': request.token,
@@ -186,7 +252,7 @@ function addRadarr(request, sendResponse) {
 
     fetch(debug.url = `${ request.url }lookup/${ query }=${ id }&apikey=${ request.token }`)
         .then(response => response.json())
-        .catch(error => sendResponse({ error: 'Movie not found', location: 'addRadarr => fetch.then.catch', silent: true }))
+        .catch(error => sendResponse({ error: 'Movie not found', location: '@0B-190/*: Push_Radarr => fetch.then.catch', silent: true }))
         .then(data => {
             let body,
                 // Monitor, search, and download movie ASAP
@@ -214,11 +280,11 @@ function addRadarr(request, sendResponse) {
                 };
             }
 
-            terminal.group('Generated URL');
-              terminal.log('URL', request.url);
-              terminal.log('Head', headers);
-              terminal.log('Body', body);
-            terminal.groupEnd();
+            BACKGROUND_TERMINAL.group('Generated URL');
+              BACKGROUND_TERMINAL.log('URL', request.url);
+              BACKGROUND_TERMINAL.log('Head', headers);
+              BACKGROUND_TERMINAL.log('Body', body);
+            BACKGROUND_TERMINAL.groupEnd();
 
             return debug.body = body;
         })
@@ -238,7 +304,7 @@ function addRadarr(request, sendResponse) {
             if (data && data[0] && data[0].errorMessage) {
                 sendResponse({
                     error: data[0].errorMessage,
-                    location: `addRadarr => fetch("${ request.url }", { headers }).then(data => { if })`,
+                    location: `@0B-242/*: Push_Radarr => fetch("${ request.url }", { headers }).then(data => { if })`,
                     debug
                 });
             } else if (data && data.path) {
@@ -248,7 +314,7 @@ function addRadarr(request, sendResponse) {
             } else {
                 sendResponse({
                     error: 'Unknown error',
-                    location: `addRadarr => fetch("${ request.url }", { headers }).then(data => { else })`,
+                    location: `@0B-252/*: Push_Radarr => fetch("${ request.url }", { headers }).then(data => { else })`,
                     debug
                 });
             }
@@ -256,13 +322,14 @@ function addRadarr(request, sendResponse) {
         .catch(error => {
             sendResponse({
                 error: String(error),
-                location: `addRadarr => fetch("${ request.url }", { headers }).catch(error => { sendResponse })`,
+                location: `@0B-260/*: Push_Radarr => fetch("${ request.url }", { headers }).catch(error => { sendResponse })`,
                 debug
             });
         });
 }
 
-function addSonarr(request, sendResponse) {
+/** Sonarr - TV Shows **/
+function Push_Sonarr(request, sendResponse) {
     let headers = {
             'Content-Type': 'application/json',
             'X-Api-Key': request.token,
@@ -275,7 +342,7 @@ function addSonarr(request, sendResponse) {
 
     fetch(debug.url = `${ request.url }lookup?apikey=${ request.token }&term=${ query }`)
         .then(response => response.json())
-        .catch(error => sendResponse({ error: 'TV Show not found', location: 'addSonarr => fetch.then.catch', silent: true }))
+        .catch(error => sendResponse({ error: 'TV Show not found', location: '@0B-280/*: Push_Sonarr => fetch.then.catch', silent: true }))
         .then(data => {
             if (!data instanceof Array || !data.length)
                 throw new Error('TV Show not found');
@@ -284,6 +351,7 @@ function addSonarr(request, sendResponse) {
             let body = {
                 ...data[0],
                 monitored: true,
+                seasonFolder: true,
                 minimumAvailability: 'preDB',
                 qualityProfileId: request.QualityID,
                 rootFolderPath: request.StoragePath,
@@ -292,11 +360,11 @@ function addSonarr(request, sendResponse) {
                 }
             };
 
-            terminal.group('Generated URL');
-              terminal.log('URL', request.url);
-              terminal.log('Head', headers);
-              terminal.log('Body', body);
-            terminal.groupEnd();
+            BACKGROUND_TERMINAL.group('Generated URL');
+              BACKGROUND_TERMINAL.log('URL', request.url);
+              BACKGROUND_TERMINAL.log('Head', headers);
+              BACKGROUND_TERMINAL.log('Body', body);
+            BACKGROUND_TERMINAL.groupEnd();
 
             return debug.body = body;
         })
@@ -316,7 +384,7 @@ function addSonarr(request, sendResponse) {
             if (data && data[0] && data[0].errorMessage) {
                 sendResponse({
                     error: data[0].errorMessage,
-                    location: `addSonarr => fetch("${ request.url }", { headers }).then(data => { if })`,
+                    location: `@0B-321/*: Push_Sonarr => fetch("${ request.url }", { headers }).then(data => { if })`,
                     debug
                 });
             } else if (data && data.path) {
@@ -326,7 +394,7 @@ function addSonarr(request, sendResponse) {
             } else {
                 sendResponse({
                     error: 'Unknown error',
-                    location: `addSonarr => fetch("${ request.url }", { headers }).then(data => { else })`,
+                    location: `@0B-331/*: Push_Sonarr => fetch("${ request.url }", { headers }).then(data => { else })`,
                     debug
                 });
             }
@@ -334,13 +402,162 @@ function addSonarr(request, sendResponse) {
         .catch(error => {
             sendResponse({
                 error: String(error),
-                location: `addSonarr => fetch("${ request.url }", { headers }).catch(error => { sendResponse })`,
+                location: `@0B-339/*: Push_Sonarr => fetch("${ request.url }", { headers }).catch(error => { sendResponse })`,
                 debug
             });
         });
 }
 
-function addOmbi(request, sendResponse) {
+/** Medusa - TV Shows **/
+function Push_Medusa(request, sendResponse) {
+    let headers = {
+            'Content-Type': 'application/json',
+            'X-Api-Key': request.token,
+            ...(new Headers(request.basicAuth))
+        },
+        id = request.tvdbId,
+        query = request.title.replace(/\s+/g, '+'),
+        debug = { headers, query, request };
+            // setup stack trace for debugging
+
+    fetch(debug.url = `${ request.root }internal/searchIndexersForShowName?api_key=${ request.token }&indexerId=0&query=${ query }`)
+        .then(response => response.json())
+        .catch(error => sendResponse({ error: 'TV Show not found', location: '@0B-359/*: Push_Medusa => fetch.then.catch', silent: true }))
+        .then(data => {
+            data = data.results;
+
+            if (!data instanceof Array || !data.length)
+                throw new Error('TV Show not found');
+
+            // Monitor, search, and download series ASAP
+            let body = data[0].join('|');
+
+            BACKGROUND_TERMINAL.group('Generated URL');
+              BACKGROUND_TERMINAL.log('URL', request.url);
+              BACKGROUND_TERMINAL.log('Head', headers);
+              BACKGROUND_TERMINAL.log('Body', body);
+            BACKGROUND_TERMINAL.groupEnd();
+
+            return debug.body = body;
+        })
+        .then(body => {
+            return fetch(`${ request.url }`, debug.requestHeaders = {
+                method: 'POST',
+                mode: cors(request.url),
+                body: JSON.stringify({ id: { tvdb: request.tvdbId } }),
+                headers
+            });
+        })
+        .then(response => response.text())
+        .then(data => {
+            let path = request.StoragePath.replace(/\\?$/, '\\');
+
+            debug.data =
+            data = JSON.parse(data || `{"path":"${ path }${ request.title } (${ request.year })"}`);
+
+            if (data && data.error) {
+                sendResponse({
+                    error: data.error,
+                    location: `@0B-395/*: Push_Medusa => fetch("${ request.url }", { headers }).then(data => { if })`,
+                    debug
+                });
+            } else if (data && data.id) {
+                sendResponse({
+                    success: `Added to ${ path }${ request.title }(${ request.year })`
+                });
+            } else {
+                sendResponse({
+                    error: 'Unknown error',
+                    location: `@0B-405/*: Push_Medusa => fetch("${ request.url }", { headers }).then(data => { else })`,
+                    debug
+                });
+            }
+        })
+        .catch(error => {
+            sendResponse({
+                error: String(error),
+                location: `@0B-413/*: Push_Medusa => fetch("${ request.url }", { headers }).catch(error => { sendResponse })`,
+                debug
+            });
+        });
+}
+
+/** Medusa - TV Shows **/
+function addMedusa(request, sendResponse) {
+    let headers = {
+            'Content-Type': 'application/json',
+            'X-Api-Key': request.token,
+            ...(new Headers(request.basicAuth))
+        },
+        id = request.tvdbId,
+        query = request.title.replace(/\s+/g, '+'),
+        debug = { headers, query, request };
+            // setup stack trace for debugging
+
+    fetch(debug.url = `${ request.root }internal/searchIndexersForShowName?api_key=${ request.token }&indexerId=0&query=${ query }`)
+        .then(response => response.json())
+        .catch(error => sendResponse({ error: 'TV Show not found', location: 'addMedusa => fetch.then.catch', silent: true }))
+        .then(data => {
+            data = data.results;
+
+            if (!data instanceof Array || !data.length)
+                throw new Error('TV Show not found');
+
+            // Monitor, search, and download series ASAP
+            let body = data[0].join('|');
+
+            BACKGROUND_TERMINAL.group('Generated URL');
+              BACKGROUND_TERMINAL.log('URL', request.url);
+              BACKGROUND_TERMINAL.log('Head', headers);
+              BACKGROUND_TERMINAL.log('Body', body);
+            BACKGROUND_TERMINAL.groupEnd();
+
+            return debug.body = body;
+        })
+        .then(body => {
+            return fetch(`${ request.url }`, debug.requestHeaders = {
+                method: 'POST',
+                mode: cors(request.url),
+                body: JSON.stringify({ id: { tvdb: request.tvdbId } }),
+                headers
+            });
+        })
+        .then(response => response.text())
+        .then(data => {
+            let path = request.StoragePath.replace(/\\?$/, '\\');
+
+            debug.data =
+            data = JSON.parse(data || `{"path":"${ path }${ request.title } (${ request.year })"}`);
+
+            if (data && data.error) {
+                sendResponse({
+                    error: data.error,
+                    location: `addMedusa => fetch("${ request.url }", { headers }).then(data => { if })`,
+                    debug
+                });
+            } else if (data && data.id) {
+                sendResponse({
+                    success: `Added to ${ path }${ request.title }(${ request.year })`
+                });
+            } else {
+                sendResponse({
+                    error: 'Unknown error',
+                    location: `addMedusa => fetch("${ request.url }", { headers }).then(data => { else })`,
+                    debug
+                });
+            }
+        })
+        .catch(error => {
+            sendResponse({
+                error: String(error),
+                location: `addMedusa => fetch("${ request.url }", { headers }).catch(error => { sendResponse })`,
+                debug
+            });
+        });
+}
+
+/** Ombi* - TV Shows/Movies **/
+function Push_Ombi(request, sendResponse) {
     let headers = {
             'Content-Type': 'application/json',
             'ApiKey': request.token,
@@ -353,9 +570,9 @@ function addOmbi(request, sendResponse) {
             // setup stack trace for debugging
 
     if(request.contentType == 'movie' && (id || null) === null)
-        sendResponse({ error: 'Invalid TMDbID', location: 'addOmbi => if', silent: true });
+        sendResponse({ error: 'Invalid TMDbID', location: '@0B-433/*: Push_Ombi => if', silent: true });
     else if((id || null) === null)
-        sendResponse({ error: 'Invalid TVDbID', location: 'addOmbi => else if', silent: true });
+        sendResponse({ error: 'Invalid TVDbID', location: '@0B-435/*: Push_Ombi => else if', silent: true });
 
     fetch(debug.url = request.url, {
             method: 'POST',
@@ -363,7 +580,7 @@ function addOmbi(request, sendResponse) {
             body: JSON.stringify(body),
             headers
         })
-        .catch(error => sendResponse({ error: `${ type } not found`, location: 'addOmbi => fetch.then.catch', silent: true }))
+        .catch(error => sendResponse({ error: `${ type } not found`, location: '@0B-443/*: Push_Ombi => fetch.then.catch', silent: true }))
         .then(response => response.text())
         .then(data => {
             debug.data =
@@ -377,7 +594,7 @@ function addOmbi(request, sendResponse) {
                 else
                     sendResponse({
                         error: data.errorMessage,
-                        location: `addOmbi => fetch("${ request.url }", { headers }).then(data => { if })`,
+                        location: `@0B-457/*: Push_Ombi => fetch("${ request.url }", { headers }).then(data => { if })`,
                         debug
                     });
             } else if (data && data.path) {
@@ -387,7 +604,7 @@ function addOmbi(request, sendResponse) {
             } else {
                 sendResponse({
                     error: 'Unknown error',
-                    location: `addOmbi => fetch("${ request.url }", { headers }).then(data => { else })`,
+                    location: `@0B-467/*: Push_Ombi => fetch("${ request.url }", { headers }).then(data => { else })`,
                     debug
                 });
             }
@@ -395,7 +612,7 @@ function addOmbi(request, sendResponse) {
         .catch(error => {
             sendResponse({
                 error: String(error),
-                location: `addOmbi => fetch("${ request.url }", { headers }).catch(error => { sendResponse })`,
+                location: `@0B-475/*: Push_Ombi => fetch("${ request.url }", { headers }).catch(error => { sendResponse })`,
                 debug
             });
         });
@@ -404,7 +621,7 @@ function addOmbi(request, sendResponse) {
 // Unfortunately the native Promise.race does not work as you would suspect.
 // If one promise (Plex request) fails, we still want the other requests to continue racing.
 // See https://www.jcore.com/2016/12/18/promise-me-you-wont-use-promise-race/ for an explanation
-function promiseRace(promises) {
+function PromiseRace(promises) {
     if (!~promises.length) {
         return Promise.reject('Cannot start a race without promises!');
     }
@@ -422,12 +639,12 @@ function promiseRace(promises) {
             // The promise has rejected, remove it from the list of promises and just continue the race.
             let promise = promises.splice(index, 1)[0];
 
-            promise.catch(error => terminal.log(`Plex request #${ index } failed:`, error));
-            return promiseRace(promises);
+            promise.catch(error => BACKGROUND_TERMINAL.log(`Plex request #${ index } failed:`, error));
+            return PromiseRace(promises);
         });
 }
 
-function $searchPlex(connection, headers, options) {
+function $Search_Plex(connection, headers, options) {
     let type = options.type || 'movie',
         url = `${ connection.uri }/hubs/search`,
         field = options.field || 'title';
@@ -444,6 +661,7 @@ function $searchPlex(connection, headers, options) {
     let title = encodeURIComponent(options.title.replace(/\s+/g, ' ')),
         finalURL = `${ url }?query=${ field }:${ title }`;
 
+    // BACKGROUND_TERMINAL.warn(`Fetching <${ JSON.stringify(headers) } ${ finalURL } >`);
     return fetch(finalURL, { headers })
         .then(response => response.json())
         .then(data => {
@@ -483,10 +701,11 @@ function $searchPlex(connection, headers, options) {
                 found: !!media,
                 key
             };
-        });
+        })
+        .catch(error => { throw error });
 }
 
-async function searchPlex(request, sendResponse) {
+async function Search_Plex(request, sendResponse) {
     let { options, serverConfig } = request,
         headers = {
             'X-Plex-Token': serverConfig.token,
@@ -495,17 +714,17 @@ async function searchPlex(request, sendResponse) {
 
     // Try all Plex connection URLs
     let requests = serverConfig.connections.map(connection =>
-        $searchPlex(connection, headers, options)
+        $Search_Plex(connection, headers, options)
     );
 
     try {
         // See what connection URL finishes the request first and pick that one.
         // TODO: optimally, as soon as the first request is finished, all other requests would be cancelled using AbortController.
-        let result = await promiseRace(requests);
+        let result = await PromiseRace(requests);
 
         sendResponse(result);
     } catch (error) {
-        sendResponse({ error: String(error), location: 'searchPlex' });
+        sendResponse({ error: String(error), location: '@0B-587/*: Search_Plex' });
     }
 }
 
@@ -531,12 +750,12 @@ chrome.contextMenus.onClicked.addListener(item => {
         case 'im':
             url = (qu && pv == 'im')?
                 `imdb.com/title/${ qu }/`:
-            `imdb.com/find?ref_=nv_sr_fn&s=all&q=${ tl }`;
+            `imdb.com/find?ref_=nv_sr_fn&s=all&q=${ tt }`;
             break;
         case 'tm':
             url = (qu && pv == 'tm')?
                 `themoviedb.org/${ external.ITEM_TYPE == 'show'? 'tv': 'movie' }/${ qu }`:
-            `themoviedb.org/search?query=${ tl }`;
+            `themoviedb.org/search?query=${ tt }`;
             break;
         case 'tv':
             url = (qu && pv == 'tv')?
@@ -544,7 +763,9 @@ chrome.contextMenus.onClicked.addListener(item => {
             `thetvdb.com/search?q=${ p(tl) }`;
             break;
         case 'xx':
-            url = external.SEARCH_PROVIDER == 'GX'?
+            url = external.SEARCH_PROVIDER == 'VO'?
+                `google.com/search?q=${ p(tl) }+site:vumoo.to`:
+            external.SEARCH_PROVIDER == 'GX'?
                 `gostream.site/?s=${ p(tl) }`:
             `google.com/search?q="${ p(tl, ' ') } ${ yr }"+${ pv }db`;
             break;
@@ -573,40 +794,43 @@ chrome.contextMenus.onClicked.addListener(item => {
 });
 
 chrome.runtime.onMessage.addListener((request, sender, callback) => {
-    terminal.log('From: ' + sender);
+    BACKGROUND_TERMINAL.log('From: ' + sender);
 
     let item = (request? request.options || request: {}),
         ITEM_TITLE = item.title,
         ITEM_YEAR = item.year,
         ITEM_TYPE = item.type,
-        ID_PROVIDER = (i=>{for(let p in i)if(/^TVDb/i.test(p)&&i[p])return'TVDb';else if(/^TMDb/i.test(p)&&i[p])return'TMDb';return'IMDb'})(item),
-        ITEM_URL = item.href || '',
+        ID_PROVIDER = (i=>{for(let p in i)if(/^TV(Db)?/i.test(p)&&i[p])return'TVDb';else if(/^TM(Db)?/i.test(p)&&i[p])return'TMDb';return'IMDb'})(item),
+        ITEM_URL = (item.href || ''),
         FILE_TYPE = (item.tail || 'mp4'),
-        FILE_PATH = item.path || '',
+        FILE_PATH = (item.path || ''),
         ITEM_ID = ((i, I)=>{for(let p in i)if(RegExp('^'+I,'i').test(p))return i[p]})(item, ID_PROVIDER);
 
     try {
         switch (request.type) {
             case 'SEARCH_PLEX':
-                searchPlex(request, callback);
+                Search_Plex(request, callback);
                 return true;
             case 'VIEW_COUCHPOTATO':
-                viewCouchPotato(request, callback);
+                Open_CouchPotato(request, callback);
                 return true;
-            case 'ADD_COUCHPOTATO':
-                addCouchpotato(request, callback);
+            case 'PUSH_COUCHPOTATO':
+                Push_CouchPotato(request, callback);
                 return true;
-            case 'ADD_RADARR':
-                addRadarr(request, callback);
+            case 'PUSH_RADARR':
+                Push_Radarr(request, callback);
                 return true;
-            case 'ADD_SONARR':
-                addSonarr(request, callback);
+            case 'PUSH_SONARR':
+                Push_Sonarr(request, callback);
                 return true;
-            case 'ADD_WATCHER':
-                addWatcher(request, callback);
+            case 'PUSH_MEDUSA':
+                Push_Medusa(request, callback);
                 return true;
-            case 'ADD_OMBI':
-                addOmbi(request, callback);
+            case 'PUSH_WATCHER':
+                Push_Watcher(request, callback);
+                return true;
+            case 'PUSH_OMBI':
+                Push_Ombi(request, callback);
                 return true;
             case 'OPEN_OPTIONS':
                 chrome.runtime.openOptionsPage();
@@ -621,7 +845,6 @@ chrome.runtime.onMessage.addListener((request, sender, callback) => {
                 });
                 return true;
             case 'DOWNLOAD_FILE':
-
                 let FILE_TITLE = ITEM_TITLE.replace(/\-/g, ' ').replace(/[\s\:]{2,}/g, ' - ').replace(/[^\w\s\-\']+/g, '');
 
                 // no try/catch, use callback for that
@@ -639,8 +862,15 @@ chrome.runtime.onMessage.addListener((request, sender, callback) => {
                     });
                 });
                 return true;
+            case 'PLUGIN':
+            case 'SCRIPT':
+            case '_INIT_':
+            case '$INIT$':
+            case 'FOUND':
+                /* These are meant to be handled by plugn.js */
+                return false;
             default:
-                terminal.warn(`Unknown event [${ request.type }]`);
+                BACKGROUND_TERMINAL.warn(`Unknown event [${ request.type }]`);
                 return false;
         }
     } catch (error) {
@@ -653,12 +883,12 @@ chrome.runtime.onMessage.addListener((request, sender, callback) => {
 if(SessionState === false) {
     SessionState = true;
 
-    parentItem = chrome.contextMenus.create({
+    __context_parent__ = chrome.contextMenus.create({
         id: 'W2P',
         title: 'Web to Plex'
     });
 
-    saveItem = chrome.contextMenus.create({
+    __context_save_element__ = chrome.contextMenus.create({
         id: 'W2P-DL',
         title: 'Nothing to Save'
     });
@@ -667,7 +897,7 @@ if(SessionState === false) {
     for(let array = 'IM TM TV'.split(' '), DL = {}, length = array.length, index = 0, item; index < length; index++)
         chrome.contextMenus.create({
             id: 'W2P-' + (item = array[index]),
-            parentId: parentItem,
+            parentId: __context_parent__,
             title: `Using ${ item }Db`,
             type: 'checkbox',
             checked: true // implement a way to use the checkboxes?
@@ -676,7 +906,7 @@ if(SessionState === false) {
     // Non-standard search engines
     chrome.contextMenus.create({
         id: 'W2P-XX',
-        parentId: parentItem,
+        parentId: __context_parent__,
         title: `Using best guess`,
         type: 'checkbox',
         checked: true // implement a way to use the checkboxes?
