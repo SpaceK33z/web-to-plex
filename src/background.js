@@ -67,7 +67,7 @@ function ChangeStatus({ ITEM_ID, ITEM_TITLE, ITEM_TYPE, ID_PROVIDER, ITEM_YEAR, 
             // File friendly title
         SEARCH_TITLE = ITEM_TITLE.replace(/[\-\s]+/g, '-').replace(/\s*&\s*/g, ' and ').replace(/[^\w\-\'\*\#]+/g, ''),
             // Search friendly title
-        SEARCH_PROVIDER = /^im/i.test(ID_PROVIDER)? 'VO': /^tm/i.test(ID_PROVIDER)? 'GX': 'GG';
+        SEARCH_PROVIDER = /\b(tv|show|series)\b/i.test(ITEM_TYPE)? 'GG': /^im/i.test(ID_PROVIDER)? 'VO': /^tm/i.test(ID_PROVIDER)? 'GX': 'GG';
 
     ITEM_ID = (ITEM_ID && !/^tt$/i.test(ITEM_ID)? ITEM_ID: '') + '';
     ITEM_ID = ITEM_ID.replace(/^.*\b(tt\d+)\b.*$/, '$1').replace(/^.*\bid=(\d+)\b.*$/, '$1').replace(/^.*(?:movie|tv|(?:tv-?)?(?:shows?|series|episodes?))\/(\d+).*$/, '$1');
