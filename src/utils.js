@@ -70,6 +70,23 @@ let configuration, init, Update;
         name = 'Cache-Data/' + btoa(name.toLowerCase().replace(/\s+/g, ''));
         data = JSON.stringify(data);
 
+        // erase entries after 400-500 have been made
+        UTILS_STORAGE.get(null, items => {
+            let array = [], bytes = 0;
+
+            for(let item in items) {
+                let object = items[item];
+
+                array.push(item);
+                bytes += (typeof object == 'string'? object.length * 8: typeof object == 'boolean'? 8: JSON.stringify(object).length * 8)|0;
+            }
+
+            if((UTILS_STORAGE.MAX_ITEMS && array.length >= UTILS_STORAGE.MAX_ITEMS) || bytes >= UTILS_STORAGE.QUOTA_BYTES)
+                for(let item in items)
+                    if(/^cache-data\//i.test(item))
+                        UTILS_STORAGE.remove(item);
+        });
+
         await UTILS_STORAGE.set({[name]: data}, () => data);
 
         return name;
@@ -684,7 +701,7 @@ let configuration, init, Update;
             local = await load(savename);
         } else {
             year = await load(`${title}.${rqut}`.toLowerCase()) || year;
-            `${title} (${year}).${rqut}`.toLowerCase();
+            savename = `${title} (${year}).${rqut}`.toLowerCase();
             local = await load(savename);
         }
 
