@@ -1660,6 +1660,8 @@ $('#erase_cache').addEventListener('click', event => {
             if(/^cache-data\//i.test(item))
                 storage.remove(item);
     });
+
+    saveOptions(event);
 });
 
 $('#version')
