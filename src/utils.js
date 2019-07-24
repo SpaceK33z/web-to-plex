@@ -70,6 +70,23 @@ let configuration, init, Update;
         name = 'Cache-Data/' + btoa(name.toLowerCase().replace(/\s+/g, ''));
         data = JSON.stringify(data);
 
+        // erase entries after 400-500 have been made
+        UTILS_STORAGE.get(null, items => {
+            let array = [], bytes = 0;
+
+            for(let item in items) {
+                let object = items[item];
+
+                array.push(item);
+                bytes += (typeof object == 'string'? object.length * 8: typeof object == 'boolean'? 8: JSON.stringify(object).length * 8)|0;
+            }
+
+            if((UTILS_STORAGE.MAX_ITEMS && array.length >= UTILS_STORAGE.MAX_ITEMS) || bytes >= UTILS_STORAGE.QUOTA_BYTES)
+                for(let item in items)
+                    if(/^cache-data\//i.test(item))
+                        UTILS_STORAGE.remove(item);
+        });
+
         await UTILS_STORAGE.set({[name]: data}, () => data);
 
         return name;
@@ -658,7 +675,7 @@ let configuration, init, Update;
         title = (title? title.replace(/\s*[\:,]\s*seasons?\s+\d+.*$/i, '').toCaps(): "")
             .replace(/[\u2010-\u2015]/g, '-') // fancy hyphen
             .replace(/[\u201a\u275f]/g, ',') // fancy comma
-            .replace(/[\u2018\u2019\u201b\u275b\u275c]/g, "'") // fancy apostrophe
+            .replace(/[\u2018\u2019\u201b\u275b\u275c`]/g, "'") // fancy apostrophe (tilde from anime results by TMDb)
             .replace(/[\u201c-\u201f\u275d\u275e]/g, '"') // fancy quotation marks
             .replace(UTF_16, ''); // only accept "usable" characters
             /* 0[ -~], 1[¡¿-ÿ], 2[Ā-ſ], 3[ƀ-ɏ], 4[ò-oͯ], 5[Ͱ-Ͽ], 6[Ѐ-ӿ], 7[Ԁ-ԯ], 8[₠-₿] */
@@ -684,7 +701,7 @@ let configuration, init, Update;
             local = await load(savename);
         } else {
             year = await load(`${title}.${rqut}`.toLowerCase()) || year;
-            `${title} (${year}).${rqut}`.toLowerCase();
+            savename = `${title} (${year}).${rqut}`.toLowerCase();
             local = await load(savename);
         }
 
@@ -783,7 +800,12 @@ let configuration, init, Update;
                         [/(?!^\s*)\b(show|series|a([st]|nd?|cross|fter|lthough)?|b(e(cause|fore|tween)|ut|y)|during|from|in(to)?|[io][fn]|[fn]?or|the|[st]o|through|under|with(out)?|yet)\b\s*/gi, ''],
                         // try replacing common words, e.g. Conjunctions, "Show," "Series," etc.
                         [/\^\s*|\s*$/g, ''],
-                        [/\s+/g, '|']
+                        [/\s+/g, '|'],
+                        [/[\u2010-\u2015]/g, '-'], // fancy hyphen
+                        [/[\u201a\u275f]/g, ','], // fancy comma
+                        [/[\u2018\u2019\u201b\u275b\u275c`]/g, "'"], // fancy apostrophe (tilde from anime results by TMDb)
+                        [/[\u201c-\u201f\u275d\u275e]/g, '"'], // fancy quotation marks
+                        [/'(?=\B)|\B'/g, '']
                     ];
 
                     for(let i = 0; i < r.length; i++) {
@@ -795,11 +817,11 @@ let configuration, init, Update;
                     return c(s);
                 },
                 R = (s = "", S = "", n = !0) => {
-                    let l = s.split(' ').length, L = S.split(' ').length,
-                        score = 100 * (((S.match(RegExp(`\\b(${k(s)})\\b`, 'i')) || [null]).length) / (L || 1)),
+                    let l = s.split(' ').length, L = S.split(' ').length, E,
+                        score = 100 * (((S.match(E = RegExp(`\\b(${k(s)})\\b`, 'gi')) || [null]).length) / (L || 1)),
                         passing = configuration.UseLooseScore | 0;
 
-                    UTILS_TERMINAL.log(`\tQuick Match => "${ s }"/"${ S }" = ${ score }%`);
+                    UTILS_TERMINAL.log(`\tQuick Match => "${ s }"/"${ S }" = ${ score }% (${ E })`);
                     score *= (l > L? (L||1)/l: L > l? (l||1)/L: 1);
                     UTILS_TERMINAL.log(`\tActual Match (${ passing }% to pass) ~> ... = ${ score }%`);
 

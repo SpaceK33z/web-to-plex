@@ -22,14 +22,13 @@ let script = {
             image = $('#body').first,
             type  = script.getType(), // described below
             IMDbID = script.getID('imdb')||"",
-            TMDbID = script.getID('tmdb')|0,
-            TVDbID = script.getID('tvdb')|0;
+            TMDbID = script.getID('tmdb')|0;
 
         title = title.textContent;
         year  = year.textContent|0;
         image = image.style.backgroundImage.replace(/url\("([^]+?)"\)/, '$1');
 
-        return { type, title, year, image, IMDbID, TMDbID, TVDbID };
+        return { type, title, year, image, IMDbID, TMDbID };
     },
 
     // optional | functioanlity only
