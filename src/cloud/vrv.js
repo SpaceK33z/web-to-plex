@@ -19,7 +19,7 @@ let script = {
             case 'show':
                 title = $('.series, .series-title, .video-title, [class*="series"] .title, [class*="video"] .title').first;
                 year  = $('.additional-information-item').first;
-                image = $('[class*="poster"][class*="wrapper"] img').first;
+                image = $('.series-poster img').first;
 
                 title = title.textContent.replace(/(unrated|mature|tv-?\d{1,2})\s*$/i, '').trim();
                 year  = year? +year.textContent.replace(/.+(\d{4}).*/, '$1').trim(): 0;

@@ -81,10 +81,15 @@ let configuration, init, Update;
                 bytes += (typeof object == 'string'? object.length * 8: typeof object == 'boolean'? 8: JSON.stringify(object).length * 8)|0;
             }
 
-            if((UTILS_STORAGE.MAX_ITEMS && array.length >= UTILS_STORAGE.MAX_ITEMS) || bytes >= UTILS_STORAGE.QUOTA_BYTES)
+            if((UTILS_STORAGE.MAX_ITEMS && array.length >= UTILS_STORAGE.MAX_ITEMS) || bytes >= UTILS_STORAGE.QUOTA_BYTES) {
+                UTILS_TERMINAL.warn('Exceeded quota. Erasing cache...');
+
                 for(let item in items)
                     if(/^cache-data\//i.test(item))
                         UTILS_STORAGE.remove(item);
+
+                UTILS_TERMINAL.log('Cache erased');
+            }
         });
 
         await UTILS_STORAGE.set({[name]: data}, () => data);

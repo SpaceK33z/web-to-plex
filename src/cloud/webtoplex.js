@@ -19,14 +19,14 @@ let script = {
 
         let title = $('#title').first,
             year  = $('#year').first,
-            image = $('#body').first,
+            image = $('#poster').first,
             type  = script.getType(), // described below
             IMDbID = script.getID('imdb')||"",
             TMDbID = script.getID('tmdb')|0;
 
         title = title.textContent;
         year  = year.textContent|0;
-        image = image.style.backgroundImage.replace(/url\("([^]+?)"\)/, '$1');
+        image = image.src;
 
         return { type, title, year, image, IMDbID, TMDbID };
     },
