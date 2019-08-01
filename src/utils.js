@@ -268,7 +268,7 @@ let configuration, init, Update;
                             // The engagers
                             furnish('div.web-to-plex-prompt-footer', {},
                                 furnish('input.web-to-plex-prompt-input[type=text]', { placeholder: 'Add an item (enter to add): Title (Year) Type / ID Type', title: 'Solo: A Star Wars Story (2018) movie / tt3778644 m', onkeydown: async event => {
-                                    if(event.keyCode === 13) {
+                                    if(event.keyCode == 13) {
                                         let title, year, type, self = event.target, R = RegExp,
                                             movie = /^(m(?:ovies?)?|f(?:ilms?)?|c(?:inemas?)?)/i,
                                             Db, IMDbID, TMDbID, TVDbID, value = self.value;
@@ -846,12 +846,12 @@ let configuration, init, Update;
                 if(manable)
                     // Medusa
                     if(configuration.usingMedusa && $data instanceof Array)
-                        found = ((t($data[4]) == t(title) || $alt) && +year === +$data[5].slice(0, 4))?
+                        found = ((t($data[4]) == t(title) || $alt) && +year == +$data[5].slice(0, 4))?
                             $alt || $data:
                         found;
                     // Radarr & Sonarr
                     else if(configuration.usingRadarr || configuration.usingSonarr)
-                        found = ((t($data.title) == t(title) || $alt) && +year === +$data.year)?
+                        found = ((t($data.title) == t(title) || $alt) && +year == +$data.year)?
                             $alt || $data:
                         found;
                 //api.tvmaze.com/
@@ -871,10 +871,10 @@ let configuration, init, Update;
                         let i, f, o, l;
 
                         for(i = 0, f = !1, o = DATA.movie_results, l = o.length | 0; i < l; i++)
-                            f = (t(o.title) === t(title) && o.release_date.slice(0, 4) == year);
+                            f = (t(o.title) == t(title) && o.release_date.slice(0, 4) == year);
 
                         for(i = (+f * l), o = (f? o: DATA.tv_results), l = (f? l: o.length | 0); i < l; i++)
-                            f = (t(o.name) === t(title) && o.first_air_date.slice(0, 4) == year);
+                            f = (t(o.name) == t(title) && o.first_air_date.slice(0, 4) == year);
 
                         return f? o: f = !!iid;
                     })($data);
@@ -885,7 +885,7 @@ let configuration, init, Update;
                     found;
                 //theimdbapi.org/
                 else if($data.release_date)
-                    found = (t($data.title) === t(title) && year == ($data.url || $data || b).release_date.slice(0, 4))?
+                    found = (t($data.title) == t(title) && year == ($data.url || $data || b).release_date.slice(0, 4))?
                         $data:
                     found;
 
@@ -2109,7 +2109,7 @@ if(!('onlocationchange' in window))
         get: () => watchlocationchange.locationchangecallbacks
     });
 
-watchlocationchange.onlocationchangeinterval = watchlocationchange.onlocationchangeinterval || setInterval(() => watchlocationchange('href'), 1);
+watchlocationchange.onlocationchangeinterval = watchlocationchange.onlocationchangeinterval || setInterval(() => watchlocationchange('href'), 1000);
 // at least 1s is needed to properly fire the event ._.
 
 String.prototype.toCaps = String.prototype.toCaps || function toCaps(all) {
