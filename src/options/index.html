@@ -48,6 +48,10 @@
             display: none;
         }
 
+		article {
+			z-index: 3;
+		}
+
         section {
             display: block !important;
             margin-bottom: 20px;
@@ -162,6 +166,16 @@
             line-height: inherit;
             text-transform: none;
         }
+
+		#footer {
+			text-align: center;
+
+			bottom: 0;
+			left: 0;
+			position: fixed;
+
+			width: 100%;
+		}
 
         /* notifications */
         .notification {
@@ -1277,12 +1291,12 @@ div
             </section>
             <hr>
             <section>
-                <h3>"Local Search" Cache</h3>
-                <label>Would you like to erase all of your cached searches?</label>
+                <h3>Cached Data</h3>
+                <label>Would you like to erase all of your cached data?</label>
                 <br>
                 <button type="button" id="erase_cache">Yes, Erase</button>
                 <div>
-                    This will empty all of you "Local Search" results.
+                    This will remove all of your Local Search, permission, and other cached data.
                     <br>
                     <strong>This action cannot be undone.</strong>
                 </div>
@@ -1365,7 +1379,7 @@ div
 
     <br>
 
-	<section>
+	<section id="footer">
 		<button id="save">Save</button>
 	</section>
 

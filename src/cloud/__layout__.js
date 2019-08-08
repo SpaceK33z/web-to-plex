@@ -1,3 +1,11 @@
+// optional
+// "Friendly Name" requires: api|username|password|token
+// api - the user's api tokens (external, such as TMDb/OMDb)
+// username - the user's usernames (internal, such as Radarr/Sonarr/etc.)
+// password - the user's passwords (internal)
+// token - the user's tokens (internal)
+// Example: "Web to Plex" requires: api, token
+
 let script = {
     // required
     "url": "< URL RegExp >",

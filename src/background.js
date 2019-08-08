@@ -867,6 +867,7 @@ chrome.runtime.onMessage.addListener((request, sender, callback) => {
             case '_INIT_':
             case '$INIT$':
             case 'FOUND':
+            case 'GRANT_PERMISSION':
                 /* These are meant to be handled by plugn.js */
                 return false;
             default:

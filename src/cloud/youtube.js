@@ -14,7 +14,7 @@ let script = {
             options, type,
             alternative = $('#offer-module-container[class*="movie-offer"], #offer-module-container[class*="unlimited-offer"]');
 
-        if($('.more-button, .less-button').empty || !$('.opened').empty)
+        if($('.more-button, .less-button').empty || !$('.opened').empty || !$('iron-dropdown[class*="ytd"][aria-hidden]').empty)
             return script.timeout;
 
         // try to not bug the page content too much, use an alternative method first (if applicable)
@@ -33,7 +33,7 @@ let script = {
             year  = year.textContent|0;
             image = image.src;
 
-            return { type, title, year, image };
+            return close(), { type, title, year, image };
         }
 
         open(); // show the year and other information, fails otherwise
