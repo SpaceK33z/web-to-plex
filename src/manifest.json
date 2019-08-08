@@ -156,7 +156,7 @@
             "js": ["utils.js", "sites/tubi/index.js"],
             "css": ["sites/tubi/index.css", "sites/common.css"]
         },{
-            "matches": ["*://ephellon.github.io/web.to.plex/?*", "*://ephellon.github.io/web.to.plex/index.html?*"],
+            "matches": ["*://ephellon.github.io/web.to.plex/?*", "*://ephellon.github.io/web.to.plex/index.html?*", "*://ephellon.github.io/web.to.plex/login.html?*"],
             "js": ["utils.js", "sites/webtoplex/index.js"],
             "css": ["sites/webtoplex/index.css", "sites/common.css"]
         }

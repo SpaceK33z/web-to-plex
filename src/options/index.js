@@ -688,10 +688,10 @@ function performWatcherTest(QualityProfileID = 'Default', refreshing = false) {
 
     let Get = () =>
         getWatcher(options, 'getconfig').then(configuration => {
-            if(!configuration || !configuration.configuration) return new Notification('error', 'Failed to get Watcher configuration');
+            if(!configuration || !configuration.response) return new Notification('error', 'Failed to get Watcher configuration');
 
-            let names = configuration.configuration.Quality.Profiles,
-                path = configuration.configuration.Postprocessing.moverpath,
+            let names = configuration.config.Quality.Profiles,
+                path = configuration.config.Postprocessing.moverpath,
                 syntax = path.replace(/\/([\w\s\/\\\{\}]+)$/, '$1'),
                 profiles = [];
 
@@ -1657,7 +1657,7 @@ $('#erase_cache').addEventListener('click', event => {
     new Notification('info', 'Clearing...', 3000);
     storage.get(null, items => {
         for(let item in items)
-            if(/^cache-data\//i.test(item))
+            if(/^~\/cache\//i.test(item))
                 storage.remove(item);
     });
 
