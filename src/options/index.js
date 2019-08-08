@@ -1657,7 +1657,7 @@ $('#erase_cache').addEventListener('click', event => {
     new Notification('info', 'Clearing...', 3000);
     storage.get(null, items => {
         for(let item in items)
-            if(/^cache-data\//i.test(item))
+            if(/^~\/cache\//i.test(item))
                 storage.remove(item);
     });
 

@@ -1,3 +1,7 @@
+// optional
+// "Web to Plex" requires: api, token
+// 'Friendly Name' requires permissions...
+
 let script = {
     // required
     "url": "*://ephellon.github.io/web.to.plex/(?!test|login)",
@@ -36,3 +40,9 @@ let script = {
 
     "getID": (provider) => $(`#${provider}`).first.textContent,
 };
+
+if(/\blogin\b/.test(location.pathname) && configuration.TMDbAPI) {
+    $('#apikey').first.value = configuration.TMDbAPI;
+
+    return 60000;
+}

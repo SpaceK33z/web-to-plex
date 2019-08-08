@@ -14,7 +14,7 @@ let script = {
             options, type,
             alternative = $('#offer-module-container[class*="movie-offer"], #offer-module-container[class*="unlimited-offer"]');
 
-        if($('.more-button, .less-button').empty || !$('.opened').empty || $('iron-dropdown[class*="ytd"][aria-hidden]').empty)
+        if($('.more-button, .less-button').empty || !$('.opened').empty || !$('iron-dropdown[class*="ytd"][aria-hidden]').empty)
             return script.timeout;
 
         // try to not bug the page content too much, use an alternative method first (if applicable)

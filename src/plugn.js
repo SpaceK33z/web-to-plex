@@ -13,19 +13,19 @@ let LAST, LAST_JS, LAST_INSTANCE, LAST_ID, LAST_TYPE, FOUND = {};
 let PLUGN_STORAGE = chrome.storage.sync || chrome.storage.local;
 let PLUGN_CONFIGURATION;
 
-function load(name) {
-    return JSON.parse(localStorage.getItem(btoa(name)));
+function load(name, private) {
+    return JSON.parse((private && sessionStorage? sessionStorage: localStorage).getItem(btoa(name)));
 }
 
-function save(name, data) {
-    return localStorage.setItem(btoa(name), JSON.stringify(data));
+function save(name, data, private) {
+    return (private && sessionStorage? sessionStorage: localStorage).setItem(btoa(name), JSON.stringify(data));
 }
 
 async function Load(name = '') {
     if(!name)
         return /* invalid name */;
 
-    name = 'Cache-Data/' + btoa(name.toLowerCase().replace(/\s+/g, ''));
+    name = '~/cache/' + (name.toLowerCase().replace(/\s+/g, '_'));
 
     return new Promise((resolve, reject) => {
         function LOAD(DISK) {
@@ -47,7 +47,7 @@ async function Save(name = '', data) {
     if(!name)
         return /* invalid name */;
 
-    name = 'Cache-Data/' + btoa(name.toLowerCase().replace(/\s+/g, ''));
+    name = '~/cache/' + (name.toLowerCase().replace(/\s+/g, '_'));
     data = JSON.stringify(data);
 
     await PLUGN_STORAGE.set({[name]: data}, () => data);
@@ -57,6 +57,22 @@ async function Save(name = '', data) {
 
 function GetConsent(name, builtin) {
     return PLUGN_CONFIGURATION[`${ (builtin? 'builtin': 'plugin') }_${ name }`];
+}
+
+async function GetAuthorization(name) {
+    let authorized = await Load(`has/${ name }`),
+        permissions = await Load(`get/${ name }`),
+        Ausername, Apassword, Atoken;
+
+    for(let permission in permissions)
+        if(/^username/i.test(permission))
+            Ausername = true;
+        else if(/^password/i.test(permission))
+            Apassword = true;
+        else if(/^(api|token)/i.test(permission))
+            Atoken = true;
+
+    return { authorized, Ausername, Apassword, Atoken };
 }
 
 // get the saved options
@@ -191,6 +207,17 @@ function RandomName(length = 16, symbol = '') {
     return values.join(symbol).replace(/^[^a-z]+/i, '');
 };
 
+function prepare(code, alias, type) {
+    return code
+        .replace(/\/\/+\s*"([^\"\n\f\r\v]+?)"\s*requires?\:?\s*(.+)([^]+)/i, ($0, $1, $2, $3, $$, $_) =>
+`${ $3 }
+
+;(async() => await Require("${ $2 }", "${ alias }", "${ $1 }"))();`
+
+        )
+    ;
+}
+
 let handle = async(results, tabID, instance, script, type) => {
     let InstanceWarning = `[${ type.toUpperCase() }:${ script }] Instance failed to execute @${ tabID }#${ instance }`,
         InstanceType = type;
@@ -300,6 +327,8 @@ let tabchange = async tabs => {
 
     if(!allowed || !js) return;
 
+    let { authorized, Ausername, Apassword, Atoken } = GetAuthorization(js);
+
     if(code) {
         chrome.tabs.executeScript(id, { file: 'helpers.js' }, () => {
             // Sorry, but the instance needs to be callable multiple times
@@ -328,11 +357,20 @@ let tabchange = async tabs => {
 ${ name } = (${ name } || (${ name }$ = $ => {
 'use strict';
 
+/* Required permissions */
 if(${ allowed } === false)
     return '<allowed>';
+if(${ authorized } === false)
+    return '<authorized>';
+if(${ Ausername } === false)
+    return '<username>';
+if(${ Apassword } === false)
+    return '<password>';
+if(${ Atoken } === false)
+    return '<token>';
 
 /* Start Injected */
-${ code }
+${ prepare(code, js, type) }
 /* End Injected */
 
 let InjectedReadyState;
@@ -422,6 +460,8 @@ chrome.runtime.onMessage.addListener(processMessage = async(request, sender, cal
                         chrome.runtime.getURL(`cloud/plugin.${ plugin }.js`):
                     `https://ephellon.github.io/web.to.plex/${ _type }s/${ options[_type] }.js`;
 
+        let { authorized, Ausername, Apassword, Atoken } = GetAuthorization(options[_type]);
+
         switch(type) {
             case 'PLUGIN':
                 allowed = await GetConsent(plugin, false);
@@ -437,11 +477,20 @@ chrome.runtime.onMessage.addListener(processMessage = async(request, sender, cal
 ${ name } = (${ name } || (${ name }$ = $ => {
 'use strict';
 
+/* Required permissions */
 if(${ allowed } === false)
     return '<allowed>';
+if(${ authorized } === false)
+    return '<authorized>';
+if(${ Ausername } === false)
+    return '<username>';
+if(${ Apassword } === false)
+    return '<password>';
+if(${ Atoken } === false)
+    return '<token>';
 
 /* Start Injected */
-${ code }
+${ prepare(code, plugin, _type) }
 /* End Injected */
 
 let PluginReadyState;
@@ -503,11 +552,20 @@ top.onlocationchange = (event) => chrome.runtime.sendMessage({ type: '$INIT$', o
 ${ name } = (${ name } || (${ name }$ = $ => {
 'use strict';
 
+/* Required permissions */
 if(${ allowed } === false)
     return '<allowed>';
+if(${ authorized } === false)
+    return '<authorized>';
+if(${ Ausername } === false)
+    return '<username>';
+if(${ Apassword } === false)
+    return '<password>';
+if(${ Atoken } === false)
+    return '<token>';
 
 /* Start Injected */
-${ code }
+${ prepare(code, script, _type) }
 /* End Injected */
 
 let ScriptReadyState;
@@ -569,6 +627,11 @@ top.onlocationchange = (event) => chrome.runtime.sendMessage({ type: '$INIT$', o
 
             case 'FOUND':
                 FOUND[request.instance] = request.found;
+                break;
+
+            case 'GRANT_PERMISSION':
+                await Save(`has/${ options[_type] }`, options.allowed);
+                await Save(`get/${ options[_type] }`, options.permissions);
                 break;
 
             default:
