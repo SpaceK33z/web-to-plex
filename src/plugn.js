@@ -263,7 +263,7 @@ let handle = async(results, tabID, instance, script, type) => {
             data = data.filter(d => d);
 
             if(data.length > 1) {
-                chrome.tabs.sendMessage(tabID, { data, script, instance, instance_type: InstanceType, type: 'POPULATE' });
+                chrome.tabs.sendMessage(tabID, { data, instance, [InstanceType.toLowerCase()]: script, instance_type: InstanceType, type: 'POPULATE' });
                 return /* done */;
             }
 
@@ -283,7 +283,7 @@ let handle = async(results, tabID, instance, script, type) => {
         data = { ...data, type, title, year };
 
         chrome.tabs.insertCSS(tabID, { file: 'sites/common.css' });
-        chrome.tabs.sendMessage(tabID, { data, script, instance, instance_type: InstanceType, type: 'POPULATE' });
+        chrome.tabs.sendMessage(tabID, { data, instance, [InstanceType.toLowerCase()]: script, instance_type: InstanceType, type: 'POPULATE' });
     } catch(error) {
         throw new Error(InstanceWarning + ' - ' + String(error));
     }

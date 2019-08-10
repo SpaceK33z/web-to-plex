@@ -106,6 +106,20 @@ let configuration, init, Update;
         return await UTILS_STORAGE.remove(['~/cache/' + (name.toLowerCase().replace(/\s+/g, '_'))]);
     }
 
+    function encode(data) {
+        if(/^[\u0000-\u00ff]+$/.test(data))
+            return btoa(data);
+        else
+            return data;
+    }
+
+    function decode(data) {
+        if(/^[a-z\d\+\/\=]+$/i.test(data))
+            return atob(data);
+        else
+            return data;
+    }
+
     /* Notifications */
     // create and/or queue a notification
     // state = "warning" - red
@@ -1687,7 +1701,7 @@ let configuration, init, Update;
                 e.preventDefault();
 
                 let self = e.target, tv = /tv[\s-]?|shows?|series/i, fail = 0,
-                    options = JSON.parse(atob(button.getAttribute('saved_options')));
+                    options = JSON.parse(decode(button.getAttribute('saved_options')));
 
                 for(let index = 0, length = options.length, option; index < length; index++) {
                     option = options[index];
@@ -1715,8 +1729,8 @@ let configuration, init, Update;
                     new Notification('error', `Failed to grab ${ fail } item${fail==1?'':'s'}`);
             };
 
-            button.setAttribute('saved_options', btoa(JSON.stringify(saved_options)));
-            element.addEventListener('click', e => (AUTO_GRAB.ENABLED && AUTO_GRAB.LIMIT > options.length)? element.ON_CLICK(e): new Prompt('select', options, o => { button.setAttribute('saved_options', btoa(JSON.stringify(o))); element.ON_CLICK(e) }));
+            button.setAttribute('saved_options', encode(JSON.stringify(saved_options)));
+            element.addEventListener('click', e => (AUTO_GRAB.ENABLED && AUTO_GRAB.LIMIT > options.length)? element.ON_CLICK(e): new Prompt('select', options, o => { button.setAttribute('saved_options', encode(JSON.stringify(o))); element.ON_CLICK(e) }));
 
             element.setAttribute(hov, `Grab ${len} new item${s}: ${ t }`);
             button.classList.add(saved_options.length || len? 'wtp--download': 'wtp--error');
@@ -1897,7 +1911,7 @@ let configuration, init, Update;
         results = results.filter(v => v.status == 'downloader');
 
         let img = furnish('img', { title: 'Add to Plex It!', src: IMG_URL.plexit_icon_48, onmouseup: event => {let frame = document.querySelector('#plexit-bookmarklet-frame'); frame.src = frame.src.replace(/(#plexit:.*)?$/, '#plexit:' + event.target.parentElement.getAttribute('data'))} }),
-            po, pi = furnish('li#plexit.list-item', { data: btoa(JSON.stringify(results)) }, img),
+            po, pi = furnish('li#plexit.list-item', { data: encode(JSON.stringify(results)) }, img),
             op  = document.querySelector('#wtp-plexit');
 
         if(po = button.querySelector('#plexit'))
@@ -1944,7 +1958,7 @@ let configuration, init, Update;
                             UpdateButton(options.button, 'found', 'On Plex', { ...options, key });
                             opt = { ...opt, url: options.button.href, found: true, status: 'found' };
 
-                            let po, pi = furnish('li#plexit.list-item', { data: btoa(JSON.stringify(opt)) }, img);
+                            let po, pi = furnish('li#plexit.list-item', { data: encode(JSON.stringify(opt)) }, img);
 
                             if(po = options.button.querySelector('#plexit'))
                                 po.remove();
@@ -1960,7 +1974,7 @@ let configuration, init, Update;
                                     UpdateButton(options.button, 'found', 'On Plex', { ...options, key });
                                     opt = { ...opt, url: options.button.href, found: true, status: 'found' };
 
-                                    let po, pi = furnish('li#plexit.list-item', { data: btoa(JSON.stringify(opt)) }, img);
+                                    let po, pi = furnish('li#plexit.list-item', { data: encode(JSON.stringify(opt)) }, img);
 
                                     if(po = options.button.querySelector('#plexit'))
                                         po.remove();
@@ -1977,7 +1991,7 @@ let configuration, init, Update;
                                     UpdateButton(options.button, action, title, options);
                                     opt = { ...opt, found: false, status: action };
 
-                                    let po, pi = furnish('li#plexit.list-item', { data: btoa(JSON.stringify(opt)) }, img);
+                                    let po, pi = furnish('li#plexit.list-item', { data: encode(JSON.stringify(opt)) }, img);
 
                                     if(po = options.button.querySelector('#plexit'))
                                         po.remove();

@@ -161,6 +161,7 @@ const storage = (chrome.storage.sync || chrome.storage.local),
             'plugin_shanaproject',
             'plugin_myanimelist',
             'plugin_myshows',
+            'plugin_indomovie',
       ];
 
 let PlexServers = [],
@@ -1481,7 +1482,7 @@ let builtins = {
 
 for(let builtin in builtins)
     builtin_array.push(builtin);
-builtin_array = builtin_array.sort();
+builtin_array = builtin_array.sort((a,b) => { let [x, y] = [a, b].map(v => v.toLowerCase()); return x < y? -1: 1; });
 
 for(let index = 0, length = builtin_array.length; builtinElement && index < length; index++) {
     let title = builtin_array[index],
@@ -1521,8 +1522,8 @@ $('[id^="builtin_"]', true)
             js = self.getAttribute('js');
 
         if(self.checked) {
-            terminal.log(bid, builtins[bid]);
-            requestURLPermissions(builtins[bid].replace(/https?:\/\/(ww\w+\.)?/i, '*://*.').replace(/\/?$/, '/*'), granted => {
+            terminal.log(bid, builtin_sites[bid]);
+            requestURLPermissions(builtin_sites[bid].replace(/https?:\/\/(ww\w+\.)?/i, '*://*.').replace(/\/?$/, '/*'), granted => {
                 save(`permission:${ bid }`, granted);
                 save(`script:${ bid }`, granted? js: null);
             });
@@ -1537,6 +1538,7 @@ $('[id^="builtin_"]', true)
 
 // Plugins and their links
 let plugins = {
+    'Indomovie': 'https://indomovietv.net/',
     'Toloka': 'https://toloka.to/',
     'Shana Project': 'https://www.shanaproject.com/',
     'My Anime List': 'https://myanimelist.net/',
@@ -1547,7 +1549,7 @@ let plugins = {
 
 for(let plugin in plugins)
     plugin_array.push(plugin);
-plugin_array = plugin_array.sort();
+plugin_array = plugin_array.sort((a,b) => { let [x, y] = [a, b].map(v => v.toLowerCase()); return x < y? -1: 1; });
 
 for(let index = 0, length = plugin_array.length; pluginElement && index < length; index++) {
     let title = plugin_array[index],
@@ -1583,8 +1585,8 @@ $('[id^="plugin_"]', true)
             js = self.getAttribute('js');
 
         if(self.checked) {
-            terminal.log(pid, plugins[pid]);
-            requestURLPermissions(plugins[pid].replace(/https?:\/\/(ww\w+\.)?/i, '*://*.').replace(/\/?$/, '/*'), granted => {
+            terminal.log(pid, plugin_sites[pid]);
+            requestURLPermissions(plugin_sites[pid].replace(/https?:\/\/(ww\w+\.)?/i, '*://*.').replace(/\/?$/, '/*'), granted => {
                 save(`permission:${ pid }`, granted);
                 save(`script:${ pid }`, granted? js: null);
             });
