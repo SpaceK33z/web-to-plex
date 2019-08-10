@@ -123,6 +123,7 @@ const storage = (chrome.storage.sync || chrome.storage.local),
             '__radarrStoragePath',
             '__sonarrStoragePath',
             '__medusaStoragePath',
+            '__domains',
 
             // Builtins
             'builtin_amazon',
@@ -1323,7 +1324,7 @@ function requestURLPermissions(url, callback) {
 // stored in chrome.storage.*
 function restoreOptions(OPTIONS) {
 	function setOptions(items) {
-    if(!items) return;
+        if(!items) return;
 
 		__options__.forEach(option => {
             let el = $(`[data-option="${ option }"]`);
@@ -1365,6 +1366,17 @@ function restoreOptions(OPTIONS) {
 			performSonarrTest(items.sonarrQualityProfileId, items.sonarrStoragePath, true);
         if(items.couchpotatoURLRoot)
             enableCouchPotato();
+
+        let __domains = (sites => {
+            let array = [];
+
+            for(let site in sites)
+                array.push(site);
+
+            return array;
+        })({ ...builtin_sites, ...plugin_sites });
+
+        $('[data-option="__domains"i]').value = __domains;
 	}
 
 
