@@ -159,7 +159,10 @@
             "matches": ["*://ephellon.github.io/web.to.plex/?*", "*://ephellon.github.io/web.to.plex/index.html?*", "*://ephellon.github.io/web.to.plex/login.html?*"],
             "js": ["utils.js", "sites/webtoplex/index.js"],
             "css": ["sites/webtoplex/index.css", "sites/common.css"]
-        }
+        },{
+			"matches": ["https://*/*"],
+			"js": ["utils.js", "sites/common.js"]
+		}
 	],
 
 	"background": {
