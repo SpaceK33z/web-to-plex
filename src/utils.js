@@ -712,6 +712,14 @@ let configuration, init, Update;
                 console:
             { error: m => m, info: m => m, log: m => m, warn: m => m, group: m => m, groupEnd: m => m };
 
+    if(configuration) {
+        let host = location.host.replace(/^(ww\w+\.)/, ''),
+            doms = configuration.__domains.split(',');
+
+        if(!~doms.indexOf(host))
+            return;
+    }
+
     UTILS_TERMINAL.log('UTILS_DEVELOPER:', UTILS_DEVELOPER, configuration);
 
     // parse the formatted headers and URL
