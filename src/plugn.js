@@ -62,17 +62,42 @@ function GetConsent(name, builtin) {
 async function GetAuthorization(name) {
     let authorized = await Load(`has/${ name }`),
         permissions = await Load(`get/${ name }`),
-        Ausername, Apassword, Atoken;
+        Ausername, Apassword, Atoken,
+        Aserver, Aurl, Astorage;
 
-    for(let permission in permissions)
-        if(/^username/i.test(permission))
-            Ausername = true;
-        else if(/^password/i.test(permission))
-            Apassword = true;
-        else if(/^(api|token)/i.test(permission))
-            Atoken = true;
+        if(!permissions)
+            return {};
 
-    return { authorized, Ausername, Apassword, Atoken };
+        if(permissions.constructor === Array)
+            for(let permission of permissions)
+                if(/^(username)/i.test(permission))
+                    Ausername = true;
+                else if(/^(password)/i.test(permission))
+                    Apassword = true;
+                else if(/^(api|token)/i.test(permission))
+                    Atoken = true;
+                else if(/^(server)/i.test(permission))
+                    Aserver = true;
+                else if(/^(url(?:root)?)/i.test(permission))
+                    Aurl = true;
+                else if(/^(storage|cache)/i.test(permission))
+                    Astorage = true;
+        else if(permissions.constructor === Object)
+            for(let permission in permissions)
+                if(/^(username)/i.test(permission))
+                    Ausername = true;
+                else if(/^(password)/i.test(permission))
+                    Apassword = true;
+                else if(/^(api|token)/i.test(permission))
+                    Atoken = true;
+                else if(/^(server)/i.test(permission))
+                    Aserver = true;
+                else if(/^(url(?:root)?)/i.test(permission))
+                    Aurl = true;
+                else if(/^(storage|cache)/i.test(permission))
+                    Astorage = true;
+
+    return { authorized, Ausername, Apassword, Atoken, Aserver, Aurl, Astorage };
 }
 
 // get the saved options
@@ -329,7 +354,7 @@ let tabchange = async tabs => {
 
     if(!allowed || !js) return;
 
-    let { authorized, Ausername, Apassword, Atoken } = GetAuthorization(js);
+    let { authorized, ...A } = await GetAuthorization(js);
 
     if(code) {
         chrome.tabs.executeScript(id, { file: 'helpers.js' }, () => {
@@ -364,12 +389,20 @@ if(${ allowed } === false)
     return '<allowed>';
 if(${ authorized } === false)
     return '<authorized>';
-if(${ Ausername } === false)
-    return '<username>';
-if(${ Apassword } === false)
-    return '<password>';
-if(${ Atoken } === false)
-    return '<token>';
+${
+    (() => {
+        let o = [];
+
+        for(let a in A)
+            o.push(
+`if(${ A[a] } === false)
+    return '<${ a.slice(1) }>';
+`
+            );
+
+        return o.join('');
+    })()
+}
 
 /* Start Injected */
 ${ prepare(code, js, type) }
@@ -405,7 +438,7 @@ return (${ type }.RegExp = RegExp(
     /* Injected file doesn't have the "ready" property */
     ${ type }.init():
 /* URL doesn't match pattern */
-(console.warn("The domain '${ org }' (" + location.href + ") does not match the domain pattern '" + ${ type }.url + "' (" + ${ type }.RegExp + ")"), 5000);
+(console.warn("The domain '${ org }' (" + location.href + ") does not match the domain pattern '" + ${ type }.url + "' (" + ${ type }.RegExp + ")"), -1);
 })(document.queryBy));
 
 console.log('[${ name.replace(/^(top\.)?(\w{7}).*$/i, '$1$2') }]', ${ name });
@@ -462,7 +495,7 @@ chrome.runtime.onMessage.addListener(processMessage = async(request, sender, cal
                         chrome.runtime.getURL(`cloud/plugin.${ plugin }.js`):
                     `https://ephellon.github.io/web.to.plex/${ _type }s/${ options[_type] }.js`;
 
-        let { authorized, Ausername, Apassword, Atoken } = GetAuthorization(options[_type]);
+        let { authorized, ...A } = await GetAuthorization(options[_type]);
 
         switch(type) {
             case 'PLUGIN':
@@ -484,12 +517,20 @@ if(${ allowed } === false)
     return '<allowed>';
 if(${ authorized } === false)
     return '<authorized>';
-if(${ Ausername } === false)
-    return '<username>';
-if(${ Apassword } === false)
-    return '<password>';
-if(${ Atoken } === false)
-    return '<token>';
+${
+    (() => {
+        let o = [];
+
+        for(let a in A)
+            o.push(
+`if(${ A[a] } === false)
+    return '<${ a.slice(1) }>';
+`
+            );
+
+        return o.join('');
+    })()
+}
 
 /* Start Injected */
 ${ prepare(code, plugin, _type) }
@@ -525,7 +566,7 @@ return (plugin.RegExp = RegExp(
     /* Plugin doesn't have the "ready" property */
     plugin.init():
 /* URL doesn't match pattern */
-(console.warn("The domain '${ org }' (" + location.href + ") does not match the domain pattern '" + plugin.url + "' (" + plugin.RegExp + ")"), 5000);
+(console.warn("The domain '${ org }' (" + location.href + ") does not match the domain pattern '" + plugin.url + "' (" + plugin.RegExp + ")"), -1);
 })(document.queryBy));
 
 console.log('[${ name.replace(/^(top\.)?(\w{7}).*$/i, '$1$2') }]', ${ name });
@@ -559,12 +600,20 @@ if(${ allowed } === false)
     return '<allowed>';
 if(${ authorized } === false)
     return '<authorized>';
-if(${ Ausername } === false)
-    return '<username>';
-if(${ Apassword } === false)
-    return '<password>';
-if(${ Atoken } === false)
-    return '<token>';
+${
+    (() => {
+        let o = [];
+
+        for(let a in A)
+            o.push(
+`if(${ A[a] } === false)
+    return '<${ a.slice(1) }>';
+`
+            );
+
+        return o.join('');
+    })()
+}
 
 /* Start Injected */
 ${ prepare(code, script, _type) }
@@ -600,7 +649,7 @@ return (script.RegExp = RegExp(
     /* Script doesn't have the "ready" property */
     script.init():
 /* URL doesn't match pattern */
-(console.warn("The domain '${ org }' (" + location.href + ") does not match the domain pattern '" + script.url + "' (" + script.RegExp + ")"), 5000);
+(console.warn("The domain '${ org }' (" + location.href + ") does not match the domain pattern '" + script.url + "' (" + script.RegExp + ")"), -1);
 })(document.queryBy));
 
 console.log('[${ name.replace(/^(top\.)?(\w{7}).*$/i, '$1$2') }]', ${ name });
