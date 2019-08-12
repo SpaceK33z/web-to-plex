@@ -674,7 +674,7 @@ let configuration, init, Update;
 
                     /* Don't expose the user's authentication information to sites */
                     for(let key in options)
-                        if(/api|username|password|token/i.test(key))
+                        if(/api|username|password|token|url|server|cache|storage/i.test(key))
                             if(ALLOWED && RegExp(PERMISS.join('|'),'i').test(key))
                                 configuration[key] = options[key];
                             else
@@ -710,7 +710,51 @@ let configuration, init, Update;
         UTILS_TERMINAL =
             UTILS_DEVELOPER?
                 console:
-            { error: m => m, info: m => m, log: m => m, warn: m => m, group: m => m, groupEnd: m => m };
+            { error: m => m, info: m => m, log: m => m, warn: m => m, group: m => m, groupEnd: m => m, honor: m => m };
+
+        UTILS_TERMINAL.honor = UTILS_TERMINAL.honor?
+            UTILS_TERMINAL.honor:
+        (...messages) => {
+            if(messages.length == 1) {
+                let message = messages[0],
+                    type = typeof message == 'object'? 'o': 'c';
+
+                UTILS_TERMINAL.log(
+                    (type == 'o'? message: `%${ type }>> ${ message } <<`),
+                    (
+                        type == 'o'?
+                            null:
+                        `
+                            background-color: #00332b;
+                            border-bottom: 1px solid #0000;
+                            border-top: 1px solid #065;
+                            box-sizing: border-box;
+                            clear: right;
+                            color: #f5f5f5;
+                            display: block !important;
+                            line-height: 2;
+                            user-select: text;
+
+                            flex-basis: 1;
+                            flex-shrink: 1;
+
+                            margin: 0;
+                            overflow-wrap: break-word;
+                            pading: 3px 22px 1px 0;
+                            position: fixed;
+                            z-index: -1;
+
+                            min-height: 0;
+                            min-width: 100%;
+                            height: 100%;
+                            width: 100%;
+                        `
+                    )
+                );
+            } else {
+                messages.forEach(message => UTILS_TERMINAL.honor(message));
+            }
+        };
 
     if(configuration) {
         let host = location.host.replace(/^(ww\w+\.)/, ''),
@@ -812,7 +856,7 @@ let configuration, init, Update;
         }
 
         if(local) {
-            UTILS_TERMINAL.log('[LOCAL] Search results', local);
+            UTILS_TERMINAL.honor('[LOCAL] Search results', local);
             return local;
         }
 
@@ -891,7 +935,7 @@ let configuration, init, Update;
                 throw error;
             });
 
-        UTILS_TERMINAL.log('Search results', { title, year, url, json });
+        UTILS_TERMINAL.honor('Search results', { title, year, url, json });
 
         if('results' in json)
             json = json.results;
@@ -1308,7 +1352,7 @@ let configuration, init, Update;
                 } else if(response && response.success) {
                     let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-{2,}/g, '-').toLowerCase();
 
-                    UTILS_TERMINAL.log('Successfully pushed', options);
+                    UTILS_TERMINAL.honor('Successfully pushed', options);
                     new Notification('update', `Added "${ options.title }" to Ombi`, 7000, () => window.open(__CONFIG__.ombiURL, '_blank'));
                 } else {
                     new Notification('warning', `Could not add "${ options.title }" to Ombi: Unknown Error`) ||
@@ -1342,7 +1386,7 @@ let configuration, init, Update;
     				(!response.silent && UTILS_TERMINAL.error('Error adding to CouchPotato: ' + String(response.error), response.location, response.debug));
     			}
     			if(response.success) {
-                    UTILS_TERMINAL.log('Successfully pushed', options);
+                    UTILS_TERMINAL.honor('Successfully pushed', options);
     				new Notification('update', `Added "${ options.title }" to CouchPotato`);
     			} else {
     				new Notification('warning', `Could not add "${ options.title }" to CouchPotato`);
@@ -1383,7 +1427,7 @@ let configuration, init, Update;
                     let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-{2,}/g, '-').toLowerCase(),
                         TMDbID = options.TMDbID || response.tmdbId;
 
-                    UTILS_TERMINAL.log('Successfully pushed', options);
+                    UTILS_TERMINAL.honor('Successfully pushed', options);
                     new Notification('update', `Added "${ options.title }" to Watcher`, 7000, () => window.open(`${__CONFIG__.watcherURL}library/status${TMDbID? `#${title}-${TMDbID}`: '' }`, '_blank'));
                 } else {
                     new Notification('warning', `Could not add "${ options.title }" to Watcher: Unknown Error`) ||
@@ -1437,7 +1481,7 @@ let configuration, init, Update;
                     let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-{2,}/g, '-').toLowerCase(),
                         TMDbID = options.TMDbID || response.tmdbId;
 
-                    UTILS_TERMINAL.log('Successfully pushed', options);
+                    UTILS_TERMINAL.honor('Successfully pushed', options);
                     new Notification('update', `Added "${ options.title }" to Radarr`, 7000, () => window.open(`${__CONFIG__.radarrURL}${TMDbID? `movies/${title}-${TMDbID}`: '' }`, '_blank'));
                 } else {
                     new Notification('warning', `Could not add "${ options.title }" to Radarr: Unknown Error`) ||
@@ -1489,7 +1533,7 @@ let configuration, init, Update;
                 } else if(response && response.success) {
                     let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-{2,}/g, '-').toLowerCase();
 
-                    UTILS_TERMINAL.log('Successfully pushed', options);
+                    UTILS_TERMINAL.honor('Successfully pushed', options);
                     new Notification('update', `Added "${ options.title }" to Sonarr`, 7000, () => window.open(`${__CONFIG__.sonarrURL}series/${title}`, '_blank'));
                 } else {
                     new Notification('warning', `Could not add "${ options.title }" to Sonarr: Unknown Error`) ||
@@ -1542,7 +1586,7 @@ let configuration, init, Update;
                 } else if(response && response.success) {
                     let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-{2,}/g, '-').toLowerCase();
 
-                    UTILS_TERMINAL.log('Successfully pushed', options);
+                    UTILS_TERMINAL.honor('Successfully pushed', options);
                     new Notification('update', `Added "${ options.title }" to Medusa`, 7000, () => window.open(`${__CONFIG__.medusaURL}home/displayShow?indexername=tvdb&seriesid=${options.TVDbID}`, '_blank'));
                 } else {
                     new Notification('warning', `Could not add "${ options.title }" to Medusa: Unknown Error`) ||

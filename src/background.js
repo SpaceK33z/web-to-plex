@@ -179,7 +179,7 @@ function Open_CouchPotato(request, sendResponse) {
         sendResponse({ success, status: (success? json.media.status: null) });
     })
     .catch(error => {
-        sendResponse({ error: String(error), location: '@0B-116/*: Open_CouchPotato' });
+        sendResponse({ error: String(error), location: '@0B: Open_CouchPotato' });
     });
 }
 
@@ -189,12 +189,12 @@ function Push_CouchPotato(request, sendResponse) {
         mode: cors(request.url)
 	})
     .then(response => response.json())
-    .catch(error => sendResponse({ error: 'Item not found', location: '@0B-127/*: Push_CouchPotato => fetch.then.catch', silent: true }))
+    .catch(error => sendResponse({ error: 'Item not found', location: '@0B: Push_CouchPotato => fetch.then.catch', silent: true }))
     .then(response => {
         sendResponse({ success: response.success });
     })
     .catch(error => {
-        sendResponse({ error: String(error) , location: '@0B-132/*: Push_CouchPotato'});
+        sendResponse({ error: String(error) , location: '@0B: Push_CouchPotato'});
     });
 }
 
@@ -216,7 +216,7 @@ function Push_Watcher(request, sendResponse) {
 
     fetch(debug.url = `${ request.url }?apikey=${ request.token }&mode=addmovie&${ query }=${ id }`)
         .then(response => response.json())
-        .catch(error => sendResponse({ error: 'Movie not found', location: '@0B-154/*: Push_Watcher => fetch.then.catch', silent: true }))
+        .catch(error => sendResponse({ error: 'Movie not found', location: '@0B: Push_Watcher => fetch.then.catch', silent: true }))
         .then(response => {
             if((response.response + "") == "true")
                 return sendResponse({
@@ -228,7 +228,7 @@ function Push_Watcher(request, sendResponse) {
         .catch(error => {
             sendResponse({
                 error: String(error),
-                location: `@0B-166/*: Push_Watcher => fetch("${ request.url }", { headers }).catch(error => { sendResponse })`,
+                location: `@0B: Push_Watcher => fetch("${ request.url }", { headers }).catch(error => { sendResponse })`,
                 debug
             });
         });
@@ -252,7 +252,7 @@ function Push_Radarr(request, sendResponse) {
 
     fetch(debug.url = `${ request.url }lookup/${ query }=${ id }&apikey=${ request.token }`)
         .then(response => response.json())
-        .catch(error => sendResponse({ error: 'Movie not found', location: '@0B-190/*: Push_Radarr => fetch.then.catch', silent: true }))
+        .catch(error => sendResponse({ error: 'Movie not found', location: '@0B: Push_Radarr => fetch.then.catch', silent: true }))
         .then(data => {
             let body,
                 // Monitor, search, and download movie ASAP
@@ -304,7 +304,7 @@ function Push_Radarr(request, sendResponse) {
             if (data && data[0] && data[0].errorMessage) {
                 sendResponse({
                     error: data[0].errorMessage,
-                    location: `@0B-242/*: Push_Radarr => fetch("${ request.url }", { headers }).then(data => { if })`,
+                    location: `@0B: Push_Radarr => fetch("${ request.url }", { headers }).then(data => { if })`,
                     debug
                 });
             } else if (data && data.path) {
@@ -314,7 +314,7 @@ function Push_Radarr(request, sendResponse) {
             } else {
                 sendResponse({
                     error: 'Unknown error',
-                    location: `@0B-252/*: Push_Radarr => fetch("${ request.url }", { headers }).then(data => { else })`,
+                    location: `@0B: Push_Radarr => fetch("${ request.url }", { headers }).then(data => { else })`,
                     debug
                 });
             }
@@ -322,7 +322,7 @@ function Push_Radarr(request, sendResponse) {
         .catch(error => {
             sendResponse({
                 error: String(error),
-                location: `@0B-260/*: Push_Radarr => fetch("${ request.url }", { headers }).catch(error => { sendResponse })`,
+                location: `@0B: Push_Radarr => fetch("${ request.url }", { headers }).catch(error => { sendResponse })`,
                 debug
             });
         });
@@ -342,7 +342,7 @@ function Push_Sonarr(request, sendResponse) {
 
     fetch(debug.url = `${ request.url }lookup?apikey=${ request.token }&term=${ query }`)
         .then(response => response.json())
-        .catch(error => sendResponse({ error: 'TV Show not found', location: '@0B-280/*: Push_Sonarr => fetch.then.catch', silent: true }))
+        .catch(error => sendResponse({ error: 'TV Show not found', location: '@0B: Push_Sonarr => fetch.then.catch', silent: true }))
         .then(data => {
             if (!data instanceof Array || !data.length)
                 throw new Error('TV Show not found');
@@ -384,7 +384,7 @@ function Push_Sonarr(request, sendResponse) {
             if (data && data[0] && data[0].errorMessage) {
                 sendResponse({
                     error: data[0].errorMessage,
-                    location: `@0B-321/*: Push_Sonarr => fetch("${ request.url }", { headers }).then(data => { if })`,
+                    location: `@0B: Push_Sonarr => fetch("${ request.url }", { headers }).then(data => { if })`,
                     debug
                 });
             } else if (data && data.path) {
@@ -394,7 +394,7 @@ function Push_Sonarr(request, sendResponse) {
             } else {
                 sendResponse({
                     error: 'Unknown error',
-                    location: `@0B-331/*: Push_Sonarr => fetch("${ request.url }", { headers }).then(data => { else })`,
+                    location: `@0B: Push_Sonarr => fetch("${ request.url }", { headers }).then(data => { else })`,
                     debug
                 });
             }
@@ -402,7 +402,7 @@ function Push_Sonarr(request, sendResponse) {
         .catch(error => {
             sendResponse({
                 error: String(error),
-                location: `@0B-339/*: Push_Sonarr => fetch("${ request.url }", { headers }).catch(error => { sendResponse })`,
+                location: `@0B: Push_Sonarr => fetch("${ request.url }", { headers }).catch(error => { sendResponse })`,
                 debug
             });
         });
@@ -422,7 +422,7 @@ function Push_Medusa(request, sendResponse) {
 
     fetch(debug.url = `${ request.root }internal/searchIndexersForShowName?api_key=${ request.token }&indexerId=0&query=${ query }`)
         .then(response => response.json())
-        .catch(error => sendResponse({ error: 'TV Show not found', location: '@0B-359/*: Push_Medusa => fetch.then.catch', silent: true }))
+        .catch(error => sendResponse({ error: 'TV Show not found', location: '@0B: Push_Medusa => fetch.then.catch', silent: true }))
         .then(data => {
             data = data.results;
 
@@ -458,7 +458,7 @@ function Push_Medusa(request, sendResponse) {
             if (data && data.error) {
                 sendResponse({
                     error: data.error,
-                    location: `@0B-395/*: Push_Medusa => fetch("${ request.url }", { headers }).then(data => { if })`,
+                    location: `@0B: Push_Medusa => fetch("${ request.url }", { headers }).then(data => { if })`,
                     debug
                 });
             } else if (data && data.id) {
@@ -468,7 +468,7 @@ function Push_Medusa(request, sendResponse) {
             } else {
                 sendResponse({
                     error: 'Unknown error',
-                    location: `@0B-405/*: Push_Medusa => fetch("${ request.url }", { headers }).then(data => { else })`,
+                    location: `@0B: Push_Medusa => fetch("${ request.url }", { headers }).then(data => { else })`,
                     debug
                 });
             }
@@ -476,7 +476,7 @@ function Push_Medusa(request, sendResponse) {
         .catch(error => {
             sendResponse({
                 error: String(error),
-                location: `@0B-413/*: Push_Medusa => fetch("${ request.url }", { headers }).catch(error => { sendResponse })`,
+                location: `@0B: Push_Medusa => fetch("${ request.url }", { headers }).catch(error => { sendResponse })`,
                 debug
             });
         });
@@ -570,9 +570,9 @@ function Push_Ombi(request, sendResponse) {
             // setup stack trace for debugging
 
     if(request.contentType == 'movie' && (id || null) === null)
-        sendResponse({ error: 'Invalid TMDbID', location: '@0B-433/*: Push_Ombi => if', silent: true });
+        sendResponse({ error: 'Invalid TMDbID', location: '@0B: Push_Ombi => if', silent: true });
     else if((id || null) === null)
-        sendResponse({ error: 'Invalid TVDbID', location: '@0B-435/*: Push_Ombi => else if', silent: true });
+        sendResponse({ error: 'Invalid TVDbID', location: '@0B: Push_Ombi => else if', silent: true });
 
     fetch(debug.url = request.url, {
             method: 'POST',
@@ -580,7 +580,7 @@ function Push_Ombi(request, sendResponse) {
             body: JSON.stringify(body),
             headers
         })
-        .catch(error => sendResponse({ error: `${ type } not found`, location: '@0B-443/*: Push_Ombi => fetch.then.catch', silent: true }))
+        .catch(error => sendResponse({ error: `${ type } not found`, location: '@0B: Push_Ombi => fetch.then.catch', silent: true }))
         .then(response => response.text())
         .then(data => {
             debug.data =
@@ -594,7 +594,7 @@ function Push_Ombi(request, sendResponse) {
                 else
                     sendResponse({
                         error: data.errorMessage,
-                        location: `@0B-457/*: Push_Ombi => fetch("${ request.url }", { headers }).then(data => { if })`,
+                        location: `@0B: Push_Ombi => fetch("${ request.url }", { headers }).then(data => { if })`,
                         debug
                     });
             } else if (data && data.path) {
@@ -604,7 +604,7 @@ function Push_Ombi(request, sendResponse) {
             } else {
                 sendResponse({
                     error: 'Unknown error',
-                    location: `@0B-467/*: Push_Ombi => fetch("${ request.url }", { headers }).then(data => { else })`,
+                    location: `@0B: Push_Ombi => fetch("${ request.url }", { headers }).then(data => { else })`,
                     debug
                 });
             }
@@ -612,7 +612,7 @@ function Push_Ombi(request, sendResponse) {
         .catch(error => {
             sendResponse({
                 error: String(error),
-                location: `@0B-475/*: Push_Ombi => fetch("${ request.url }", { headers }).catch(error => { sendResponse })`,
+                location: `@0B: Push_Ombi => fetch("${ request.url }", { headers }).catch(error => { sendResponse })`,
                 debug
             });
         });
@@ -724,7 +724,7 @@ async function Search_Plex(request, sendResponse) {
 
         sendResponse(result);
     } catch (error) {
-        sendResponse({ error: String(error), location: '@0B-587/*: Search_Plex' });
+        sendResponse({ error: String(error), location: '@0B: Search_Plex' });
     }
 }
 
