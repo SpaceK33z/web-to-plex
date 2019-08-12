@@ -63,41 +63,39 @@ async function GetAuthorization(name) {
     let authorized = await Load(`has/${ name }`),
         permissions = await Load(`get/${ name }`),
         Ausername, Apassword, Atoken,
-        Aserver, Aurl, Astorage;
+        Aapi, Aserver, Aurl, Astorage,
+        Acache;
 
         if(!permissions)
             return {};
 
+        function WriteOff(permission) {
+            if(/^(username)/i.test(permission))
+                Ausername = true;
+            else if(/^(password)/i.test(permission))
+                Apassword = true;
+            else if(/^(token)/i.test(permission))
+                Atoken = true;
+            else if(/^(api)/i.test(permission))
+                Aapi = true;
+            else if(/^(server)/i.test(permission))
+                Aserver = true;
+            else if(/^(url(?:root)?)/i.test(permission))
+                Aurl = true;
+            else if(/^(storage)/i.test(permission))
+                Astorage = true;
+            else if(/^cache/i.test(permission))
+                Acache = true;
+        }
+
         if(permissions.constructor === Array)
             for(let permission of permissions)
-                if(/^(username)/i.test(permission))
-                    Ausername = true;
-                else if(/^(password)/i.test(permission))
-                    Apassword = true;
-                else if(/^(api|token)/i.test(permission))
-                    Atoken = true;
-                else if(/^(server)/i.test(permission))
-                    Aserver = true;
-                else if(/^(url(?:root)?)/i.test(permission))
-                    Aurl = true;
-                else if(/^(storage|cache)/i.test(permission))
-                    Astorage = true;
+                WriteOff(permission);
         else if(permissions.constructor === Object)
             for(let permission in permissions)
-                if(/^(username)/i.test(permission))
-                    Ausername = true;
-                else if(/^(password)/i.test(permission))
-                    Apassword = true;
-                else if(/^(api|token)/i.test(permission))
-                    Atoken = true;
-                else if(/^(server)/i.test(permission))
-                    Aserver = true;
-                else if(/^(url(?:root)?)/i.test(permission))
-                    Aurl = true;
-                else if(/^(storage|cache)/i.test(permission))
-                    Astorage = true;
+                WriteOff(permission);
 
-    return { authorized, Ausername, Apassword, Atoken, Aserver, Aurl, Astorage };
+    return { authorized, Ausername, Apassword, Atoken, Aapi, Aserver, Aurl, Astorage };
 }
 
 // get the saved options
@@ -202,7 +200,7 @@ function parseConfiguration() {
     return getConfiguration().then(options => {
         PLUGN_CONFIGURATION = options;
 
-        if((PLUGN_DEVELOPER = options.ExtensionBranchType) && !parseConfiguration.gotConfig) {
+        if((PLUGN_DEVELOPER = options.DeveloperMode) && !parseConfiguration.gotConfig) {
             parseConfiguration.gotConfig = true;
             PLUGN_TERMINAL =
                 PLUGN_DEVELOPER?
