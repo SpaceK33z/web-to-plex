@@ -164,6 +164,7 @@ const storage = (chrome.storage.sync || chrome.storage.local),
             'plugin_myshows',
             'plugin_indomovie',
             'plugin_redbox',
+            'plugin_kitsu',
       ];
 
 let PlexServers = [],
@@ -1557,6 +1558,7 @@ let plugins = {
     'My Anime List': 'https://myanimelist.net/',
     'My Shows': 'https://myshows.me/',
     'Redbox': 'https://www.redbox.com/',
+    'Kitsu': 'https://kitsu.io/',
 
     // Dont' forget to add to the __options__ array!
 }, plugin_array = [], plugin_sites = {}, pluginElement = $('#plugins');
