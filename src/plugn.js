@@ -79,13 +79,13 @@ async function GetAuthorization(name) {
 function getConfiguration() {
     return new Promise((resolve, reject) => {
         function handleConfiguration(options) {
-            if((!options.plexToken || !options.servers) && !options.DO_NOT_USE)
+            if((!options.plexToken || !options.servers) && !options.IGNORE_PLEX)
                 return reject(new Error('Required options are missing')),
                     null;
 
             let server, o;
 
-            if(!options.DO_NOT_USE) {
+            if(!options.IGNORE_PLEX) {
                 // For now we support only one Plex server, but the options already
                 // allow multiple for easy migration in the future.
                 server = options.servers[0];
@@ -236,6 +236,8 @@ let handle = async(results, tabID, instance, script, type) => {
     if(typeof data == 'number') {
         if(handle.timeout)
             return /* already running */;
+        if(data < 0)
+            return /* stop execution and timeouts/intervals */;
 
         return handle.timeout = setTimeout(() => { let { request, sender, callback } = (processMessage.properties || {}); handle.timeout = null; processMessage(request, sender, callback) }, data);
     } else if(typeof data == 'string') {
@@ -406,7 +408,7 @@ return (${ type }.RegExp = RegExp(
 (console.warn("The domain '${ org }' (" + location.href + ") does not match the domain pattern '" + ${ type }.url + "' (" + ${ type }.RegExp + ")"), 5000);
 })(document.queryBy));
 
-console.log('[${ name }]', ${ name });
+console.log('[${ name.replace(/^(top\.)?(\w{7}).*$/i, '$1$2') }]', ${ name });
 
 top.onlocationchange = (event) => chrome.runtime.sendMessage({ type: '$INIT$', options: { ${ type }: '${ js }' } }, callback => callback);
 
@@ -526,7 +528,7 @@ return (plugin.RegExp = RegExp(
 (console.warn("The domain '${ org }' (" + location.href + ") does not match the domain pattern '" + plugin.url + "' (" + plugin.RegExp + ")"), 5000);
 })(document.queryBy));
 
-console.log('[${ name }]', ${ name });
+console.log('[${ name.replace(/^(top\.)?(\w{7}).*$/i, '$1$2') }]', ${ name });
 
 top.onlocationchange = (event) => chrome.runtime.sendMessage({ type: '$INIT$', options: { plugin: '${ plugin }' } }, callback => callback);
 
@@ -601,7 +603,7 @@ return (script.RegExp = RegExp(
 (console.warn("The domain '${ org }' (" + location.href + ") does not match the domain pattern '" + script.url + "' (" + script.RegExp + ")"), 5000);
 })(document.queryBy));
 
-console.log('[${ name }]', ${ name });
+console.log('[${ name.replace(/^(top\.)?(\w{7}).*$/i, '$1$2') }]', ${ name });
 
 top.onlocationchange = (event) => chrome.runtime.sendMessage({ type: '$INIT$', options: { script: '${ script }' } }, callback => callback);
 

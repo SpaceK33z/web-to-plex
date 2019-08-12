@@ -560,13 +560,13 @@ let configuration, init, Update;
     function options() {
         return new Promise((resolve, reject) => {
             function handleOptions(options) {
-                if((!options.plexToken || !options.servers) && !options.DO_NOT_USE)
+                if((!options.plexToken || !options.servers) && !options.IGNORE_PLEX)
                     return reject(new Error('Required options are missing')),
                         null;
 
                 let server, o;
 
-                if(!options.DO_NOT_USE) {
+                if(!options.IGNORE_PLEX) {
                     // For now we support only one Plex server, but the options already
                     // allow multiple for easy migration in the future.
                     server = options.servers[0];
@@ -2027,7 +2027,7 @@ let configuration, init, Update;
     }
 
     function Request_Plex(options) {
-        if(!(__CONFIG__.plexURL && __CONFIG__.plexToken) || __CONFIG__.DO_NOT_USE)
+        if(!(__CONFIG__.plexURL && __CONFIG__.plexToken) || __CONFIG__.IGNORE_PLEX)
             return new Promise((resolve, reject) => resolve({ found: false, key: null }));
 
         return new Promise((resolve, reject) => {

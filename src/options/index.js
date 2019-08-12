@@ -163,6 +163,7 @@ const storage = (chrome.storage.sync || chrome.storage.local),
             'plugin_myanimelist',
             'plugin_myshows',
             'plugin_indomovie',
+            'plugin_redbox',
       ];
 
 let PlexServers = [],
@@ -1078,7 +1079,7 @@ function saveOptions() {
 	let options = getOptionValues(),
         endingSlash = ($0, $1, $$, $_) => ($1 + (/\\/.test($_)? '\\': '/'));
 
-    options.DO_NOT_USE = false;
+    options.IGNORE_PLEX = false;
 
     let r, R = 'Radarr',
         s, S = 'Sonarr',
@@ -1195,7 +1196,7 @@ function saveOptionsWithoutPlex() {
 	let options = getOptionValues(),
         endingSlash = ($0, $1, $$, $_) => ($1 + (/\\/.test($_)? '\\': '/'));
 
-    options.DO_NOT_USE = true;
+    options.IGNORE_PLEX = true;
 
     let r, R = 'Radarr',
         s, S = 'Sonarr',
@@ -1555,6 +1556,7 @@ let plugins = {
     'Shana Project': 'https://www.shanaproject.com/',
     'My Anime List': 'https://myanimelist.net/',
     'My Shows': 'https://myshows.me/',
+    'Redbox': 'https://www.redbox.com/',
 
     // Dont' forget to add to the __options__ array!
 }, plugin_array = [], plugin_sites = {}, pluginElement = $('#plugins');
