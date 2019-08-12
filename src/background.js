@@ -107,13 +107,13 @@ function ChangeStatus({ ITEM_ID, ITEM_TITLE, ITEM_TYPE, ID_PROVIDER, ITEM_YEAR, 
 function getConfiguration() {
     return new Promise((resolve, reject) => {
         function handleConfiguration(options) {
-            if((!options.plexToken || !options.servers) && !options.DO_NOT_USE)
+            if((!options.plexToken || !options.servers) && !options.IGNORE_PLEX)
                 return reject(new Error('Required options are missing')),
                     null;
 
             let server, o;
 
-            if(!options.DO_NOT_USE) {
+            if(!options.IGNORE_PLEX) {
                 // For now we support only one Plex server, but the options already
                 // allow multiple for easy migration in the future.
                 server = options.servers[0];
