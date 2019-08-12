@@ -106,7 +106,7 @@ const storage = (chrome.storage.sync || chrome.storage.local),
             // Advance Settings
             'OMDbAPI',
             'TMDbAPI',
-            'ExtensionBranchType',
+            'DeveloperMode',
 
             // Hidden values
             'watcherQualities',
@@ -172,7 +172,7 @@ let PlexServers = [],
     ClientID = null,
     manifest = chrome.runtime.getManifest(),
     terminal = // See #3
-        (DEVELOPER_MODE = $('[data-option="ExtensionBranchType"]').checked)?
+        (DEVELOPER_MODE = $('[data-option="DeveloperMode"]').checked)?
             { error: m => m, info: m => m, log: m => m, warn: m => m, group: m => m, groupEnd: m => m }:
         console;
 

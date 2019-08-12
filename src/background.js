@@ -146,7 +146,7 @@ function parseConfiguration() {
     return getConfiguration().then(options => {
         BACKGROUND_CONFIGURATION = options;
 
-        if((BACKGROUND_DEVELOPER = options.ExtensionBranchType) && !parseConfiguration.gotConfig) {
+        if((BACKGROUND_DEVELOPER = options.DeveloperMode) && !parseConfiguration.gotConfig) {
             parseConfiguration.gotConfig = true;
             BACKGROUND_TERMINAL =
                 BACKGROUND_DEVELOPER?

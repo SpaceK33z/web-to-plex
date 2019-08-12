@@ -674,7 +674,7 @@ let configuration, init, Update;
 
                     /* Don't expose the user's authentication information to sites */
                     for(let key in options)
-                        if(/api|username|password|token|url|server|cache|storage/i.test(key))
+                        if(/username|password|token|api|server|url|storage|cache/i.test(key))
                             if(ALLOWED && RegExp(PERMISS.join('|'),'i').test(key))
                                 configuration[key] = options[key];
                             else
@@ -706,7 +706,7 @@ let configuration, init, Update;
             ENABLED: __CONFIG__.UseAutoGrab,
             LIMIT:   __CONFIG__.AutoGrabLimit,
         },
-        UTILS_DEVELOPER = __CONFIG__.ExtensionBranchType, // = { true: Developer Mode, fase: Standard Mode }
+        UTILS_DEVELOPER = __CONFIG__.DeveloperMode, // = { true: Developer Mode, fase: Standard Mode }
         UTILS_TERMINAL =
             UTILS_DEVELOPER?
                 console:
