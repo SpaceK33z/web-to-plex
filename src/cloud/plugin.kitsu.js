@@ -8,7 +8,7 @@ let plugin = {
     "timeout": 1000,
 
     "init": () => {
-        let _title = /^\s*english\s+(.+)\s*$/i,
+        let _title = /^\s*(?:english|romanized)\s+(.+)\s*$/i,
             _year  = /^\s*aired\s+.+(\d{4})(?:\s+to.+)?\s*$/i;
 
         let title = $('.media--information li').filter(e => _title.test(e.textContent))[0],
