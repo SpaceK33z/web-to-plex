@@ -44,5 +44,6 @@ let script = {
 if(/\blogin\b/.test(location.pathname) && configuration.TMDbAPI) {
     $('#apikey').first.value = configuration.TMDbAPI;
 
-    return 60000;
+    return -1;
+    // no longer needed to run
 }

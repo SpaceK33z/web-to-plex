@@ -9,7 +9,8 @@ let configuration, init, Update;
     let YEAR  = date.getFullYear(),
         MONTH = date.getMonth() + 1,
         DATE  = date.getDate(),
-        NOTIFIED = false;
+        NOTIFIED = false,
+        RUNNING  = false;
 
     // simple helpers
     let extURL = url => chrome.extension.getURL(url),
@@ -497,7 +498,8 @@ let configuration, init, Update;
 
                         ParsedOptions();
 
-                        return Update(`GRANT_PERMISSION`, { allowed, permissions }, true);
+                        return Update(`GRANT_PERMISSION`, { allowed, permissions }, true),
+                            (init && !RUNNING? (init(), RUNNING = true): RUNNING = false);
                     };
 
                     prompt = furnish('div.web-to-plex-prompt', {},
@@ -1675,7 +1677,7 @@ let configuration, init, Update;
                             let self = event.target, parent = button;
 
                             if(init instanceof Function)
-                                button.setAttribute('class', 'closed floating web-to-plex-button restarting'), button.onmouseenter = button.onmouseleave = null, button.setAttribute('tooltip', 'Restarting...'), button.querySelector('.list-action').setAttribute('tooltip', 'Restarting...'), setTimeout(init, 500);
+                                button.setAttribute('class', 'closed floating web-to-plex-button restarting'), button.onmouseenter = button.onmouseleave = null, button.setAttribute('tooltip', 'Restarting...'), button.querySelector('.list-action').setAttribute('tooltip', 'Restarting...'), setTimeout(() => (init && !RUNNING? (init(), RUNNING = true): RUNNING = false), 500);
                             else
                                 new Notification('warning', "Couldn't reload. Please refresh the page.");
                         }
@@ -2195,6 +2197,8 @@ let configuration, init, Update;
                         PERMISS = data.allotted;
 
                         await ParsedOptions();
+
+                        (init && !RUNNING? (init(), RUNNING = true): RUNNING = false);
                     } else {
                         UTILS_TERMINAL.warn('Permission Request:', data);
                         new Prompt('permission', data);
