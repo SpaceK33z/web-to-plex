@@ -58,21 +58,6 @@ The sites used as search engines (IMDb, TMDb, and TVDb) will automatically creat
 
 --------
 
-# Download Managers
-
-Optionally, you can configure your download manager(s) (see support table) in the extension's options. After that, you can immediately add a TV show or movie with one click, right from your favorite site.
-
-## Supported Managers
-| Manager                                         | Movie Support | TV Show Support | Searchable
-| ----------------------------------------------- | ------------- | --------------- | ----------
-| [Watcher 3](https://nosmokingbandit.github.io/) | Yes           |                 |
-| [CouchPotato](https://couchpota.to/)            | Yes           | Yes             |
-| [Radarr](https://radarr.video/)                 | Yes           |                 | Yes
-| [Sonarr](https://sonarr.tv/)                    |               | Yes             | Yes
-| [Ombi](https://ombi.io/)                        | Yes           | Yes             | Yes
-
-If you don't feel like actually downloading the movie, or want a simple watchlist, you can also use the built-in "Plex It!" feature to bookmark the current page.
-
 ## Supported sites
 
 *Given in order of completion*
