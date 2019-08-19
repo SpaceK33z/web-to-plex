@@ -124,6 +124,7 @@ const storage = (chrome.storage.sync || chrome.storage.local),
             '__sonarrStoragePath',
             '__medusaStoragePath',
             '__domains',
+            '__caught',
 
             // Builtins
             'builtin_amazon',
@@ -176,7 +177,14 @@ let PlexServers = [],
             { error: m => m, info: m => m, log: m => m, warn: m => m, group: m => m, groupEnd: m => m }:
         console;
 
-chrome.manifest = chrome.runtime.getManifest();
+chrome.manifest = manifest;
+
+// Not really important variables
+let __caught = {
+    imdb: [],
+    tmdb: [],
+    tvdb: [],
+};
 
 // create and/or queue a notification
 // state = "error" - red
@@ -474,6 +482,11 @@ function getPlexConnections(server) {
 function getOptionValues() {
 	let options = {};
 
+    for(let key in __caught)
+        __caught[key] = __caught[key].filter(id => id);
+
+    $('[data-option="__caught"i]').value = JSON.stringify(__caught);
+
 	__options__.forEach(option => {
         let element = $(
 			`[data-option="${ option }"]`
@@ -625,7 +638,25 @@ function performOmbiTest(refreshing = false) {
     teststatus.textContent = '?';
     options.ombiURLRoot = url = path.value = options.ombiURLRoot.replace(/^(\:\d+)/, 'localhost$1').replace(/^(?!^http(s)?:)/, 'http$1://').replace(/\/+$/, '');
 
-    let Get = () =>
+    let Get = () => {
+        fetch(`${ url }/api/v1/Request/movie`)
+            .then(r => r.json())
+            .thne(json => {
+                json.map(item => {
+                    __caught.imdb.push(item.imdbId);
+                    __caught.tmdb.push(item.theMovieDbId);
+                });
+            });
+
+        fetch(`${ url }/api/v1/Request/tv`)
+            .then(r => r.json())
+            .thne(json => {
+                json.map(item => {
+                    __caught.imdb.push(item.imdbId);
+                    __caught.tvdb.push(item.tvDbId);
+                });
+            });
+
         fetch(`${ url }/api/v1/Status`, headers)
             .then( response => response.text() )
             .then( status => {
@@ -644,6 +675,7 @@ function performOmbiTest(refreshing = false) {
                 }
             } )
             .catch( error => { new Notification('error', error) } );
+    }
 
     if(refreshing)
         Get();
@@ -690,7 +722,14 @@ function performWatcherTest(QualityProfileID = 'Default', refreshing = false) {
     storagepath.value = '[Empty]';
     options.watcherURLRoot = url = path.value = options.watcherURLRoot.replace(/^(\:\d+)/, 'localhost$1').replace(/^(?!^http(s)?:)/, 'http$1://').replace(/\/+$/, '');
 
-    let Get = () =>
+    let Get = () => {
+        getWatcher(options, 'liststatus').then(list => {
+            list.map(item => {
+                __caught.imdb.push(item.movies.imdbid);
+                __caught.tmdb.push(item.movies.tmdbid);
+            });
+        });
+
         getWatcher(options, 'getconfig').then(configuration => {
             if(!configuration || !configuration.response) return new Notification('error', 'Failed to get Watcher configuration');
 
@@ -735,6 +774,7 @@ function performWatcherTest(QualityProfileID = 'Default', refreshing = false) {
 
             $('[data-option="watcherStoragePaths"i]').value = JSON.stringify(path || { path: '[Default Location]', id: 0 });
         });
+    }
 
     if(refreshing)
         Get();
@@ -782,6 +822,13 @@ function performRadarrTest(QualityProfileID, StoragePath, refreshing = false) {
     options.radarrURLRoot = url = path.value = options.radarrURLRoot.replace(/^(\:\d+)/, 'localhost$1').replace(/^(?!^http(s)?:)/, 'http$1://').replace(/\/+$/, '');
 
     let Get = () => {
+        getRadarr(options, 'movie').then(movies => {
+            movies.map(movie => {
+                __caught.imdb.push(movie.imdbId);
+                __caught.tmdb.push(movie.tmdbId);
+            });
+        });
+
         getRadarr(options, 'profile').then(profiles => {
             if(!profiles) return new Notification('error', 'Failed to get Radarr configuration');
 
@@ -875,6 +922,12 @@ function performSonarrTest(QualityProfileID, StoragePath, refreshing = false) {
     options.sonarrURLRoot = url = path.value = options.sonarrURLRoot.replace(/^(\:\d+)/, 'localhost$1').replace(/^(?!^http(s)?:)/, 'http$1://').replace(/\/+$/, '');
 
     let Get = () => {
+        getSonarr(options, 'series').then(shows => {
+            shows.map(show => {
+                __caught.tvdb.push(show.tvdbId);
+            });
+        });
+
         getSonarr(options, 'profile').then(profiles => {
             if(!profiles) return new Notification('error', 'Failed to get Sonarr configuration');
 
@@ -968,6 +1021,13 @@ function performMedusaTest(QualityProfileID, StoragePath, refreshing = false) {
     options.medusaURLRoot = url = path.value = options.medusaURLRoot.replace(/^(\:\d+)/, 'localhost$1').replace(/^(?!^http(s)?:)/, 'http$1://').replace(/\/+$/, '');
 
     let Get = () => {
+        getMedusa(options, 'series').then(shows => {
+            shows.map(show => {
+                __caught.imdb.push(show.id.imdb)
+                __caught.tvdb.push(show.id.tvdb);
+            });
+        });
+
         getMedusa(options, 'config').then(configuration => {
             if(!configuration) return new Notification('error', 'Failed to get Medusa configuration');
 
@@ -1381,7 +1441,6 @@ function restoreOptions(OPTIONS) {
         $('[data-option="__domains"i]').value = __domains;
 	}
 
-
     if (OPTIONS && typeof OPTIONS == 'string') {
         OPTIONS = JSON.parse(OPTIONS);
 
@@ -1683,7 +1742,7 @@ $('#erase_cache').addEventListener('click', event => {
 });
 
 $('#version')
-    .innerHTML = `Version ${ chrome.manifest.version }`;
+    .innerHTML = `Version ${ manifest.version }`;
 
 $('[type="range"]', true)
     .forEach((element, index, array) => {
