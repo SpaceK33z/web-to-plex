@@ -400,6 +400,10 @@
     background: #265AF4 !important;
 }
 
+.web-to-plex-button.wtp--queued::after, .web-to-plex-button.wtp--queued::before {
+    background: #568AF4 !important;
+}
+
 .web-to-plex-button.wtp--error::after, .web-to-plex-button.wtp--error::before {
     background: #FF2A2A !important;
 }

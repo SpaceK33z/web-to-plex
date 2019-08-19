@@ -9,8 +9,12 @@ let configuration, init, Update;
     let YEAR  = date.getFullYear(),
         MONTH = date.getMonth() + 1,
         DATE  = date.getDate(),
+    // Notification items
         NOTIFIED = false,
-        RUNNING  = false;
+        RUNNING  = false,
+    // Other items
+    /* Items that the user has already asked for */
+        CAUGHT;
 
     // simple helpers
     let extURL = url => chrome.extension.getURL(url),
@@ -88,7 +92,7 @@ let configuration, init, Update;
                 UTILS_TERMINAL.warn('Exceeded quota. Erasing cache...');
 
                 for(let item in items)
-                    if(/^~\/cache\//i.test(item))
+                    if(/^~\/cache\/(?!get|has)/i.test(item))
                         UTILS_STORAGE.remove(item);
 
                 UTILS_TERMINAL.log('Cache erased');
@@ -688,6 +692,16 @@ let configuration, init, Update;
                             /* Simple copy */
                             configuration[key] = options[key];
 
+                    CAUGHT = JSON.parse(options.__caught);
+                    CAUGHT.bump = async(ids) => {
+                        for(let id in ids)
+                            CAUGHT[id.toLowerCase().slice(0, 4)].push(ids[id]);
+
+                        let __caught = JSON.stringify(CAUGHT);
+
+                        await UTILS_STORAGE.set({ __caught }, () => configuration.__caught = __caught);
+                    };
+
                     return __CONFIG__ = options;
                 },
                 error => {
@@ -1283,7 +1297,7 @@ let configuration, init, Update;
         return data;
     }
 
-    function __Request_CouchPotato__(options) {
+    function Request_CouchPotato(options) {
     	// TODO: this does not work anymore!
     	if(!options.IMDbID)
     		return new Notification(
@@ -1310,7 +1324,7 @@ let configuration, init, Update;
     				(!response.silent && UTILS_TERMINAL.error('Error viewing CouchPotato: ' + String(response.error)));
     			}
     			if(!movieExists) {
-    				Request_CouchPotato(options);
+    				__Request_CouchPotato__(options);
     				return;
     			}
     			new Notification(
@@ -1352,7 +1366,10 @@ let configuration, init, Update;
                     return new Notification('warning', `Could not add "${ options.title }" to Ombi: ${ response.error }`) ||
                         (!response.silent && UTILS_TERMINAL.error('Error adding to Ombi: ' + String(response.error), response.location, response.debug));
                 } else if(response && response.success) {
-                    let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-{2,}/g, '-').toLowerCase();
+                    let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-{2,}/g, '-').toLowerCase(),
+                        { IMDbID, TMDbID, TVDbID } = options;
+
+                    CAUGHT.bump({ IMDbID, TMDbID, TVDbID });
 
                     UTILS_TERMINAL.honor('Successfully pushed', options);
                     new Notification('update', `Added "${ options.title }" to Ombi`, 7000, () => window.open(__CONFIG__.ombiURL, '_blank'));
@@ -1365,7 +1382,7 @@ let configuration, init, Update;
     }
 
     // Movies/TV Shows
-    function Request_CouchPotato(options) {
+    function __Request_CouchPotato__(options) {
         new Notification('info', `Adding "${ options.title }" to CouchPotato`, 3000);
 
     	chrome.runtime.sendMessage(
@@ -1388,6 +1405,10 @@ let configuration, init, Update;
     				(!response.silent && UTILS_TERMINAL.error('Error adding to CouchPotato: ' + String(response.error), response.location, response.debug));
     			}
     			if(response.success) {
+                    let { IMDbID, TMDbID, TVDbID } = options;
+
+                    CAUGHT.bump({ IMDbID, TMDbID, TVDbID });
+
                     UTILS_TERMINAL.honor('Successfully pushed', options);
     				new Notification('update', `Added "${ options.title }" to CouchPotato`);
     			} else {
@@ -1427,7 +1448,10 @@ let configuration, init, Update;
                         (!response.silent && UTILS_TERMINAL.error('Error adding to Watcher: ' + String(response.error), response.location, response.debug));
                 } else if(response && (response.success || (response.response + "") == "true")) {
                     let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-{2,}/g, '-').toLowerCase(),
-                        TMDbID = options.TMDbID || response.tmdbId;
+                        TMDbID = options.TMDbID || response.tmdbId,
+                        IMDbID = options.IMDbID || response.imdbId;
+
+                    CAUGHT.bump({ IMDbID, TMDbID });
 
                     UTILS_TERMINAL.honor('Successfully pushed', options);
                     new Notification('update', `Added "${ options.title }" to Watcher`, 7000, () => window.open(`${__CONFIG__.watcherURL}library/status${TMDbID? `#${title}-${TMDbID}`: '' }`, '_blank'));
@@ -1481,7 +1505,10 @@ let configuration, init, Update;
                         (!response.silent && UTILS_TERMINAL.error('Error adding to Radarr: ' + String(response.error), response.location, response.debug));
                 } else if(response && response.success) {
                     let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-{2,}/g, '-').toLowerCase(),
-                        TMDbID = options.TMDbID || response.tmdbId;
+                        TMDbID = options.TMDbID || response.tmdbId,
+                        IMDbID = options.IMDbID || response.imdbId;
+
+                    CAUGHT.bump({ IMDbID, TMDbID });
 
                     UTILS_TERMINAL.honor('Successfully pushed', options);
                     new Notification('update', `Added "${ options.title }" to Radarr`, 7000, () => window.open(`${__CONFIG__.radarrURL}${TMDbID? `movies/${title}-${TMDbID}`: '' }`, '_blank'));
@@ -1533,7 +1560,10 @@ let configuration, init, Update;
                     return new Notification('warning', `Could not add "${ options.title }" to Sonarr: ${ response.error }`) ||
                         (!response.silent && UTILS_TERMINAL.error('Error adding to Sonarr: ' + String(response.error), response.location, response.debug));
                 } else if(response && response.success) {
-                    let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-{2,}/g, '-').toLowerCase();
+                    let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-{2,}/g, '-').toLowerCase(),
+                        TVDbID = options.TVDbID || response.tvdbId;
+
+                    CAUGHT.bump({ TVDbID });
 
                     UTILS_TERMINAL.honor('Successfully pushed', options);
                     new Notification('update', `Added "${ options.title }" to Sonarr`, 7000, () => window.open(`${__CONFIG__.sonarrURL}series/${title}`, '_blank'));
@@ -1586,7 +1616,10 @@ let configuration, init, Update;
                     return new Notification('warning', `Could not add "${ options.title }" to Medusa: ${ response.error }`) ||
                         (!response.silent && UTILS_TERMINAL.error('Error adding to Medusa: ' + String(response.error), response.location, response.debug));
                 } else if(response && response.success) {
-                    let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-{2,}/g, '-').toLowerCase();
+                    let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-{2,}/g, '-').toLowerCase(),
+                        TVDbID = options.TVDbID || response.tvdbId;
+
+                    CAUGHT.bump({ TVDbID });
 
                     UTILS_TERMINAL.honor('Successfully pushed', options);
                     new Notification('update', `Added "${ options.title }" to Medusa`, 7000, () => window.open(`${__CONFIG__.medusaURL}home/displayShow?indexername=tvdb&seriesid=${options.TVDbID}`, '_blank'));
@@ -1734,11 +1767,20 @@ let configuration, init, Update;
                 let option = options[index];
 
                 // Skip empty entries
-                if(!option || !option.type || !option.title) continue;
+                if(!option || !option.type || !option.title)
+                    continue;
+
+                // Skip queued entries
+                if(
+                    !!~CAUGHT.imdb.indexOf(option.IMDbID) ||
+                    !!~CAUGHT.tmdb.indexOf(option.TMDbID) ||
+                    !!~CAUGHT.tvdb.indexOf(option.TVDbID)
+                )
+                    continue;
 
                 // the action should be an array
                 // we'll give the button a list of links to engage, so make it snappy!
-                let url = `#${ option.imdb || 'tt' }-${ option.tmdb | 0 }-${ option.tvdb | 0 }`;
+                let url = `#${ option.IMDbID || 'tt' }-${ option.TMDbID | 0 }-${ option.TVDbID | 0 }`;
 
                 /* Failed */
                 if(/#tt-0-0/i.test(url))
@@ -1772,7 +1814,9 @@ let configuration, init, Update;
                         else if(__CONFIG__.usingMedusa && tv.test(option.type))
                             Request_Medusa(option, true);
                         else if(__CONFIG__.usingCouchPotato)
-                            __Request_CouchPotato__(option, true);
+                            Request_CouchPotato(option, true);
+
+                        button.classList.replace('wtp--download', 'wtp--queued');
                     } catch(error) {
                         UTILS_TERMINAL.error(`Failed to get "${ option.title }" (Error #${ ++fail })`)
                     }
@@ -1791,7 +1835,8 @@ let configuration, init, Update;
         } else {
         /* Handle a single item */
 
-            if(!options || !options.type || !options.title) return;
+            if(!options || !options.type || !options.title)
+                return;
 
             let empty = (em.test(options.IMDbID) && em.test(options.TMDbID) && em.test(options.TVDbID)),
                 nice_title = `${options.title.toCaps()}${options.year? ` (${options.year})`: ''}`;
@@ -1858,19 +1903,25 @@ let configuration, init, Update;
                         button.classList.add('wtp--download');
                         element.addEventListener('click', element.ON_CLICK = e => {
                             e.preventDefault();
-                            if(__CONFIG__.usingOmbi) {
-                                Request_Ombi(options);
-                            } else if(__CONFIG__.usingWatcher && !tv.test(options.type)) {
-                                Request_Watcher(options);
-                            } else if(__CONFIG__.usingRadarr && !tv.test(options.type)) {
-                                Request_Radarr(options);
-                            } else if(__CONFIG__.usingSonarr && tv.test(options.type)) {
-                                Request_Sonarr(options);
-                            } else if(__CONFIG__.usingMedusa && tv.test(options.type)) {
-                                Request_Medusa(options);
-                            } else if(__CONFIG__.usingCouchPotato) {
-                                __Request_CouchPotato__(options);
+                            try {
+                                if(__CONFIG__.usingOmbi)
+                                    Request_Ombi(options);
+                                else if(__CONFIG__.usingWatcher && !tv.test(options.type))
+                                    Request_Watcher(options);
+                                else if(__CONFIG__.usingRadarr && !tv.test(options.type))
+                                    Request_Radarr(options);
+                                else if(__CONFIG__.usingSonarr && tv.test(options.type))
+                                    Request_Sonarr(options);
+                                else if(__CONFIG__.usingMedusa && tv.test(options.type))
+                                    Request_Medusa(options);
+                                else if(__CONFIG__.usingCouchPotato)
+                                    Request_CouchPotato(options);
+
+                                button.classList.replace('wtp--download', 'wtp--queued');
+                            } catch(error) {
+                                throw error;
                             }
+
                         });
                 }
                 NOTIFIED = false;
@@ -1889,6 +1940,13 @@ let configuration, init, Update;
 
                 button.classList.remove('wtp--found');
                 button.classList.add('wtp--error');
+            }
+
+            if((action == 'downloader') && (!!~CAUGHT.imdb.indexOf(options.IMDbID) || !!~CAUGHT.tmdb.indexOf(options.TMDbID) || !!~CAUGHT.tvdb.indexOf(options.TVDbID))) {
+                element.setAttribute(hov, `Modify "${ nice_title }" | ${ty}`);
+
+                button.classList.remove('wtp--found');
+                button.classList.add('wtp--queued');
             }
 
             element.id = options? `${options.IMDbID || 'tt'}-${options.TMDbID | 0}-${options.TVDbID | 0}`: 'tt-0-0';
