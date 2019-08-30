@@ -25,7 +25,7 @@
             text-decoration: none !important;
         }
 
-		a[target="_blank"]:after {
+		a[target="_blank"]::after {
 		    content: " [\2197]";
 		    font-size: 70%;
 
@@ -325,7 +325,7 @@
 			background: #ffffff4d;
 		}
 
-		.prompt-option.mutable > *:last-child:after {
+		.prompt-option.mutable > *:last-child::after {
 			content: '\00d7';
 		}
 
@@ -430,7 +430,7 @@
 			vertical-align: text-bottom;
 		}
 
-        .checkbox:after {
+        .checkbox::after {
             content: 'OFF';
             color: #666;
             position: absolute;
@@ -441,7 +441,7 @@
             text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.15);
         }
 
-        .checkbox:before {
+        .checkbox::before {
             content: 'ON';
             color: #cc7b19;
             position: absolute;
@@ -451,21 +451,37 @@
             font-weight: bold;
         }
 
-		.checkbox[prompt-yes]:before {
+		.checkbox[prompt-yes]::before {
 			content: attr(prompt-yes);
 			text-transform: uppercase;
 		}
 
-		.checkbox[prompt-no]:after {
+		.checkbox[prompt-no]::after {
 			content: attr(prompt-no);
 			text-transform: uppercase;
 		}
 
-        .checkbox[prompt="y/n"i]:before {
+		.checkbox[prompt-size="large"i]::before, .checkbox[prompt-size="large"i]::after {
+		    font-size: 30px !important;
+		}
+
+		.checkbox[prompt-size="medium"i]::before, .checkbox[prompt-size="medium"i]::after {
+		    font-size: 21px !important;
+		}
+
+		.checkbox[prompt-size="normal"i]::before, .checkbox[prompt-size="normal"i]::after {
+		    font-size: 12px !important;
+		}
+
+		.checkbox[prompt-size="small"i]::before, .checkbox[prompt-size="small"i]::after {
+		    font-size: 6px !important;
+		}
+
+        .checkbox[prompt="y/n"i]::before {
             content: 'YES';
         }
 
-        .checkbox[prompt="y/n"i]:after {
+        .checkbox[prompt="y/n"i]::after {
             content: 'NO';
         }
 
@@ -530,7 +546,7 @@
             vertical-align: sub;
         }
 
-        input[type="range"] + output:after {
+        input[type="range"] + output::after {
             position: absolute;
             top: 8px;
             left: -7px;
@@ -1076,6 +1092,22 @@ div
 
 	<article>
 		<details>
+			<summary>Theme Settings</summary>
+
+			<h2>The Button</h2>
+			<section>
+				Where should the button be?
+				<br>
+				<span class="checkbox" prompt-size="large" prompt-yes="&#10525;" prompt-no="&#10526;">
+					<input id="theme:button-location" theme="true:right" type="checkbox" />
+					<label for="theme:button-location"></label>
+				</span>
+			</section>
+		</details>
+	</article>
+
+	<article>
+		<details>
 			<summary>Site Settings</summary>
 
             <h2>Experimental Sites</h2>
@@ -1400,6 +1432,7 @@ div
 		<input data-option="__medusaStoragePath" value />
 		<input data-option="__domains" value />
 		<input data-option="__caught" value />
+		<input data-option="__theme" value />
 	</div>
 
     <footer id="version"></footer>

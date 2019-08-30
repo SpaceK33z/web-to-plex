@@ -371,6 +371,11 @@ let tabchange = async tabs => {
                     chrome.runtime.getURL(`cloud/plugin.${ js }.js`):
                 `https://ephellon.github.io/web.to.plex/${ type }s/${ js }.js`;
 
+    let DATE = (new Date),
+        YEAR = DATE.getFullYear(),
+        MONT = DATE.getMonth(),
+        DAY  = DATE.getDate();
+
     fetch(file, { mode: 'cors' })
         .then(response => response.text())
         .then(code => {
@@ -401,6 +406,11 @@ ${
         return o.join('');
     })()
 }
+
+let DATE = (new Date),
+    YEAR = ${YEAR},
+    MONT = ${MONT},
+    DAY  = ${DAY};
 
 /* Start Injected */
 ${ prepare(code, js, type) }
@@ -493,6 +503,11 @@ chrome.runtime.onMessage.addListener(processMessage = async(request, sender, cal
                         chrome.runtime.getURL(`cloud/plugin.${ plugin }.js`):
                     `https://ephellon.github.io/web.to.plex/${ _type }s/${ options[_type] }.js`;
 
+        let DATE = (new Date),
+            YEAR = DATE.getFullYear(),
+            MONT = DATE.getMonth(),
+            DAY  = DATE.getDate();
+
         let { authorized, ...A } = await GetAuthorization(options[_type]);
 
         switch(type) {
@@ -529,6 +544,11 @@ ${
         return o.join('');
     })()
 }
+
+let DATE = (new Date),
+    YEAR = ${YEAR},
+    MONT = ${MONT},
+    DAY  = ${DAY};
 
 /* Start Injected */
 ${ prepare(code, plugin, _type) }
@@ -612,6 +632,11 @@ ${
         return o.join('');
     })()
 }
+
+let DATE = (new Date),
+    YEAR = ${YEAR},
+    MONT = ${MONT},
+    DAY  = ${DAY};
 
 /* Start Injected */
 ${ prepare(code, script, _type) }

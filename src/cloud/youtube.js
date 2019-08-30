@@ -1,5 +1,6 @@
 let openedByUser = false,
-    listenersSet = false;
+    listenersSet = false,
+    listenerInt;
 
 let script = {
     "url": "*://www.youtube.com/*",
@@ -48,7 +49,7 @@ let script = {
         if(type == 'movie' || type == 'show') {
             let title = $((type == 'movie'? '.title': '#owner-container')).first,
                 year  = $('#content ytd-expander').first,
-                image = $('$img img').first || { src: '' };
+                image = $('#img img').first || { src: '' };
 
             if(!title)
                 return -1;
@@ -77,7 +78,7 @@ let script = {
         }
 
         if(!listenersSet) {
-            setInterval(() => {
+            listenerInt = setInterval(() => {
                 let closed = 'collapsed' in $('ytd-expander').first.attributes;
 
                 if(closed && !openedByUser)
@@ -94,6 +95,8 @@ let script = {
             });
 
             listenersSet = true;
+        } else {
+            clearInterval(listenerInt);
         }
 
         return options;

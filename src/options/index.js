@@ -125,6 +125,7 @@ const storage = (chrome.storage.sync || chrome.storage.local),
             '__medusaStoragePath',
             '__domains',
             '__caught',
+            '__theme',
 
             // Builtins
             'builtin_amazon',
@@ -180,11 +181,14 @@ let PlexServers = [],
 chrome.manifest = manifest;
 
 // Not really important variables
+// The "caught" IDs (already asked for in managers)
 let __caught = {
     imdb: [],
     tmdb: [],
     tvdb: [],
-};
+},
+// The theme classes
+    __theme = [];
 
 // create and/or queue a notification
 // state = "error" - red
@@ -485,7 +489,10 @@ function getOptionValues() {
     for(let key in __caught)
         __caught[key] = __caught[key].filter(id => id);
 
+    __theme = __theme.filter(v => v);
+
     $('[data-option="__caught"i]').value = JSON.stringify(__caught);
+    $('[data-option="__theme"i]').value = JSON.stringify(__theme);
 
 	__options__.forEach(option => {
         let element = $(
@@ -1778,5 +1785,20 @@ $('.test', true)
             await saveOptions(event);
 
             open(self.href, self.target);
+        });
+    });
+
+$('[id^="theme:"i]', true)
+    .forEach((element, idnex, array) => {
+        element.addEventListener('click', async event => {
+            let self = event.target;
+
+            let [a, b] = self.getAttribute('theme').split(/\s*:\s*/).filter(v => v),
+                value = `${self.id.replace(/^theme:/i, '')}-${b}`;
+
+            if((self.checked + '') == a)
+                __theme.push(value);
+            else
+                __theme = __theme.filter(v => v != value);
         });
     });
