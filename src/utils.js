@@ -893,7 +893,7 @@ let configuration, init, Update;
                     `${ __CONFIG__.sonarrURLRoot }api/series/lookup?term=${ plus(title, '%20') }&apikey=${ __CONFIG__.sonarrToken }`:
                 (__CONFIG__.usingMedusa)?
                     (tid)?
-                        `${ __CONFIG__.medusarURLRoot }api/v2/series/tvdb${ tid }?detailed=true&${ tid }&api_key=${ __CONFIG__.medusaToken }`:
+                        `${ __CONFIG__.medusaURLRoot }api/v2/series/tvdb${ tid }?detailed=true&${ tid }&api_key=${ __CONFIG__.medusaToken }`:
                     `${ __CONFIG__.medusaURLRoot }api/v2/internal/searchIndexersForShowName?query=${ plus(title) }&indexerId=0&api_key=${ __CONFIG__.medusaToken }`:
                 null:
             (rqut == 'imdb' || (rqut == '*' && !iid && title) || (rqut == 'tvdb' && !iid && title && !(rerun & 0b1000)) && (rerun |= 0b1000))?
@@ -1642,9 +1642,11 @@ let configuration, init, Update;
         else if(persistent && firstButton !== null && firstButton !== undefined)
             return firstButton;
 
+        let ThemeClasses = JSON.parse(__CONFIG__.__theme).join('.');
+
         // <button>
         let button =
-            furnish('button.show.closed.floating.web-to-plex-button', {
+            furnish(`button.show.closed.floating.web-to-plex-button${ThemeClasses?'.'+ThemeClasses:''}`, {
                     tooltip: 'Loading...',
                     onmouseenter: event => {
                         let self = event.target;
@@ -1809,12 +1811,12 @@ let configuration, init, Update;
                             Request_Watcher(option, true);
                         else if(__CONFIG__.usingRadarr && !tv.test(option.type))
                             Request_Radarr(option, true);
+                        else if(__CONFIG__.usingCouchPotato && !tv.test(option.type))
+                            Request_CouchPotato(option, true);
                         else if(__CONFIG__.usingSonarr && tv.test(option.type))
                             Request_Sonarr(option, true);
                         else if(__CONFIG__.usingMedusa && tv.test(option.type))
                             Request_Medusa(option, true);
-                        else if(__CONFIG__.usingCouchPotato)
-                            Request_CouchPotato(option, true);
 
                         button.classList.replace('wtp--download', 'wtp--queued');
                     } catch(error) {
@@ -1910,12 +1912,12 @@ let configuration, init, Update;
                                     Request_Watcher(options);
                                 else if(__CONFIG__.usingRadarr && !tv.test(options.type))
                                     Request_Radarr(options);
+                                else if(__CONFIG__.usingCouchPotato && !tv.test(options.type))
+                                    Request_CouchPotato(options);
                                 else if(__CONFIG__.usingSonarr && tv.test(options.type))
                                     Request_Sonarr(options);
                                 else if(__CONFIG__.usingMedusa && tv.test(options.type))
                                     Request_Medusa(options);
-                                else if(__CONFIG__.usingCouchPotato)
-                                    Request_CouchPotato(options);
 
                                 button.classList.replace('wtp--download', 'wtp--queued');
                             } catch(error) {
