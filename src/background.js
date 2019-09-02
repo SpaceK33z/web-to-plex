@@ -811,39 +811,50 @@ chrome.runtime.onMessage.addListener((request, sender, callback) => {
             case 'SEARCH_PLEX':
                 Search_Plex(request, callback);
                 return true;
+
             case 'VIEW_COUCHPOTATO':
                 Open_CouchPotato(request, callback);
                 return true;
+
             case 'PUSH_COUCHPOTATO':
                 Push_CouchPotato(request, callback);
                 return true;
+
             case 'PUSH_RADARR':
                 Push_Radarr(request, callback);
                 return true;
+
             case 'PUSH_SONARR':
                 Push_Sonarr(request, callback);
                 return true;
+
             case 'PUSH_MEDUSA':
                 Push_Medusa(request, callback);
                 return true;
+
             case 'PUSH_WATCHER':
                 Push_Watcher(request, callback);
                 return true;
+
             case 'PUSH_OMBI':
                 Push_Ombi(request, callback);
                 return true;
+
             case 'OPEN_OPTIONS':
                 chrome.runtime.openOptionsPage();
                 return true;
+
             case 'SEARCH_FOR':
                 if(ITEM_TITLE && ITEM_TYPE)
                     ChangeStatus({ ITEM_ID, ITEM_TITLE, ITEM_TYPE, ID_PROVIDER, ITEM_YEAR, ITEM_URL, FILE_TYPE, FILE_PATH });
                 return true;
+
             case 'SAVE_AS':
                 chrome.contextMenus.update('W2P-DL', {
                     title: `Save as "${ ITEM_TITLE } (${ ITEM_YEAR })" (${ FILE_TYPE })`
                 });
                 return true;
+
             case 'DOWNLOAD_FILE':
                 let FILE_TITLE = ITEM_TITLE.replace(/\-/g, ' ').replace(/[\s\:]{2,}/g, ' - ').replace(/[^\w\s\-\']+/g, '');
 
@@ -862,6 +873,7 @@ chrome.runtime.onMessage.addListener((request, sender, callback) => {
                     });
                 });
                 return true;
+
             case 'PLUGIN':
             case 'SCRIPT':
             case '_INIT_':
@@ -870,6 +882,7 @@ chrome.runtime.onMessage.addListener((request, sender, callback) => {
             case 'GRANT_PERMISSION':
                 /* These are meant to be handled by plugn.js */
                 return false;
+
             default:
                 BACKGROUND_TERMINAL.warn(`Unknown event [${ request.type }]`);
                 return false;

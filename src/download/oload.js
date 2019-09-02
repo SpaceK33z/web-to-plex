@@ -10,13 +10,13 @@ let check;
 check = document.body.onload = event => {
     let video = document.querySelector('div > p + p');
 
-    if(video) {
+    if(video && video.textContent) {
         try {
             top.postMessage({ href: `https://oload.fun/stream/${ video.textContent }?mime=true`, tail: 'mp4', type: 'SEND_VIDEO_LINK', from: 'oload' }, '*');
         } catch(error) {
             terminal.error('Failed to post message:', error);
         }
     } else {
-        setTimeout(check, 5000);
+        setTimeout(check, 500);
     }
 };

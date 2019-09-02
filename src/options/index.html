@@ -71,13 +71,13 @@
             transition: background 0.2s;
             display: block !important;
             height: 38px !important;
-            padding: 6px 12px !important;
+            padding: 6px 12px;
             font-size: 16px !important;
             color: #eee !important;
             vertical-align: middle;
-            background: rgba(255, 255, 255, 0.25) !important;
-            border: 3px solid rgba(0, 0, 0, 0) !important;
-            border-radius: 3px !important;
+            background: rgba(255, 255, 255, 0.25);
+            border: 3px solid rgba(0, 0, 0, 0);
+            border-radius: 3px;
             font-family: inherit;
             margin: 0;
         }
@@ -175,6 +175,28 @@
 			position: fixed;
 
 			width: 100%;
+		}
+
+		[in-use] {
+			color: #197bcc;
+		}
+
+		[in-use]::after {
+			content: '\2610';
+		}
+
+		[in-use="true"i]::after {
+			content: '\2611';
+		}
+
+		[top] {
+			border-bottom-left-radius:  0 !important;
+			border-bottom-right-radius: 0 !important;
+		}
+
+		[bottom] {
+			border-top-left-radius:  0 !important;
+			border-top-right-radius: 0 !important;
 		}
 
         /* notifications */
@@ -655,36 +677,36 @@ div
 
 	<article>
         <details>
-            <summary>Login</summary>
+            <summary>Login <span in-use="plex_token"></span></summary>
 
             <h2>Login Settings</h2>
-            <section>
-                <label>Use your Plex token</label>
+            <details>
+                <summary>Use your Plex token <span in-use="plex_token"></span></summary>
                 <input type="text" id="plex_token" data-option="plexToken" placeholder="Enter your Plex token"/>
                 <div>
                     How to find your <a href="https://support.plex.tv/hc/en-us/articles/204059436-Finding-your-account-token-X-Plex-Token" title="How to find your token?" target="_blank">Plex token</a>.
                 </div>
-            </section>
+            </details>
 
             <h3 style="width: 35%; text-align: center;"><em>&mdash; OR &mdash;</em></h3>
 
-            <section>
-                <label>Login with Plex</label>
-                <input type="text" id="plex_username" style="border-bottom-left-radius: 0 !important; border-bottom-right-radius: 0 !important;" placeholder="Enter your Plex username"/>
-                <input type="password" id="plex_password" style="border-top-left-radius: 0 !important; border-top-right-radius: 0 !important;" placeholder="Enter your Plex password"/>
+            <details>
+                <summary>Login with Plex</summary>
+                <input type="text" id="plex_username" top placeholder="Enter your Plex username"/>
+                <input type="password" id="plex_password" bottom placeholder="Enter your Plex password"/>
                 <div>
                     Your Plex username and password are never stored, only your <a href="https://support.plex.tv/hc/en-us/articles/204059436-Finding-your-account-token-X-Plex-Token" title="How to find your token?" target="_blank">Plex token</a>.
                     <br>
                     Your username and password are used in order to get a token from Plex itself.
                 </div>
-            </section>
+            </details>
 
             <h3 style="width: 35%; text-align: center;"><em>&mdash; OR &mdash;</em></h3>
 
-            <section>
-                <label>Attach to Ombi<sup><em>*</em></sup></label>
-                <input type="text" id="ombi_url" style="border-bottom-left-radius: 0 !important; border-bottom-right-radius: 0 !important;" placeholder="Enter your Ombi URL"/>
-                <input type="text" id="ombi_api" style="border-top-left-radius: 0 !important; border-top-right-radius: 0 !important;" placeholder="Enter your Ombi API key"/>
+            <details>
+                <summary>Attach to Ombi<sup><em>*</em></sup></summary>
+                <input type="text" id="ombi_url" top placeholder="Enter your Ombi URL"/>
+                <input type="text" id="ombi_api" bottom placeholder="Enter your Ombi API key"/>
                 <br>
                 <h3><em>Fill in Manager Settings with Ombi?</em></h3>
                 <div class="checkbox" prompt="y/n">
@@ -694,13 +716,13 @@ div
                 <div>
                     Your Ombi <a href="https://support.plex.tv/hc/en-us/articles/204059436-Finding-your-account-token-X-Plex-Token" title="How to find your token?" target="_blank">Plex token</a> will be shared by this extension.
                 </div>
-            </section>
+            </details>
 			<hr><br>
             <section>
                 <button type="button" id="plex_test">Test <span id="plex_test_status">?</span></button>
             </section>
             <section>
-                <label>Select a server</label>
+                <label>Select a preferred server</label>
                 <select id="plex_servers">
                     <option value="">Press "Test [?]" first</option>
                 </select>
@@ -1098,7 +1120,7 @@ div
 			<section>
 				Where should the button be?
 				<br>
-				<span class="checkbox" prompt-size="large" prompt-yes="&#10525;" prompt-no="&#10526;">
+				<span class="checkbox" prompt-size="large" prompt-yes="&#8672;" prompt-no="&#8674;">
 					<input id="theme:button-location" theme="true:right" type="checkbox" />
 					<label for="theme:button-location"></label>
 				</span>
