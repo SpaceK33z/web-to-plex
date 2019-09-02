@@ -548,10 +548,51 @@ let configuration, init, Update;
         });
     }
 
+    // "secret frame"
+    function sFrame(url, callbacks) {
+        let { success, error } = callbacks;
+
+        let frame = document.furnish('iframe#web-to-plex-sframe', {
+            src: url,
+            style: `
+                display:    none   !important;
+                opacity:    0      !important;
+                visibility: hidden !important;
+            `,
+
+            onload:  success,
+            onerror: error,
+        });
+
+        // todo: make iframe, load, delete
+        document.body.append(frame);
+    }
+
     // Send an update query to background.js
     Update = (type, options = {}, postToo) => {
         if(configuration)
-            UTILS_TERMINAL.log(`Requesting update: ${ type }`, options);
+            UTILS_TERMINAL.log(`Requesting update [post-to-top: ${ !!postToo }]: ${ type }`, options);
+        else
+            return sFrame(extURL(`options/index.html#save`), {
+                success: async event => {
+                    let self = event.target;
+
+                    await ParsedOptions();
+
+                    Update(type, options, postToo);
+
+                    self.remove();
+                },
+
+                error: async event => {
+                    let self = event.target;
+                    self.remove();
+
+                    new Notification('error', `Fill in missing Web to Plex options`, 15000, Options, false);
+
+                    throw `Unable to set configuration variable: ${ JSON.stringify(configuration) }`;
+                }
+            });
 
         chrome.runtime.sendMessage({
             type,
@@ -1337,7 +1378,7 @@ let configuration, init, Update;
 
     // Movies/TV Shows
     function Request_Ombi(options) {
-        new Notification('info', `Adding "${ options.title }" to Ombi`, 3000);
+        new Notification('info', `Sending "${ options.title }" to Ombi`, 3000);
 
         if((!options.IMDbID && !options.TMDbID) && !options.TVDbID) {
             return new Notification(
@@ -1383,7 +1424,7 @@ let configuration, init, Update;
 
     // Movies/TV Shows
     function __Request_CouchPotato__(options) {
-        new Notification('info', `Adding "${ options.title }" to CouchPotato`, 3000);
+        new Notification('info', `Sending "${ options.title }" to CouchPotato`, 3000);
 
     	chrome.runtime.sendMessage(
     		{
@@ -1420,7 +1461,7 @@ let configuration, init, Update;
 
     // Movies
     function Request_Watcher(options) {
-        new Notification('info', `Adding "${ options.title }" to Watcher`, 3000);
+        new Notification('info', `Sending "${ options.title }" to Watcher`, 3000);
 
         if(!options.IMDbID && !options.TMDbID) {
             return new Notification(
@@ -1482,7 +1523,7 @@ let configuration, init, Update;
         if(PromptLocation && options.location)
             PromptValues.StoragePath = JSON.parse(__CONFIG__.radarrStoragePaths).map(item => item.id == options.location? item: null).filter(n => n)[0].path.replace(/\\/g, '\\\\');
 
-        new Notification('info', `Adding "${ options.title }" to Radarr`, 3000);
+        new Notification('info', `Sending "${ options.title }" to Radarr`, 3000);
 
         chrome.runtime.sendMessage({
                 type: 'PUSH_RADARR',
@@ -1539,7 +1580,7 @@ let configuration, init, Update;
         if(PromptLocation && options.location)
             PromptValues.StoragePath = JSON.parse(__CONFIG__.sonarrStoragePaths).map(item => item.id == options.location? item: null).filter(n => n)[0].path.replace(/\\/g, '\\\\');
 
-        new Notification('info', `Adding "${ options.title }" to Sonarr`, 3000);
+        new Notification('info', `Sending "${ options.title }" to Sonarr`, 3000);
 
         chrome.runtime.sendMessage({
                 type: 'PUSH_SONARR',
@@ -1594,7 +1635,7 @@ let configuration, init, Update;
         if(PromptLocation && options.location)
             PromptValues.StoragePath = JSON.parse(__CONFIG__.medusaStoragePaths).map(item => item.id == options.location? item: null).filter(n => n)[0].path.replace(/\\/g, '\\\\');
 
-        new Notification('info', `Adding "${ options.title }" to Medusa`, 3000);
+        new Notification('info', `Sending "${ options.title }" to Medusa`, 3000);
 
         chrome.runtime.sendMessage({
                 type: 'PUSH_MEDUSA',
@@ -1742,6 +1783,9 @@ let configuration, init, Update;
     }
 
     function UpdateButton(button, action, title, options = {}) {
+        if(!button)
+            return /*  Rare, but happens: especially on failed download links sent*/;
+
         let multiple = (action == 'multiple' || options instanceof Array),
             element = button.querySelector('.w2p-action, .list-action'),
             delimeter = '<!---->',
@@ -2222,6 +2266,10 @@ let configuration, init, Update;
                     let found = await FindMediaItem({ type, title, year, image, button, IMDbID, TMDbID, TVDbID });
                     Update('FOUND', { ...request, found }, true);
                 }
+                return true;
+
+            case 'INITIALIZE':
+                UTILS_TERMINAL.warn('Caught init event [utils]');
                 return true;
 
             default:

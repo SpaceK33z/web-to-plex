@@ -192,5 +192,5 @@
         "contextMenus",
         "<all_urls>"
 	],
-    "web_accessible_resources": ["img/*", "options/test/*"]
+    "web_accessible_resources": ["img/*", "options/*"]
 }

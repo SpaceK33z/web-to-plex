@@ -437,7 +437,8 @@ function performPlexLogin() {
 
 function performPlexTest(ServerID) {
 	let plexToken = $('#plex_token').value,
-        teststatus = $('#plex_test_status');
+        teststatus = $('#plex_test_status'),
+        inusestataus = [...$('[in-use="plex_token"]', true)];
 
 	__save__.disabled = true;
 	__servers__.innerHTML = '';
@@ -446,9 +447,11 @@ function performPlexTest(ServerID) {
 	getServers(plexToken).then(servers => {
 		PlexServers = servers || [];
         teststatus.textContent = '!';
+        inusestataus.map(e => e.setAttribute('in-use', false));
 
 		if(!servers)
             return teststatus.title = 'Failed to communicate with Plex', teststatus.classList = false;
+        inusestataus.map(e => e.setAttribute('in-use', true));
 
 		__save__.disabled = false;
         teststatus.classList = true;
@@ -458,7 +461,7 @@ function performPlexTest(ServerID) {
                 source = server.sourceTitle;
 
 			$option.value = server.clientIdentifier;
-			$option.textContent = `${ server.name } ${ source ? `(${ source })` : '' }`;
+			$option.textContent = `${ server.name }${ source ? ` \u2014 ${ source }` : '' }`;
 			__servers__.appendChild($option);
 		});
 
@@ -1113,9 +1116,9 @@ function HandleProxySettings(data) {
 }
 
 function saveOptions() {
-    ServerID = __servers__.options[__servers__.selectedIndex].value;
+    ServerID = [...__servers__.selectedOptions][0];
 
-	if(!ServerID) {
+	if(!ServerID || !ServerID.value) {
         let withoutplex = confirm('Continue without a Plex server?');
 
         if(withoutplex)
@@ -1123,6 +1126,7 @@ function saveOptions() {
 		else
             return new Notification('error', 'Select a server!');
     }
+    ServerID = ServerID.value;
 
 	let server = PlexServers.find(ID => ID.clientIdentifier === ServerID);
 
@@ -1233,9 +1237,9 @@ function saveOptions() {
 
 	function OptionsSavedMessage() {
 		// Update status to let the user know the options were saved
-		new Notification('update', 'Saved', 3000);
+		new Notification('update', 'Saved', 1500);
 	}
-	new Notification('update', 'Saving...', 3000);
+	new Notification('update', 'Saving...', 1500);
 
 	let data = {
 		...options,
@@ -1347,9 +1351,9 @@ function saveOptionsWithoutPlex() {
 
 	function OptionsSavedMessage() {
 		// Update status to let the user know the options were saved
-		new Notification('update', 'Saved', 3000);
+		new Notification('update', 'Saved', 1500);
 	}
-	new Notification('update', 'Saving...', 3000);
+	new Notification('update', 'Saving...', 1500);
 
 	let data = options;
 
@@ -1776,7 +1780,7 @@ $('.checkbox', true)
     });
 
 $('.test', true)
-    .forEach((element, idnex, array) => {
+    .forEach((element, index, array) => {
         element.addEventListener('click', async event => {
             event.preventDefault(true);
 
@@ -1789,7 +1793,7 @@ $('.test', true)
     });
 
 $('[id^="theme:"i]', true)
-    .forEach((element, idnex, array) => {
+    .forEach((element, index, array) => {
         element.addEventListener('click', async event => {
             let self = event.target;
 
@@ -1802,3 +1806,22 @@ $('[id^="theme:"i]', true)
                 __theme = __theme.filter(v => v != value);
         });
     });
+
+// CORS exception: SecurityError
+// MUST be { window }, never { top }
+let { hash } = window.location;
+
+if(hash.length > 1)
+    switch(hash = hash.slice(1, hash.length).toLowerCase()) {
+        case 'save':
+            setTimeout(async() => {
+                await saveOptions();
+
+                window.postMessage({ type: 'INITIALIZE' });
+            }, 1000);
+            break;
+
+        default:
+            terminal.log(`Unknown event "${ hash }"`);
+            break;
+    };
