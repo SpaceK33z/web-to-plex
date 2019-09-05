@@ -11,8 +11,13 @@ check = document.body.onload = event => {
     let video = document.querySelector('div > p + p');
 
     if(video && video.textContent) {
+        let { src } = video.textContent;
+
+        if(/^blob:/i.test(src))
+            throw '<blob> URL detected. Unable to reform file.';
+
         try {
-            top.postMessage({ href: `https://oload.fun/stream/${ video.textContent }?mime=true`, tail: 'mp4', type: 'SEND_VIDEO_LINK', from: 'oload' }, '*');
+            top.postMessage({ href: `https://oload.fun/stream/${ src }?mime=true`, tail: 'MP4', type: 'SEND_VIDEO_LINK', from: 'oload' }, '*');
         } catch(error) {
             terminal.error('Failed to post message:', error);
         }
