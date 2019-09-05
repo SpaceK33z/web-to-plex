@@ -15,7 +15,7 @@ if(chrome.runtime.lastError)
 // FireFox doesn't support sync storage.
 const storage = (chrome.storage.sync || chrome.storage.local),
       $ = (selector, all) => (all? document.querySelectorAll(selector): document.querySelector(selector)),
-      __servers__ = $('#plex_servers'),
+      __servers__ = $('[data-option="preferredServer"]'),
       __medusa_qualityProfile__  = $(`[data-option="medusaQualityProfileId"]`),
       __medusa_storagePath__     = $(`[data-option="medusaStoragePath"]`),
       __watcher_qualityProfile__ = $(`[data-option="watcherQualityProfileId"]`),
@@ -30,6 +30,7 @@ const storage = (chrome.storage.sync || chrome.storage.local),
             'plexURL',
             'plexToken',
             'UseOmbi',
+            'preferredServer',
 
             /* Manager Settings */
             // Ombi
@@ -391,7 +392,7 @@ function getServers(plexToken) {
         if(/^\s*Invalid/i.test(data))
             return null;
 
-        return data.Device.filter(device => device.provides === 'server');
+        return data.Device.filter(device => !!~device.provides.split(',').indexOf('server'));
     });
 }
 
@@ -536,8 +537,8 @@ function performOmbiLogin() {
             /* Swagger API says "enable", but we'll go with "enabled" */
             if(json && (json.enable || json.enabled)) {
                 let t = $('#plex_token'),
-                    s = $('#plex_servers'),
-                    u = $('[data-option="UseOmbi"]');
+                    u = $('[data-option="UseOmbi"]'),
+                    s = __servers__;
 
                 json = (json && json.servers.length? json.servers[0]: {});
 
