@@ -52,10 +52,10 @@ let script = {
     },
 
     "getType": () => (
-        !$(FILM).empty?
-            'movie':
         !$(SHOW).empty?
             'show':
+        !$(FILM).empty?
+            'movie':
         'error'
     ),
 };

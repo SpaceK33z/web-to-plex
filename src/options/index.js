@@ -1562,6 +1562,7 @@ let builtins = {
     "Tubi": "https://tubitv.com/",
     "Web to Plex": "https://ephellon.github.io/web.to.plex/",
 
+    // Dont' forget to add to the __options__ array!
 }, builtin_array = [], builtin_sites = {}, builtinElement = $('#builtin');
 
 for(let builtin in builtins)
@@ -1569,28 +1570,58 @@ for(let builtin in builtins)
 builtin_array = builtin_array.sort((a,b) => { let [x, y] = [a, b].map(v => v.toLowerCase()); return x < y? -1: 1; });
 
 for(let index = 0, length = builtin_array.length; builtinElement && index < length; index++) {
-    let title = builtin_array[index],
-        name  = 'builtin_' + title.toLowerCase().replace(/\s+/g, ''),
-        url   = new URL(builtins[title]),
-        js    = name.replace(/^builtin_/i, ''),
-        o     = url.origin,
-        r     = url.host.replace(/^(ww\w+\.)/, '');
+    let builtin = builtins[builtin_array[index]];
 
-    builtin_sites[r] = o;
+    if(builtin instanceof Array) {
+        for(let i = 0, l = builtin.length; i < l; i++) {
+            let title = builtin_array[index],
+                name  = 'builtin_' + title.toLowerCase().replace(/\s+/g, ''),
+                url   = new URL(builtin[i]),
+                js    = name.replace(/^builtin_/i, ''),
+                o     = url.origin,
+                r     = url.host.replace(/^(ww\w+\.)/, '');
 
-    builtinElement.innerHTML +=
+            builtin_sites[r] = o;
+
+            if(!i)
+                builtinElement.innerHTML +=
 `
 <h3>${ title }</h3>
 <div class="checkbox">
-    <input id="${ name }" type="checkbox" checked="true" data-option="${ name }" bid="${ r }" js="${ js }">
-    <label for="${ name }"></label>
+<input id="${ name }" type="checkbox" data-option="${ name }" pid="${ r }" js="${ js }">
+<label for="${ name }"></label>
 </div>
 <div>
-    Run on <a href="${ url.href }" title="${ r }" target="_blank">${ title }</a>
+Run on <a href="${ url.href }" title="${ r }" target="_blank">${ title }</a>
 </div>
 
 <hr>
 `;
+        }
+    } else {
+        let title = builtin_array[index],
+            name  = 'builtin_' + title.toLowerCase().replace(/\s+/g, ''),
+            url   = new URL(builtins[title]),
+            js    = name.replace(/^builtin_/i, ''),
+            o     = url.origin,
+            r     = url.host.replace(/^(ww\w+\.)/, '');
+
+        builtin_sites[r] = o;
+
+        builtinElement.innerHTML +=
+`
+<h3>${ title }</h3>
+<div class="checkbox">
+<input id="${ name }" type="checkbox" data-option="${ name }" pid="${ r }" js="${ js }">
+<label for="${ name }"></label>
+</div>
+<div>
+Run on <a href="${ url.href }" title="${ r }" target="_blank">${ title }</a>
+</div>
+
+<hr>
+`;
+    }
 
     // save(`permission:${ r }`, true);
     // save(`script:${ r }`, js);
@@ -1622,7 +1653,7 @@ $('[id^="builtin_"]', true)
 
 // Plugins and their links
 let plugins = {
-    'Indomovie': 'https://indomovietv.net/',
+    'Indomovie': ['https://indeomovietv.org/', 'https://indomovietv.net/'],
     'Toloka': 'https://toloka.to/',
     'Shana Project': 'https://www.shanaproject.com/',
     'My Anime List': 'https://myanimelist.net/',
@@ -1638,16 +1669,21 @@ for(let plugin in plugins)
 plugin_array = plugin_array.sort((a,b) => { let [x, y] = [a, b].map(v => v.toLowerCase()); return x < y? -1: 1; });
 
 for(let index = 0, length = plugin_array.length; pluginElement && index < length; index++) {
-    let title = plugin_array[index],
-        name  = 'plugin_' + title.toLowerCase().replace(/\s+/g, ''),
-        url   = new URL(plugins[title]),
-        js    = name.replace(/^plugin_/i, ''),
-        o     = url.origin,
-        r     = url.host.replace(/^(ww\w+\.)/, '');
+    let plugin = plugins[plugin_array[index]];
 
-    plugin_sites[r] = o;
+    if(plugin instanceof Array) {
+        for(let i = 0, l = plugin.length; i < l; i++) {
+            let title = plugin_array[index],
+                name  = 'plugin_' + title.toLowerCase().replace(/\s+/g, ''),
+                url   = new URL(plugin[i]),
+                js    = name.replace(/^plugin_/i, ''),
+                o     = url.origin,
+                r     = url.host.replace(/^(ww\w+\.)/, '');
 
-    pluginElement.innerHTML +=
+            plugin_sites[r] = o;
+
+            if(!i)
+                pluginElement.innerHTML +=
 `
 <h3>${ title }</h3>
 <div class="checkbox">
@@ -1660,6 +1696,31 @@ for(let index = 0, length = plugin_array.length; pluginElement && index < length
 
 <hr>
 `;
+        }
+    } else {
+        let title = plugin_array[index],
+            name  = 'plugin_' + title.toLowerCase().replace(/\s+/g, ''),
+            url   = new URL(plugins[title]),
+            js    = name.replace(/^plugin_/i, ''),
+            o     = url.origin,
+            r     = url.host.replace(/^(ww\w+\.)/, '');
+
+        plugin_sites[r] = o;
+
+        pluginElement.innerHTML +=
+`
+<h3>${ title }</h3>
+<div class="checkbox">
+    <input id="${ name }" type="checkbox" data-option="${ name }" pid="${ r }" js="${ js }">
+    <label for="${ name }"></label>
+</div>
+<div>
+    Run on <a href="${ url.href }" title="${ r }" target="_blank">${ title }</a>
+</div>
+
+<hr>
+`;
+    }
 }
 
 save('optional.sites', plugin_sites);

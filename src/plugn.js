@@ -13,6 +13,17 @@ let LAST, LAST_JS, LAST_INSTANCE, LAST_ID, LAST_TYPE, FOUND = {};
 let PLUGN_STORAGE = chrome.storage.sync || chrome.storage.local;
 let PLUGN_CONFIGURATION;
 
+let URLRegExp = `
+    .replace(/^\\*\\:/,'\\\\w{3,}:')
+        // *://
+    .replace(/\\*\\./g,'([^\\\\.]+\\\\.)?')
+        // *.
+    .replace(/\\.\\*/g,'(\\\\.[^\\\\/\\\\.]+)?')
+        // .*
+    .replace(/\\/\\*/g,'/[^$]*'),'i')
+        // /*
+`;
+
 function load(name, private) {
     return JSON.parse((private && sessionStorage? sessionStorage: localStorage).getItem(btoa(name)));
 }
@@ -423,10 +434,7 @@ top.addEventListener('pushstate-changed', ${ type }.init);
 
 return (${ type }.RegExp = RegExp(
     ${ type }.url
-    /*.replace(/\\|.*?(\\)|$)/g,'')*/
-    .replace(/^\\*\\:/,'\\\\w{3,}:')
-    .replace(/\\*\\./g,'([^\\\\.]+\\\\.)?')
-    .replace(/\\/\\*/g,'/[^$]*'),'i')
+${ URLRegExp }
 ).test
 (location.href)?
 /* URL matches pattern */
@@ -561,10 +569,7 @@ top.addEventListener('pushstate-changed', plugin.init);
 
 return (plugin.RegExp = RegExp(
     plugin.url
-    /*.replace(/\\|.*?(\\)|$)/g,'')*/
-    .replace(/^\\*\\:/,'\\\\w{3,}:')
-    .replace(/\\*\\./g,'([^\\\\.]+\\\\.)?')
-    .replace(/\\/\\*/g,'/[^$]*'),'i')
+${ URLRegExp }
 ).test
 (location.href)?
 /* URL matches pattern */
@@ -648,11 +653,7 @@ top.addEventListener('popstate', script.init);
 top.addEventListener('pushstate-changed', script.init);
 
 return (script.RegExp = RegExp(
-    script.url
-    // .replace(/\\|.*?(\\)|$)/g,'')
-    .replace(/^\\*\\:/,'\\\\w{3,}:')
-    .replace(/\\*\\./g,'([^\\\\.]+\\\\.)?')
-    .replace(/\\/\\*/g,'/[^$]*'),'i')
+    script.url${ URLRegExp }
 ).test
 (location.href)?
 /* URL matches pattern */
