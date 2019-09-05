@@ -7,7 +7,7 @@ let script = {
         let _title, _year, _image, R = RegExp;
 
         let title = $('.film-box h1').first,
-            year  = $('.film-box > * span').child(9),
+            year  = $('.film-box > * span').filter(e => /\b\d{4}\b/.test(e.textContent))[0],
             image = $('.poster').first,
             type  = script.getType();
 
