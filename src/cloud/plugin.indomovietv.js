@@ -1,5 +1,6 @@
 let plugin = {
-	"url": "*://*.indomovietv.net/(?!tag)",
+	"url": "*://*.indomovietv.*/(?!tag)",
+	// TLD changes often: net, org
 
 	"ready": () => !$('[itemprop="name"i]:not(meta)').empty && !$('[itemprop="datePublished"i]').empty,
 
