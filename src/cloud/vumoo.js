@@ -12,9 +12,9 @@ let script = {
             type  = script.getType();
 
         title = title.textContent.replace(/\s*season\s+\d+\s*$/i, '').replace(/\s*\((\d{4})\)/, '').trim();
-        year  = (type == 'movie')?
-            +R.$1:
-        +year.textContent.replace(/[^]*(\d{4})[^]*/, '$1');
+        year  = +(type == 'movie')?
+            R.$1:
+        year.textContent.replace(/[^]*(\d{4})[^]*/, '$1');
         image = (image? image.src: null);
 
         // auto-prompt downloading for the user

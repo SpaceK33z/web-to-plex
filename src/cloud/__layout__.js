@@ -9,9 +9,10 @@
 let script = {
     // required
     "url": "< URL RegExp >",
-    // Example: *://*.amazon.com/*/video/(detail|buy)/*
+    // Example: *://*.amazon.*/*/video/(detail|buy)/*
     // *://         - match any protocol (http, https, etc.)
-    // *.amazon.com - match any sub-domain (www, ww5, etc.)
+    // *.amazon     - match any sub-domain (www, ww5, etc.)
+    // .*           - match any TLD (com, net, org, etc.)
     // /*           - match any path
     // (detail|buy) - match one of the items
 

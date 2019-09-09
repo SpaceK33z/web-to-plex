@@ -13,7 +13,7 @@ let script = {
             IMDbID = script.getIMDbID();
 
         title = title.textContent.trim();
-        year  = year.textContent.trim();
+        year  = +year.textContent.trim();
         image = image.empty? '': image.first.src;
 
         return { type, title, year, image, IMDbID };

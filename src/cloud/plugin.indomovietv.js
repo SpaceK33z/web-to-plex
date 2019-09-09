@@ -2,7 +2,7 @@ let plugin = {
 	"url": "*://*.indomovietv.*/(?!tag)",
 	// TLD changes often: net, org
 
-	"ready": () => !$('[itemprop="name"i]:not(meta)').empty && !$('[itemprop="datePublished"i]').empty,
+	"ready": () => !$('[itemprop="name"i]:not(meta), [itemprop="datePublished"i]').empty,
 
 	"timeout": 1000,
 
@@ -15,7 +15,7 @@ let plugin = {
 			type  = 'movie';
 
 		title = title.textContent;
-		year  = year.textContent.replace(/[^]*(\d{4})[^]*/, '$1');
+		year  = +year.textContent.replace(/[^]*(\d{4})[^]*/, '$1');
 		image = image.src;
 
 		// auto-prompt downloading for the user
