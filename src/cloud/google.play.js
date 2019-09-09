@@ -10,7 +10,7 @@ let script = {
             image = $('img[alt="cover art" i]').first;
 
         title = title.textContent.replace(/\s*\(\s*(\d{4})\s*\).*?$/, '').trim();
-        year = (year.textContent || R.$1).replace(/^.*?(\d{4})/, '$1').trim();
+        year = +(year.textContent || R.$1).replace(/^.*?(\d{4})/, '$1').trim();
         image = (image || {}).src;
 
         return { type, title, year, image };

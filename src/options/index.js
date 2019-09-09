@@ -1185,8 +1185,8 @@ function saveOptions() {
     } if(!ClientID) {
         ClientID = window.crypto.getRandomValues(new Uint32Array(5))
             .join('-');
-        storage.set({ ClientID });
     }
+    storage.set({ ClientID });
 
     options.plexURL = options.plexURLRoot = (options.plexURL || "https://app.plex.tv/")
         .replace(/^(\:\d+)/, 'localhost$1')

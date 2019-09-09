@@ -10,7 +10,7 @@ let script = {
             type   = 'movie';
 
         title = title.textContent.trim().split(/\n+/)[0].trim();
-        year  = year.textContent.replace(/.*(\d{4}).*/, '$1').trim();
+        year  = +year.textContent.replace(/.*(\d{4}).*/, '$1').trim();
         image = image.empty? '': image.src;
 
         title = title.replace(RegExp(`\\s*\\((${ year })\\)`), '');

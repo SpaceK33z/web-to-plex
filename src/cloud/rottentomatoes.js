@@ -25,7 +25,7 @@ let script = {
                     return 1000;
 
                 title = title.textContent.trim().replace(/(.+)\:[^]*$/, type == 'movie'? '$&': '$1');
-                year  = year.textContent.replace(/[^]*(\d{4})/, '').trim();
+                year  = +year.textContent.replace(/[^]*(\d{4})/, '').trim();
                 image = (image || {}).srcset;
 
                 if(image)

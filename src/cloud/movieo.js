@@ -16,7 +16,7 @@ let script = {
                 image = $('img.poster').first;
 
                 title  = title.dataset.title.trim();
-                year   = year.content.slice(0, 4);
+                year   = +year.content.slice(0, 4);
                 image  = (image || {}).src;
                 IMDbID = script.getIMDbID();
                 break;

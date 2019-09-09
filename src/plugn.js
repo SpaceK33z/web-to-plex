@@ -242,10 +242,19 @@ function RandomName(length = 16, symbol = '') {
 };
 
 function prepare(code, alias, type) {
+
+    let DATE = (new Date),
+        YEAR = DATE.getFullYear(),
+        MONT = DATE.getMonth(),
+        DAY  = DATE.getDate();
+
     return code
         .replace(/\/\/+\s*"([^\"\n\f\r\v]+?)"\s*requires?\:?\s*(.+)([^]+)/i, ($0, $1, $2, $3, $$, $_) =>
-`${ $3 }
-
+`let DATE = (new Date),
+    YEAR = ${YEAR},
+    MONT = ${MONT},
+    DAY  = ${DAY};
+${ $3 }
 ;(async() => await Require("${ $2 }", "${ alias }", "${ $1 }"))();`
 
         )
@@ -382,17 +391,12 @@ let tabchange = async tabs => {
                     chrome.runtime.getURL(`cloud/plugin.${ js }.js`):
                 `https://ephellon.github.io/web.to.plex/${ type }s/${ js }.js`;
 
-    let DATE = (new Date),
-        YEAR = DATE.getFullYear(),
-        MONT = DATE.getMonth(),
-        DAY  = DATE.getDate();
-
-    fetch(file, { mode: 'cors' })
+    await fetch(file, { mode: 'cors' })
         .then(response => response.text())
-        .then(code => {
-            chrome.tabs.executeScript(id, { file: 'helpers.js' }, () => {
+        .then(async code => {
+            await chrome.tabs.executeScript(id, { file: 'helpers.js' }, async() => {
                 // Sorry, but the instance needs to be callable multiple times
-                chrome.tabs.executeScript(id, { code:
+                await chrome.tabs.executeScript(id, { code:
                     (LAST = cache[ali] =
 `/* ${ type }* (${ (!PLUGN_DEVELOPER? 'on':'off') }line) - "${ url.href }" */
 ${ name } = (${ name } || (${ name }$ = $ => {
@@ -417,12 +421,6 @@ ${
         return o.join('');
     })()
 }
-
-let DATE = (new Date),
-    YEAR = ${YEAR},
-    MONT = ${MONT},
-    DAY  = ${DAY};
-
 /* Start Injected */
 ${ prepare(code, js, type) }
 /* End Injected */
@@ -511,23 +509,18 @@ chrome.runtime.onMessage.addListener(processMessage = async(request, sender, cal
                         chrome.runtime.getURL(`cloud/plugin.${ plugin }.js`):
                     `https://ephellon.github.io/web.to.plex/${ _type }s/${ options[_type] }.js`;
 
-        let DATE = (new Date),
-            YEAR = DATE.getFullYear(),
-            MONT = DATE.getMonth(),
-            DAY  = DATE.getDate();
-
         let { authorized, ...A } = await GetAuthorization(options[_type]);
 
         switch(type) {
             case 'PLUGIN':
                 allowed = await GetConsent(plugin, false);
 
-                fetch(file, { mode: 'cors' })
+                await fetch(file, { mode: 'cors' })
                     .then(response => response.text())
-                    .then(code => {
-                        chrome.tabs.executeScript(id, { file: 'helpers.js' }, () => {
+                    .then(async code => {
+                        await chrome.tabs.executeScript(id, { file: 'helpers.js' }, async() => {
                             // Sorry, but the instance needs to be callable multiple times
-                            chrome.tabs.executeScript(id, { code:
+                            await chrome.tabs.executeScript(id, { code:
                                 (LAST = cache[plugin] =
 `/* plugin (${ (!PLUGN_DEVELOPER? 'on':'off') }line) - "${ url.href }" */
 ${ name } = (${ name } || (${ name }$ = $ => {
@@ -552,13 +545,7 @@ ${
         return o.join('');
     })()
 }
-
-let DATE = (new Date),
-    YEAR = ${YEAR},
-    MONT = ${MONT},
-    DAY  = ${DAY};
-
-/* Start Injected */
+/* Start Injected (Plugin) */
 ${ prepare(code, plugin, _type) }
 /* End Injected */
 
@@ -605,15 +592,15 @@ top.onlocationchange = (event) => chrome.runtime.sendMessage({ type: '$INIT$', o
                 break;
 
             case 'SCRIPT':
-            allowed = await GetConsent(script, true);
+                allowed = await GetConsent(script, true);
 
-            fetch(file, { mode: 'cors' })
-                .then(response => response.text())
-                .then(code => {
-                    chrome.tabs.executeScript(id, { file: 'helpers.js' }, () => {
-                        // Sorry, but the instance needs to be callable multiple times
-                        chrome.tabs.executeScript(id, { code:
-                            (LAST = cache[script] =
+                await fetch(file, { mode: 'cors' })
+                    .then(response => response.text())
+                    .then(async code => {
+                        await chrome.tabs.executeScript(id, { file: 'helpers.js' }, async() => {
+                            // Sorry, but the instance needs to be callable multiple times
+                            await chrome.tabs.executeScript(id, { code:
+                                (LAST = cache[script] =
 `/* script (${ (!PLUGN_DEVELOPER? 'on':'off') }line) - "${ url.href }" */
 ${ name } = (${ name } || (${ name }$ = $ => {
 'use strict';
@@ -637,13 +624,7 @@ ${
         return o.join('');
     })()
 }
-
-let DATE = (new Date),
-    YEAR = ${YEAR},
-    MONT = ${MONT},
-    DAY  = ${DAY};
-
-/* Start Injected */
+/* Start Injected (Script) */
 ${ prepare(code, script, _type) }
 /* End Injected */
 
@@ -681,11 +662,11 @@ console.log('[${ name.replace(/^(top\.)?(\w{7}).*$/i, '$1$2') }]', ${ name });
 top.onlocationchange = (event) => chrome.runtime.sendMessage({ type: '$INIT$', options: { script: '${ script }' } }, callback => callback);
 
 ;${ name };`
-) }, results => handle(results, LAST_ID = id, LAST_INSTANCE = instance, LAST_JS = script, LAST_TYPE = type))
+    ) }, results => handle(results, LAST_ID = id, LAST_INSTANCE = instance, LAST_JS = script, LAST_TYPE = type))
+                        })
                     })
-                })
-                .then(() => running.push(id, instance))
-                .catch(error => { throw error });
+                    .then(() => running.push(id, instance))
+                    .catch(error => { throw error });
                 break;
 
             case '_INIT_':

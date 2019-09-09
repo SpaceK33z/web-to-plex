@@ -28,7 +28,7 @@ let script = {
                     return 5000;
 
                 title = title.textContent.replace(/(.+)(\d{4}).*?$/, '$1').replace(/\s*\:\s*Season.*$/i, '').trim();
-                year  = +(RegExp.$2 || year.textContent).trim();
+                year  = +(R.$2 || year.textContent).trim();
                 image = (image || {}).src;
 
                 options = { type, title, year, image, IMDbID, TMDbID, TVDbID };
