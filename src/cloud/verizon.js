@@ -1,7 +1,7 @@
 let script = {
     "url": "*://*.verizon.com/*/(movie|show)s?/*",
 
-    "ready": !$('.container .btn-with-play, .moredetails, .more-like').empty,
+    "ready": () => !$('.container .btn-with-play, .moredetails, .more-like').empty,
 
     "init": (ready) => {
         let _title, _year, _image, R = RegExp;
