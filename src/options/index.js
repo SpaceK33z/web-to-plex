@@ -1862,10 +1862,12 @@ $('[id^="theme:"i]', true)
             let [a, b] = self.getAttribute('theme').split(/\s*:\s*/).filter(v => v),
                 value = `${self.id.replace(/^theme:/i, '')}-${b}`;
 
-            if((self.checked + '') == a)
+            if(/^(checkbox)$/i.test(self.type) && (self.checked + '') == a)
                 __theme.push(value);
-            else
-                __theme = __theme.filter(v => v != value);
+            else if(/^(text|input|button|\B)$/i.test(self.type) && (self.value + '') == a)
+                __theme.push(value);
+
+            __theme = __theme.filter(v => v != value);
         });
     });
 
