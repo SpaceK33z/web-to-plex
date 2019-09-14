@@ -196,6 +196,8 @@ let configuration, init, Update;
                             __CONFIG__.sonarrQualities:
                         __CONFIG__.usingMedusa?
                             __CONFIG__.medusaQualities:
+                        __CONFIG__.usingSickBeard?
+                            __CONFIG__.sickBeardQualities:
                         '[]'
                     )
                 },
@@ -212,6 +214,8 @@ let configuration, init, Update;
                             __CONFIG__.sonarrStoragePaths:
                         __CONFIG__.usingMedusa?
                             __CONFIG__.medusaStoragePaths:
+                        __CONFIG__.usingSickBeard?
+                            __CONFIG__.sickBeardStoragePaths:
                         '[]'
                     )
                 },
@@ -226,6 +230,8 @@ let configuration, init, Update;
                             { quality: __CONFIG__.__sonarrQuality, location: __CONFIG__.__sonarrStoragePath }:
                         __CONFIG__.usingMedusa?
                             { quality: __CONFIG__.__medusaQuality, location: __CONFIG__.__medusaStoragePath }:
+                        __CONFIG__.usingSickBeard?
+                            { quality: __CONFIG__.__sickBeardQuality, location: __CONFIG__.__sickBeardStoragePath }:
                         {}
                     )
                 };
@@ -664,6 +670,12 @@ let configuration, init, Update;
                         password: o.medusaBasicAuthPassword
                     };
 
+                if(o.sickBeardBasicAuthUsername)
+                    o.sickBeardBasicAuth = {
+                        username: o.sickBeardBasicAuthUsername,
+                        password: o.sickBeardBasicAuthPassword
+                    };
+
                 if(o.usingOmbi && o.ombiURLRoot && o.ombiToken) {
                     o.ombiURL = o.ombiURLRoot;
                 } else {
@@ -698,6 +710,12 @@ let configuration, init, Update;
                     o.medusaURL = o.medusaURLRoot;
                 } else {
                     delete o.medusaURL; // prevent variable ghosting
+                }
+
+                if(o.usingSickBeard && o.sickBeardURLRoot && o.sickBeardToken) {
+                    o.sickBeardURL = o.sickBeardURLRoot;
+                } else {
+                    delete o.sickBeardURL; // prevent variable ghosting
                 }
 
                 resolve(o);
@@ -878,7 +896,7 @@ let configuration, init, Update;
         /(movie|film|cinema)s?/i.test(rqut)?
             'tmdb':
         rqut || '*';
-        manable = manable && (__CONFIG__.usingOmbi || (__CONFIG__.usingRadarr && rqut == 'tmdb') || ((__CONFIG__.usingSonarr || __CONFIG__.usingMedusa) && rqut == 'tvdb'));
+        manable = manable && (__CONFIG__.usingOmbi || (__CONFIG__.usingRadarr && rqut == 'tmdb') || ((__CONFIG__.usingSonarr || __CONFIG__.usingMedusa /*|| __CONFIG__.usingSickBeard*/) && rqut == 'tvdb'));
         title = (title? title.replace(/\s*[\:,]\s*seasons?\s+\d+.*$/i, '').toCaps(): "")
             .replace(/[\u2010-\u2015]/g, '-') // fancy hyphen
             .replace(/[\u201a\u275f]/g, ',') // fancy comma
@@ -921,7 +939,7 @@ let configuration, init, Update;
         let url =
             (manable && title && __CONFIG__.usingOmbi)?
                 `${ __CONFIG__.ombiURLRoot }api/v1/Search/${ (rqut == 'imdb' || rqut == 'tmdb' || apit == 'movie')? 'movie': 'tv' }/${ plus(title, '%20') }/?apikey=${ api.ombi }`:
-            (manable && (__CONFIG__.usingRadarr || __CONFIG__.usingSonarr || __CONFIG__.usingMedusa))?
+            (manable && (__CONFIG__.usingRadarr || __CONFIG__.usingSonarr || __CONFIG__.usingMedusa /*|| __CONFIG__.usingSickBeard*/))?
                 (__CONFIG__.usingRadarr && (rqut == 'imdb' || rqut == 'tmdb'))?
                     (mid)?
                         `${ __CONFIG__.radarrURLRoot }api/movie/lookup/tmdb?tmdbId=${ mid }&apikey=${ __CONFIG__.radarrToken }`:
@@ -934,8 +952,13 @@ let configuration, init, Update;
                     `${ __CONFIG__.sonarrURLRoot }api/series/lookup?term=${ plus(title, '%20') }&apikey=${ __CONFIG__.sonarrToken }`:
                 (__CONFIG__.usingMedusa)?
                     (tid)?
-                        `${ __CONFIG__.medusaURLRoot }api/v2/series/tvdb${ tid }?detailed=true&${ tid }&api_key=${ __CONFIG__.medusaToken }`:
+                        `${ __CONFIG__.medusaURLRoot }api/v2/series/tvdb${ tid }?detailed=true&api_key=${ __CONFIG__.medusaToken }`:
                     `${ __CONFIG__.medusaURLRoot }api/v2/internal/searchIndexersForShowName?query=${ plus(title) }&indexerId=0&api_key=${ __CONFIG__.medusaToken }`:
+                /* TODO: find a way to get CORS to work on Sick Beard URLs (localhost) */
+                // (__CONFIG__.usingSickBeard)?
+                //     (tid)?
+                //         `${ __CONFIG__.sickBeardURLRoot }api/${ __CONFIG__.sickBeardToken }/?cmd=sb.searchtvdb&tvdbid=${ tid }`:
+                //     `${ __CONFIG__.sickBeardURLRoot }api/${ __CONFIG__.sickBeardToken }/?cmd=sb.searchtvdb&name=${ encodeURIComponent(title) }`:
                 null:
             (rqut == 'imdb' || (rqut == '*' && !iid && title) || (rqut == 'tvdb' && !iid && title && !(rerun & 0b1000)) && (rerun |= 0b1000))?
                 (iid)?
@@ -994,6 +1017,9 @@ let configuration, init, Update;
 
         UTILS_TERMINAL.honor('Search results', { title, year, url, json });
 
+        /* DO NOT change to else-if, won't work with Sick Beard: { data: { results: ... } } */
+        if('data' in json)
+            json = json.data;
         if('results' in json)
             json = json.results;
 
@@ -1056,6 +1082,11 @@ let configuration, init, Update;
                         found = ((t($data.title) == t(title) || $alt) && +year == +$data.year)?
                             $alt || $data:
                         found;
+                    // Sick Beard
+                    else if(__CONFIG__.usingSickBeard)
+                        found = ((t($data.name) == t(title) || $alt) && +year == parseInt($data.first_aired))?
+                            $alt || $data:
+                        found;
                 //api.tvmaze.com/
                 else if(('externals' in ($data = $data.show || $data) || 'show' in $data) && $data.premiered)
                     found = (iid == $data.externals.imdb || t($data.name) == t(title) && year == $data.premiered.slice(0, 4))?
@@ -1111,6 +1142,11 @@ let configuration, init, Update;
                     // Radarr & Sonarr
                     if(__CONFIG__.usingRadarr || __CONFIG__.usingSonarr)
                         found = (c($data.title) == c(title) || $alt)?
+                            $alt || $data:
+                        found;
+                    // Sick Beard
+                    if(__CONFIG__.usingSickBeard)
+                        found = (c($data.name) == c(title) || $alt)?
                             $alt || $data:
                         found;
                 //api.tvmaze.com/
@@ -1186,6 +1222,11 @@ let configuration, init, Update;
                         found = (R($data.name || $data.title, title) || $alt)?
                             $alt || $data:
                         found;
+                    // Sick Beard
+                    if(__CONFIG__.usingSickBeard)
+                        found = (R($data.name, title) || $alt)?
+                            $alt || $data:
+                        found;
                 //api.tvmaze.com/
                 else if('externals' in ($data = $data.show || $data) || 'show' in $data)
                     found =
@@ -1237,7 +1278,7 @@ let configuration, init, Update;
 
         json = json && mr in json? json[mr].length > json[tr].length? json[mr]: json[tr]: json;
 
-        if(json instanceof Array && (!__CONFIG__.usingMedusa? true: (__CONFIG__.usingSonarr || __CONFIG__.usingOmbi)))
+        if(json instanceof Array && (!__CONFIG__.usingMedusa? true: (__CONFIG__.usingSonarr || __CONFIG__.usingOmbi || __CONFIG__.usingSickBeard)))
             json = json[0];
 
         if(!json)
@@ -1246,7 +1287,7 @@ let configuration, init, Update;
         // Ombi, Medusa, Radarr and Sonarr
         if(manable)
             data = (
-                (__CONFIG__.usingMedusa && !(__CONFIG__.usingSonarr || __CONFIG__.usingOmbi))?
+                (__CONFIG__.usingMedusa && !(__CONFIG__.usingSonarr || __CONFIG__.usingOmbi || __CONFIG__.usingSickBeard))?
                     {
                         imdb: iid || ei,
                         tmdb: mid |  0,
@@ -1672,6 +1713,62 @@ let configuration, init, Update;
         );
     }
 
+    // TV Shows
+    function Request_SickBeard(options, prompted) {
+        if(!options.TVDbID)
+            return (!prompted)? new Notification(
+                'warning',
+                'Stopped adding to Sick Beard: No TVDb ID'
+            ): null;
+
+        let PromptValues = {},
+            { PromptQuality, PromptLocation } = __CONFIG__;
+
+        if(!prompted && (PromptQuality || PromptLocation))
+            return new Prompt('modify', options, refined => Request_SickBeard(refined, true));
+
+        if(PromptQuality && +options.quality > 0)
+            PromptValues.QualityID = +options.quality;
+        if(PromptLocation && +options.location >= 0)
+            PromptValues.StoragePath = JSON.parse(__CONFIG__.sickBeardStoragePaths)[+options.location].path.replace(/\\/g, '\\\\');
+
+        new Notification('info', `Sending "${ options.title }" to Sick Beard`, 3000);
+
+        chrome.runtime.sendMessage({
+                type: 'PUSH_SICKBEARD',
+                url: `${ __CONFIG__.sickBeardURL }api/${ __CONFIG__.sickBeardToken }/`,
+                token: __CONFIG__.sickBeardToken,
+                StoragePath: __CONFIG__.sickBeardStoragePath,
+                QualityID: __CONFIG__.sickBeardQualityProfileId,
+                basicAuth: __CONFIG__.sickBeardBasicAuth,
+                title: options.title,
+                year: options.year,
+                tvdbId: options.TVDbID,
+                exists: !!~JSON.parse(__CONFIG__.__caught).tvdb.indexOf(options.TVDbID),
+                ...PromptValues
+            },
+            response => {
+                UTILS_TERMINAL.log('Pushing to Sick Beard', response);
+
+                if(response && response.error) {
+                    return new Notification('warning', `Could not add "${ options.title }" to Sick Beard: ${ response.error }`) ||
+                        (!response.silent && UTILS_TERMINAL.error('Error adding to Sick Beard: ' + String(response.error), response.location, response.debug));
+                } else if(response && response.success) {
+                    let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-{2,}/g, '-').toLowerCase(),
+                        TVDbID = options.TVDbID || response.tvdbId;
+
+                    CAUGHT.bump({ TVDbID });
+
+                    UTILS_TERMINAL.honor('Successfully pushed', options);
+                    new Notification('update', `Added "${ options.title }" to Sick Beard`, 7000, () => window.open(`${__CONFIG__.sickBeardURL}home/displayShow?show=${ TVDbID }`, '_blank'));
+                } else {
+                    new Notification('warning', `Could not add "${ options.title }" to Sick Beard: Unknown Error`) ||
+                    (!response.silent && UTILS_TERMINAL.error('Error adding to Sick Beard: ' + String(response)));
+                }
+            }
+        );
+    }
+
     // make the button
     let MASTER_BUTTON;
     function RenderButton(persistent) {
@@ -1861,6 +1958,8 @@ let configuration, init, Update;
                             Request_Sonarr(option, true);
                         else if(__CONFIG__.usingMedusa && tv.test(option.type))
                             Request_Medusa(option, true);
+                        else if(__CONFIG__.usingSickBeard && tv.test(option.type))
+                            Request_SickBeard(option, true);
 
                         button.classList.replace('wtp--download', 'wtp--queued');
                     } catch(error) {
@@ -1917,6 +2016,8 @@ let configuration, init, Update;
                             path = __CONFIG__.sonarrStoragePath;
                         } else if(__CONFIG__.usingMedusa && tv.test(options.type)) {
                             path = __CONFIG__.medusaStoragePath;
+                        } else if(__CONFIG__.usingSickBeard && tv.test(options.type)) {
+                            path = __CONFIG__.sickBeardStoragePath;
                         } else if(__CONFIG__.usingCouchPotato) {
                             path = '';
                         }
@@ -1962,6 +2063,8 @@ let configuration, init, Update;
                                     Request_Sonarr(options);
                                 else if(__CONFIG__.usingMedusa && tv.test(options.type))
                                     Request_Medusa(options);
+                                else if(__CONFIG__.usingSickBeard && tv.test(options.type))
+                                    Request_SickBeard(options);
 
                                 button.classList.replace('wtp--download', 'wtp--queued');
                             } catch(error) {
@@ -2049,7 +2152,7 @@ let configuration, init, Update;
                                     if(found) {
                                         // ignore found items, we only want new items
                                     } else {
-                                        let available = (__CONFIG__.usingOmbi || __CONFIG__.usingWatcher || __CONFIG__.usingRadarr || __CONFIG__.usingSonarr || __CONFIG__.usingMedusa || __CONFIG__.usingCouchPotato),
+                                        let available = (__CONFIG__.usingOmbi || __CONFIG__.usingWatcher || __CONFIG__.usingRadarr || __CONFIG__.usingSonarr || __CONFIG__.usingMedusa || __CONFIG__.usingSickBeard || __CONFIG__.usingCouchPotato),
                                             action = (available ? 'downloader' : 'notfound'),
                                             title = available ?
                                                 'Not on Plex (download available)':
@@ -2140,7 +2243,7 @@ let configuration, init, Update;
                                         options.button.querySelector('ul').insertBefore(pi, op);
                                     } catch(e) { /* Don't do anything */ }
                                 } else {
-                                    let available = (__CONFIG__.usingOmbi || __CONFIG__.usingWatcher || __CONFIG__.usingRadarr || __CONFIG__.usingSonarr || __CONFIG__.usingMedusa || __CONFIG__.usingCouchPotato),
+                                    let available = (__CONFIG__.usingOmbi || __CONFIG__.usingWatcher || __CONFIG__.usingRadarr || __CONFIG__.usingSonarr || __CONFIG__.usingMedusa || __CONFIG__.usingSickBeard || __CONFIG__.usingCouchPotato),
                                         action = (available ? 'downloader' : 'notfound'),
                                         title = available ?
                                             'Not on Plex (download available)':
