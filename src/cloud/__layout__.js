@@ -1,9 +1,18 @@
+// optional
+// "Friendly Name" requires: api|username|password|token
+// api - the user's api tokens (external, such as TMDb/OMDb)
+// username - the user's usernames (internal, such as Radarr/Sonarr/etc.)
+// password - the user's passwords (internal)
+// token - the user's tokens (internal)
+// Example: "Web to Plex" requires: api, token
+
 let script = {
     // required
     "url": "< URL RegExp >",
-    // Example: *://*.amazon.com/*/video/(detail|buy)/*
+    // Example: *://*.amazon.*/*/video/(detail|buy)/*
     // *://         - match any protocol (http, https, etc.)
-    // *.amazon.com - match any sub-domain (www, ww5, etc.)
+    // *.amazon     - match any sub-domain (www, ww5, etc.)
+    // .*           - match any TLD (com, net, org, etc.)
     // /*           - match any path
     // (detail|buy) - match one of the items
 

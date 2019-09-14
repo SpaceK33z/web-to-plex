@@ -14,7 +14,7 @@ let script = {
         Notify('update', 'Select the OL/VH server');
 
         title = title.textContent.trim();
-        year = (year? year.textContent.trim(): 0);
+        year = +(year? year.textContent.trim(): 0);
         image = (image? image.src: null);
 
         return { type, title, year, image };

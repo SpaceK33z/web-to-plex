@@ -15,21 +15,24 @@ if(chrome.runtime.lastError)
 // FireFox doesn't support sync storage.
 const storage = (chrome.storage.sync || chrome.storage.local),
       $ = (selector, all) => (all? document.querySelectorAll(selector): document.querySelector(selector)),
-      __servers__ = $('#plex_servers'),
-      __medusa_qualityProfile__  = $(`[data-option="medusaQualityProfileId"]`),
-      __medusa_storagePath__     = $(`[data-option="medusaStoragePath"]`),
-      __watcher_qualityProfile__ = $(`[data-option="watcherQualityProfileId"]`),
-      __watcher_storagePath__    = $(`[data-option="watcherStoragePath"]`),
-      __radarr_qualityProfile__  = $(`[data-option="radarrQualityProfileId"]`),
-      __radarr_storagePath__     = $(`[data-option="radarrStoragePath"]`),
-      __sonarr_qualityProfile__  = $(`[data-option="sonarrQualityProfileId"]`),
-      __sonarr_storagePath__     = $(`[data-option="sonarrStoragePath"]`),
+      __servers__ = $('[data-option="preferredServer"]'),
+      __sickBeard_qualityProfile__  = $(`[data-option="sickBeardQualityProfileId"]`),
+      __sickBeard_storagePath__     = $(`[data-option="sickBeardStoragePath"]`),
+      __medusa_qualityProfile__     = $(`[data-option="medusaQualityProfileId"]`),
+      __medusa_storagePath__        = $(`[data-option="medusaStoragePath"]`),
+      __watcher_qualityProfile__    = $(`[data-option="watcherQualityProfileId"]`),
+      __watcher_storagePath__       = $(`[data-option="watcherStoragePath"]`),
+      __radarr_qualityProfile__     = $(`[data-option="radarrQualityProfileId"]`),
+      __radarr_storagePath__        = $(`[data-option="radarrStoragePath"]`),
+      __sonarr_qualityProfile__     = $(`[data-option="sonarrQualityProfileId"]`),
+      __sonarr_storagePath__        = $(`[data-option="sonarrStoragePath"]`),
       __save__ = $('#save'),
       __options__ = [
             /* Plex Settings */
             'plexURL',
             'plexToken',
             'UseOmbi',
+            'preferredServer',
 
             /* Manager Settings */
             // Ombi
@@ -73,6 +76,15 @@ const storage = (chrome.storage.sync || chrome.storage.local),
             'sonarrStoragePath',
             'sonarrQualityProfileId',
 
+            // Sick Beard
+            'usingSickBeard',
+            'sickBeardURLRoot',
+            'sickBeardToken',
+            'sickBeardBasicAuthUsername',
+            'sickBeardBasicAuthPassword',
+            'sickBeardStoragePath',
+            'sickBeardQualityProfileId',
+
             // CouchPotato
             'enableCouchPotato',
             'usingCouchPotato',
@@ -106,23 +118,30 @@ const storage = (chrome.storage.sync || chrome.storage.local),
             // Advance Settings
             'OMDbAPI',
             'TMDbAPI',
-            'ExtensionBranchType',
+            'DeveloperMode',
 
             // Hidden values
             'watcherQualities',
             'radarrQualities',
             'sonarrQualities',
             'medusaQualities',
+            'sickBeardQualities',
             'watcherStoragePaths',
             'radarrStoragePaths',
             'sonarrStoragePaths',
             'medusaStoragePaths',
+            'sickBeardStoragePaths',
             '__radarrQuality',
             '__sonarrQuality',
             '__medusaQuality',
+            '__sickBeardQuality',
             '__radarrStoragePath',
             '__sonarrStoragePath',
             '__medusaStoragePath',
+            '__sickBeardStoragePath',
+            '__domains',
+            '__caught',
+            '__theme',
 
             // Builtins
             'builtin_amazon',
@@ -161,6 +180,9 @@ const storage = (chrome.storage.sync || chrome.storage.local),
             'plugin_shanaproject',
             'plugin_myanimelist',
             'plugin_myshows',
+            'plugin_indomovie',
+            'plugin_redbox',
+            'plugin_kitsu',
       ];
 
 let PlexServers = [],
@@ -168,11 +190,21 @@ let PlexServers = [],
     ClientID = null,
     manifest = chrome.runtime.getManifest(),
     terminal = // See #3
-        (DEVELOPER_MODE = $('[data-option="ExtensionBranchType"]').checked)?
+        (DEVELOPER_MODE = $('[data-option="DeveloperMode"]').checked)?
             { error: m => m, info: m => m, log: m => m, warn: m => m, group: m => m, groupEnd: m => m }:
         console;
 
-chrome.manifest = chrome.runtime.getManifest();
+chrome.manifest = manifest;
+
+// Not really important variables
+// The "caught" IDs (already asked for in managers)
+let __caught = {
+    imdb: [],
+    tmdb: [],
+    tvdb: [],
+},
+// The theme classes
+    __theme = [];
 
 // create and/or queue a notification
 // state = "error" - red
@@ -375,7 +407,7 @@ function getServers(plexToken) {
         if(/^\s*Invalid/i.test(data))
             return null;
 
-        return data.Device.filter(device => device.provides === 'server');
+        return data.Device.filter(device => !!~device.provides.split(',').indexOf('server'));
     });
 }
 
@@ -421,7 +453,8 @@ function performPlexLogin() {
 
 function performPlexTest(ServerID) {
 	let plexToken = $('#plex_token').value,
-        teststatus = $('#plex_test_status');
+        teststatus = $('#plex_test_status'),
+        inusestataus = [...$('[in-use="plex_token"]', true)];
 
 	__save__.disabled = true;
 	__servers__.innerHTML = '';
@@ -430,9 +463,11 @@ function performPlexTest(ServerID) {
 	getServers(plexToken).then(servers => {
 		PlexServers = servers || [];
         teststatus.textContent = '!';
+        inusestataus.map(e => e.setAttribute('in-use', false));
 
 		if(!servers)
             return teststatus.title = 'Failed to communicate with Plex', teststatus.classList = false;
+        inusestataus.map(e => e.setAttribute('in-use', true));
 
 		__save__.disabled = false;
         teststatus.classList = true;
@@ -442,7 +477,7 @@ function performPlexTest(ServerID) {
                 source = server.sourceTitle;
 
 			$option.value = server.clientIdentifier;
-			$option.textContent = `${ server.name } ${ source ? `(${ source })` : '' }`;
+			$option.textContent = `${ server.name }${ source ? ` \u2014 ${ source }` : '' }`;
 			__servers__.appendChild($option);
 		});
 
@@ -469,6 +504,14 @@ function getPlexConnections(server) {
 
 function getOptionValues() {
 	let options = {};
+
+    for(let key in __caught)
+        __caught[key] = __caught[key].filter(id => id);
+
+    __theme = __theme.filter(v => v);
+
+    $('[data-option="__caught"i]').value = JSON.stringify(__caught);
+    $('[data-option="__theme"i]').value = JSON.stringify(__theme);
 
 	__options__.forEach(option => {
         let element = $(
@@ -509,8 +552,8 @@ function performOmbiLogin() {
             /* Swagger API says "enable", but we'll go with "enabled" */
             if(json && (json.enable || json.enabled)) {
                 let t = $('#plex_token'),
-                    s = $('#plex_servers'),
-                    u = $('[data-option="UseOmbi"]');
+                    u = $('[data-option="UseOmbi"]'),
+                    s = __servers__;
 
                 json = (json && json.servers.length? json.servers[0]: {});
 
@@ -621,7 +664,25 @@ function performOmbiTest(refreshing = false) {
     teststatus.textContent = '?';
     options.ombiURLRoot = url = path.value = options.ombiURLRoot.replace(/^(\:\d+)/, 'localhost$1').replace(/^(?!^http(s)?:)/, 'http$1://').replace(/\/+$/, '');
 
-    let Get = () =>
+    let Get = () => {
+        fetch(`${ url }/api/v1/Request/movie`)
+            .then(r => r.json())
+            .thne(json => {
+                json.map(item => {
+                    __caught.imdb.push(item.imdbId);
+                    __caught.tmdb.push(item.theMovieDbId);
+                });
+            });
+
+        fetch(`${ url }/api/v1/Request/tv`)
+            .then(r => r.json())
+            .thne(json => {
+                json.map(item => {
+                    __caught.imdb.push(item.imdbId);
+                    __caught.tvdb.push(item.tvDbId);
+                });
+            });
+
         fetch(`${ url }/api/v1/Status`, headers)
             .then( response => response.text() )
             .then( status => {
@@ -640,6 +701,7 @@ function performOmbiTest(refreshing = false) {
                 }
             } )
             .catch( error => { new Notification('error', error) } );
+    }
 
     if(refreshing)
         Get();
@@ -686,7 +748,14 @@ function performWatcherTest(QualityProfileID = 'Default', refreshing = false) {
     storagepath.value = '[Empty]';
     options.watcherURLRoot = url = path.value = options.watcherURLRoot.replace(/^(\:\d+)/, 'localhost$1').replace(/^(?!^http(s)?:)/, 'http$1://').replace(/\/+$/, '');
 
-    let Get = () =>
+    let Get = () => {
+        getWatcher(options, 'liststatus').then(list => {
+            list.map(item => {
+                __caught.imdb.push(item.movies.imdbid);
+                __caught.tmdb.push(item.movies.tmdbid);
+            });
+        });
+
         getWatcher(options, 'getconfig').then(configuration => {
             if(!configuration || !configuration.response) return new Notification('error', 'Failed to get Watcher configuration');
 
@@ -731,6 +800,7 @@ function performWatcherTest(QualityProfileID = 'Default', refreshing = false) {
 
             $('[data-option="watcherStoragePaths"i]').value = JSON.stringify(path || { path: '[Default Location]', id: 0 });
         });
+    }
 
     if(refreshing)
         Get();
@@ -778,6 +848,13 @@ function performRadarrTest(QualityProfileID, StoragePath, refreshing = false) {
     options.radarrURLRoot = url = path.value = options.radarrURLRoot.replace(/^(\:\d+)/, 'localhost$1').replace(/^(?!^http(s)?:)/, 'http$1://').replace(/\/+$/, '');
 
     let Get = () => {
+        getRadarr(options, 'movie').then(movies => {
+            movies.map(movie => {
+                __caught.imdb.push(movie.imdbId);
+                __caught.tmdb.push(movie.tmdbId);
+            });
+        });
+
         getRadarr(options, 'profile').then(profiles => {
             if(!profiles) return new Notification('error', 'Failed to get Radarr configuration');
 
@@ -871,6 +948,12 @@ function performSonarrTest(QualityProfileID, StoragePath, refreshing = false) {
     options.sonarrURLRoot = url = path.value = options.sonarrURLRoot.replace(/^(\:\d+)/, 'localhost$1').replace(/^(?!^http(s)?:)/, 'http$1://').replace(/\/+$/, '');
 
     let Get = () => {
+        getSonarr(options, 'series').then(shows => {
+            shows.map(show => {
+                __caught.tvdb.push(show.tvdbId);
+            });
+        });
+
         getSonarr(options, 'profile').then(profiles => {
             if(!profiles) return new Notification('error', 'Failed to get Sonarr configuration');
 
@@ -964,6 +1047,13 @@ function performMedusaTest(QualityProfileID, StoragePath, refreshing = false) {
     options.medusaURLRoot = url = path.value = options.medusaURLRoot.replace(/^(\:\d+)/, 'localhost$1').replace(/^(?!^http(s)?:)/, 'http$1://').replace(/\/+$/, '');
 
     let Get = () => {
+        getMedusa(options, 'series').then(shows => {
+            shows.map(show => {
+                __caught.imdb.push(show.id.imdb)
+                __caught.tvdb.push(show.id.tvdb);
+            });
+        });
+
         getMedusa(options, 'config').then(configuration => {
             if(!configuration) return new Notification('error', 'Failed to get Medusa configuration');
 
@@ -1029,6 +1119,123 @@ function performMedusaTest(QualityProfileID, StoragePath, refreshing = false) {
         );
 }
 
+function getSickBeard(options, api = 'sb') {
+    if(!options.sickBeardToken)
+        return new Notification('error', 'Invalid Sick Beard token');
+
+	let headers = {
+		'Accept': 'application/json',
+		'Content-Type': 'application/json',
+		'X-Api-Key': options.sickBeardToken, // not really used, but just in case...
+	};
+
+	if(options.sickBeardBasicAuthUsername)
+		headers.Authorization = `Basic ${ btoa(`${ options.sickBeardBasicAuthUsername }:${ options.sickBeardBasicAuthPassword }`) }`;
+
+	return fetch(`${ options.sickBeardURLRoot }/api/${ options.sickBeardToken }/?cmd=${ api }`, { headers })
+		.then(response => response.json())
+		.catch(error => {
+			return new Notification('error', 'Sick Beard failed to connect with error:' + String(error)),
+              [];
+		});
+}
+
+function performSickBeardTest(QualityProfileID, StoragePath, refreshing = false) {
+	let options = getOptionValues(),
+        teststatus = $('#sickBeard_test_status'),
+        path = $('[data-option="sickBeardURLRoot"]'),
+        storagepath = __sickBeard_storagePath__,
+        quality = __sickBeard_qualityProfile__,
+        url,
+        enabled = $('#using-sickBeard');
+
+	quality.innerHTML = '';
+	teststatus.textContent = '?';
+    storagepath.textContent = '';
+    options.sickBeardURLRoot = url = path.value = options.sickBeardURLRoot.replace(/^(\:\d+)/, 'localhost$1').replace(/^(?!^http(s)?:)/, 'http$1://').replace(/\/+$/, '');
+
+    let Get = () => {
+        getSickBeard(options, 'shows').then(shows => {
+            let _shows = shows.data;
+
+            shows = [];
+
+            for(let _show in _shows)
+                shows.push(_shows[_show]);
+
+            shows.map(show => {
+                __caught.tvdb.push(show.tvdbid);
+            });
+        });
+
+        getSickBeard(options, 'sb.getdefaults').then(configuration => {
+            if(!configuration) return new Notification('error', 'Failed to get Sick Beard configuration');
+
+            let qualities = configuration.data,
+                profileType = $('[data-option="sickBeardQualityProfileType"i]').selectedIndex,
+                profiles = (profileType == 0? 'initial': 'archive');
+
+            profiles = qualities[profiles];
+
+            teststatus.textContent = '!';
+            teststatus.classList = enabled.checked = !!profiles.length;
+
+            if(!profiles.length)
+                return teststatus.title = 'Failed to communicate with Sick Beard';
+            enabled.parentElement.removeAttribute('disabled');
+
+            profiles = profiles.map((profile, index, array) => {
+                let option = document.createElement('option');
+                let name = profile;
+
+                option.value = option.textContent = name;
+                quality.appendChild(option);
+
+                return { id: name, name };
+            });
+
+            $('[data-option="sickBeardQualities"i]').value = JSON.stringify(profiles);
+
+            // Because the <select> was reset, the original value is lost.
+            if(QualityProfileID)
+                $('[data-option="__sickBeardQuality"i]').value = quality.value = QualityProfileID;
+        });
+
+        let StoragePaths = [];
+        getSickBeard(options, 'sb.getrootdirs').then(configuration => {
+            let storagepaths = configuration.data.filter(d => +d.valid > 0);
+
+            if(storagepaths.length < 1) return new Notification('error', 'Sick Beard has no usable storage paths');
+
+            storagepaths = storagepaths.map(path => {
+                let option = document.createElement('option');
+
+                StoragePaths.push((path = option.value = option.textContent = path.location).replace(/\\/g, '/').replace(/\/+$/, ''));
+                storagepath.appendChild(option);
+
+                return path;
+            });
+
+            $('[data-option="sickBeardStoragePaths"i]').value = JSON.stringify(storagepaths.map((path, index, array) => ({ path, id: index })));
+
+            // Because the <select> was reset, the original value is lost.
+            if(StoragePath) {
+                $('[data-option="__sickBeardStoragePath"i]').value =
+                storagepath.selectedIndex = StoragePaths.indexOf(StoragePath.replace(/\\/g, '/').replace(/\/+$/, ''));
+            }
+        });
+    };
+
+    if(refreshing)
+        Get();
+    else if(url && url.length)
+        requestURLPermissions(url + '/*', allowed =>
+            (allowed)?
+                Get():
+            new Notification('error', 'The user refused permission to access Sick Beard')
+        );
+}
+
 function enableCouchPotato() {
     $('#use-couchpotato').parentElement.removeAttribute('disabled');
 }
@@ -1042,9 +1249,9 @@ function HandleProxySettings(data) {
 }
 
 function saveOptions() {
-    ServerID = __servers__.options[__servers__.selectedIndex].value;
+    ServerID = [...__servers__.selectedOptions][0];
 
-	if(!ServerID) {
+	if(!ServerID || !ServerID.value) {
         let withoutplex = confirm('Continue without a Plex server?');
 
         if(withoutplex)
@@ -1052,6 +1259,7 @@ function saveOptions() {
 		else
             return new Notification('error', 'Select a server!');
     }
+    ServerID = ServerID.value;
 
 	let server = PlexServers.find(ID => ID.clientIdentifier === ServerID);
 
@@ -1076,22 +1284,23 @@ function saveOptions() {
 	let options = getOptionValues(),
         endingSlash = ($0, $1, $$, $_) => ($1 + (/\\/.test($_)? '\\': '/'));
 
-    options.DO_NOT_USE = false;
+    options.IGNORE_PLEX = false;
 
     let r, R = 'Radarr',
         s, S = 'Sonarr',
         w, W = 'Watcher',
         c, C = 'CouchPotato',
         o, O = 'Ombi',
-        m, M = 'Medusa';
+        m, M = 'Medusa',
+        i, I = 'Sick Beard';
 
-    let who = () => (r? R: s? S: w? W: c? C: o? O: m? M: 'manager');
+    let who = () => (r? R: s? S: w? W: c? C: o? O: m? M: i? I: 'manager');
 
     // Instead of having the user be so wordy, complete the URL ourselves here
-    if((r = !options.radarrURLRoot && options.radarrToken) || (s = !options.sonarrURLRoot && options.sonarrToken) || (w = !options.watcherURLRoot && options.watcherToken) || (o = !options.ombiURLRoot && options.ombiToken) || (o = !options.medusaURLRoot && options.medusaToken)) {
+    if((r = !options.radarrURLRoot && options.radarrToken) || (s = !options.sonarrURLRoot && options.sonarrToken) || (w = !options.watcherURLRoot && options.watcherToken) || (o = !options.ombiURLRoot && options.ombiToken) || (m = !options.medusaURLRoot && options.medusaToken) || (i = !options.sickBeardURLRoot && options.sickBeardToken)) {
       return new Notification('error', `Please enter a valid URL for ${ who() }`),
           null;
-    } if((options.radarrURLRoot && !options.radarrStoragePath) && (options.sonarrURLRoot && !options.sonarrStoragePath) && (options.medusaURLRoot && !options.medusaStoragePath)) {
+    } if((options.radarrURLRoot && !options.radarrStoragePath) && (options.sonarrURLRoot && !options.sonarrStoragePath) && (options.medusaURLRoot && !options.medusaStoragePath) && (options.sickBeardURLRoot && !options.sickBeardStoragePath)) {
       return new Notification('error', `Please enter a valid storage path for ${ who() }`),
           null;
     } if(options.watcherURLRoot && !options.watcherQualityProfileId) {
@@ -1106,11 +1315,14 @@ function saveOptions() {
     } if(options.medusaURLRoot && !options.medusaQualityProfileId) {
         return new Notification('error', 'Select a quality profile for Medusa'),
             null;
+    } if(options.sickBeardURLRoot && !options.sickBeardQualityProfileId) {
+        return new Notification('error', 'Select a quality profile for Sick Beard'),
+            null;
     } if(!ClientID) {
         ClientID = window.crypto.getRandomValues(new Uint32Array(5))
             .join('-');
-        storage.set({ ClientID });
     }
+    storage.set({ ClientID });
 
     options.plexURL = options.plexURLRoot = (options.plexURL || "https://app.plex.tv/")
         .replace(/^(\:\d+)/, 'localhost$1')
@@ -1137,6 +1349,10 @@ function saveOptions() {
         .replace(/([^\\\/])$/, endingSlash)
         .replace(/^(?!^http(s)?:\/\/)(.+)/, 'http$1://$2');
 
+    options.sickBeardURLRoot = (options.sickBeardURLRoot || "")
+        .replace(/([^\\\/])$/, endingSlash)
+        .replace(/^(?!^http(s)?:\/\/)(.+)/, 'http$1://$2');
+
     options.radarrStoragePath = options.radarrStoragePath
         .replace(/([^\\\/])$/, endingSlash);
 
@@ -1146,7 +1362,11 @@ function saveOptions() {
     options.medusaStoragePath = options.medusaStoragePath
         .replace(/([^\\\/])$/, endingSlash);
 
-    for(let index = 0, array = 'plex ombi medusa watcher radarr sonarr couchpotato'.split(' '), item = save('URLs', array); index < array.length; index++)
+    options.sickBeardStoragePath = options.sickBeardStoragePath
+        .replace(/([^\\\/])$/, endingSlash);
+
+    // icons for the popup page
+    for(let index = 0, array = 'plex ombi medusa watcher radarr sonarr couchpotato sickBeard'.split(' '), item = save('URLs', array); index < array.length; index++)
         save(`${ item = array[index] }.url`, options[`${ item }URLRoot`]);
 
 	// Dynamically asking permissions
@@ -1156,15 +1376,16 @@ function saveOptions() {
 	requestURLPermissions(options.sonarrURLRoot);
 	requestURLPermissions(options.medusaURLRoot);
 	requestURLPermissions(options.ombiURLRoot);
+    requestURLPermissions(options.sickBeardURLRoot);
 
     // Handle the proxy settings
     options.proxy = HandleProxySettings(options);
 
 	function OptionsSavedMessage() {
 		// Update status to let the user know the options were saved
-		new Notification('update', 'Saved', 3000);
+		new Notification('update', 'Saved', 1500);
 	}
-	new Notification('update', 'Saving...', 3000);
+	new Notification('update', 'Saving...', 1500);
 
 	let data = {
 		...options,
@@ -1193,22 +1414,23 @@ function saveOptionsWithoutPlex() {
 	let options = getOptionValues(),
         endingSlash = ($0, $1, $$, $_) => ($1 + (/\\/.test($_)? '\\': '/'));
 
-    options.DO_NOT_USE = true;
+    options.IGNORE_PLEX = true;
 
     let r, R = 'Radarr',
         s, S = 'Sonarr',
         w, W = 'Watcher',
         c, C = 'CouchPotato',
         o, O = 'Ombi',
-        m, M = 'Medusa';
+        m, M = 'Medusa',
+        i, I = 'Sick Beard';
 
     let who = () => (r? R: s? S: w? W: c? C: o? O: m? M: 'manager');
 
     // Instead of having the user be so wordy, complete the URL ourselves here
-    if((r = !options.radarrURLRoot && options.radarrToken) || (s = !options.sonarrURLRoot && options.sonarrToken) || (w = !options.watcherURLRoot && options.watcherToken) || (o = !options.ombiURLRoot && options.ombiToken) || (o = !options.medusaURLRoot && options.medusaToken)) {
+    if((r = !options.radarrURLRoot && options.radarrToken) || (s = !options.sonarrURLRoot && options.sonarrToken) || (w = !options.watcherURLRoot && options.watcherToken) || (o = !options.ombiURLRoot && options.ombiToken) || (m = !options.medusaURLRoot && options.medusaToken) || (i = !options.sickBeardURLRoot && options.sickBeardToken)) {
       return new Notification('error', `Please enter a valid URL for ${ who() }`),
           null;
-    } if((options.radarrURLRoot && !options.radarrStoragePath) && (options.sonarrURLRoot && !options.sonarrStoragePath) && (options.medusaURLRoot && !options.medusaStoragePath)) {
+    } if((options.radarrURLRoot && !options.radarrStoragePath) && (options.sonarrURLRoot && !options.sonarrStoragePath) && (options.medusaURLRoot && !options.medusaStoragePath) && (options.sickBeardURLRoot && !options.sickBeardStoragePath)) {
       return new Notification('error', `Please enter a valid storage path for ${ who() }`),
           null;
     } if(options.watcherURLRoot && !options.watcherQualityProfileId) {
@@ -1222,6 +1444,9 @@ function saveOptionsWithoutPlex() {
             null;
     } if(options.medusaURLRoot && !options.medusaQualityProfileId) {
         return new Notification('error', 'Select a quality profile for Medusa'),
+            null;
+    } if(options.sickBeardURLRoot && !options.sickBeardQualityProfileId) {
+        return new Notification('error', 'Select a quality profile for Sick Beard'),
             null;
     } if(!ClientID) {
         ClientID = 'web-to-plex:client';
@@ -1251,6 +1476,10 @@ function saveOptionsWithoutPlex() {
         .replace(/([^\\\/])$/, endingSlash)
         .replace(/^(?!^http(s)?:\/\/)(.+)/, 'http$1://$2');
 
+    options.sickBeardURLRoot = (options.sickBeardURLRoot || "")
+        .replace(/([^\\\/])$/, endingSlash)
+        .replace(/^(?!^http(s)?:\/\/)(.+)/, 'http$1://$2');
+
     options.radarrStoragePath = options.radarrStoragePath
         .replace(/([^\\\/])$/, endingSlash);
 
@@ -1260,7 +1489,11 @@ function saveOptionsWithoutPlex() {
     options.medusaStoragePath = options.medusaStoragePath
         .replace(/([^\\\/])$/, endingSlash);
 
-    for(let index = 0, array = 'ombi medusa watcher radarr sonarr couchpotato'.split(' '), item = save('URLs', array); index < array.length; index++)
+    options.sickBeardStoragePath = options.sickBeardStoragePath
+        .replace(/([^\\\/])$/, endingSlash);
+
+    // icons for the popup page
+    for(let index = 0, array = 'ombi medusa watcher radarr sonarr couchpotato sickBeard'.split(' '), item = save('URLs', array); index < array.length; index++)
         save(`${ item = array[index] }.url`, options[`${ item }URLRoot`]);
 
 	// Dynamically asking permissions
@@ -1276,9 +1509,9 @@ function saveOptionsWithoutPlex() {
 
 	function OptionsSavedMessage() {
 		// Update status to let the user know the options were saved
-		new Notification('update', 'Saved', 3000);
+		new Notification('update', 'Saved', 1500);
 	}
-	new Notification('update', 'Saving...', 3000);
+	new Notification('update', 'Saving...', 1500);
 
 	let data = options;
 
@@ -1322,7 +1555,7 @@ function requestURLPermissions(url, callback) {
 // stored in chrome.storage.*
 function restoreOptions(OPTIONS) {
 	function setOptions(items) {
-    if(!items) return;
+        if(!items) return;
 
 		__options__.forEach(option => {
             let el = $(`[data-option="${ option }"]`);
@@ -1362,10 +1595,22 @@ function restoreOptions(OPTIONS) {
 			performRadarrTest(items.radarrQualityProfileId, items.radarrStoragePath, true);
         if(items.sonarrURLRoot)
 			performSonarrTest(items.sonarrQualityProfileId, items.sonarrStoragePath, true);
+        if(items.sickBeardURLRoot)
+			performSickBeardTest(items.sickBeardQualityProfileId, items.sickBeardStoragePath, true);
         if(items.couchpotatoURLRoot)
             enableCouchPotato();
-	}
 
+        let __domains = (sites => {
+            let array = [];
+
+            for(let site in sites)
+                array.push(site);
+
+            return array;
+        })({ ...builtin_sites, ...plugin_sites });
+
+        $('[data-option="__domains"i]').value = __domains;
+	}
 
     if (OPTIONS && typeof OPTIONS == 'string') {
         OPTIONS = JSON.parse(OPTIONS);
@@ -1476,36 +1721,68 @@ let builtins = {
     "GoStream": "https://gostream.site/",
     "Tubi": "https://tubitv.com/",
     "Web to Plex": "https://ephellon.github.io/web.to.plex/",
+    "Allocine": "https://allocine.fr/",
 
+    // Dont' forget to add to the __options__ array!
 }, builtin_array = [], builtin_sites = {}, builtinElement = $('#builtin');
 
 for(let builtin in builtins)
     builtin_array.push(builtin);
-builtin_array = builtin_array.sort();
+builtin_array = builtin_array.sort((a,b) => { let [x, y] = [a, b].map(v => v.toLowerCase()); return x < y? -1: 1; });
 
 for(let index = 0, length = builtin_array.length; builtinElement && index < length; index++) {
-    let title = builtin_array[index],
-        name  = 'builtin_' + title.toLowerCase().replace(/\s+/g, ''),
-        url   = new URL(builtins[title]),
-        js    = name.replace(/^builtin_/i, ''),
-        o     = url.origin,
-        r     = url.host.replace(/^(ww\w+\.)/, '');
+    let builtin = builtins[builtin_array[index]];
 
-    builtin_sites[r] = o;
+    if(builtin instanceof Array) {
+        for(let i = 0, l = builtin.length; i < l; i++) {
+            let title = builtin_array[index],
+                name  = 'builtin_' + title.toLowerCase().replace(/\s+/g, ''),
+                url   = new URL(builtin[i]),
+                js    = name.replace(/^builtin_/i, ''),
+                o     = url.origin,
+                r     = url.host.replace(/^(ww\w+\.)/, '');
 
-    builtinElement.innerHTML +=
+            builtin_sites[r] = o;
+
+            if(!i)
+                builtinElement.innerHTML +=
 `
 <h3>${ title }</h3>
 <div class="checkbox">
-    <input id="${ name }" type="checkbox" checked="true" data-option="${ name }" bid="${ r }" js="${ js }">
-    <label for="${ name }"></label>
+<input id="${ name }" type="checkbox" data-option="${ name }" pid="${ r }" js="${ js }">
+<label for="${ name }"></label>
 </div>
 <div>
-    Run on <a href="${ url.href }" title="${ r }" target="_blank">${ title }</a>
+Run on <a href="${ url.href }" title="${ r }" target="_blank">${ title }</a>
 </div>
 
 <hr>
 `;
+        }
+    } else {
+        let title = builtin_array[index],
+            name  = 'builtin_' + title.toLowerCase().replace(/\s+/g, ''),
+            url   = new URL(builtins[title]),
+            js    = name.replace(/^builtin_/i, ''),
+            o     = url.origin,
+            r     = url.host.replace(/^(ww\w+\.)/, '');
+
+        builtin_sites[r] = o;
+
+        builtinElement.innerHTML +=
+`
+<h3>${ title }</h3>
+<div class="checkbox">
+<input id="${ name }" type="checkbox" data-option="${ name }" pid="${ r }" js="${ js }">
+<label for="${ name }"></label>
+</div>
+<div>
+Run on <a href="${ url.href }" title="${ r }" target="_blank">${ title }</a>
+</div>
+
+<hr>
+`;
+    }
 
     // save(`permission:${ r }`, true);
     // save(`script:${ r }`, js);
@@ -1521,8 +1798,8 @@ $('[id^="builtin_"]', true)
             js = self.getAttribute('js');
 
         if(self.checked) {
-            terminal.log(bid, builtins[bid]);
-            requestURLPermissions(builtins[bid].replace(/https?:\/\/(ww\w+\.)?/i, '*://*.').replace(/\/?$/, '/*'), granted => {
+            terminal.log(bid, builtin_sites[bid]);
+            requestURLPermissions(builtin_sites[bid].replace(/https?:\/\/(ww\w+\.)?/i, '*://*.').replace(/\/?$/, '/*'), granted => {
                 save(`permission:${ bid }`, granted);
                 save(`script:${ bid }`, granted? js: null);
             });
@@ -1537,29 +1814,37 @@ $('[id^="builtin_"]', true)
 
 // Plugins and their links
 let plugins = {
+    'Indomovie': ['https://indomovietv.club/', 'https://indomovietv.org/', 'https://indomovietv.net/'],
     'Toloka': 'https://toloka.to/',
     'Shana Project': 'https://www.shanaproject.com/',
     'My Anime List': 'https://myanimelist.net/',
     'My Shows': 'https://myshows.me/',
+    'Redbox': 'https://www.redbox.com/',
+    'Kitsu': 'https://kitsu.io/',
 
     // Dont' forget to add to the __options__ array!
 }, plugin_array = [], plugin_sites = {}, pluginElement = $('#plugins');
 
 for(let plugin in plugins)
     plugin_array.push(plugin);
-plugin_array = plugin_array.sort();
+plugin_array = plugin_array.sort((a,b) => { let [x, y] = [a, b].map(v => v.toLowerCase()); return x < y? -1: 1; });
 
 for(let index = 0, length = plugin_array.length; pluginElement && index < length; index++) {
-    let title = plugin_array[index],
-        name  = 'plugin_' + title.toLowerCase().replace(/\s+/g, ''),
-        url   = new URL(plugins[title]),
-        js    = name.replace(/^plugin_/i, ''),
-        o     = url.origin,
-        r     = url.host.replace(/^(ww\w+\.)/, '');
+    let plugin = plugins[plugin_array[index]];
 
-    plugin_sites[r] = o;
+    if(plugin instanceof Array) {
+        for(let i = 0, l = plugin.length; i < l; i++) {
+            let title = plugin_array[index],
+                name  = 'plugin_' + title.toLowerCase().replace(/\s+/g, ''),
+                url   = new URL(plugin[i]),
+                js    = name.replace(/^plugin_/i, ''),
+                o     = url.origin,
+                r     = url.host.replace(/^(ww\w+\.)/, '');
 
-    pluginElement.innerHTML +=
+            plugin_sites[r] = o;
+
+            if(!i)
+                pluginElement.innerHTML +=
 `
 <h3>${ title }</h3>
 <div class="checkbox">
@@ -1572,6 +1857,31 @@ for(let index = 0, length = plugin_array.length; pluginElement && index < length
 
 <hr>
 `;
+        }
+    } else {
+        let title = plugin_array[index],
+            name  = 'plugin_' + title.toLowerCase().replace(/\s+/g, ''),
+            url   = new URL(plugins[title]),
+            js    = name.replace(/^plugin_/i, ''),
+            o     = url.origin,
+            r     = url.host.replace(/^(ww\w+\.)/, '');
+
+        plugin_sites[r] = o;
+
+        pluginElement.innerHTML +=
+`
+<h3>${ title }</h3>
+<div class="checkbox">
+    <input id="${ name }" type="checkbox" data-option="${ name }" pid="${ r }" js="${ js }">
+    <label for="${ name }"></label>
+</div>
+<div>
+    Run on <a href="${ url.href }" title="${ r }" target="_blank">${ title }</a>
+</div>
+
+<hr>
+`;
+    }
 }
 
 save('optional.sites', plugin_sites);
@@ -1583,8 +1893,8 @@ $('[id^="plugin_"]', true)
             js = self.getAttribute('js');
 
         if(self.checked) {
-            terminal.log(pid, plugins[pid]);
-            requestURLPermissions(plugins[pid].replace(/https?:\/\/(ww\w+\.)?/i, '*://*.').replace(/\/?$/, '/*'), granted => {
+            terminal.log(pid, plugin_sites[pid]);
+            requestURLPermissions(plugin_sites[pid].replace(/https?:\/\/(ww\w+\.)?/i, '*://*.').replace(/\/?$/, '/*'), granted => {
                 save(`permission:${ pid }`, granted);
                 save(`script:${ pid }`, granted? js: null);
             });
@@ -1622,6 +1932,7 @@ $('#radarr_test', true).forEach(element => element.addEventListener('click', eve
 $('#sonarr_test', true).forEach(element => element.addEventListener('click', event => performSonarrTest()));
 $('#medusa_test', true).forEach(element => element.addEventListener('click', event => performMedusaTest()));
 $('#ombi_test', true).forEach(element => element.addEventListener('click', event => performOmbiTest()));
+$('#sickBeard_test', true).forEach(element => element.addEventListener('click', event => performSickBeardTest()));
 $('#enable-couchpotato', true).forEach(element => element.addEventListener('click', event => enableCouchPotato()));
 
 /* INPUT | Get the JSON data */
@@ -1657,7 +1968,7 @@ $('#erase_cache').addEventListener('click', event => {
     new Notification('info', 'Clearing...', 3000);
     storage.get(null, items => {
         for(let item in items)
-            if(/^cache-data\//i.test(item))
+            if(/^~\/cache\//i.test(item))
                 storage.remove(item);
     });
 
@@ -1665,7 +1976,7 @@ $('#erase_cache').addEventListener('click', event => {
 });
 
 $('#version')
-    .innerHTML = `Version ${ chrome.manifest.version }`;
+    .innerHTML = `Version ${ manifest.version }`;
 
 $('[type="range"]', true)
     .forEach((element, index, array) => {
@@ -1692,7 +2003,7 @@ $('.checkbox', true)
     });
 
 $('.test', true)
-    .forEach((element, idnex, array) => {
+    .forEach((element, index, array) => {
         element.addEventListener('click', async event => {
             event.preventDefault(true);
 
@@ -1703,3 +2014,39 @@ $('.test', true)
             open(self.href, self.target);
         });
     });
+
+$('[id^="theme:"i]', true)
+    .forEach((element, index, array) => {
+        element.addEventListener('click', async event => {
+            let self = event.target;
+
+            let [a, b] = self.getAttribute('theme').split(/\s*:\s*/).filter(v => v),
+                value = `${self.id.replace(/^theme:/i, '')}-${b}`;
+
+            if(/^(checkbox)$/i.test(self.type) && (self.checked + '') == a)
+                __theme.push(value);
+            else if(/^(text|input|button|\B)$/i.test(self.type) && (self.value + '') == a)
+                __theme.push(value);
+
+            __theme = __theme.filter(v => v != value);
+        });
+    });
+
+// CORS exception: SecurityError
+// MUST be { window }, never { top }
+let { hash } = window.location;
+
+if(hash.length > 1)
+    switch(hash = hash.slice(1, hash.length).toLowerCase()) {
+        case 'save':
+            setTimeout(async() => {
+                await saveOptions();
+
+                window.postMessage({ type: 'INITIALIZE' });
+            }, 1000);
+            break;
+
+        default:
+            terminal.log(`Unknown event "${ hash }"`);
+            break;
+    };

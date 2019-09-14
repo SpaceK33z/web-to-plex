@@ -25,7 +25,7 @@
             text-decoration: none !important;
         }
 
-		a[target="_blank"]:after {
+		a[target="_blank"]::after {
 		    content: " [\2197]";
 		    font-size: 70%;
 
@@ -48,6 +48,10 @@
             display: none;
         }
 
+		article {
+			z-index: 3;
+		}
+
         section {
             display: block !important;
             margin-bottom: 20px;
@@ -67,18 +71,18 @@
             transition: background 0.2s;
             display: block !important;
             height: 38px !important;
-            padding: 6px 12px !important;
+            padding: 6px 12px;
             font-size: 16px !important;
             color: #eee !important;
             vertical-align: middle;
-            background: rgba(255, 255, 255, 0.25) !important;
-            border: 3px solid rgba(0, 0, 0, 0) !important;
-            border-radius: 3px !important;
+            background: rgba(255, 255, 255, 0.25);
+            border: 3px solid rgba(0, 0, 0, 0);
+            border-radius: 3px;
             font-family: inherit;
             margin: 0;
         }
 
-		textarea {
+		textarea, select[multiple] {
 			height: 114px !important;
 		}
 
@@ -162,6 +166,38 @@
             line-height: inherit;
             text-transform: none;
         }
+
+		#footer {
+			text-align: center;
+
+			bottom: 0;
+			left: 0;
+			position: fixed;
+
+			width: 100%;
+		}
+
+		[in-use] {
+			color: #197bcc;
+		}
+
+		[in-use]::after {
+			content: '\2610';
+		}
+
+		[in-use="true"i]::after {
+			content: '\2611';
+		}
+
+		[top] {
+			border-bottom-left-radius:  0 !important;
+			border-bottom-right-radius: 0 !important;
+		}
+
+		[bottom] {
+			border-top-left-radius:  0 !important;
+			border-top-right-radius: 0 !important;
+		}
 
         /* notifications */
         .notification {
@@ -311,7 +347,7 @@
 			background: #ffffff4d;
 		}
 
-		.prompt-option.mutable > *:last-child:after {
+		.prompt-option.mutable > *:last-child::after {
 			content: '\00d7';
 		}
 
@@ -374,7 +410,7 @@
             cursor: pointer;
         }
 
-        option {
+        select:not([multiple]) > option {
             background: url(../img/noise.png), #3f4245 !important;
         }
 
@@ -416,7 +452,7 @@
 			vertical-align: text-bottom;
 		}
 
-        .checkbox:after {
+        .checkbox::after {
             content: 'OFF';
             color: #666;
             position: absolute;
@@ -427,7 +463,7 @@
             text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.15);
         }
 
-        .checkbox:before {
+        .checkbox::before {
             content: 'ON';
             color: #cc7b19;
             position: absolute;
@@ -437,21 +473,37 @@
             font-weight: bold;
         }
 
-		.checkbox[prompt-yes]:before {
+		.checkbox[prompt-yes]::before {
 			content: attr(prompt-yes);
 			text-transform: uppercase;
 		}
 
-		.checkbox[prompt-no]:after {
+		.checkbox[prompt-no]::after {
 			content: attr(prompt-no);
 			text-transform: uppercase;
 		}
 
-        .checkbox[prompt="y/n"i]:before {
+		.checkbox[prompt-size="large"i]::before, .checkbox[prompt-size="large"i]::after {
+		    font-size: 30px !important;
+		}
+
+		.checkbox[prompt-size="medium"i]::before, .checkbox[prompt-size="medium"i]::after {
+		    font-size: 21px !important;
+		}
+
+		.checkbox[prompt-size="normal"i]::before, .checkbox[prompt-size="normal"i]::after {
+		    font-size: 12px !important;
+		}
+
+		.checkbox[prompt-size="small"i]::before, .checkbox[prompt-size="small"i]::after {
+		    font-size: 6px !important;
+		}
+
+        .checkbox[prompt="y/n"i]::before {
             content: 'YES';
         }
 
-        .checkbox[prompt="y/n"i]:after {
+        .checkbox[prompt="y/n"i]::after {
             content: 'NO';
         }
 
@@ -516,7 +568,7 @@
             vertical-align: sub;
         }
 
-        input[type="range"] + output:after {
+        input[type="range"] + output::after {
             position: absolute;
             top: 8px;
             left: -7px;
@@ -565,7 +617,10 @@
         }
 
 		[code], code {
+			border: 1px solid #FFF3;
 			font-family: monospace, console, consolas, system, arial !important;
+
+			padding: 0 3px;
 		}
 
         *::-webkit-scrollbar {
@@ -625,36 +680,36 @@ div
 
 	<article>
         <details>
-            <summary>Login</summary>
+            <summary>Login <span in-use="plex_token"></span></summary>
 
             <h2>Login Settings</h2>
-            <section>
-                <label>Use your Plex token</label>
+            <details>
+                <summary>Use your Plex token <span in-use="plex_token"></span></summary>
                 <input type="text" id="plex_token" data-option="plexToken" placeholder="Enter your Plex token"/>
                 <div>
                     How to find your <a href="https://support.plex.tv/hc/en-us/articles/204059436-Finding-your-account-token-X-Plex-Token" title="How to find your token?" target="_blank">Plex token</a>.
                 </div>
-            </section>
+            </details>
 
             <h3 style="width: 35%; text-align: center;"><em>&mdash; OR &mdash;</em></h3>
 
-            <section>
-                <label>Login with Plex</label>
-                <input type="text" id="plex_username" style="border-bottom-left-radius: 0 !important; border-bottom-right-radius: 0 !important;" placeholder="Enter your Plex username"/>
-                <input type="password" id="plex_password" style="border-top-left-radius: 0 !important; border-top-right-radius: 0 !important;" placeholder="Enter your Plex password"/>
+            <details>
+                <summary>Login with Plex</summary>
+                <input type="text" id="plex_username" top placeholder="Enter your Plex username"/>
+                <input type="password" id="plex_password" bottom placeholder="Enter your Plex password"/>
                 <div>
                     Your Plex username and password are never stored, only your <a href="https://support.plex.tv/hc/en-us/articles/204059436-Finding-your-account-token-X-Plex-Token" title="How to find your token?" target="_blank">Plex token</a>.
                     <br>
                     Your username and password are used in order to get a token from Plex itself.
                 </div>
-            </section>
+            </details>
 
             <h3 style="width: 35%; text-align: center;"><em>&mdash; OR &mdash;</em></h3>
 
-            <section>
-                <label>Attach to Ombi<sup><em>*</em></sup></label>
-                <input type="text" id="ombi_url" style="border-bottom-left-radius: 0 !important; border-bottom-right-radius: 0 !important;" placeholder="Enter your Ombi URL"/>
-                <input type="text" id="ombi_api" style="border-top-left-radius: 0 !important; border-top-right-radius: 0 !important;" placeholder="Enter your Ombi API key"/>
+            <details>
+                <summary>Attach to Ombi<sup><em>*</em></sup></summary>
+                <input type="text" id="ombi_url" top placeholder="Enter your Ombi URL"/>
+                <input type="text" id="ombi_api" bottom placeholder="Enter your Ombi API key"/>
                 <br>
                 <h3><em>Fill in Manager Settings with Ombi?</em></h3>
                 <div class="checkbox" prompt="y/n">
@@ -664,14 +719,14 @@ div
                 <div>
                     Your Ombi <a href="https://support.plex.tv/hc/en-us/articles/204059436-Finding-your-account-token-X-Plex-Token" title="How to find your token?" target="_blank">Plex token</a> will be shared by this extension.
                 </div>
-            </section>
+            </details>
 			<hr><br>
             <section>
                 <button type="button" id="plex_test">Test <span id="plex_test_status">?</span></button>
             </section>
             <section>
-                <label>Select a server</label>
-                <select id="plex_servers">
+                <label>Select a preferred server</label>
+                <select data-option="preferredServer">
                     <option value="">Press "Test [?]" first</option>
                 </select>
             </section>
@@ -959,7 +1014,7 @@ div
 		        <input type="text" data-option="medusaBasicAuthPassword" placeholder="Enter your Medusa (HTTP) password"/>
 		        <div class="hidden-help">Your password will be hidden once saved.</div>
 		        <br>
-		        <div>This information will be used for <a href="https://wikipedia.org/wiki/Basic_access_authentication" target="_blank">Basic Access Authentication</a> only. This will allow the extension to ask Medusa for your list of films, or to add to your list of films.</div>
+		        <div>This information will be used for <a href="https://wikipedia.org/wiki/Basic_access_authentication" target="_blank">Basic Access Authentication</a> only. This will allow the extension to ask Medusa for your list of TV shows, or to add to your list of TV shows.</div>
 		    </section>
 
 		    <section>
@@ -1028,7 +1083,7 @@ div
                 <div>Only use this if you setup a Sonarr password.</div>
                 <div class="hidden-help">Your password will be hidden once saved.</div>
                 <br>
-                <div>This information will be used for <a href="https://wikipedia.org/wiki/Basic_access_authentication" target="_blank">Basic Access Authentication</a> only. This will allow the extension to ask Sonarr for your list of shows, or to add to your list of shows.</div>
+                <div>This information will be used for <a href="https://wikipedia.org/wiki/Basic_access_authentication" target="_blank">Basic Access Authentication</a> only. This will allow the extension to ask Sonarr for your list of TV shows, or to add to your list of TV shows.</div>
             </section>
 
             <section>
@@ -1055,10 +1110,98 @@ div
 				<a class="button test" target="_blank" href="https://ephellon.github.io/web.to.plex/test/#tv-show">try out sonarr</a>
 			</section>
         </details>
+
+		<details id="sickBeard">
+		    <summary>Sick Beard (TV Shows) <span class="checkbox" disabled prompt-yes="use" prompt-no="skip"><input id="using-sickBeard" type="checkbox" data-option="usingSickBeard" checked="false" /><label for="using-sickBeard"></label></span></summary>
+
+		    <h2>Connection Settings</h2>
+		    <section>
+		        <label>Sick Beard URL</label>
+		        <input type="text" data-option="sickBeardURLRoot" placeholder="What's your Sick Beard URL?"/>
+		        <div>
+		            Such as <em>https://example.com/sickBeard</em> or <em>http://192.168.1.100:8081</em>
+		        </div>
+		    </section>
+
+		    <section>
+		        <label>Sick Beard API Key</label>
+		        <input type="text" data-option="sickBeardToken" placeholder="What's your Sick Beard API key?"/>
+		        <div>
+		            1. Go to Sick Beard | Config | General | API<br/>
+		            &mdash; a. Ensure the checkbox "Enable API" is enabled<br/>
+		            &mdash; b. Press the "Generate" button<br/>
+		            2. Copy/Paste the "API Key."<br/>
+		            Such as <em>aa756d33242f6g8ffbca2b3963586f21</em>
+		        </div>
+		    </section>
+
+		    <h3>Login <em>(saved)</em></h3>
+		    <section>
+		        <label>Username</label>
+		        <input type="text" data-option="sickBeardBasicAuthUsername" placeholder="Enter your Sick Beard (HTTP) username"/>
+		    </section>
+		    <section>
+		        <label>Password</label>
+		        <input type="text" data-option="sickBeardBasicAuthPassword" placeholder="Enter your Sick Beard (HTTP) password"/>
+		        <div class="hidden-help">Your password will be hidden once saved.</div>
+		        <br>
+		        <div>This information will be used for <a href="https://wikipedia.org/wiki/Basic_access_authentication" target="_blank">Basic Access Authentication</a> only. This will allow the extension to ask Sick Beard for your list of TV shows, or to add to your list of TV shows.</div>
+		    </section>
+
+		    <section>
+		        <button type="button" id="sickBeard_test">Test <span id="sickBeard_test_status">?</span></button>
+		    </section>
+
+		    <section>
+		        <label>Sick Beard Storage Path</label>
+		        <select data-option="sickBeardStoragePath">
+		            <option value="">Press "Test [?]" first</option>
+		        </select>
+		        <div>
+		            This should be the same path (verbatim) used in Sick Beard.
+		        </div>
+		    </section>
+		    <section>
+		        <label>Quality Profile Type</label>
+		        <select data-option="sickBeardQualityProfileType">
+					<option>Initial</option>
+		            <option>Archive</option>
+		        </select>
+		        <hr/>
+		        <label>Quality Profile</label>
+		        <select data-option="sickBeardQualityProfileId">
+		            <option value="">Press "Test [?]" first</option>
+		        </select>
+				<!-- <div>
+					Use <code>Ctrl + Click</code> to select multiple items.
+				</div> -->
+		    </section>
+		    <hr><br>
+		    <section>
+		        <a class="button test" target="_blank" href="https://ephellon.github.io/web.to.plex/test/#tv-show">try out Sick Beard</a>
+		    </section>
+		</details>
     </article>
 </div>
 <div>
     <h1>Other Settings</h1>
+
+	<article>
+		<details>
+			<summary>Theme Settings</summary>
+
+			<h2>The Button</h2>
+			<section>
+				Where should the button be?
+				<br>
+				<span class="checkbox" prompt-size="large" prompt-yes="&#8672;" prompt-no="&#8674;">
+					<!-- When true (checked), will be accessed in CSS (/sites/...) as "button-location-right { ... }" -->
+					<input id="theme:button-location" theme="true:right" type="checkbox" />
+					<label for="theme:button-location"></label>
+				</span>
+			</section>
+		</details>
+	</article>
 
 	<article>
 		<details>
@@ -1277,12 +1420,12 @@ div
             </section>
             <hr>
             <section>
-                <h3>"Local Search" Cache</h3>
-                <label>Would you like to erase all of your cached searches?</label>
+                <h3>Cached Data</h3>
+                <label>Would you like to erase all of your cached data?</label>
                 <br>
                 <button type="button" id="erase_cache">Yes, Erase</button>
                 <div>
-                    This will empty all of you "Local Search" results.
+                    This will remove all of your Local Search, permission, and other cached data.
                     <br>
                     <strong>This action cannot be undone.</strong>
                 </div>
@@ -1293,7 +1436,7 @@ div
 				<h3>
 					Developer Mode
 	                <span class="checkbox">
-	                    <input id="extension-branch-type" type="checkbox" checked data-option="ExtensionBranchType"/>
+	                    <input id="extension-branch-type" type="checkbox" checked data-option="DeveloperMode"/>
 	                    <label for="extension-branch-type"></label>
 	                </span>
 				</h3>
@@ -1359,13 +1502,20 @@ div
                     Download, and/or find more information for <a href="https://pymedusa.com/" target="_blank">Medusa</a>.
                 </div>
             </section>
+
+			<section>
+				<label>Sick Beard's Website</label>
+				<div>
+					Download, and/or find more information for <a href="http://sickbeard.com/" target="_blank">Sick Beard</a>.
+				</div>
+			</section>
         </details>
     </article>
 </div>
 
     <br>
 
-	<section>
+	<section id="footer">
 		<button id="save">Save</button>
 	</section>
 
@@ -1374,16 +1524,23 @@ div
 		<input data-option="radarrQualities" value />
 		<input data-option="sonarrQualities" value />
 		<input data-option="medusaQualities" value />
+		<input data-option="sickBeardQualities" value />
 		<input data-option="watcherStoragePaths" value />
 		<input data-option="radarrStoragePaths" value />
 		<input data-option="sonarrStoragePaths" value />
 		<input data-option="medusaStoragePaths" value />
+		<input data-option="sickBeardStoragePaths" value />
 		<input data-option="__radarrQuality" value />
 		<input data-option="__sonarrQuality" value />
 		<input data-option="__medusaQuality" value />
+		<input data-option="__sickBeardQuality" value />
 		<input data-option="__radarrStoragePath" value />
 		<input data-option="__sonarrStoragePath" value />
 		<input data-option="__medusaStoragePath" value />
+		<input data-option="__sickBeardStoragePath" value />
+		<input data-option="__domains" value />
+		<input data-option="__caught" value />
+		<input data-option="__theme" value />
 	</div>
 
     <footer id="version"></footer>

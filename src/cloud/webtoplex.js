@@ -1,3 +1,7 @@
+// optional
+// "Web to Plex" requires: api, token
+// 'Friendly Name' requires permissions...
+
 let script = {
     // required
     "url": "*://ephellon.github.io/web.to.plex/(?!test|login)",
@@ -19,14 +23,14 @@ let script = {
 
         let title = $('#title').first,
             year  = $('#year').first,
-            image = $('#body').first,
+            image = $('#poster').first,
             type  = script.getType(), // described below
             IMDbID = script.getID('imdb')||"",
             TMDbID = script.getID('tmdb')|0;
 
         title = title.textContent;
         year  = year.textContent|0;
-        image = image.style.backgroundImage.replace(/url\("([^]+?)"\)/, '$1');
+        image = image.src;
 
         return { type, title, year, image, IMDbID, TMDbID };
     },
@@ -36,3 +40,10 @@ let script = {
 
     "getID": (provider) => $(`#${provider}`).first.textContent,
 };
+
+if(/\blogin\b/.test(location.pathname) && configuration.TMDbAPI) {
+    $('#apikey').first.value = configuration.TMDbAPI;
+
+    return -1;
+    // no longer needed to run
+}

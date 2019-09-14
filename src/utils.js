@@ -9,11 +9,18 @@ let configuration, init, Update;
     let YEAR  = date.getFullYear(),
         MONTH = date.getMonth() + 1,
         DATE  = date.getDate(),
-        NOTIFIED = false;
+    // Notification items
+        NOTIFIED = false,
+        RUNNING  = false,
+    // Other items
+    /* Items that the user has already asked for */
+        CAUGHT;
 
     // simple helpers
     let extURL = url => chrome.extension.getURL(url),
-        $ = (selector, container) => queryBy(selector, container);
+        $ = (selector, container) => queryBy(selector, container),
+        // DO NOT EXPOSE
+        __CONFIG__, ALLOWED, PERMISS;
 
     let IMG_URL = {
         'nil':              extURL('img/null.png'),
@@ -45,7 +52,7 @@ let configuration, init, Update;
         if(!name)
             return /* invalid name */;
 
-        name = 'Cache-Data/' + btoa(name.toLowerCase().replace(/\s+/g, ''));
+        name = '~/cache/' + (name.toLowerCase().replace(/\s+/g, '_'));
 
         return new Promise((resolve, reject) => {
             function LOAD(DISK) {
@@ -67,7 +74,7 @@ let configuration, init, Update;
         if(!name)
             return /* invalid name */;
 
-        name = 'Cache-Data/' + btoa(name.toLowerCase().replace(/\s+/g, ''));
+        name = '~/cache/' + (name.toLowerCase().replace(/\s+/g, '_'));
         data = JSON.stringify(data);
 
         // erase entries after 400-500 have been made
@@ -81,10 +88,15 @@ let configuration, init, Update;
                 bytes += (typeof object == 'string'? object.length * 8: typeof object == 'boolean'? 8: JSON.stringify(object).length * 8)|0;
             }
 
-            if((UTILS_STORAGE.MAX_ITEMS && array.length >= UTILS_STORAGE.MAX_ITEMS) || bytes >= UTILS_STORAGE.QUOTA_BYTES)
+            if((UTILS_STORAGE.MAX_ITEMS && array.length >= UTILS_STORAGE.MAX_ITEMS) || bytes >= UTILS_STORAGE.QUOTA_BYTES) {
+                UTILS_TERMINAL.warn('Exceeded quota. Erasing cache...');
+
                 for(let item in items)
-                    if(/^cache-data\//i.test(item))
+                    if(/^~\/cache\/(?!get|has)/i.test(item))
                         UTILS_STORAGE.remove(item);
+
+                UTILS_TERMINAL.log('Cache erased');
+            }
         });
 
         await UTILS_STORAGE.set({[name]: data}, () => data);
@@ -96,7 +108,21 @@ let configuration, init, Update;
         if(!name)
             return /* invalid name */;
 
-        return await UTILS_STORAGE.remove(['Cache-Data/' + btoa(name.toLowerCase().replace(/\s+/g, ''))]);
+        return await UTILS_STORAGE.remove(['~/cache/' + (name.toLowerCase().replace(/\s+/g, '_'))]);
+    }
+
+    function encode(data) {
+        if(/^[\u0000-\u00ff]+$/.test(data))
+            return btoa(data);
+        else
+            return data;
+    }
+
+    function decode(data) {
+        if(/^[a-z\d\+\/\=]+$/i.test(data))
+            return atob(data);
+        else
+            return data;
     }
 
     /* Notifications */
@@ -109,9 +135,9 @@ let configuration, init, Update;
     class Notification {
         constructor(state, text, timeout = 7000, callback = () => {}, requiresClick = true) {
             let queue = (Notification.queue = Notification.queue || { list: [] }),
-                last = queue.list[queue.list.length - 1];
+                last = queue.list[queue.list.length - 1] || document.queryBy('.web-to-plex-notification').first;
 
-            if(((state == 'error' || state == 'warning') && configuration.NotifyNewOnly && /\balready\s+(exists?|(been\s+)?added)\b/.test(text)) || (configuration.NotifyOnlyOnce && NOTIFIED && state === 'info'))
+            if(((state == 'error' || state == 'warning') && __CONFIG__.NotifyNewOnly && /\balready\s+(exists?|(been\s+)?added)\b/.test(text)) || (__CONFIG__.NotifyOnlyOnce && NOTIFIED && state === 'info'))
                 return /* Don't match /.../i as to not match item titles */;
             NOTIFIED = true;
 
@@ -159,47 +185,53 @@ let configuration, init, Update;
                 data = [...array],
                 profiles = {
                     movie: JSON.parse(
-                        configuration.usingRadarr?
-                            configuration.radarrQualities:
-                        configuration.usingWatcher?
-                            configuration.watcherQualities:
+                        __CONFIG__.usingRadarr?
+                            __CONFIG__.radarrQualities:
+                        __CONFIG__.usingWatcher?
+                            __CONFIG__.watcherQualities:
                         '[]'
                     ),
                     show: JSON.parse(
-                        configuration.usingSonarr?
-                            configuration.sonarrQualities:
-                        configuration.usingMedusa?
-                            configuration.medusaQualities:
+                        __CONFIG__.usingSonarr?
+                            __CONFIG__.sonarrQualities:
+                        __CONFIG__.usingMedusa?
+                            __CONFIG__.medusaQualities:
+                        __CONFIG__.usingSickBeard?
+                            __CONFIG__.sickBeardQualities:
                         '[]'
                     )
                 },
                 locations = {
                     movie: JSON.parse(
-                        configuration.usingRadarr?
-                            configuration.radarrStoragePaths:
-                        configuration.usingWatcher?
-                            configuration.watcherStoragePaths:
+                        __CONFIG__.usingRadarr?
+                            __CONFIG__.radarrStoragePaths:
+                        __CONFIG__.usingWatcher?
+                            __CONFIG__.watcherStoragePaths:
                         '[]'
                     ),
                     show: JSON.parse(
-                        configuration.usingSonarr?
-                            configuration.sonarrStoragePaths:
-                        configuration.usingMedusa?
-                            configuration.medusaStoragePaths:
+                        __CONFIG__.usingSonarr?
+                            __CONFIG__.sonarrStoragePaths:
+                        __CONFIG__.usingMedusa?
+                            __CONFIG__.medusaStoragePaths:
+                        __CONFIG__.usingSickBeard?
+                            __CONFIG__.sickBeardStoragePaths:
                         '[]'
                     )
                 },
                 defaults = {
                     movie: (
-                        configuration.usingRadarr?
-                            { quality: configuration.__radarrQuality, location: configuration.__radarrStoragePath }:
+                        __CONFIG__.usingRadarr?
+                            { quality: __CONFIG__.__radarrQuality, location: __CONFIG__.__radarrStoragePath }:
                         {}
                     ),
                     show: (
-                        configuration.usingSonarr?
-                            { quality: configuration.__sonarrQuality, location: configuration.__sonarrStoragePath }:
-                        configuration.usingMedusa?
-                            { quality: configuration.__medusaQuality, location: configuration.__medusaStoragePath }:
+                        __CONFIG__.usingSonarr?
+                            { quality: __CONFIG__.__sonarrQuality, location: __CONFIG__.__sonarrStoragePath }:
+                        __CONFIG__.usingMedusa?
+                            { quality: __CONFIG__.__medusaQuality, location: __CONFIG__.__medusaStoragePath }:
+                        __CONFIG__.usingSickBeard?
+                            { quality: __CONFIG__.__sickBeardQuality, location: __CONFIG__.__sickBeardStoragePath }:
                         {}
                     )
                 };
@@ -239,11 +271,11 @@ let configuration, init, Update;
                                             furnish('li.web-to-plex-prompt-option.mutable', { value: index, innerHTML: `<h2>${ index + 1 } \u00b7 ${ ITEM.title }${ ITEM.year? ` (${ ITEM.year })`: '' } <em>\u2014 ${ ITEM.type }</em></h2>` },
                                                 furnish('button.remove', { title: `Remove "${ ITEM.title }"`, onmouseup: event => { remove(event.target.parentElement); event.target.remove() } }),
                                                 (
-                                                    configuration.PromptQuality?
+                                                    __CONFIG__.PromptQuality?
                                                         P_QUA = furnish('select.quality', { index, onchange: event => data[event.target.getAttribute('index')].quality = event.target.value }, ...profiles[/(movie|film|cinema)/i.test(ITEM.type)?'movie':'show'].map(Q => furnish('option', { value: Q.id }, Q.name))):
                                                     ''
                                                 ),(
-                                                    configuration.PromptLocation?
+                                                    __CONFIG__.PromptLocation?
                                                         P_LOC = furnish('select.location', { index, onchange: event => data[event.target.getAttribute('index')].location = event.target.value }, ...locations[/(movie|film|cinema)/i.test(ITEM.type)?'movie':'show'].map(Q => furnish('option', { value: Q.id }, Q.path))):
                                                     ''
                                                 )
@@ -263,7 +295,7 @@ let configuration, init, Update;
                             // The engagers
                             furnish('div.web-to-plex-prompt-footer', {},
                                 furnish('input.web-to-plex-prompt-input[type=text]', { placeholder: 'Add an item (enter to add): Title (Year) Type / ID Type', title: 'Solo: A Star Wars Story (2018) movie / tt3778644 m', onkeydown: async event => {
-                                    if(event.keyCode === 13) {
+                                    if(event.keyCode == 13) {
                                         let title, year, type, self = event.target, R = RegExp,
                                             movie = /^(m(?:ovies?)?|f(?:ilms?)?|c(?:inemas?)?)/i,
                                             Db, IMDbID, TMDbID, TVDbID, value = self.value;
@@ -352,11 +384,11 @@ let configuration, init, Update;
                                             furnish('li.web-to-plex-prompt-option.mutable', { value: index, innerHTML: `<h2>${ index + 1 } \u00b7 ${ ITEM.title }${ ITEM.year? ` (${ ITEM.year })`: '' } <em>\u2014 ${ ITEM.type }</em></h2>` },
                                                 furnish('button.remove', { title: `Remove "${ ITEM.title }"`, onmouseup: event => { remove(event.target.parentElement); event.target.remove() } }),
                                                 (
-                                                    configuration.PromptQuality?
+                                                    __CONFIG__.PromptQuality?
                                                         P_QUA = furnish('select.quality', { index, onchange: event => data[event.target.getAttribute('index')].quality = event.target.value }, ...profiles[/(movie|film|cinema)/i.test(ITEM.type)?'movie':'show'].map(Q => furnish('option', { value: Q.id }, Q.name))):
                                                     ''
                                                 ),(
-                                                    configuration.PromptLocation?
+                                                    __CONFIG__.PromptLocation?
                                                         P_LOC = furnish('select.location', { index, onchange: event => data[event.target.getAttribute('index')].location = event.target.value }, ...locations[/(movie|film|cinema)/i.test(ITEM.type)?'movie':'show'].map(Q => furnish('option', { value: Q.id }, Q.path))):
                                                     ''
                                                 )
@@ -419,13 +451,13 @@ let configuration, init, Update;
                             furnish('div.web-to-plex-prompt-options', {},
                                 furnish('div.web-to-plex-prompt-option', { innerHTML: `${ i? `<a href="https://imdb.com/title/${i}/?ref=web_to_plex" ${s}>${i}</a>`: '/' } \u2014 ${ t? `<a href="https://themoviedb.org/${type=='show'?'tv':type}/${t}" ${s}>${t}</a>`: '/' } \u2014 ${ v? `<a href="https://thetvdb.com/series/${title.replace(/\s+/g,'-').replace(/&/g,'and').replace(/[^\w\-]+/g,'')}#${v}" ${s}>${v}</a>`: '/' }` }),
                                 (
-                                    configuration.PromptQuality?
+                                    __CONFIG__.PromptQuality?
                                         P_QUA = furnish('select.quality', { onchange: event => options.quality = event.target.value }, ...profiles[type].map(Q => furnish('option', { value: Q.id }, Q.name))):
                                     ''
                                 ),
                                 furnish('br'),
                                 (
-                                    configuration.PromptLocation?
+                                    __CONFIG__.PromptLocation?
                                         P_LOC = furnish('select.location', { onchange: event => options.location = event.target.value }, ...locations[type].map(Q => furnish('option', { value: Q.id }, Q.path))):
                                     ''
                                 )
@@ -446,10 +478,70 @@ let configuration, init, Update;
                     P_QUA = P_LOC = null;
                     break;
 
+                case 'permission':
+                    let { permission, name, alias } = options;
+                    let existing, permissions;
+
+                    /* Only one permission prompt allowed */
+                    if(!(existing = $('.web-to-plex-prompt[type=permission]')).empty)
+                        return existing.first;
+
+                    UTILS_TERMINAL.log(`Asking for permission(s):`, options);
+
+                    remove = element => {
+                        let prompter = $('.web-to-plex-prompt').first,
+                            header = $('.web-to-plex-prompt-header').first,
+                            counter = $('.web-to-plex-prompt-options').first;
+
+                        if(element === true)
+                            return prompter.remove();
+                        else
+                            element.remove();
+                    };
+
+                    callback = (allowed, permissions) => {
+                        save(`has/${ name }`, allowed);
+                        save(`get/${ name }`, permissions);
+
+                        ALLOWED = allowed;
+                        PERMISS = permissions;
+
+                        ParsedOptions();
+
+                        return Update(`GRANT_PERMISSION`, { allowed, permissions }, true),
+                            (init && !RUNNING? (init(), RUNNING = true): RUNNING = false);
+                    };
+
+                    prompt = furnish('div.web-to-plex-prompt', {},
+                        furnish('div.web-to-plex-prompt-body', {},
+                            // The prompt's title
+                            furnish('h1.web-to-plex-prompt-header', { innerHTML: `${ alias || name } (${ location.host }) would like:` }),
+
+                            // The prompt's items
+                            furnish('div.web-to-plex-prompt-options', {},
+                                ...((permissions = permission.split(/\s*,\s*/).filter(v=>v&&v.length)).map(
+                                    __permission =>
+                                        furnish('div.web-to-plex-prompt-option', { innerHTML: `Access to your ${ __permission } information` })
+                                    )
+                                )
+                            ),
+
+
+                            // The engagers
+                            furnish('div.web-to-plex-prompt-footer', {},
+                                furnish('button.web-to-plex-prompt-decline', { onmouseup: event => { remove(true); callback(false, {}) }, title: 'Deny' }, '\u2718'),
+                                furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { remove(true); callback(true, permissions) }, title: 'Allow' }, '\u2714')
+                            )
+                        )
+                    );
+                    break;
+
                 default:
                     return UTILS_TERMINAL.warn(`Unknown prompt type "${ prompt_type }"`);
                     break;
             }
+
+            prompt.setAttribute('type', prompt_type);
 
             return container.append(prompt), prompt;
         }
@@ -462,10 +554,51 @@ let configuration, init, Update;
         });
     }
 
+    // "secret frame"
+    function sFrame(url, callbacks) {
+        let { success, error } = callbacks;
+
+        let frame = document.furnish('iframe#web-to-plex-sframe', {
+            src: url,
+            style: `
+                display:    none   !important;
+                opacity:    0      !important;
+                visibility: hidden !important;
+            `,
+
+            onload:  success,
+            onerror: error,
+        });
+
+        // todo: make iframe, load, delete
+        document.body.append(frame);
+    }
+
     // Send an update query to background.js
     Update = (type, options = {}, postToo) => {
         if(configuration)
-            UTILS_TERMINAL.log(`Requesting update: ${ type }`, options);
+            UTILS_TERMINAL.log(`Requesting update [post-to-top: ${ !!postToo }]: ${ type }`, options);
+        else
+            return sFrame(extURL(`options/index.html#save`), {
+                success: async event => {
+                    let self = event.target;
+
+                    await ParsedOptions();
+
+                    Update(type, options, postToo);
+
+                    self.remove();
+                },
+
+                error: async event => {
+                    let self = event.target;
+                    self.remove();
+
+                    new Notification('error', `Fill in missing Web to Plex options`, 15000, Options, false);
+
+                    throw `Unable to set configuration variable: ${ JSON.stringify(configuration) }`;
+                }
+            });
 
         chrome.runtime.sendMessage({
             type,
@@ -480,13 +613,13 @@ let configuration, init, Update;
     function options() {
         return new Promise((resolve, reject) => {
             function handleOptions(options) {
-                if((!options.plexToken || !options.servers) && !options.DO_NOT_USE)
+                if((!options.plexToken || !options.servers) && !options.IGNORE_PLEX)
                     return reject(new Error('Required options are missing')),
                         null;
 
                 let server, o;
 
-                if(!options.DO_NOT_USE) {
+                if(!options.IGNORE_PLEX) {
                     // For now we support only one Plex server, but the options already
                     // allow multiple for easy migration in the future.
                     server = options.servers[0];
@@ -537,6 +670,12 @@ let configuration, init, Update;
                         password: o.medusaBasicAuthPassword
                     };
 
+                if(o.sickBeardBasicAuthUsername)
+                    o.sickBeardBasicAuth = {
+                        username: o.sickBeardBasicAuthUsername,
+                        password: o.sickBeardBasicAuthPassword
+                    };
+
                 if(o.usingOmbi && o.ombiURLRoot && o.ombiToken) {
                     o.ombiURL = o.ombiURLRoot;
                 } else {
@@ -573,6 +712,12 @@ let configuration, init, Update;
                     delete o.medusaURL; // prevent variable ghosting
                 }
 
+                if(o.usingSickBeard && o.sickBeardURLRoot && o.sickBeardToken) {
+                    o.sickBeardURL = o.sickBeardURLRoot;
+                } else {
+                    delete o.sickBeardURL; // prevent variable ghosting
+                }
+
                 resolve(o);
             }
 
@@ -589,7 +734,35 @@ let configuration, init, Update;
     function ParsedOptions() {
         return options()
             .then(
-                options => (configuration = options),
+                options => {
+                    configuration = {};
+
+                    /* Don't expose the user's authentication information to sites */
+                    for(let key in options)
+                        if(/username|password|token|api|server|url|storage|cache/i.test(key))
+                            if(ALLOWED && RegExp(PERMISS.join('|'),'i').test(key))
+                                configuration[key] = options[key];
+                            else
+                                /* Do nothing */;
+                        // else if(/(^cache-data|paths|qualities)/i.test(key))
+                        //     /* Pre-parse JSON - make sure anything accessing thedata handles objects too */
+                        //     configuration[key] = JSON.parse(options[key] || null);
+                        else
+                            /* Simple copy */
+                            configuration[key] = options[key];
+
+                    CAUGHT = JSON.parse(options.__caught);
+                    CAUGHT.bump = async(ids) => {
+                        for(let id in ids)
+                            CAUGHT[id.toLowerCase().slice(0, 4)].push(ids[id]);
+
+                        let __caught = JSON.stringify(CAUGHT);
+
+                        await UTILS_STORAGE.set({ __caught }, () => configuration.__caught = __caught);
+                    };
+
+                    return __CONFIG__ = options;
+                },
                 error => {
                     new Notification(
                         'warning',
@@ -605,14 +778,66 @@ let configuration, init, Update;
     await ParsedOptions();
 
     let AUTO_GRAB = {
-            ENABLED: configuration.UseAutoGrab,
-            LIMIT:   configuration.AutoGrabLimit,
+            ENABLED: __CONFIG__.UseAutoGrab,
+            LIMIT:   __CONFIG__.AutoGrabLimit,
         },
-        UTILS_DEVELOPER = configuration.ExtensionBranchType, // = { true: Developer Mode, fase: Standard Mode }
+        UTILS_DEVELOPER = __CONFIG__.DeveloperMode, // = { true: Developer Mode, fase: Standard Mode }
         UTILS_TERMINAL =
             UTILS_DEVELOPER?
                 console:
-            { error: m => m, info: m => m, log: m => m, warn: m => m, group: m => m, groupEnd: m => m };
+            { error: m => m, info: m => m, log: m => m, warn: m => m, group: m => m, groupEnd: m => m, honor: m => m };
+
+        UTILS_TERMINAL.honor = UTILS_TERMINAL.honor?
+            UTILS_TERMINAL.honor:
+        (...messages) => {
+            if(messages.length == 1) {
+                let message = messages[0],
+                    type = typeof message == 'object'? 'o': 'c';
+
+                UTILS_TERMINAL.log(
+                    (type == 'o'? message: `%${ type }>> ${ message } <<`),
+                    (
+                        type == 'o'?
+                            null:
+                        `
+                            background-color: #00332b;
+                            border-bottom: 1px solid #0000;
+                            border-top: 1px solid #065;
+                            box-sizing: border-box;
+                            clear: right;
+                            color: #f5f5f5;
+                            display: block !important;
+                            line-height: 2;
+                            user-select: text;
+
+                            flex-basis: 1;
+                            flex-shrink: 1;
+
+                            margin: 0;
+                            overflow-wrap: break-word;
+                            pading: 3px 22px 1px 0;
+                            position: fixed;
+                            z-index: -1;
+
+                            min-height: 0;
+                            min-width: 100%;
+                            height: 100%;
+                            width: 100%;
+                        `
+                    )
+                );
+            } else {
+                messages.forEach(message => UTILS_TERMINAL.honor(message));
+            }
+        };
+
+    if(configuration) {
+        let host = location.host.replace(/^(ww\w+\.)/, ''),
+            doms = configuration.__domains.split(',');
+
+        if(!~doms.indexOf(host))
+            return;
+    }
 
     UTILS_TERMINAL.log('UTILS_DEVELOPER:', UTILS_DEVELOPER, configuration);
 
@@ -650,9 +875,9 @@ let configuration, init, Update;
             data = {}, // mutated object
             promise,   // query promise
             api = {
-                tmdb: configuration.TMDbAPI || 'bcb95f026f9a01ffa707fcff71900e94',
-                omdb: configuration.OMDbAPI || 'PlzBanMe',
-                ombi: configuration.ombiToken,
+                tmdb: __CONFIG__.TMDbAPI || 'bcb95f026f9a01ffa707fcff71900e94',
+                omdb: __CONFIG__.OMDbAPI || 'PlzBanMe',
+                ombi: __CONFIG__.ombiToken,
             },
             apit = APIType || type, // api type (depends on "rqut")
             apid = APIID   || null, // api id
@@ -660,7 +885,7 @@ let configuration, init, Update;
             mid  = TMDbID  || null, // TMDbID
             tid  = TVDbID  || null, // TVDbID
             rqut = apit, // request type: tmdb, imdb, or tvdb
-            manable = configuration.ManagerSearch && !(rerun & 0b1000), // is the user's "Manager Searches" option enabled?
+            manable = __CONFIG__.ManagerSearch && !(rerun & 0b1000), // is the user's "Manager Searches" option enabled?
             UTF_16 = /[^0\u0020-\u007e, 1\u00a1\u00bf-\u00ff, 2\u0100-\u017f, 3\u0180-\u024f, 4\u0300-\u036f, 5\u0370-\u03ff, 6\u0400-\u04ff, 7\u0500-\u052f, 8\u20a0-\u20bf]+/g;
 
         type = type || null;
@@ -671,7 +896,7 @@ let configuration, init, Update;
         /(movie|film|cinema)s?/i.test(rqut)?
             'tmdb':
         rqut || '*';
-        manable = manable && (configuration.usingOmbi || (configuration.usingRadarr && rqut == 'tmdb') || ((configuration.usingSonarr || configuration.usingMedusa) && rqut == 'tvdb'));
+        manable = manable && (__CONFIG__.usingOmbi || (__CONFIG__.usingRadarr && rqut == 'tmdb') || ((__CONFIG__.usingSonarr || __CONFIG__.usingMedusa /*|| __CONFIG__.usingSickBeard*/) && rqut == 'tvdb'));
         title = (title? title.replace(/\s*[\:,]\s*seasons?\s+\d+.*$/i, '').toCaps(): "")
             .replace(/[\u2010-\u2015]/g, '-') // fancy hyphen
             .replace(/[\u201a\u275f]/g, ',') // fancy comma
@@ -706,29 +931,34 @@ let configuration, init, Update;
         }
 
         if(local) {
-            UTILS_TERMINAL.log('[LOCAL] Search results', local);
+            UTILS_TERMINAL.honor('[LOCAL] Search results', local);
             return local;
         }
 
         /* the rest of this function is a beautiful mess that will need to be dealt with later... but it works */
         let url =
-            (manable && title && configuration.usingOmbi)?
-                `${ configuration.ombiURLRoot }api/v1/Search/${ (rqut == 'imdb' || rqut == 'tmdb' || apit == 'movie')? 'movie': 'tv' }/${ plus(title, '%20') }/?apikey=${ api.ombi }`:
-            (manable && (configuration.usingRadarr || configuration.usingSonarr || configuration.usingMedusa))?
-                (configuration.usingRadarr && (rqut == 'imdb' || rqut == 'tmdb'))?
+            (manable && title && __CONFIG__.usingOmbi)?
+                `${ __CONFIG__.ombiURLRoot }api/v1/Search/${ (rqut == 'imdb' || rqut == 'tmdb' || apit == 'movie')? 'movie': 'tv' }/${ plus(title, '%20') }/?apikey=${ api.ombi }`:
+            (manable && (__CONFIG__.usingRadarr || __CONFIG__.usingSonarr || __CONFIG__.usingMedusa /*|| __CONFIG__.usingSickBeard*/))?
+                (__CONFIG__.usingRadarr && (rqut == 'imdb' || rqut == 'tmdb'))?
                     (mid)?
-                        `${ configuration.radarrURLRoot }api/movie/lookup/tmdb?tmdbId=${ mid }&apikey=${ configuration.radarrToken }`:
+                        `${ __CONFIG__.radarrURLRoot }api/movie/lookup/tmdb?tmdbId=${ mid }&apikey=${ __CONFIG__.radarrToken }`:
                     (iid)?
-                        `${ configuration.radarrURLRoot }api/movie/lookup/imdb?imdbId=${ iid }&apikey=${ configuration.radarrToken }`:
-                    `${ configuration.radarrURLRoot }api/movie/lookup?term=${ plus(title, '%20') }&apikey=${ configuration.radarrToken }`:
-                (configuration.usingSonarr)?
+                        `${ __CONFIG__.radarrURLRoot }api/movie/lookup/imdb?imdbId=${ iid }&apikey=${ __CONFIG__.radarrToken }`:
+                    `${ __CONFIG__.radarrURLRoot }api/movie/lookup?term=${ plus(title, '%20') }&apikey=${ __CONFIG__.radarrToken }`:
+                (__CONFIG__.usingSonarr)?
                     (tid)?
-                        `${ configuration.sonarrURLRoot }api/series/lookup?term=tvdb:${ tid }&apikey=${ configuration.sonarrToken }`:
-                    `${ configuration.sonarrURLRoot }api/series/lookup?term=${ plus(title, '%20') }&apikey=${ configuration.sonarrToken }`:
-                (configuration.usingMedusa)?
+                        `${ __CONFIG__.sonarrURLRoot }api/series/lookup?term=tvdb:${ tid }&apikey=${ __CONFIG__.sonarrToken }`:
+                    `${ __CONFIG__.sonarrURLRoot }api/series/lookup?term=${ plus(title, '%20') }&apikey=${ __CONFIG__.sonarrToken }`:
+                (__CONFIG__.usingMedusa)?
                     (tid)?
-                        `${ configuration.medusarURLRoot }api/v2/series/tvdb${ tid }?detailed=true&${ tid }&api_key=${ configuration.medusaToken }`:
-                    `${ configuration.medusaURLRoot }api/v2/internal/searchIndexersForShowName?query=${ plus(title) }&indexerId=0&api_key=${ configuration.medusaToken }`:
+                        `${ __CONFIG__.medusaURLRoot }api/v2/series/tvdb${ tid }?detailed=true&api_key=${ __CONFIG__.medusaToken }`:
+                    `${ __CONFIG__.medusaURLRoot }api/v2/internal/searchIndexersForShowName?query=${ plus(title) }&indexerId=0&api_key=${ __CONFIG__.medusaToken }`:
+                /* TODO: find a way to get CORS to work on Sick Beard URLs (localhost) */
+                // (__CONFIG__.usingSickBeard)?
+                //     (tid)?
+                //         `${ __CONFIG__.sickBeardURLRoot }api/${ __CONFIG__.sickBeardToken }/?cmd=sb.searchtvdb&tvdbid=${ tid }`:
+                //     `${ __CONFIG__.sickBeardURLRoot }api/${ __CONFIG__.sickBeardToken }/?cmd=sb.searchtvdb&name=${ encodeURIComponent(title) }`:
                 null:
             (rqut == 'imdb' || (rqut == '*' && !iid && title) || (rqut == 'tvdb' && !iid && title && !(rerun & 0b1000)) && (rerun |= 0b1000))?
                 (iid)?
@@ -756,7 +986,7 @@ let configuration, init, Update;
 
         if(url === null) return null;
 
-        let proxy = configuration.proxy,
+        let proxy = __CONFIG__.proxy,
             cors = proxy.url, // if cors is requried and not uspported, proxy through this URL
             headers = HandleProxyHeaders(proxy.headers, url);
 
@@ -785,8 +1015,11 @@ let configuration, init, Update;
                 throw error;
             });
 
-        UTILS_TERMINAL.log('Search results', { title, year, url, json });
+        UTILS_TERMINAL.honor('Search results', { title, year, url, json });
 
+        /* DO NOT change to else-if, won't work with Sick Beard: { data: { results: ... } } */
+        if('data' in json)
+            json = json.data;
         if('results' in json)
             json = json.results;
 
@@ -819,7 +1052,7 @@ let configuration, init, Update;
                 R = (s = "", S = "", n = !0) => {
                     let l = s.split(' ').length, L = S.split(' ').length, E,
                         score = 100 * (((S.match(E = RegExp(`\\b(${k(s)})\\b`, 'gi')) || [null]).length) / (L || 1)),
-                        passing = configuration.UseLooseScore | 0;
+                        passing = __CONFIG__.UseLooseScore | 0;
 
                     UTILS_TERMINAL.log(`\tQuick Match => "${ s }"/"${ S }" = ${ score }% (${ E })`);
                     score *= (l > L? (L||1)/l: L > l? (l||1)/L: 1);
@@ -840,13 +1073,18 @@ let configuration, init, Update;
                 // Managers
                 if(manable)
                     // Medusa
-                    if(configuration.usingMedusa && $data instanceof Array)
-                        found = ((t($data[4]) == t(title) || $alt) && +year === +$data[5].slice(0, 4))?
+                    if(__CONFIG__.usingMedusa && $data instanceof Array)
+                        found = ((t($data[4]) == t(title) || $alt) && +year == +$data[5].slice(0, 4))?
                             $alt || $data:
                         found;
                     // Radarr & Sonarr
-                    else if(configuration.usingRadarr || configuration.usingSonarr)
-                        found = ((t($data.title) == t(title) || $alt) && +year === +$data.year)?
+                    else if(__CONFIG__.usingRadarr || __CONFIG__.usingSonarr)
+                        found = ((t($data.title) == t(title) || $alt) && +year == +$data.year)?
+                            $alt || $data:
+                        found;
+                    // Sick Beard
+                    else if(__CONFIG__.usingSickBeard)
+                        found = ((t($data.name) == t(title) || $alt) && +year == parseInt($data.first_aired))?
                             $alt || $data:
                         found;
                 //api.tvmaze.com/
@@ -866,10 +1104,10 @@ let configuration, init, Update;
                         let i, f, o, l;
 
                         for(i = 0, f = !1, o = DATA.movie_results, l = o.length | 0; i < l; i++)
-                            f = (t(o.title) === t(title) && o.release_date.slice(0, 4) == year);
+                            f = (t(o.title) == t(title) && o.release_date.slice(0, 4) == year);
 
                         for(i = (+f * l), o = (f? o: DATA.tv_results), l = (f? l: o.length | 0); i < l; i++)
-                            f = (t(o.name) === t(title) && o.first_air_date.slice(0, 4) == year);
+                            f = (t(o.name) == t(title) && o.first_air_date.slice(0, 4) == year);
 
                         return f? o: f = !!iid;
                     })($data);
@@ -880,7 +1118,7 @@ let configuration, init, Update;
                     found;
                 //theimdbapi.org/
                 else if($data.release_date)
-                    found = (t($data.title) === t(title) && year == ($data.url || $data || b).release_date.slice(0, 4))?
+                    found = (t($data.title) == t(title) && year == ($data.url || $data || b).release_date.slice(0, 4))?
                         $data:
                     found;
 
@@ -897,13 +1135,18 @@ let configuration, init, Update;
                 // Managers
                 if(manable)
                     // Medusa
-                    if(configuration.usingMedusa && $data instanceof Array)
+                    if(__CONFIG__.usingMedusa && $data instanceof Array)
                         found = (c($data[4]) == c(title) || $alt)?
                             $alt || $data:
                         found;
                     // Radarr & Sonarr
-                    if(configuration.usingRadarr || configuration.usingSonarr)
+                    if(__CONFIG__.usingRadarr || __CONFIG__.usingSonarr)
                         found = (c($data.title) == c(title) || $alt)?
+                            $alt || $data:
+                        found;
+                    // Sick Beard
+                    if(__CONFIG__.usingSickBeard)
+                        found = (c($data.name) == c(title) || $alt)?
                             $alt || $data:
                         found;
                 //api.tvmaze.com/
@@ -961,7 +1204,7 @@ let configuration, init, Update;
             // BAD, not found: "Gun Show Showdown" vs. "Gundarr"
                 // /\b(gun|showdown)\b/i.test('gundarr') === false
                 // this should not match; the '\b' (border between \w and \W) keeps them from matching
-            for(index = 0; configuration.UseLoose && title && index < json.length && (!found || lastscore > 0); rerun |= 0b0010, index++) {
+            for(index = 0; __CONFIG__.UseLoose && title && index < json.length && (!found || lastscore > 0); rerun |= 0b0010, index++) {
                 $data = json[index];
 
                 let altt = $data.alternativeTitles,
@@ -970,13 +1213,18 @@ let configuration, init, Update;
                 // Managers
                 if(manable)
                     // Medusa
-                    if(configuration.usingMedusa && $data instanceof Array)
+                    if(__CONFIG__.usingMedusa && $data instanceof Array)
                         found = (R($data[4], title) || $alt)?
                             $alt || $data:
                         found;
                     // Radarr & Sonarr
-                    if(configuration.usingRadarr || configuration.usingSonarr)
+                    if(__CONFIG__.usingRadarr || __CONFIG__.usingSonarr)
                         found = (R($data.name || $data.title, title) || $alt)?
+                            $alt || $data:
+                        found;
+                    // Sick Beard
+                    if(__CONFIG__.usingSickBeard)
+                        found = (R($data.name, title) || $alt)?
                             $alt || $data:
                         found;
                 //api.tvmaze.com/
@@ -1030,7 +1278,7 @@ let configuration, init, Update;
 
         json = json && mr in json? json[mr].length > json[tr].length? json[mr]: json[tr]: json;
 
-        if(json instanceof Array && (!configuration.usingMedusa? true: (configuration.usingSonarr || configuration.usingOmbi)))
+        if(json instanceof Array && (!__CONFIG__.usingMedusa? true: (__CONFIG__.usingSonarr || __CONFIG__.usingOmbi || __CONFIG__.usingSickBeard)))
             json = json[0];
 
         if(!json)
@@ -1039,7 +1287,7 @@ let configuration, init, Update;
         // Ombi, Medusa, Radarr and Sonarr
         if(manable)
             data = (
-                (configuration.usingMedusa && !(configuration.usingSonarr || configuration.usingOmbi))?
+                (__CONFIG__.usingMedusa && !(__CONFIG__.usingSonarr || __CONFIG__.usingOmbi || __CONFIG__.usingSickBeard))?
                     {
                         imdb: iid || ei,
                         tmdb: mid |  0,
@@ -1131,7 +1379,7 @@ let configuration, init, Update;
         return data;
     }
 
-    function __Request_CouchPotato__(options) {
+    function Request_CouchPotato(options) {
     	// TODO: this does not work anymore!
     	if(!options.IMDbID)
     		return new Notification(
@@ -1142,11 +1390,11 @@ let configuration, init, Update;
     	chrome.runtime.sendMessage(
     		{
     			type: 'VIEW_COUCHPOTATO',
-    			url: `${ configuration.couchpotatoURL }/media.get`,
+    			url: `${ __CONFIG__.couchpotatoURL }/media.get`,
                 IMDbID: options.IMDbID,
                 TMDbID: options.TMDbID,
                 TVDbID: options.TVDbID,
-    			basicAuth: configuration.couchpotatoBasicAuth,
+    			basicAuth: __CONFIG__.couchpotatoBasicAuth,
     		},
     		response => {
     			let movieExists = response.success;
@@ -1158,7 +1406,7 @@ let configuration, init, Update;
     				(!response.silent && UTILS_TERMINAL.error('Error viewing CouchPotato: ' + String(response.error)));
     			}
     			if(!movieExists) {
-    				Request_CouchPotato(options);
+    				__Request_CouchPotato__(options);
     				return;
     			}
     			new Notification(
@@ -1171,7 +1419,7 @@ let configuration, init, Update;
 
     // Movies/TV Shows
     function Request_Ombi(options) {
-        new Notification('info', `Adding "${ options.title }" to Ombi`, 3000);
+        new Notification('info', `Sending "${ options.title }" to Ombi`, 3000);
 
         if((!options.IMDbID && !options.TMDbID) && !options.TVDbID) {
             return new Notification(
@@ -1184,8 +1432,8 @@ let configuration, init, Update;
 
         chrome.runtime.sendMessage({
                 type: 'PUSH_OMBI',
-                url: `${ configuration.ombiURL }api/v1/Request/${ contentType }`,
-                token: configuration.ombiToken,
+                url: `${ __CONFIG__.ombiURL }api/v1/Request/${ contentType }`,
+                token: __CONFIG__.ombiToken,
                 title: options.title,
                 year: options.year,
                 imdbId: options.IMDbID,
@@ -1200,10 +1448,13 @@ let configuration, init, Update;
                     return new Notification('warning', `Could not add "${ options.title }" to Ombi: ${ response.error }`) ||
                         (!response.silent && UTILS_TERMINAL.error('Error adding to Ombi: ' + String(response.error), response.location, response.debug));
                 } else if(response && response.success) {
-                    let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-{2,}/g, '-').toLowerCase();
+                    let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-{2,}/g, '-').toLowerCase(),
+                        { IMDbID, TMDbID, TVDbID } = options;
 
-                    UTILS_TERMINAL.log('Successfully pushed', options);
-                    new Notification('update', `Added "${ options.title }" to Ombi`, 7000, () => window.open(configuration.ombiURL, '_blank'));
+                    CAUGHT.bump({ IMDbID, TMDbID, TVDbID });
+
+                    UTILS_TERMINAL.honor('Successfully pushed', options);
+                    new Notification('update', `Added "${ options.title }" to Ombi`, 7000, () => window.open(__CONFIG__.ombiURL, '_blank'));
                 } else {
                     new Notification('warning', `Could not add "${ options.title }" to Ombi: Unknown Error`) ||
                     (!response.silent && UTILS_TERMINAL.error('Error adding to Ombi: ' + String(response)));
@@ -1213,17 +1464,17 @@ let configuration, init, Update;
     }
 
     // Movies/TV Shows
-    function Request_CouchPotato(options) {
-        new Notification('info', `Adding "${ options.title }" to CouchPotato`, 3000);
+    function __Request_CouchPotato__(options) {
+        new Notification('info', `Sending "${ options.title }" to CouchPotato`, 3000);
 
     	chrome.runtime.sendMessage(
     		{
     			type: 'PUSH_COUCHPOTATO',
-    			url: `${ configuration.couchpotatoURL }/movie.add`,
+    			url: `${ __CONFIG__.couchpotatoURL }/movie.add`,
                 IMDbID: options.IMDbID,
                 TMDbID: options.TMDbID,
                 TVDbID: options.TVDbID,
-    			basicAuth: configuration.couchpotatoBasicAuth,
+    			basicAuth: __CONFIG__.couchpotatoBasicAuth,
     		},
     		response => {
                 UTILS_TERMINAL.log('Pushing to CouchPotato', response);
@@ -1236,7 +1487,11 @@ let configuration, init, Update;
     				(!response.silent && UTILS_TERMINAL.error('Error adding to CouchPotato: ' + String(response.error), response.location, response.debug));
     			}
     			if(response.success) {
-                    UTILS_TERMINAL.log('Successfully pushed', options);
+                    let { IMDbID, TMDbID, TVDbID } = options;
+
+                    CAUGHT.bump({ IMDbID, TMDbID, TVDbID });
+
+                    UTILS_TERMINAL.honor('Successfully pushed', options);
     				new Notification('update', `Added "${ options.title }" to CouchPotato`);
     			} else {
     				new Notification('warning', `Could not add "${ options.title }" to CouchPotato`);
@@ -1247,7 +1502,7 @@ let configuration, init, Update;
 
     // Movies
     function Request_Watcher(options) {
-        new Notification('info', `Adding "${ options.title }" to Watcher`, 3000);
+        new Notification('info', `Sending "${ options.title }" to Watcher`, 3000);
 
         if(!options.IMDbID && !options.TMDbID) {
             return new Notification(
@@ -1258,10 +1513,10 @@ let configuration, init, Update;
 
         chrome.runtime.sendMessage({
                 type: 'PUSH_WATCHER',
-                url: `${ configuration.watcherURL }api/`,
-                token: configuration.watcherToken,
-                StoragePath: configuration.watcherStoragePath,
-                basicAuth: configuration.watcherBasicAuth,
+                url: `${ __CONFIG__.watcherURL }api/`,
+                token: __CONFIG__.watcherToken,
+                StoragePath: __CONFIG__.watcherStoragePath,
+                basicAuth: __CONFIG__.watcherBasicAuth,
                 title: options.title,
                 year: options.year,
                 imdbId: options.IMDbID,
@@ -1275,10 +1530,13 @@ let configuration, init, Update;
                         (!response.silent && UTILS_TERMINAL.error('Error adding to Watcher: ' + String(response.error), response.location, response.debug));
                 } else if(response && (response.success || (response.response + "") == "true")) {
                     let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-{2,}/g, '-').toLowerCase(),
-                        TMDbID = options.TMDbID || response.tmdbId;
+                        TMDbID = options.TMDbID || response.tmdbId,
+                        IMDbID = options.IMDbID || response.imdbId;
 
-                    UTILS_TERMINAL.log('Successfully pushed', options);
-                    new Notification('update', `Added "${ options.title }" to Watcher`, 7000, () => window.open(`${configuration.watcherURL}library/status${TMDbID? `#${title}-${TMDbID}`: '' }`, '_blank'));
+                    CAUGHT.bump({ IMDbID, TMDbID });
+
+                    UTILS_TERMINAL.honor('Successfully pushed', options);
+                    new Notification('update', `Added "${ options.title }" to Watcher`, 7000, () => window.open(`${__CONFIG__.watcherURL}library/status${TMDbID? `#${title}-${TMDbID}`: '' }`, '_blank'));
                 } else {
                     new Notification('warning', `Could not add "${ options.title }" to Watcher: Unknown Error`) ||
                     (!response.silent && UTILS_TERMINAL.error('Error adding to Watcher: ' + String(response)));
@@ -1296,7 +1554,7 @@ let configuration, init, Update;
             ): null;
 
         let PromptValues = {},
-            { PromptQuality, PromptLocation } = configuration;
+            { PromptQuality, PromptLocation } = __CONFIG__;
 
         if(!prompted && (PromptQuality || PromptLocation))
             return new Prompt('modify', options, refined => Request_Radarr(refined, true));
@@ -1304,17 +1562,17 @@ let configuration, init, Update;
         if(PromptQuality && +options.quality > 0)
             PromptValues.QualityID = +options.quality;
         if(PromptLocation && options.location)
-            PromptValues.StoragePath = JSON.parse(configuration.radarrStoragePaths).map(item => item.id == options.location? item: null).filter(n => n)[0].path.replace(/\\/g, '\\\\');
+            PromptValues.StoragePath = JSON.parse(__CONFIG__.radarrStoragePaths).map(item => item.id == options.location? item: null).filter(n => n)[0].path.replace(/\\/g, '\\\\');
 
-        new Notification('info', `Adding "${ options.title }" to Radarr`, 3000);
+        new Notification('info', `Sending "${ options.title }" to Radarr`, 3000);
 
         chrome.runtime.sendMessage({
                 type: 'PUSH_RADARR',
-                url: `${ configuration.radarrURL }api/movie/`,
-                token: configuration.radarrToken,
-                StoragePath: configuration.radarrStoragePath,
-                QualityID: configuration.radarrQualityProfileId,
-                basicAuth: configuration.radarrBasicAuth,
+                url: `${ __CONFIG__.radarrURL }api/movie/`,
+                token: __CONFIG__.radarrToken,
+                StoragePath: __CONFIG__.radarrStoragePath,
+                QualityID: __CONFIG__.radarrQualityProfileId,
+                basicAuth: __CONFIG__.radarrBasicAuth,
                 title: options.title,
                 year: options.year,
                 imdbId: options.IMDbID,
@@ -1329,10 +1587,13 @@ let configuration, init, Update;
                         (!response.silent && UTILS_TERMINAL.error('Error adding to Radarr: ' + String(response.error), response.location, response.debug));
                 } else if(response && response.success) {
                     let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-{2,}/g, '-').toLowerCase(),
-                        TMDbID = options.TMDbID || response.tmdbId;
+                        TMDbID = options.TMDbID || response.tmdbId,
+                        IMDbID = options.IMDbID || response.imdbId;
 
-                    UTILS_TERMINAL.log('Successfully pushed', options);
-                    new Notification('update', `Added "${ options.title }" to Radarr`, 7000, () => window.open(`${configuration.radarrURL}${TMDbID? `movies/${title}-${TMDbID}`: '' }`, '_blank'));
+                    CAUGHT.bump({ IMDbID, TMDbID });
+
+                    UTILS_TERMINAL.honor('Successfully pushed', options);
+                    new Notification('update', `Added "${ options.title }" to Radarr`, 7000, () => window.open(`${__CONFIG__.radarrURL}${TMDbID? `movies/${title}-${TMDbID}`: '' }`, '_blank'));
                 } else {
                     new Notification('warning', `Could not add "${ options.title }" to Radarr: Unknown Error`) ||
                     (!response.silent && UTILS_TERMINAL.error('Error adding to Radarr: ' + String(response)));
@@ -1350,7 +1611,7 @@ let configuration, init, Update;
             ): null;
 
         let PromptValues = {},
-            { PromptQuality, PromptLocation } = configuration;
+            { PromptQuality, PromptLocation } = __CONFIG__;
 
         if(!prompted && (PromptQuality || PromptLocation))
             return new Prompt('modify', options, refined => Request_Sonarr(refined, true));
@@ -1358,17 +1619,17 @@ let configuration, init, Update;
         if(PromptQuality && +options.quality > 0)
             PromptValues.QualityID = +options.quality;
         if(PromptLocation && options.location)
-            PromptValues.StoragePath = JSON.parse(configuration.sonarrStoragePaths).map(item => item.id == options.location? item: null).filter(n => n)[0].path.replace(/\\/g, '\\\\');
+            PromptValues.StoragePath = JSON.parse(__CONFIG__.sonarrStoragePaths).map(item => item.id == options.location? item: null).filter(n => n)[0].path.replace(/\\/g, '\\\\');
 
-        new Notification('info', `Adding "${ options.title }" to Sonarr`, 3000);
+        new Notification('info', `Sending "${ options.title }" to Sonarr`, 3000);
 
         chrome.runtime.sendMessage({
                 type: 'PUSH_SONARR',
-                url: `${ configuration.sonarrURL }api/series/`,
-                token: configuration.sonarrToken,
-                StoragePath: configuration.sonarrStoragePath,
-                QualityID: configuration.sonarrQualityProfileId,
-                basicAuth: configuration.sonarrBasicAuth,
+                url: `${ __CONFIG__.sonarrURL }api/series/`,
+                token: __CONFIG__.sonarrToken,
+                StoragePath: __CONFIG__.sonarrStoragePath,
+                QualityID: __CONFIG__.sonarrQualityProfileId,
+                basicAuth: __CONFIG__.sonarrBasicAuth,
                 title: options.title,
                 year: options.year,
                 tvdbId: options.TVDbID,
@@ -1381,10 +1642,13 @@ let configuration, init, Update;
                     return new Notification('warning', `Could not add "${ options.title }" to Sonarr: ${ response.error }`) ||
                         (!response.silent && UTILS_TERMINAL.error('Error adding to Sonarr: ' + String(response.error), response.location, response.debug));
                 } else if(response && response.success) {
-                    let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-{2,}/g, '-').toLowerCase();
+                    let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-{2,}/g, '-').toLowerCase(),
+                        TVDbID = options.TVDbID || response.tvdbId;
 
-                    UTILS_TERMINAL.log('Successfully pushed', options);
-                    new Notification('update', `Added "${ options.title }" to Sonarr`, 7000, () => window.open(`${configuration.sonarrURL}series/${title}`, '_blank'));
+                    CAUGHT.bump({ TVDbID });
+
+                    UTILS_TERMINAL.honor('Successfully pushed', options);
+                    new Notification('update', `Added "${ options.title }" to Sonarr`, 7000, () => window.open(`${__CONFIG__.sonarrURL}series/${title}`, '_blank'));
                 } else {
                     new Notification('warning', `Could not add "${ options.title }" to Sonarr: Unknown Error`) ||
                     (!response.silent && UTILS_TERMINAL.error('Error adding to Sonarr: ' + String(response)));
@@ -1402,7 +1666,7 @@ let configuration, init, Update;
             ): null;
 
         let PromptValues = {},
-            { PromptQuality, PromptLocation } = configuration;
+            { PromptQuality, PromptLocation } = __CONFIG__;
 
         if(!prompted && (PromptQuality || PromptLocation))
             return new Prompt('modify', options, refined => Request_Medusa(refined, true));
@@ -1410,18 +1674,18 @@ let configuration, init, Update;
         if(PromptQuality && +options.quality > 0)
             PromptValues.QualityID = +options.quality;
         if(PromptLocation && options.location)
-            PromptValues.StoragePath = JSON.parse(configuration.medusaStoragePaths).map(item => item.id == options.location? item: null).filter(n => n)[0].path.replace(/\\/g, '\\\\');
+            PromptValues.StoragePath = JSON.parse(__CONFIG__.medusaStoragePaths).map(item => item.id == options.location? item: null).filter(n => n)[0].path.replace(/\\/g, '\\\\');
 
-        new Notification('info', `Adding "${ options.title }" to Medusa`, 3000);
+        new Notification('info', `Sending "${ options.title }" to Medusa`, 3000);
 
         chrome.runtime.sendMessage({
                 type: 'PUSH_MEDUSA',
-                url: `${ configuration.medusaURL }api/v2/series`,
-                root: `${ configuration.medusaURL }api/v2/`,
-                token: configuration.medusaToken,
-                StoragePath: configuration.medusaStoragePath,
-                QualityID: configuration.medusaQualityProfileId,
-                basicAuth: configuration.medusaBasicAuth,
+                url: `${ __CONFIG__.medusaURL }api/v2/series`,
+                root: `${ __CONFIG__.medusaURL }api/v2/`,
+                token: __CONFIG__.medusaToken,
+                StoragePath: __CONFIG__.medusaStoragePath,
+                QualityID: __CONFIG__.medusaQualityProfileId,
+                basicAuth: __CONFIG__.medusaBasicAuth,
                 title: options.title,
                 year: options.year,
                 tvdbId: options.TVDbID,
@@ -1434,13 +1698,72 @@ let configuration, init, Update;
                     return new Notification('warning', `Could not add "${ options.title }" to Medusa: ${ response.error }`) ||
                         (!response.silent && UTILS_TERMINAL.error('Error adding to Medusa: ' + String(response.error), response.location, response.debug));
                 } else if(response && response.success) {
-                    let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-{2,}/g, '-').toLowerCase();
+                    let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-{2,}/g, '-').toLowerCase(),
+                        TVDbID = options.TVDbID || response.tvdbId;
 
-                    UTILS_TERMINAL.log('Successfully pushed', options);
-                    new Notification('update', `Added "${ options.title }" to Medusa`, 7000, () => window.open(`${configuration.medusaURL}home/displayShow?indexername=tvdb&seriesid=${options.TVDbID}`, '_blank'));
+                    CAUGHT.bump({ TVDbID });
+
+                    UTILS_TERMINAL.honor('Successfully pushed', options);
+                    new Notification('update', `Added "${ options.title }" to Medusa`, 7000, () => window.open(`${__CONFIG__.medusaURL}home/displayShow?indexername=tvdb&seriesid=${options.TVDbID}`, '_blank'));
                 } else {
                     new Notification('warning', `Could not add "${ options.title }" to Medusa: Unknown Error`) ||
                     (!response.silent && UTILS_TERMINAL.error('Error adding to Medusa: ' + String(response)));
+                }
+            }
+        );
+    }
+
+    // TV Shows
+    function Request_SickBeard(options, prompted) {
+        if(!options.TVDbID)
+            return (!prompted)? new Notification(
+                'warning',
+                'Stopped adding to Sick Beard: No TVDb ID'
+            ): null;
+
+        let PromptValues = {},
+            { PromptQuality, PromptLocation } = __CONFIG__;
+
+        if(!prompted && (PromptQuality || PromptLocation))
+            return new Prompt('modify', options, refined => Request_SickBeard(refined, true));
+
+        if(PromptQuality && +options.quality > 0)
+            PromptValues.QualityID = +options.quality;
+        if(PromptLocation && +options.location >= 0)
+            PromptValues.StoragePath = JSON.parse(__CONFIG__.sickBeardStoragePaths)[+options.location].path.replace(/\\/g, '\\\\');
+
+        new Notification('info', `Sending "${ options.title }" to Sick Beard`, 3000);
+
+        chrome.runtime.sendMessage({
+                type: 'PUSH_SICKBEARD',
+                url: `${ __CONFIG__.sickBeardURL }api/${ __CONFIG__.sickBeardToken }/`,
+                token: __CONFIG__.sickBeardToken,
+                StoragePath: __CONFIG__.sickBeardStoragePath,
+                QualityID: __CONFIG__.sickBeardQualityProfileId,
+                basicAuth: __CONFIG__.sickBeardBasicAuth,
+                title: options.title,
+                year: options.year,
+                tvdbId: options.TVDbID,
+                exists: !!~JSON.parse(__CONFIG__.__caught).tvdb.indexOf(options.TVDbID),
+                ...PromptValues
+            },
+            response => {
+                UTILS_TERMINAL.log('Pushing to Sick Beard', response);
+
+                if(response && response.error) {
+                    return new Notification('warning', `Could not add "${ options.title }" to Sick Beard: ${ response.error }`) ||
+                        (!response.silent && UTILS_TERMINAL.error('Error adding to Sick Beard: ' + String(response.error), response.location, response.debug));
+                } else if(response && response.success) {
+                    let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-{2,}/g, '-').toLowerCase(),
+                        TVDbID = options.TVDbID || response.tvdbId;
+
+                    CAUGHT.bump({ TVDbID });
+
+                    UTILS_TERMINAL.honor('Successfully pushed', options);
+                    new Notification('update', `Added "${ options.title }" to Sick Beard`, 7000, () => window.open(`${__CONFIG__.sickBeardURL}home/displayShow?show=${ TVDbID }`, '_blank'));
+                } else {
+                    new Notification('warning', `Could not add "${ options.title }" to Sick Beard: Unknown Error`) ||
+                    (!response.silent && UTILS_TERMINAL.error('Error adding to Sick Beard: ' + String(response)));
                 }
             }
         );
@@ -1457,9 +1780,11 @@ let configuration, init, Update;
         else if(persistent && firstButton !== null && firstButton !== undefined)
             return firstButton;
 
+        let ThemeClasses = JSON.parse(__CONFIG__.__theme).join('.');
+
         // <button>
         let button =
-            furnish('button.show.closed.floating.web-to-plex-button', {
+            furnish(`button.show.closed.floating.web-to-plex-button${ThemeClasses?'.'+ThemeClasses:''}`, {
                     tooltip: 'Loading...',
                     onmouseenter: event => {
                         let self = event.target;
@@ -1525,7 +1850,7 @@ let configuration, init, Update;
                             let self = event.target, parent = button;
 
                             if(init instanceof Function)
-                                button.setAttribute('class', 'closed floating web-to-plex-button restarting'), button.onmouseenter = button.onmouseleave = null, button.setAttribute('tooltip', 'Restarting...'), button.querySelector('.list-action').setAttribute('tooltip', 'Restarting...'), setTimeout(init, 500);
+                                button.setAttribute('class', 'closed floating web-to-plex-button restarting'), button.onmouseenter = button.onmouseleave = null, button.setAttribute('tooltip', 'Restarting...'), button.querySelector('.list-action').setAttribute('tooltip', 'Restarting...'), setTimeout(() => (init && !RUNNING? (init(), RUNNING = true): RUNNING = false), 500);
                             else
                                 new Notification('warning', "Couldn't reload. Please refresh the page.");
                         }
@@ -1555,6 +1880,9 @@ let configuration, init, Update;
     }
 
     function UpdateButton(button, action, title, options = {}) {
+        if(!button)
+            return /*  Rare, but happens: especially on failed download links sent*/;
+
         let multiple = (action == 'multiple' || options instanceof Array),
             element = button.querySelector('.w2p-action, .list-action'),
             delimeter = '<!---->',
@@ -1582,11 +1910,20 @@ let configuration, init, Update;
                 let option = options[index];
 
                 // Skip empty entries
-                if(!option || !option.type || !option.title) continue;
+                if(!option || !option.type || !option.title)
+                    continue;
+
+                // Skip queued entries
+                if(
+                    !!~CAUGHT.imdb.indexOf(option.IMDbID) ||
+                    !!~CAUGHT.tmdb.indexOf(option.TMDbID) ||
+                    !!~CAUGHT.tvdb.indexOf(option.TVDbID)
+                )
+                    continue;
 
                 // the action should be an array
                 // we'll give the button a list of links to engage, so make it snappy!
-                let url = `#${ option.imdb || 'tt' }-${ option.tmdb | 0 }-${ option.tvdb | 0 }`;
+                let url = `#${ option.IMDbID || 'tt' }-${ option.TMDbID | 0 }-${ option.TVDbID | 0 }`;
 
                 /* Failed */
                 if(/#tt-0-0/i.test(url))
@@ -1603,24 +1940,28 @@ let configuration, init, Update;
                 e.preventDefault();
 
                 let self = e.target, tv = /tv[\s-]?|shows?|series/i, fail = 0,
-                    options = JSON.parse(atob(button.getAttribute('saved_options')));
+                    options = JSON.parse(decode(button.getAttribute('saved_options')));
 
                 for(let index = 0, length = options.length, option; index < length; index++) {
                     option = options[index];
 
                     try {
-                        if(configuration.usingOmbi)
+                        if(__CONFIG__.usingOmbi)
                             Request_Ombi(option, true);
-                        else if(configuration.usingWatcher && !tv.test(option.type))
+                        else if(__CONFIG__.usingWatcher && !tv.test(option.type))
                             Request_Watcher(option, true);
-                        else if(configuration.usingRadarr && !tv.test(option.type))
+                        else if(__CONFIG__.usingRadarr && !tv.test(option.type))
                             Request_Radarr(option, true);
-                        else if(configuration.usingSonarr && tv.test(option.type))
+                        else if(__CONFIG__.usingCouchPotato && !tv.test(option.type))
+                            Request_CouchPotato(option, true);
+                        else if(__CONFIG__.usingSonarr && tv.test(option.type))
                             Request_Sonarr(option, true);
-                        else if(configuration.usingMedusa && tv.test(option.type))
+                        else if(__CONFIG__.usingMedusa && tv.test(option.type))
                             Request_Medusa(option, true);
-                        else if(configuration.usingCouchPotato)
-                            __Request_CouchPotato__(option, true);
+                        else if(__CONFIG__.usingSickBeard && tv.test(option.type))
+                            Request_SickBeard(option, true);
+
+                        button.classList.replace('wtp--download', 'wtp--queued');
                     } catch(error) {
                         UTILS_TERMINAL.error(`Failed to get "${ option.title }" (Error #${ ++fail })`)
                     }
@@ -1631,27 +1972,28 @@ let configuration, init, Update;
                     new Notification('error', `Failed to grab ${ fail } item${fail==1?'':'s'}`);
             };
 
-            button.setAttribute('saved_options', btoa(JSON.stringify(saved_options)));
-            element.addEventListener('click', e => (AUTO_GRAB.ENABLED && AUTO_GRAB.LIMIT > options.length)? element.ON_CLICK(e): new Prompt('select', options, o => { button.setAttribute('saved_options', btoa(JSON.stringify(o))); element.ON_CLICK(e) }));
+            button.setAttribute('saved_options', encode(JSON.stringify(saved_options)));
+            element.addEventListener('click', e => (AUTO_GRAB.ENABLED && AUTO_GRAB.LIMIT > options.length)? element.ON_CLICK(e): new Prompt('select', options, o => { button.setAttribute('saved_options', encode(JSON.stringify(o))); element.ON_CLICK(e) }));
 
             element.setAttribute(hov, `Grab ${len} new item${s}: ${ t }`);
             button.classList.add(saved_options.length || len? 'wtp--download': 'wtp--error');
         } else {
         /* Handle a single item */
 
-            if(!options || !options.type || !options.title) return;
+            if(!options || !options.type || !options.title)
+                return;
 
             let empty = (em.test(options.IMDbID) && em.test(options.TMDbID) && em.test(options.TVDbID)),
                 nice_title = `${options.title.toCaps()}${options.year? ` (${options.year})`: ''}`;
 
             if(options) {
-                ty = (options.type == 'movie'? 'Movie': 'TV Show');
+                ty = (/^(cine(ma)?|films?|movies?|theat[re]{2})$/i.test(options.type)? 'Movie': 'TV Show');
                 txt = options.txt || txt;
                 hov = options.hov || hov;
             }
 
             if(action == 'found') {
-                element.href = Request_PlexURL(configuration.server.id, options.key);
+                element.href = Request_PlexURL(__CONFIG__.server.id, options.key);
                 element.setAttribute(hov, `Watch "${options.title} (${options.year})" on Plex`);
                 button.classList.add('wtp--found');
 
@@ -1664,17 +2006,19 @@ let configuration, init, Update;
                     case 'consistent':
                         let href = options.href, path = '';
 
-                        if(configuration.usingOmbi) {
+                        if(__CONFIG__.usingOmbi) {
                             path = '';
-                        } else if(configuration.usingWatcher && !tv.test(options.type)) {
+                        } else if(__CONFIG__.usingWatcher && !tv.test(options.type)) {
                             path = '';
-                        } else if(configuration.usingRadarr && !tv.test(options.type)) {
-                            path = configuration.radarrStoragePath;
-                        } else if(configuration.usingSonarr && tv.test(options.type)) {
-                            path = configuration.sonarrStoragePath;
-                        } else if(configuration.usingMedusa && tv.test(options.type)) {
-                            path = configuration.medusaStoragePath;
-                        } else if(configuration.usingCouchPotato) {
+                        } else if(__CONFIG__.usingRadarr && !tv.test(options.type)) {
+                            path = __CONFIG__.radarrStoragePath;
+                        } else if(__CONFIG__.usingSonarr && tv.test(options.type)) {
+                            path = __CONFIG__.sonarrStoragePath;
+                        } else if(__CONFIG__.usingMedusa && tv.test(options.type)) {
+                            path = __CONFIG__.medusaStoragePath;
+                        } else if(__CONFIG__.usingSickBeard && tv.test(options.type)) {
+                            path = __CONFIG__.sickBeardStoragePath;
+                        } else if(__CONFIG__.usingCouchPotato) {
                             path = '';
                         }
 
@@ -1706,19 +2050,27 @@ let configuration, init, Update;
                         button.classList.add('wtp--download');
                         element.addEventListener('click', element.ON_CLICK = e => {
                             e.preventDefault();
-                            if(configuration.usingOmbi) {
-                                Request_Ombi(options);
-                            } else if(configuration.usingWatcher && !tv.test(options.type)) {
-                                Request_Watcher(options);
-                            } else if(configuration.usingRadarr && !tv.test(options.type)) {
-                                Request_Radarr(options);
-                            } else if(configuration.usingSonarr && tv.test(options.type)) {
-                                Request_Sonarr(options);
-                            } else if(configuration.usingMedusa && tv.test(options.type)) {
-                                Request_Medusa(options);
-                            } else if(configuration.usingCouchPotato) {
-                                __Request_CouchPotato__(options);
+                            try {
+                                if(__CONFIG__.usingOmbi)
+                                    Request_Ombi(options);
+                                else if(__CONFIG__.usingWatcher && !tv.test(options.type))
+                                    Request_Watcher(options);
+                                else if(__CONFIG__.usingRadarr && !tv.test(options.type))
+                                    Request_Radarr(options);
+                                else if(__CONFIG__.usingCouchPotato && !tv.test(options.type))
+                                    Request_CouchPotato(options);
+                                else if(__CONFIG__.usingSonarr && tv.test(options.type))
+                                    Request_Sonarr(options);
+                                else if(__CONFIG__.usingMedusa && tv.test(options.type))
+                                    Request_Medusa(options);
+                                else if(__CONFIG__.usingSickBeard && tv.test(options.type))
+                                    Request_SickBeard(options);
+
+                                button.classList.replace('wtp--download', 'wtp--queued');
+                            } catch(error) {
+                                throw error;
                             }
+
                         });
                 }
                 NOTIFIED = false;
@@ -1739,6 +2091,13 @@ let configuration, init, Update;
                 button.classList.add('wtp--error');
             }
             NOTIFIED = false;
+
+            if((action == 'downloader') && (!!~CAUGHT.imdb.indexOf(options.IMDbID) || !!~CAUGHT.tmdb.indexOf(options.TMDbID) || !!~CAUGHT.tvdb.indexOf(options.TVDbID))) {
+                element.setAttribute(hov, `Modify "${ nice_title }" | ${ty}`);
+
+                button.classList.remove('wtp--found');
+                button.classList.add('wtp--queued');
+            }
 
             element.id = options? `${options.IMDbID || 'tt'}-${options.TMDbID | 0}-${options.TVDbID | 0}`: 'tt-0-0';
         }
@@ -1794,7 +2153,7 @@ let configuration, init, Update;
                                     if(found) {
                                         // ignore found items, we only want new items
                                     } else {
-                                        let available = (configuration.usingOmbi || configuration.usingWatcher || configuration.usingRadarr || configuration.usingSonarr || configuration.usingMedusa || configuration.usingCouchPotato),
+                                        let available = (__CONFIG__.usingOmbi || __CONFIG__.usingWatcher || __CONFIG__.usingRadarr || __CONFIG__.usingSonarr || __CONFIG__.usingMedusa || __CONFIG__.usingSickBeard || __CONFIG__.usingCouchPotato),
                                             action = (available ? 'downloader' : 'notfound'),
                                             title = available ?
                                                 'Not on Plex (download available)':
@@ -1814,7 +2173,7 @@ let configuration, init, Update;
         results = results.filter(v => v.status == 'downloader');
 
         let img = furnish('img', { title: 'Add to Plex It!', src: IMG_URL.plexit_icon_48, onmouseup: event => {let frame = document.querySelector('#plexit-bookmarklet-frame'); frame.src = frame.src.replace(/(#plexit:.*)?$/, '#plexit:' + event.target.parentElement.getAttribute('data'))} }),
-            po, pi = furnish('li#plexit.list-item', { data: btoa(JSON.stringify(results)) }, img),
+            po, pi = furnish('li#plexit.list-item', { data: encode(JSON.stringify(results)) }, img),
             op  = document.querySelector('#wtp-plexit');
 
         if(po = button.querySelector('#plexit'))
@@ -1861,7 +2220,7 @@ let configuration, init, Update;
                             UpdateButton(options.button, 'found', 'On Plex', { ...options, key });
                             opt = { ...opt, url: options.button.href, found: true, status: 'found' };
 
-                            let po, pi = furnish('li#plexit.list-item', { data: btoa(JSON.stringify(opt)) }, img);
+                            let po, pi = furnish('li#plexit.list-item', { data: encode(JSON.stringify(opt)) }, img);
 
                             if(po = options.button.querySelector('#plexit'))
                                 po.remove();
@@ -1877,7 +2236,7 @@ let configuration, init, Update;
                                     UpdateButton(options.button, 'found', 'On Plex', { ...options, key });
                                     opt = { ...opt, url: options.button.href, found: true, status: 'found' };
 
-                                    let po, pi = furnish('li#plexit.list-item', { data: btoa(JSON.stringify(opt)) }, img);
+                                    let po, pi = furnish('li#plexit.list-item', { data: encode(JSON.stringify(opt)) }, img);
 
                                     if(po = options.button.querySelector('#plexit'))
                                         po.remove();
@@ -1885,7 +2244,7 @@ let configuration, init, Update;
                                         options.button.querySelector('ul').insertBefore(pi, op);
                                     } catch(e) { /* Don't do anything */ }
                                 } else {
-                                    let available = (configuration.usingOmbi || configuration.usingWatcher || configuration.usingRadarr || configuration.usingSonarr || configuration.usingMedusa || configuration.usingCouchPotato),
+                                    let available = (__CONFIG__.usingOmbi || __CONFIG__.usingWatcher || __CONFIG__.usingRadarr || __CONFIG__.usingSonarr || __CONFIG__.usingMedusa || __CONFIG__.usingSickBeard || __CONFIG__.usingCouchPotato),
                                         action = (available ? 'downloader' : 'notfound'),
                                         title = available ?
                                             'Not on Plex (download available)':
@@ -1894,7 +2253,7 @@ let configuration, init, Update;
                                     UpdateButton(options.button, action, title, options);
                                     opt = { ...opt, found: false, status: action };
 
-                                    let po, pi = furnish('li#plexit.list-item', { data: btoa(JSON.stringify(opt)) }, img);
+                                    let po, pi = furnish('li#plexit.list-item', { data: encode(JSON.stringify(opt)) }, img);
 
                                     if(po = options.button.querySelector('#plexit'))
                                         po.remove();
@@ -1922,14 +2281,14 @@ let configuration, init, Update;
     }
 
     function Request_Plex(options) {
-        if(!(configuration.plexURL && configuration.plexToken) || configuration.DO_NOT_USE)
+        if(!(__CONFIG__.plexURL && __CONFIG__.plexToken) || __CONFIG__.IGNORE_PLEX)
             return new Promise((resolve, reject) => resolve({ found: false, key: null }));
 
         return new Promise((resolve, reject) => {
             chrome.runtime.sendMessage({
                     type: 'SEARCH_PLEX',
                     options,
-                    serverConfig: configuration.server
+                    serverConfig: __CONFIG__.server
                 },
                 response =>
                     (response && response.error)?
@@ -1942,7 +2301,7 @@ let configuration, init, Update;
     }
 
     function Request_PlexURL(PlexUIID, key) {
-        return configuration.plexURL.replace(RegExp(`\/(${ configuration.server.id })?$`), `/web#!/server/` + PlexUIID) + `/details?key=${encodeURIComponent( key )}`;
+        return __CONFIG__.plexURL.replace(RegExp(`\/(${ __CONFIG__.server.id })?$`), `/web#!/server/` + PlexUIID) + `/details?key=${encodeURIComponent( key )}`;
     }
 
     /* Listen for events */
@@ -2013,6 +2372,10 @@ let configuration, init, Update;
                 }
                 return true;
 
+            case 'INITIALIZE':
+                UTILS_TERMINAL.warn('Caught init event [utils]');
+                return true;
+
             default:
     //            UTILS_TERMINAL.warn(`Unknown event [${ request.type }]`);
                 return false;
@@ -2020,7 +2383,7 @@ let configuration, init, Update;
     });
 
     /* Listen for Window events - from iframes, etc. */
-    top.addEventListener('message', request => {
+    top.addEventListener('message', async request => {
         try {
             request = request.data;
 
@@ -2036,6 +2399,22 @@ let configuration, init, Update;
                 case 'NOTIFICATION':
                     let { state, text, timeout = 7000, callback = () => {}, requiresClick = true } = request.data;
                     new Notification(state, text, timeout, callback, requiresClick);
+                    return true;
+
+                case 'PERMISSION':
+                    let { data } = request;
+
+                    if(typeof data.allowed == 'boolean') {
+                        ALLOWED = data.allowed;
+                        PERMISS = data.allotted;
+
+                        await ParsedOptions();
+
+                        (init && !RUNNING? (init(), RUNNING = true): RUNNING = false);
+                    } else {
+                        UTILS_TERMINAL.warn('Permission Request:', data);
+                        new Prompt('permission', data);
+                    }
                     return true;
 
                 default:
@@ -2105,7 +2484,7 @@ if(!('onlocationchange' in window))
         get: () => watchlocationchange.locationchangecallbacks
     });
 
-watchlocationchange.onlocationchangeinterval = watchlocationchange.onlocationchangeinterval || setInterval(() => watchlocationchange('href'), 1);
+watchlocationchange.onlocationchangeinterval = watchlocationchange.onlocationchangeinterval || setInterval(() => watchlocationchange('href'), 1000);
 // at least 1s is needed to properly fire the event ._.
 
 String.prototype.toCaps = String.prototype.toCaps || function toCaps(all) {

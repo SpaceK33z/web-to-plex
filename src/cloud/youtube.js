@@ -1,21 +1,26 @@
 let openedByUser = false,
-    listenersSet = false;
+    listenersSet = false,
+    listenerInt;
 
 let script = {
     "url": "*://www.youtube.com/*",
 
-    "timeout": 5000,
+    "timeout": 1000,
 
     "init": (ready, rerun = false) => {
         let _title, _year, _image, R = RegExp;
 
-        let open  = () => $('.more-button').first.click(),
-            close = () => $('.less-button').first.click(),
-            options, type,
+        let options, type,
             alternative = $('#offer-module-container[class*="movie-offer"], #offer-module-container[class*="unlimited-offer"]');
 
-        if($('.more-button, .less-button').empty || !$('.opened').empty)
+        if($('.more-button:not(span), .less-button').empty || !$('.opened').empty || !$('iron-dropdown[class*="ytd"][aria-hidden]').empty)
             return script.timeout;
+
+        // open and close the meta-information
+        // open
+        $('.more-button:not(span)').first.click();
+        // close
+        setTimeout(() => $('.less-button').first.click(), script.timeout);
 
         // try to not bug the page content too much, use an alternative method first (if applicable)
         if(!alternative.empty && !rerun) {
@@ -26,34 +31,36 @@ let script = {
                 image = $('#img img', alternative).first,
                 type  = /\bmovie-offer\b/i.test(alternative.classList)? 'movie': 'show';
 
-            if(!title || !year || !type)
-                return script.init(ready, true);
+            if(!title || !year)
+                return -1;
 
             title = title.textContent;
             year  = year.textContent|0;
             image = image.src;
 
+            title = title.replace(R(`\\s*(\\(\\s*)?${ year }\\s*(\\))?`), '');
+
             return { type, title, year, image };
         }
-
-        open(); // show the year and other information, fails otherwise
 
         type = script.getType();
 
         if(type == 'error')
-            return close(), script.timeout;
+            return -1;
 
         if(type == 'movie' || type == 'show') {
             let title = $((type == 'movie'? '.title': '#owner-container')).first,
-                year  = $('#content ytd-expander').first;
+                year  = $('#content ytd-expander').first,
+                image = $('#img img').first || { src: '' };
 
             if(!title)
-                return close(), null;
+                return -1;
 
             title = title.textContent.trim();
             year  = +year.textContent.replace(/[^]*(?:release|air) date\s+(?:(?:\d+\/\d+\/)?(\d{2,4}))[^]*/i, ($0, $1, $$, $_) => +$1 < 1000? 2000 + +$1: $1);
+            image = image.src;
 
-            title = title.replace(RegExp(`\\s*(\\(\\s*)?${ year }\\s*(\\))?`), '');
+            title = title.replace(R(`\\s*(\\(\\s*)?${ year }\\s*(\\))?`), '');
 
             options = { type, title, year };
         } else if(type == 'list') {
@@ -62,7 +69,7 @@ let script = {
                 image = $('#thumbnail #img').first;
 
             if(!title)
-                return close(), null;
+                return -1;
 
             title = title.textContent.trim();
             year  = parseInt(year.textContent);
@@ -70,12 +77,12 @@ let script = {
             type  = 'show';
 
             options = { type, title, year, image };
+        } else {
+            return -1;
         }
 
-        close(); // close the meta-information
-
         if(!listenersSet) {
-            setInterval(() => {
+            listenerInt = setInterval(() => {
                 let closed = 'collapsed' in $('ytd-expander').first.attributes;
 
                 if(closed && !openedByUser)
@@ -92,6 +99,8 @@ let script = {
             });
 
             listenersSet = true;
+        } else {
+            clearInterval(listenerInt);
         }
 
         return options;

@@ -13,8 +13,10 @@ let script = {
             return 1000;
 
         title = title.textContent.trim();
-        year  = +year.textContent.replace(/[^]*(\d{4})[^]*/, '');
         image = image.src;
+
+        year.textContent.replace(/(\d{4})/, '');
+        year = +R.$1;
 
         return { type, title, year, image };
     },

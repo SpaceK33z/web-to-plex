@@ -7,14 +7,14 @@ let script = {
         let _title, _year, _image, R = RegExp;
 
         let title = $('.film-box h1').first,
-            year  = $('.film-box > * span').child(9),
+            year  = $('.film-box > * span').filter(e => /\b\d{4}\b/.test(e.textContent))[0],
             image = $('.poster').first,
             type  = script.getType();
 
         title = title.textContent.replace(/\s*season\s+\d+\s*$/i, '').replace(/\s*\((\d{4})\)/, '').trim();
-        year  = (type == 'movie')?
-            +R.$1:
-        +year.textContent.replace(/[^]*(\d{4})[^]*/, '$1');
+        year  = +(type == 'movie')?
+            R.$1:
+        year.textContent.replace(/[^]*(\d{4})[^]*/, '$1');
         image = (image? image.src: null);
 
         // auto-prompt downloading for the user

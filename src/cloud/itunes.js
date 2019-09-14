@@ -17,7 +17,7 @@ let script = {
 
             case 'tv':
                 title = $('h1[itemprop="name"], h1').first.textContent.replace(/\s*\((\d+)\)\s*/, '').trim();
-                year  = $('.release-date > *:last-child').first.textContent.replace(/[^]*(\d{4})[^]*?$/g, '$1').trim();
+                year  = +$('.release-date > *:last-child').first.textContent.replace(/[^]*(\d{4})[^]*?$/g, '$1').trim();
                 image = $('[class*="product"] ~ * picture img').first.src;
 
                 title = title.replace(RegExp(`\\s*\\(${ year }\\)`), '');

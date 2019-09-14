@@ -27,10 +27,10 @@ let script = {
                     .trim(),
                 // REQUIRED [title:string]
                 // you have access to the exposed "helper.js" file within the extension
-            year = (
+            year = +(
                 !(_year = $('[data-automation-id="release-year-badge"], .release-year')).empty?
                     _year.first.textContent.trim():
-                +(R.$1 || R.$2 || YEAR)
+                (R.$1 || R.$2 || YEAR)
             ),
                 // PREFERRED [year:number, null, undefined]
             image = (

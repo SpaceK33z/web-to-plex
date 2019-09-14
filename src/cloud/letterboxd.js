@@ -11,7 +11,7 @@ let script = {
         switch(type) {
             case 'movie':
                 title  = $('.headline-1[itemprop="name"]').first.textContent.trim();
-                year   = $('small[itemprop="datePublished"]').first.textContent.trim();
+                year   = +$('small[itemprop="datePublished"]').first.textContent.trim();
                 image  = ($('.image').first || {}).src;
                 IMDbID = script.getIMDbID(type);
 
