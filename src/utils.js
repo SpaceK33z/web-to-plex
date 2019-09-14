@@ -135,7 +135,7 @@ let configuration, init, Update;
     class Notification {
         constructor(state, text, timeout = 7000, callback = () => {}, requiresClick = true) {
             let queue = (Notification.queue = Notification.queue || { list: [] }),
-                last = queue.list[queue.list.length - 1];
+                last = queue.list[queue.list.length - 1] || document.queryBy('.web-to-plex-notification').first;
 
             if(((state == 'error' || state == 'warning') && __CONFIG__.NotifyNewOnly && /\balready\s+(exists?|(been\s+)?added)\b/.test(text)) || (__CONFIG__.NotifyOnlyOnce && NOTIFIED && state === 'info'))
                 return /* Don't match /.../i as to not match item titles */;
@@ -1987,7 +1987,7 @@ let configuration, init, Update;
                 nice_title = `${options.title.toCaps()}${options.year? ` (${options.year})`: ''}`;
 
             if(options) {
-                ty = (options.type == 'movie'? 'Movie': 'TV Show');
+                ty = (/^(cine(ma)?|films?|movies?|theat[re]{2})$/i.test(options.type)? 'Movie': 'TV Show');
                 txt = options.txt || txt;
                 hov = options.hov || hov;
             }

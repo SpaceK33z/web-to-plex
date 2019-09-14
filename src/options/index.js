@@ -1721,6 +1721,7 @@ let builtins = {
     "GoStream": "https://gostream.site/",
     "Tubi": "https://tubitv.com/",
     "Web to Plex": "https://ephellon.github.io/web.to.plex/",
+    "Allocine": "https://allocine.fr/",
 
     // Dont' forget to add to the __options__ array!
 }, builtin_array = [], builtin_sites = {}, builtinElement = $('#builtin');
