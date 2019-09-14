@@ -21,6 +21,7 @@ Optionally, you can configure NZB Manager (see support table) in the extension's
 | [Sonarr](https://sonarr.tv/)                    | ❌            | ✔              | ✔
 | [Ombi](https://ombi.io/)                        | ❔             | ❔              | ✔
 | [Medusa](https://pymedusa.com/)                 | ❌            | ✔              | ✔
+| [Sick Beard](https://sickbeard.com/)            | ❌            | ✔              | ❌
 
 ### Key
 
@@ -87,7 +88,7 @@ The sites used as search engines (IMDb, TMDb, and TVDb) will automatically creat
 23. [Toloka](https://toloka.to/)<sup>6</sup>
 24. [Shana Project](https://www.shanaproject.com/)<sup>6</sup>
 25. [My Anime List](https://myanimelist.com/)<sup>6</sup>
-26. [My Shows](https://en.myshows.me/)
+26. [My Shows](https://en.myshows.me/)<sup>6</sup>
 27. [YouTube](https://youtube.com/)
 28. [Flickmetrix (Cinesift)](https://flickmetrix.com/)
 29. [Allociné](https://www.allocine.fr/)
@@ -95,6 +96,9 @@ The sites used as search engines (IMDb, TMDb, and TVDb) will automatically creat
 31. [JustWatch](https://justwatch.com/)
 32. [Vumoo](https://vumoo.to/)<sup>1</sup>
 33. [Web to Plex](https://ephellon.github.io/web.to.plex/)<sup>2/3/4/5</sup>
+34. [Indomovie](https://indomovie.club)<sup>5/6</sup>
+35. [Kitsu](https://kitsu.io/)<sup>6</sup>
+36. [Redbox](https://redbox.com/)<sup>6</sup>
 
 *Notes*
 
