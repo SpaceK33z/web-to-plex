@@ -875,7 +875,7 @@ let configuration, init, Update;
             data = {}, // mutated object
             promise,   // query promise
             api = {
-                tmdb: __CONFIG__.TMDbAPI || 'bcb95f026f9a01ffa707fcff71900e94',
+                tmdb: __CONFIG__.TMDbAPI || '37930f472ee15263f0b1ef5cc72e181a',
                 omdb: __CONFIG__.OMDbAPI || 'PlzBanMe',
                 ombi: __CONFIG__.ombiToken,
             },

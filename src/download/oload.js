@@ -10,8 +10,10 @@ let check;
 check = document.body.onload = event => {
     let video = document.querySelector('div > p + p');
 
-    if(video && video.textContent) {
-        let { src } = video.textContent;
+    if(video && (video.src || video.textContent)) {
+        let { src } = video;
+
+        src = src || video.textContent;
 
         if(/^blob:/i.test(src))
             throw '<blob> URL detected. Unable to reform file.';

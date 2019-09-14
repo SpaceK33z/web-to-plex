@@ -25,7 +25,26 @@
 	"content_scripts": [
         // Allows media downloads
         {
-            "matches": ["*://*.openload.co/*", "*://*.openload.com/*", "*://*.oload.fun/*", "*://*.oload.biz/*"],
+            "matches": [
+				"*://*.openload.co/*", "*://*.oload.co/*",
+				"*://*.openload.com/*", "*://*.oload.com/*",
+				"*://*.openload.fun/*", "*://*.oload.fun/*",
+				"*://*.openload.biz/*", "*://*.oload.biz/*",
+				"*://*.openload.vip/*", "*://*.oload.vip/*",
+				"*://*.openload.club/*", "*://*.oload.club/*",
+				"*://*.openload.io/*", "*://*.oload.io/*",
+				"*://*.openload.xyz/*", "*://*.oload.xyz/*",
+				"*://*.openload.cc/*", "*://*.oload.cc/*",
+				"*://*.openload.to/*", "*://*.oload.to/*",
+				"*://*.openload.is/*", "*://*.oload.is/*",
+				"*://*.openload.gg/*", "*://*.oload.gg/*",
+				"*://*.openload.tv/*", "*://*.oload.tv/*",
+				"*://*.openload.fm/*", "*://*.oload.fm/*",
+				"*://*.openload.cx/*", "*://*.oload.cx/*",
+				"*://*.openload.ac/*", "*://*.oload.ac/*",
+				"*://*.openload.name/*", "*://*.oload.name/*",
+				"*://*.openload.global/*", "*://*.oload.global/*"
+			],
             "js": ["download/oload.js"],
             "all_frames": true
         },
