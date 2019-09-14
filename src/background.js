@@ -281,9 +281,9 @@ function Push_Radarr(request, sendResponse) {
             }
 
             BACKGROUND_TERMINAL.group('Generated URL');
-              BACKGROUND_TERMINAL.log('URL', request.url);
-              BACKGROUND_TERMINAL.log('Head', headers);
-              BACKGROUND_TERMINAL.log('Body', body);
+                BACKGROUND_TERMINAL.log('URL', request.url);
+                BACKGROUND_TERMINAL.log('Head', headers);
+                BACKGROUND_TERMINAL.log('Body', body);
             BACKGROUND_TERMINAL.groupEnd();
 
             return debug.body = body;
@@ -361,9 +361,9 @@ function Push_Sonarr(request, sendResponse) {
             };
 
             BACKGROUND_TERMINAL.group('Generated URL');
-              BACKGROUND_TERMINAL.log('URL', request.url);
-              BACKGROUND_TERMINAL.log('Head', headers);
-              BACKGROUND_TERMINAL.log('Body', body);
+                BACKGROUND_TERMINAL.log('URL', request.url);
+                BACKGROUND_TERMINAL.log('Head', headers);
+                BACKGROUND_TERMINAL.log('Body', body);
             BACKGROUND_TERMINAL.groupEnd();
 
             return debug.body = body;
@@ -433,9 +433,9 @@ function Push_Medusa(request, sendResponse) {
             let body = data[0].join('|');
 
             BACKGROUND_TERMINAL.group('Generated URL');
-              BACKGROUND_TERMINAL.log('URL', request.url);
-              BACKGROUND_TERMINAL.log('Head', headers);
-              BACKGROUND_TERMINAL.log('Body', body);
+                BACKGROUND_TERMINAL.log('URL', request.url);
+                BACKGROUND_TERMINAL.log('Head', headers);
+                BACKGROUND_TERMINAL.log('Body', body);
             BACKGROUND_TERMINAL.groupEnd();
 
             return debug.body = body;
@@ -507,9 +507,9 @@ function addMedusa(request, sendResponse) {
             let body = data[0].join('|');
 
             BACKGROUND_TERMINAL.group('Generated URL');
-              BACKGROUND_TERMINAL.log('URL', request.url);
-              BACKGROUND_TERMINAL.log('Head', headers);
-              BACKGROUND_TERMINAL.log('Body', body);
+                BACKGROUND_TERMINAL.log('URL', request.url);
+                BACKGROUND_TERMINAL.log('Head', headers);
+                BACKGROUND_TERMINAL.log('Body', body);
             BACKGROUND_TERMINAL.groupEnd();
 
             return debug.body = body;
@@ -551,6 +551,90 @@ function addMedusa(request, sendResponse) {
             sendResponse({
                 error: String(error),
                 location: `addMedusa => fetch("${ request.url }", { headers }).catch(error => { sendResponse })`,
+                debug
+            });
+        });
+}
+
+/** Sick Beard - TV Shows **/
+function Push_SickBeard(request, sendResponse) {
+    let headers = {
+            'Content-Type': 'application/json',
+            'X-Api-Key': request.token,
+            ...(new Headers(request.basicAuth))
+        },
+        id = request.tvdbId,
+        query = `tvdbid=${ id }`,
+        path = (`${ request.StoragePath }\\${ request.title }`).replace(/\\\\/g, '\\'),
+        debug = { headers, query, request };
+            // setup stack trace for debugging
+
+    fetch(debug.url = `${ request.url }?cmd=sb.searchtvdb&${ query }`)
+        .then(response => response.json())
+        .catch(error => sendResponse({ error: 'TV Show not found', location: '@0B: Push_SickBeard => fetch.then.catch', silent: true }))
+        .then(data => {
+            if (!/^success$/i.test(data.result))
+                throw new Error('TV Show not found');
+
+            data = data.data.results;
+
+            // Monitor, search, and download series ASAP
+            let body = formify({
+                tvdbid: id,
+                initial: request.QualityID,
+                location: encodeURIComponent(path),
+                status: 'wanted',
+            });
+
+            BACKGROUND_TERMINAL.group('Generated URL');
+                BACKGROUND_TERMINAL.log('URL', request.url);
+                BACKGROUND_TERMINAL.log('Head', headers);
+                BACKGROUND_TERMINAL.log('Body', body);
+            BACKGROUND_TERMINAL.groupEnd();
+
+            return debug.body = body;
+        })
+        .then(async body => {
+            await fetch(`${ request.url }?cmd=sb.addrootdir&${ body }`);
+
+            return fetch(`${ request.url }?cmd=show.${ request.exists? 'addexisting': 'addnew' }&${ body }`, debug.requestHeaders = {
+                method: 'POST',
+                mode: cors(request.url),
+                // body: JSON.stringify(body),
+                headers
+            });
+        })
+        .then(response => response.text())
+        .then(results => {
+            debug.data =
+            results = JSON.parse(results || `{"data":{},message:"",result:""}`);
+
+            let { data, message, result } = results;
+
+            data.path = `${ request.StoragePath }${ request.title } (${ request.year })`;
+
+            if (data && !/^success$/i.test(result) && message) {
+                sendResponse({
+                    error: message,
+                    location: `@0B: Push_SickBeard => fetch("${ request.url }", { headers }).then(results => { if })`,
+                    debug
+                });
+            } else if (data && data.path) {
+                sendResponse({
+                    success: 'Added to ' + data.path
+                });
+            } else {
+                sendResponse({
+                    error: 'Unknown error',
+                    location: `@0B: Push_SickBeard => fetch("${ request.url }", { headers }).then(results => { else })`,
+                    debug
+                });
+            }
+        })
+        .catch(error => {
+            sendResponse({
+                error: String(error),
+                location: `@0B: Push_SickBeard => fetch("${ request.url }", { headers }).catch(error => { sendResponse })`,
                 debug
             });
         });
@@ -840,6 +924,10 @@ chrome.runtime.onMessage.addListener((request, sender, callback) => {
                 Push_Ombi(request, callback);
                 return true;
 
+            case 'PUSH_SICKBEARD':
+                Push_SickBeard(request, callback);
+                return true;
+
             case 'OPEN_OPTIONS':
                 chrome.runtime.openOptionsPage();
                 return true;
@@ -926,6 +1014,15 @@ if(SessionState === false) {
         checked: true // implement a way to use the checkboxes?
     });
 
+}
+
+// turn object into URL paramaeters:
+// { data: data, ... } => data=data&...
+function formify(data) {
+    let body = [];
+    for(let key in data)
+        body.push(`${ key }=${ data[key] }`);
+    return body.join('&');
 }
 
 if(chrome.runtime.lastError)

@@ -82,7 +82,7 @@
             margin: 0;
         }
 
-		textarea {
+		textarea, select[multiple] {
 			height: 114px !important;
 		}
 
@@ -410,7 +410,7 @@
             cursor: pointer;
         }
 
-        option {
+        select:not([multiple]) > option {
             background: url(../img/noise.png), #3f4245 !important;
         }
 
@@ -617,7 +617,10 @@
         }
 
 		[code], code {
+			border: 1px solid #FFF3;
 			font-family: monospace, console, consolas, system, arial !important;
+
+			padding: 0 3px;
 		}
 
         *::-webkit-scrollbar {
@@ -1011,7 +1014,7 @@ div
 		        <input type="text" data-option="medusaBasicAuthPassword" placeholder="Enter your Medusa (HTTP) password"/>
 		        <div class="hidden-help">Your password will be hidden once saved.</div>
 		        <br>
-		        <div>This information will be used for <a href="https://wikipedia.org/wiki/Basic_access_authentication" target="_blank">Basic Access Authentication</a> only. This will allow the extension to ask Medusa for your list of films, or to add to your list of films.</div>
+		        <div>This information will be used for <a href="https://wikipedia.org/wiki/Basic_access_authentication" target="_blank">Basic Access Authentication</a> only. This will allow the extension to ask Medusa for your list of TV shows, or to add to your list of TV shows.</div>
 		    </section>
 
 		    <section>
@@ -1080,7 +1083,7 @@ div
                 <div>Only use this if you setup a Sonarr password.</div>
                 <div class="hidden-help">Your password will be hidden once saved.</div>
                 <br>
-                <div>This information will be used for <a href="https://wikipedia.org/wiki/Basic_access_authentication" target="_blank">Basic Access Authentication</a> only. This will allow the extension to ask Sonarr for your list of shows, or to add to your list of shows.</div>
+                <div>This information will be used for <a href="https://wikipedia.org/wiki/Basic_access_authentication" target="_blank">Basic Access Authentication</a> only. This will allow the extension to ask Sonarr for your list of TV shows, or to add to your list of TV shows.</div>
             </section>
 
             <section>
@@ -1107,6 +1110,77 @@ div
 				<a class="button test" target="_blank" href="https://ephellon.github.io/web.to.plex/test/#tv-show">try out sonarr</a>
 			</section>
         </details>
+
+		<details id="sickBeard">
+		    <summary>Sick Beard (TV Shows) <span class="checkbox" disabled prompt-yes="use" prompt-no="skip"><input id="using-sickBeard" type="checkbox" data-option="usingSickBeard" checked="false" /><label for="using-sickBeard"></label></span></summary>
+
+		    <h2>Connection Settings</h2>
+		    <section>
+		        <label>Sick Beard URL</label>
+		        <input type="text" data-option="sickBeardURLRoot" placeholder="What's your Sick Beard URL?"/>
+		        <div>
+		            Such as <em>https://example.com/sickBeard</em> or <em>http://192.168.1.100:8081</em>
+		        </div>
+		    </section>
+
+		    <section>
+		        <label>Sick Beard API Key</label>
+		        <input type="text" data-option="sickBeardToken" placeholder="What's your Sick Beard API key?"/>
+		        <div>
+		            1. Go to Sick Beard | Config | General | API<br/>
+		            &mdash; a. Ensure the checkbox "Enable API" is enabled<br/>
+		            &mdash; b. Press the "Generate" button<br/>
+		            2. Copy/Paste the "API Key."<br/>
+		            Such as <em>aa756d33242f6g8ffbca2b3963586f21</em>
+		        </div>
+		    </section>
+
+		    <h3>Login <em>(saved)</em></h3>
+		    <section>
+		        <label>Username</label>
+		        <input type="text" data-option="sickBeardBasicAuthUsername" placeholder="Enter your Sick Beard (HTTP) username"/>
+		    </section>
+		    <section>
+		        <label>Password</label>
+		        <input type="text" data-option="sickBeardBasicAuthPassword" placeholder="Enter your Sick Beard (HTTP) password"/>
+		        <div class="hidden-help">Your password will be hidden once saved.</div>
+		        <br>
+		        <div>This information will be used for <a href="https://wikipedia.org/wiki/Basic_access_authentication" target="_blank">Basic Access Authentication</a> only. This will allow the extension to ask Sick Beard for your list of TV shows, or to add to your list of TV shows.</div>
+		    </section>
+
+		    <section>
+		        <button type="button" id="sickBeard_test">Test <span id="sickBeard_test_status">?</span></button>
+		    </section>
+
+		    <section>
+		        <label>Sick Beard Storage Path</label>
+		        <select data-option="sickBeardStoragePath">
+		            <option value="">Press "Test [?]" first</option>
+		        </select>
+		        <div>
+		            This should be the same path (verbatim) used in Sick Beard.
+		        </div>
+		    </section>
+		    <section>
+		        <label>Quality Profile Type</label>
+		        <select data-option="sickBeardQualityProfileType">
+					<option>Initial</option>
+		            <option>Archive</option>
+		        </select>
+		        <hr/>
+		        <label>Quality Profile</label>
+		        <select data-option="sickBeardQualityProfileId">
+		            <option value="">Press "Test [?]" first</option>
+		        </select>
+				<!-- <div>
+					Use <code>Ctrl + Click</code> to select multiple items.
+				</div> -->
+		    </section>
+		    <hr><br>
+		    <section>
+		        <a class="button test" target="_blank" href="https://ephellon.github.io/web.to.plex/test/#tv-show">try out Sick Beard</a>
+		    </section>
+		</details>
     </article>
 </div>
 <div>
@@ -1428,6 +1502,13 @@ div
                     Download, and/or find more information for <a href="https://pymedusa.com/" target="_blank">Medusa</a>.
                 </div>
             </section>
+
+			<section>
+				<label>Sick Beard's Website</label>
+				<div>
+					Download, and/or find more information for <a href="http://sickbeard.com/" target="_blank">Sick Beard</a>.
+				</div>
+			</section>
         </details>
     </article>
 </div>
@@ -1443,16 +1524,20 @@ div
 		<input data-option="radarrQualities" value />
 		<input data-option="sonarrQualities" value />
 		<input data-option="medusaQualities" value />
+		<input data-option="sickBeardQualities" value />
 		<input data-option="watcherStoragePaths" value />
 		<input data-option="radarrStoragePaths" value />
 		<input data-option="sonarrStoragePaths" value />
 		<input data-option="medusaStoragePaths" value />
+		<input data-option="sickBeardStoragePaths" value />
 		<input data-option="__radarrQuality" value />
 		<input data-option="__sonarrQuality" value />
 		<input data-option="__medusaQuality" value />
+		<input data-option="__sickBeardQuality" value />
 		<input data-option="__radarrStoragePath" value />
 		<input data-option="__sonarrStoragePath" value />
 		<input data-option="__medusaStoragePath" value />
+		<input data-option="__sickBeardStoragePath" value />
 		<input data-option="__domains" value />
 		<input data-option="__caught" value />
 		<input data-option="__theme" value />

@@ -16,14 +16,16 @@ if(chrome.runtime.lastError)
 const storage = (chrome.storage.sync || chrome.storage.local),
       $ = (selector, all) => (all? document.querySelectorAll(selector): document.querySelector(selector)),
       __servers__ = $('[data-option="preferredServer"]'),
-      __medusa_qualityProfile__  = $(`[data-option="medusaQualityProfileId"]`),
-      __medusa_storagePath__     = $(`[data-option="medusaStoragePath"]`),
-      __watcher_qualityProfile__ = $(`[data-option="watcherQualityProfileId"]`),
-      __watcher_storagePath__    = $(`[data-option="watcherStoragePath"]`),
-      __radarr_qualityProfile__  = $(`[data-option="radarrQualityProfileId"]`),
-      __radarr_storagePath__     = $(`[data-option="radarrStoragePath"]`),
-      __sonarr_qualityProfile__  = $(`[data-option="sonarrQualityProfileId"]`),
-      __sonarr_storagePath__     = $(`[data-option="sonarrStoragePath"]`),
+      __sickBeard_qualityProfile__  = $(`[data-option="sickBeardQualityProfileId"]`),
+      __sickBeard_storagePath__     = $(`[data-option="sickBeardStoragePath"]`),
+      __medusa_qualityProfile__     = $(`[data-option="medusaQualityProfileId"]`),
+      __medusa_storagePath__        = $(`[data-option="medusaStoragePath"]`),
+      __watcher_qualityProfile__    = $(`[data-option="watcherQualityProfileId"]`),
+      __watcher_storagePath__       = $(`[data-option="watcherStoragePath"]`),
+      __radarr_qualityProfile__     = $(`[data-option="radarrQualityProfileId"]`),
+      __radarr_storagePath__        = $(`[data-option="radarrStoragePath"]`),
+      __sonarr_qualityProfile__     = $(`[data-option="sonarrQualityProfileId"]`),
+      __sonarr_storagePath__        = $(`[data-option="sonarrStoragePath"]`),
       __save__ = $('#save'),
       __options__ = [
             /* Plex Settings */
@@ -74,6 +76,15 @@ const storage = (chrome.storage.sync || chrome.storage.local),
             'sonarrStoragePath',
             'sonarrQualityProfileId',
 
+            // Sick Beard
+            'usingSickBeard',
+            'sickBeardURLRoot',
+            'sickBeardToken',
+            'sickBeardBasicAuthUsername',
+            'sickBeardBasicAuthPassword',
+            'sickBeardStoragePath',
+            'sickBeardQualityProfileId',
+
             // CouchPotato
             'enableCouchPotato',
             'usingCouchPotato',
@@ -114,16 +125,20 @@ const storage = (chrome.storage.sync || chrome.storage.local),
             'radarrQualities',
             'sonarrQualities',
             'medusaQualities',
+            'sickBeardQualities',
             'watcherStoragePaths',
             'radarrStoragePaths',
             'sonarrStoragePaths',
             'medusaStoragePaths',
+            'sickBeardStoragePaths',
             '__radarrQuality',
             '__sonarrQuality',
             '__medusaQuality',
+            '__sickBeardQuality',
             '__radarrStoragePath',
             '__sonarrStoragePath',
             '__medusaStoragePath',
+            '__sickBeardStoragePath',
             '__domains',
             '__caught',
             '__theme',
@@ -1104,6 +1119,123 @@ function performMedusaTest(QualityProfileID, StoragePath, refreshing = false) {
         );
 }
 
+function getSickBeard(options, api = 'sb') {
+    if(!options.sickBeardToken)
+        return new Notification('error', 'Invalid Sick Beard token');
+
+	let headers = {
+		'Accept': 'application/json',
+		'Content-Type': 'application/json',
+		'X-Api-Key': options.sickBeardToken, // not really used, but just in case...
+	};
+
+	if(options.sickBeardBasicAuthUsername)
+		headers.Authorization = `Basic ${ btoa(`${ options.sickBeardBasicAuthUsername }:${ options.sickBeardBasicAuthPassword }`) }`;
+
+	return fetch(`${ options.sickBeardURLRoot }/api/${ options.sickBeardToken }/?cmd=${ api }`, { headers })
+		.then(response => response.json())
+		.catch(error => {
+			return new Notification('error', 'Sick Beard failed to connect with error:' + String(error)),
+              [];
+		});
+}
+
+function performSickBeardTest(QualityProfileID, StoragePath, refreshing = false) {
+	let options = getOptionValues(),
+        teststatus = $('#sickBeard_test_status'),
+        path = $('[data-option="sickBeardURLRoot"]'),
+        storagepath = __sickBeard_storagePath__,
+        quality = __sickBeard_qualityProfile__,
+        url,
+        enabled = $('#using-sickBeard');
+
+	quality.innerHTML = '';
+	teststatus.textContent = '?';
+    storagepath.textContent = '';
+    options.sickBeardURLRoot = url = path.value = options.sickBeardURLRoot.replace(/^(\:\d+)/, 'localhost$1').replace(/^(?!^http(s)?:)/, 'http$1://').replace(/\/+$/, '');
+
+    let Get = () => {
+        getSickBeard(options, 'shows').then(shows => {
+            let _shows = shows.data;
+
+            shows = [];
+
+            for(let _show in _shows)
+                shows.push(_shows[_show]);
+
+            shows.map(show => {
+                __caught.tvdb.push(show.tvdbid);
+            });
+        });
+
+        getSickBeard(options, 'sb.getdefaults').then(configuration => {
+            if(!configuration) return new Notification('error', 'Failed to get Sick Beard configuration');
+
+            let qualities = configuration.data,
+                profileType = $('[data-option="sickBeardQualityProfileType"i]').selectedIndex,
+                profiles = (profileType == 0? 'initial': 'archive');
+
+            profiles = qualities[profiles];
+
+            teststatus.textContent = '!';
+            teststatus.classList = enabled.checked = !!profiles.length;
+
+            if(!profiles.length)
+                return teststatus.title = 'Failed to communicate with Sick Beard';
+            enabled.parentElement.removeAttribute('disabled');
+
+            profiles = profiles.map((profile, index, array) => {
+                let option = document.createElement('option');
+                let name = profile;
+
+                option.value = option.textContent = name;
+                quality.appendChild(option);
+
+                return { id: name, name };
+            });
+
+            $('[data-option="sickBeardQualities"i]').value = JSON.stringify(profiles);
+
+            // Because the <select> was reset, the original value is lost.
+            if(QualityProfileID)
+                $('[data-option="__sickBeardQuality"i]').value = quality.value = QualityProfileID;
+        });
+
+        let StoragePaths = [];
+        getSickBeard(options, 'sb.getrootdirs').then(configuration => {
+            let storagepaths = configuration.data.filter(d => +d.valid > 0);
+
+            if(storagepaths.length < 1) return new Notification('error', 'Sick Beard has no usable storage paths');
+
+            storagepaths = storagepaths.map(path => {
+                let option = document.createElement('option');
+
+                StoragePaths.push((path = option.value = option.textContent = path.location).replace(/\\/g, '/').replace(/\/+$/, ''));
+                storagepath.appendChild(option);
+
+                return path;
+            });
+
+            $('[data-option="sickBeardStoragePaths"i]').value = JSON.stringify(storagepaths.map((path, index, array) => ({ path, id: index })));
+
+            // Because the <select> was reset, the original value is lost.
+            if(StoragePath) {
+                $('[data-option="__sickBeardStoragePath"i]').value =
+                storagepath.selectedIndex = StoragePaths.indexOf(StoragePath.replace(/\\/g, '/').replace(/\/+$/, ''));
+            }
+        });
+    };
+
+    if(refreshing)
+        Get();
+    else if(url && url.length)
+        requestURLPermissions(url + '/*', allowed =>
+            (allowed)?
+                Get():
+            new Notification('error', 'The user refused permission to access Sick Beard')
+        );
+}
+
 function enableCouchPotato() {
     $('#use-couchpotato').parentElement.removeAttribute('disabled');
 }
@@ -1159,15 +1291,16 @@ function saveOptions() {
         w, W = 'Watcher',
         c, C = 'CouchPotato',
         o, O = 'Ombi',
-        m, M = 'Medusa';
+        m, M = 'Medusa',
+        i, I = 'Sick Beard';
 
-    let who = () => (r? R: s? S: w? W: c? C: o? O: m? M: 'manager');
+    let who = () => (r? R: s? S: w? W: c? C: o? O: m? M: i? I: 'manager');
 
     // Instead of having the user be so wordy, complete the URL ourselves here
-    if((r = !options.radarrURLRoot && options.radarrToken) || (s = !options.sonarrURLRoot && options.sonarrToken) || (w = !options.watcherURLRoot && options.watcherToken) || (o = !options.ombiURLRoot && options.ombiToken) || (o = !options.medusaURLRoot && options.medusaToken)) {
+    if((r = !options.radarrURLRoot && options.radarrToken) || (s = !options.sonarrURLRoot && options.sonarrToken) || (w = !options.watcherURLRoot && options.watcherToken) || (o = !options.ombiURLRoot && options.ombiToken) || (m = !options.medusaURLRoot && options.medusaToken) || (i = !options.sickBeardURLRoot && options.sickBeardToken)) {
       return new Notification('error', `Please enter a valid URL for ${ who() }`),
           null;
-    } if((options.radarrURLRoot && !options.radarrStoragePath) && (options.sonarrURLRoot && !options.sonarrStoragePath) && (options.medusaURLRoot && !options.medusaStoragePath)) {
+    } if((options.radarrURLRoot && !options.radarrStoragePath) && (options.sonarrURLRoot && !options.sonarrStoragePath) && (options.medusaURLRoot && !options.medusaStoragePath) && (options.sickBeardURLRoot && !options.sickBeardStoragePath)) {
       return new Notification('error', `Please enter a valid storage path for ${ who() }`),
           null;
     } if(options.watcherURLRoot && !options.watcherQualityProfileId) {
@@ -1181,6 +1314,9 @@ function saveOptions() {
             null;
     } if(options.medusaURLRoot && !options.medusaQualityProfileId) {
         return new Notification('error', 'Select a quality profile for Medusa'),
+            null;
+    } if(options.sickBeardURLRoot && !options.sickBeardQualityProfileId) {
+        return new Notification('error', 'Select a quality profile for Sick Beard'),
             null;
     } if(!ClientID) {
         ClientID = window.crypto.getRandomValues(new Uint32Array(5))
@@ -1213,6 +1349,10 @@ function saveOptions() {
         .replace(/([^\\\/])$/, endingSlash)
         .replace(/^(?!^http(s)?:\/\/)(.+)/, 'http$1://$2');
 
+    options.sickBeardURLRoot = (options.sickBeardURLRoot || "")
+        .replace(/([^\\\/])$/, endingSlash)
+        .replace(/^(?!^http(s)?:\/\/)(.+)/, 'http$1://$2');
+
     options.radarrStoragePath = options.radarrStoragePath
         .replace(/([^\\\/])$/, endingSlash);
 
@@ -1222,7 +1362,11 @@ function saveOptions() {
     options.medusaStoragePath = options.medusaStoragePath
         .replace(/([^\\\/])$/, endingSlash);
 
-    for(let index = 0, array = 'plex ombi medusa watcher radarr sonarr couchpotato'.split(' '), item = save('URLs', array); index < array.length; index++)
+    options.sickBeardStoragePath = options.sickBeardStoragePath
+        .replace(/([^\\\/])$/, endingSlash);
+
+    // icons for the popup page
+    for(let index = 0, array = 'plex ombi medusa watcher radarr sonarr couchpotato sickBeard'.split(' '), item = save('URLs', array); index < array.length; index++)
         save(`${ item = array[index] }.url`, options[`${ item }URLRoot`]);
 
 	// Dynamically asking permissions
@@ -1232,6 +1376,7 @@ function saveOptions() {
 	requestURLPermissions(options.sonarrURLRoot);
 	requestURLPermissions(options.medusaURLRoot);
 	requestURLPermissions(options.ombiURLRoot);
+    requestURLPermissions(options.sickBeardURLRoot);
 
     // Handle the proxy settings
     options.proxy = HandleProxySettings(options);
@@ -1276,15 +1421,16 @@ function saveOptionsWithoutPlex() {
         w, W = 'Watcher',
         c, C = 'CouchPotato',
         o, O = 'Ombi',
-        m, M = 'Medusa';
+        m, M = 'Medusa',
+        i, I = 'Sick Beard';
 
     let who = () => (r? R: s? S: w? W: c? C: o? O: m? M: 'manager');
 
     // Instead of having the user be so wordy, complete the URL ourselves here
-    if((r = !options.radarrURLRoot && options.radarrToken) || (s = !options.sonarrURLRoot && options.sonarrToken) || (w = !options.watcherURLRoot && options.watcherToken) || (o = !options.ombiURLRoot && options.ombiToken) || (o = !options.medusaURLRoot && options.medusaToken)) {
+    if((r = !options.radarrURLRoot && options.radarrToken) || (s = !options.sonarrURLRoot && options.sonarrToken) || (w = !options.watcherURLRoot && options.watcherToken) || (o = !options.ombiURLRoot && options.ombiToken) || (m = !options.medusaURLRoot && options.medusaToken) || (i = !options.sickBeardURLRoot && options.sickBeardToken)) {
       return new Notification('error', `Please enter a valid URL for ${ who() }`),
           null;
-    } if((options.radarrURLRoot && !options.radarrStoragePath) && (options.sonarrURLRoot && !options.sonarrStoragePath) && (options.medusaURLRoot && !options.medusaStoragePath)) {
+    } if((options.radarrURLRoot && !options.radarrStoragePath) && (options.sonarrURLRoot && !options.sonarrStoragePath) && (options.medusaURLRoot && !options.medusaStoragePath) && (options.sickBeardURLRoot && !options.sickBeardStoragePath)) {
       return new Notification('error', `Please enter a valid storage path for ${ who() }`),
           null;
     } if(options.watcherURLRoot && !options.watcherQualityProfileId) {
@@ -1298,6 +1444,9 @@ function saveOptionsWithoutPlex() {
             null;
     } if(options.medusaURLRoot && !options.medusaQualityProfileId) {
         return new Notification('error', 'Select a quality profile for Medusa'),
+            null;
+    } if(options.sickBeardURLRoot && !options.sickBeardQualityProfileId) {
+        return new Notification('error', 'Select a quality profile for Sick Beard'),
             null;
     } if(!ClientID) {
         ClientID = 'web-to-plex:client';
@@ -1327,6 +1476,10 @@ function saveOptionsWithoutPlex() {
         .replace(/([^\\\/])$/, endingSlash)
         .replace(/^(?!^http(s)?:\/\/)(.+)/, 'http$1://$2');
 
+    options.sickBeardURLRoot = (options.sickBeardURLRoot || "")
+        .replace(/([^\\\/])$/, endingSlash)
+        .replace(/^(?!^http(s)?:\/\/)(.+)/, 'http$1://$2');
+
     options.radarrStoragePath = options.radarrStoragePath
         .replace(/([^\\\/])$/, endingSlash);
 
@@ -1336,7 +1489,11 @@ function saveOptionsWithoutPlex() {
     options.medusaStoragePath = options.medusaStoragePath
         .replace(/([^\\\/])$/, endingSlash);
 
-    for(let index = 0, array = 'ombi medusa watcher radarr sonarr couchpotato'.split(' '), item = save('URLs', array); index < array.length; index++)
+    options.sickBeardStoragePath = options.sickBeardStoragePath
+        .replace(/([^\\\/])$/, endingSlash);
+
+    // icons for the popup page
+    for(let index = 0, array = 'ombi medusa watcher radarr sonarr couchpotato sickBeard'.split(' '), item = save('URLs', array); index < array.length; index++)
         save(`${ item = array[index] }.url`, options[`${ item }URLRoot`]);
 
 	// Dynamically asking permissions
@@ -1438,6 +1595,8 @@ function restoreOptions(OPTIONS) {
 			performRadarrTest(items.radarrQualityProfileId, items.radarrStoragePath, true);
         if(items.sonarrURLRoot)
 			performSonarrTest(items.sonarrQualityProfileId, items.sonarrStoragePath, true);
+        if(items.sickBeardURLRoot)
+			performSickBeardTest(items.sickBeardQualityProfileId, items.sickBeardStoragePath, true);
         if(items.couchpotatoURLRoot)
             enableCouchPotato();
 
@@ -1654,7 +1813,7 @@ $('[id^="builtin_"]', true)
 
 // Plugins and their links
 let plugins = {
-    'Indomovie': ['https://indeomovietv.org/', 'https://indomovietv.net/'],
+    'Indomovie': ['https://indomovietv.club/', 'https://indomovietv.org/', 'https://indomovietv.net/'],
     'Toloka': 'https://toloka.to/',
     'Shana Project': 'https://www.shanaproject.com/',
     'My Anime List': 'https://myanimelist.net/',
@@ -1772,6 +1931,7 @@ $('#radarr_test', true).forEach(element => element.addEventListener('click', eve
 $('#sonarr_test', true).forEach(element => element.addEventListener('click', event => performSonarrTest()));
 $('#medusa_test', true).forEach(element => element.addEventListener('click', event => performMedusaTest()));
 $('#ombi_test', true).forEach(element => element.addEventListener('click', event => performOmbiTest()));
+$('#sickBeard_test', true).forEach(element => element.addEventListener('click', event => performSickBeardTest()));
 $('#enable-couchpotato', true).forEach(element => element.addEventListener('click', event => enableCouchPotato()));
 
 /* INPUT | Get the JSON data */
