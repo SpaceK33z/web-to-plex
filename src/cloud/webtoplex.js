@@ -15,7 +15,7 @@ let script = {
     "ready": () => location.search && location.search.length > 1 && $('#tmdb').first.textContent,
 
     // optional
-    "timeout": 1000, // if the script fails to complete, retry after ... milliseconds
+    "timeout": 10000, // if the script fails to complete, retry after ... milliseconds
 
     // required
     "init": (ready) => {
