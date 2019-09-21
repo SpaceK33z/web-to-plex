@@ -393,16 +393,16 @@
     outline: none !important;
 }
 
-.web-to-plex-button.wtp--found::after, .web-to-plex-button.wtp--found::before {
-    background: #F9BD03 !important;
-}
-
 .web-to-plex-button.wtp--download::after, .web-to-plex-button.wtp--download::before {
     background: #265AF4 !important;
 }
 
 .web-to-plex-button.wtp--queued::after, .web-to-plex-button.wtp--queued::before {
     background: #568AF4 !important;
+}
+
+.web-to-plex-button.wtp--found::after, .web-to-plex-button.wtp--found::before {
+    background: #F9BD03 !important;
 }
 
 .web-to-plex-button.wtp--error::after, .web-to-plex-button.wtp--error::before {

@@ -16,9 +16,9 @@ let PLUGN_CONFIGURATION;
 let URLRegExp = `
     .replace(/^\\*\\:/,'\\\\w{3,}:')
         // *://
-    .replace(/\\*\\./g,'([^\\\\.]+\\\\.)?')
+    .replace(/\\*\\./g,'(?:[^\\\\.]+\\\\.)?')
         // *.
-    .replace(/\\.\\*/g,'(\\\\.[^\\\\/\\\\.]+)?')
+    .replace(/\\.\\*/g,'(?:\\\\.[^\\\\/\\\\.]+)?')
         // .*
     .replace(/\\/\\*/g,'/[^$]*'),'i')
         // /*
@@ -637,7 +637,8 @@ top.addEventListener('popstate', script.init);
 top.addEventListener('pushstate-changed', script.init);
 
 return (script.RegExp = RegExp(
-    script.url${ URLRegExp }
+    script.url
+${ URLRegExp }
 ).test
 (location.href)?
 /* URL matches pattern */

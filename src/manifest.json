@@ -49,7 +49,7 @@
             "all_frames": true
         },
         {
-            "matches": ["*://*.consistent.stream/titles/*"],
+            "matches": ["*://*.consistent.stream/titles/*", "*://*.consistent.stream/watch/*"],
             "js": ["download/consistent.js"],
             "all_frames": true
         },

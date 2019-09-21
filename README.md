@@ -115,7 +115,7 @@ The sites used as search engines (IMDb, TMDb, and TVDb) will automatically creat
 
 **Download on [FireFox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/web-to-plex/).**
 
-**Download the [SRC](archive/master.zip)**
+**Download the [SRC](archive/master.zip).**
 
 ## Requirements
 
@@ -125,6 +125,6 @@ The sites used as search engines (IMDb, TMDb, and TVDb) will automatically creat
 
 ## Issues & Contributions
 
-If you have any problem with the extension, please don't hesitate to [submit an issue](https://github.com/SpaceK33z/web-to-plex/issues/new).
+If you have any problem with the extension, please don't hesitate to [submit an issue](https://github.com/SpaceK33z/web-to-plex/issues/new/choose).
 
 All contributions are welcome.

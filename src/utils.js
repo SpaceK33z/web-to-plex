@@ -1780,19 +1780,26 @@ let configuration, init, Update;
     let MASTER_BUTTON;
     function RenderButton(persistent, headers = {}) {
     	let existingButtons = document.queryBy('.web-to-plex-button'),
-            firstButton = existingButtons.first,
-            { sleeper } = headers;
+            firstButton = existingButtons.first;
 
     	if(existingButtons.length && !persistent)
     		[].slice.call(existingButtons).forEach(button => button.remove());
         else if(persistent && firstButton !== null && firstButton !== undefined)
             return firstButton;
 
-        let ThemeClasses = JSON.parse(__CONFIG__.__theme).join('.'),
+        let ThemeClasses = JSON.parse(__CONFIG__.__theme),
             HeaderClasses = [];
 
-        if(sleeper)
-            HeaderClasses.push('sleeper');
+        // Theme(s)
+        if(!ThemeClasses.length)
+            ThemeClasses = '';
+        else
+            ThemeClasses = '.' + ThemeClasses.join('.');
+
+        // Header(s)
+        for(let header in headers)
+            if(headers[header])
+                HeaderClasses.push( header );
 
         if(!HeaderClasses.length)
             HeaderClasses = '';
@@ -1801,7 +1808,7 @@ let configuration, init, Update;
 
         // <button>
         let button =
-            furnish(`button.show.closed.floating.web-to-plex-button${HeaderClasses}${ThemeClasses?'.'+ThemeClasses:''}`, {
+            furnish(`button.show.closed.floating.web-to-plex-button${HeaderClasses}${ThemeClasses}`, {
                     onmouseenter: event => {
                         let self = event.target;
 
@@ -2039,7 +2046,10 @@ let configuration, init, Update;
                         }
 
                         element.href = `#${ options.IMDbID || 'tt' }-${ options.TMDbID | 0 }-${ options.TVDbID | 0 }`;
+
+                        button.classList.remove('wtp--queued');
                         button.classList.add('wtp--download');
+
                         element.removeEventListener('click', element.ON_CLICK);
                         element.addEventListener('click', element.ON_DOWNLOAD = e => {
                             e.preventDefault();
