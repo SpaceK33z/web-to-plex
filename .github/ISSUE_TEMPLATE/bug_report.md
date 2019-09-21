@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Create a report to help us improve the project
+about: Used for minor bugs that don't make the extension unusable
 title: 'Issue: [Something Broke]'
 labels: bug, enhancement
 assignees: ''

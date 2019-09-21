@@ -1,6 +1,6 @@
 ---
 name: Feature request
-about: Suggest a feature (addition) for this project
+about: Used to suggest a feature (addition) for this project
 title: 'Feature: [Please Add ...]'
 labels: enhancement
 assignees: Ephellon
