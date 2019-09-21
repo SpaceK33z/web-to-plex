@@ -24,9 +24,9 @@ A clear and concise description of what you expected to happen.
 If applicable, add screenshots to help explain your problem.
 
 **Extension Information**
- - Version [e.g. 3.4, 4.0]
- - Source [e.g. store, GitHub]
- - Browser [e.g. chrome, firefox]
+ - Version: [e.g. 3.4, 4.0]
+ - Source: [e.g. store, GitHub]
+ - Browser: [e.g. chrome, firefox]
 
 **Additional comments**
 Add any other comments about the problem here, such as how often the issue occurs, any new changes, etc.
