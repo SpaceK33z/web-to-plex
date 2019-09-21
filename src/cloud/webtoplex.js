@@ -15,7 +15,7 @@ let script = {
     "ready": () => location.search && location.search.length > 1 && $('#tmdb').first.textContent,
 
     // optional
-    "timeout": 10000, // if the script fails to complete, retry after ... milliseconds
+    "timeout": 5000, // if the script fails to complete, retry after ... milliseconds
 
     // required
     "init": (ready) => {
@@ -41,9 +41,15 @@ let script = {
     "getID": (provider) => $(`#${provider}`).first.textContent,
 };
 
-if(/\blogin\b/.test(location.pathname) && configuration.TMDbAPI) {
-    $('#apikey').first.value = configuration.TMDbAPI;
+let login = /\blogin\b/.test(location.pathname),
+    apikey = $('#apikey').first;
+
+if(login && configuration.TMDbAPI && !apikey.value) {
+    apikey.value = configuration.TMDbAPI;
 
     return -1;
     // no longer needed to run
+} else if(login) {
+    return -1;
+    // don't run on the login page
 }

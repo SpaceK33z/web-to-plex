@@ -3,7 +3,7 @@ let openedByUser = false,
     listenerInt;
 
 let script = {
-    "url": "*://www.youtube.com/*",
+    "url": "*://www.youtube.com/.+",
 
     "timeout": 1000,
 
@@ -49,7 +49,7 @@ let script = {
             return -1;
 
         if(type == 'movie' || type == 'show') {
-            let title = $((type == 'movie'? '.title': '#owner-container')).first,
+            let title = $((type == 'movie'? '.title': '#owner-container, #header #main-title')).first,
                 year  = $('#content ytd-expander').first,
                 image = $('#img img').first || { src: '' };
 
@@ -57,8 +57,12 @@ let script = {
                 return -1;
 
             title = title.textContent.trim();
-            year  = +year.textContent.replace(/[^]*(?:release|air) date\s+(?:(?:\d+\/\d+\/)?(\d{2,4}))[^]*/i, ($0, $1, $$, $_) => +$1 < 1000? 2000 + +$1: $1);
-            image = image.src;
+            year  = (year)?
+                +year.textContent.replace(/[^]*(?:release|air) date\s+(?:(?:\d+\/\d+\/)?(\d{2,4}))[^]*/i, ($0, $1, $$, $_) => +$1 < 1000? 2000 + +$1: $1):
+            YEAR;
+            image = (image)?
+                image.src:
+            null;
 
             title = title.replace(R(`\\s*(\\(\\s*)?${ year }\\s*(\\))?`), '');
 
@@ -107,19 +111,26 @@ let script = {
     },
 
     "getType": () => {
-        let title = $('.super-title, #title').filter(e => e.textContent)[0],
-            owner = $('#owner-container');
+        let title = $('.super-title, #title, #header #main-title').filter(e => e.textContent)[0],
+            subtitle = $('#header #main-title + #sub-title').filter(e => e.textContent)[0],
+            owner = $('#owner-container, #upload-info [href^="/channel/"]');
 
         if(owner.empty)
             return 'error';
         else
             owner = owner.first.textContent.replace(/^\s+|\s+$/g, '');
 
-        return (/\byoutube movies\b/i.test(owner))?
+        let R = {
+            movie: /\byoutube movies\b/i,
+            show : /\b(s\d+\b.+\be\d+|season \d+)\b/i,
+            list : /\/playlist\b/,
+        };
+
+        return (R.movie.test(owner))?
             'movie':
-        (title && /\bs\d+\b.+\be\d+\b/i.test(title.textContent))?
+        ((title && R.show.test(title.textContent)) || (subtitle && R.show.test(subtitle.textContent)))?
             'show':
-        (title && /\/playlist\b/.test(top.location.pathname))?
+        (title && R.list.test(top.location.pathname))?
             'list':
         'error';
     },

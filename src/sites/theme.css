@@ -1,0 +1,6 @@
+/* Themes and other stylings for Web to Plex */
+
+.web-to-plex-button.button-location-right {
+    left: unset !important;
+    right: 5px !important;
+}

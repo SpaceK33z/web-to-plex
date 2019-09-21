@@ -339,16 +339,11 @@
     transition: opacity 1s ese !important;
 }
 
-.web-to-plex-button.button-location-right {
-    left: unset !important;
-    right: 5px !important;
-}
-
 .web-to-plex-button.hide {
     display: initial !important;
 }
 
-.web-to-plex-button.hide:not(:hover) {
+.web-to-plex-button.hide:not(:hover), .web-to-plex-button.sleeper {
     opacity: 0.1;
 }
 

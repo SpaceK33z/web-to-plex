@@ -144,6 +144,7 @@ const storage = (chrome.storage.sync || chrome.storage.local),
             '__theme',
 
             // Builtins
+            'builtin_allocine',
             'builtin_amazon',
             'builtin_couchpotato',
             'builtin_fandango',
@@ -191,8 +192,8 @@ let PlexServers = [],
     manifest = chrome.runtime.getManifest(),
     terminal = // See #3
         (DEVELOPER_MODE = $('[data-option="DeveloperMode"]').checked)?
-            { error: m => m, info: m => m, log: m => m, warn: m => m, group: m => m, groupEnd: m => m }:
-        console;
+            console:
+        { error: m => m, info: m => m, log: m => m, warn: m => m, group: m => m, groupEnd: m => m };
 
 chrome.manifest = manifest;
 
@@ -1403,7 +1404,7 @@ function saveOptions() {
 			new Notification('error', 'Error with saving: ' + chrome.runtime.lastError.message);
 			storage.set(data, OptionsSavedMessage);
 		} else {
-            terminal.log('Saved Options: ' + JSON.stringify(options));
+            terminal.log('Saved Options: ', options);
 			OptionsSavedMessage();
 		}
 	});
@@ -1520,7 +1521,7 @@ function saveOptionsWithoutPlex() {
 			new Notification('error', 'Error with saving: ' + chrome.runtime.lastError.message);
 			storage.set(data, OptionsSavedMessage);
 		} else {
-            terminal.log('Saved Options: ' + JSON.stringify(options));
+            terminal.log('Saved Options: ', options);
 			OptionsSavedMessage();
 		}
 	});
@@ -1749,11 +1750,11 @@ for(let index = 0, length = builtin_array.length; builtinElement && index < leng
 `
 <h3>${ title }</h3>
 <div class="checkbox">
-<input id="${ name }" type="checkbox" data-option="${ name }" pid="${ r }" js="${ js }">
-<label for="${ name }"></label>
+    <input id="${ name }" type="checkbox" data-option="${ name }" pid="${ r }" js="${ js }">
+    <label for="${ name }"></label>
 </div>
 <div>
-Run on <a href="${ url.href }" title="${ r }" target="_blank">${ title }</a>
+    Run on <a href="${ url.href }" title="${ r }" target="_blank">${ title }</a>
 </div>
 
 <hr>
@@ -1773,11 +1774,11 @@ Run on <a href="${ url.href }" title="${ r }" target="_blank">${ title }</a>
 `
 <h3>${ title }</h3>
 <div class="checkbox">
-<input id="${ name }" type="checkbox" data-option="${ name }" pid="${ r }" js="${ js }">
-<label for="${ name }"></label>
+    <input id="${ name }" type="checkbox" data-option="${ name }" bid="${ r }" js="${ js }">
+    <label for="${ name }"></label>
 </div>
 <div>
-Run on <a href="${ url.href }" title="${ r }" target="_blank">${ title }</a>
+    Run on <a href="${ url.href }" title="${ r }" target="_blank">${ title }</a>
 </div>
 
 <hr>
@@ -2018,17 +2019,18 @@ $('.test', true)
 $('[id^="theme:"i]', true)
     .forEach((element, index, array) => {
         element.addEventListener('click', async event => {
-            let self = event.target;
+            let self = event.target,
+                R = RegExp;
 
             let [a, b] = self.getAttribute('theme').split(/\s*:\s*/).filter(v => v),
                 value = `${self.id.replace(/^theme:/i, '')}-${b}`;
 
             if(/^(checkbox)$/i.test(self.type) && (self.checked + '') == a)
                 __theme.push(value);
-            else if(/^(text|input|button|\B)$/i.test(self.type) && (self.value + '') == a)
+            else if(/^(text|input|button|\B)$/i.test(self.type) && R(self.value + '', 'i').test(a))
                 __theme.push(value);
-
-            __theme = __theme.filter(v => v != value);
+            else
+                __theme = __theme.filter(v => v != value);
         });
     });
 

@@ -265,6 +265,8 @@ let handle = async(results, tabID, instance, script, type) => {
     let InstanceWarning = `[${ type.toUpperCase() }:${ script }] Instance failed to execute @${ tabID }#${ instance }`,
         InstanceType = type;
 
+    results = await results;
+
     if((!results || !results[0] || !instance) && !FOUND[instance])
         try {
             instance = RandomName();
@@ -280,7 +282,8 @@ let handle = async(results, tabID, instance, script, type) => {
         if(handle.timeout)
             return /* already running */;
         if(data < 0)
-            return /* stop execution and timeouts/intervals */;
+            return chrome.tabs.sendMessage(tabID, { data, instance, [InstanceType.toLowerCase()]: script, instance_type: InstanceType, type: 'NO_RENDER' })
+            /* stop execution and timeouts/intervals */;
 
         return handle.timeout = setTimeout(() => { let { request, sender, callback } = (processMessage.properties || {}); handle.timeout = null; processMessage(request, sender, callback) }, data);
     } else if(typeof data == 'string') {

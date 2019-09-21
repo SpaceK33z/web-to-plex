@@ -137,6 +137,12 @@ let configuration, init, Update;
             let queue = (Notification.queue = Notification.queue || { list: [] }),
                 last = queue.list[queue.list.length - 1] || document.queryBy('.web-to-plex-notification').first;
 
+            if(!__CONFIG__) {
+                Options();
+
+                throw 'No configuration saved...';
+            }
+
             if(((state == 'error' || state == 'warning') && __CONFIG__.NotifyNewOnly && /\balready\s+(exists?|(been\s+)?added)\b/.test(text)) || (__CONFIG__.NotifyOnlyOnce && NOTIFIED && state === 'info'))
                 return /* Don't match /.../i as to not match item titles */;
             NOTIFIED = true;
@@ -1770,22 +1776,32 @@ let configuration, init, Update;
     }
 
     // make the button
+    // ( PERSISTENT, { HEADER_CLASSES } )
     let MASTER_BUTTON;
-    function RenderButton(persistent) {
-    	let existingButtons = document.querySelectorAll('.web-to-plex-button'),
-            firstButton = existingButtons[0];
+    function RenderButton(persistent, headers = {}) {
+    	let existingButtons = document.queryBy('.web-to-plex-button'),
+            firstButton = existingButtons.first,
+            { sleeper } = headers;
 
     	if(existingButtons.length && !persistent)
     		[].slice.call(existingButtons).forEach(button => button.remove());
         else if(persistent && firstButton !== null && firstButton !== undefined)
             return firstButton;
 
-        let ThemeClasses = JSON.parse(__CONFIG__.__theme).join('.');
+        let ThemeClasses = JSON.parse(__CONFIG__.__theme).join('.'),
+            HeaderClasses = [];
+
+        if(sleeper)
+            HeaderClasses.push('sleeper');
+
+        if(!HeaderClasses.length)
+            HeaderClasses = '';
+        else
+            HeaderClasses = '.' + HeaderClasses.join('.');
 
         // <button>
         let button =
-            furnish(`button.show.closed.floating.web-to-plex-button${ThemeClasses?'.'+ThemeClasses:''}`, {
-                    tooltip: 'Loading...',
+            furnish(`button.show.closed.floating.web-to-plex-button${HeaderClasses}${ThemeClasses?'.'+ThemeClasses:''}`, {
                     onmouseenter: event => {
                         let self = event.target;
 
@@ -1804,7 +1820,7 @@ let configuration, init, Update;
                 furnish('ul', {},
                     // <li>
                     furnish('li#wtp-list-name.list-name', {},
-                        furnish('a.list-action', {}, furnish(`img[alt=Web to Plex]`, { src: IMG_URL.icon_48 }))
+                        furnish('a.list-action', { tooltip: 'Web to Plex' }, furnish(`img[alt=Web to Plex]`, { src: IMG_URL.icon_48 }))
                     ),
 
                     furnish('li#wtp-plexit.list-item', {
@@ -1850,7 +1866,7 @@ let configuration, init, Update;
                             let self = event.target, parent = button;
 
                             if(init instanceof Function)
-                                button.setAttribute('class', 'closed floating web-to-plex-button restarting'), button.onmouseenter = button.onmouseleave = null, button.setAttribute('tooltip', 'Restarting...'), button.querySelector('.list-action').setAttribute('tooltip', 'Restarting...'), setTimeout(() => (init && !RUNNING? (init(), RUNNING = true): RUNNING = false), 500);
+                                button.setAttribute('class', 'closed floating web-to-plex-button restarting'), button.onmouseenter = button.onmouseleave = null, button.querySelector('.list-action').setAttribute('tooltip', 'Restarting...'), setTimeout(() => (init && !RUNNING? (init(), RUNNING = true): RUNNING = false), 500);
                             else
                                 new Notification('warning', "Couldn't reload. Please refresh the page.");
                         }
@@ -2319,6 +2335,7 @@ let configuration, init, Update;
 
         if(!button)
             return UTILS_TERMINAL.warn(BUTTON_ERROR);
+        button.classList.remove('sleeper');
 
         switch(request.type) {
             case 'POPULATE':
@@ -2375,6 +2392,10 @@ let configuration, init, Update;
                 UTILS_TERMINAL.warn('Caught init event [utils]');
                 return true;
 
+            case 'NO_RENDER':
+                document.queryBy('.web-to-plex-button').map(e => e.remove());
+                return true;
+
             default:
     //            UTILS_TERMINAL.warn(`Unknown event [${ request.type }]`);
                 return false;
@@ -2425,6 +2446,9 @@ let configuration, init, Update;
             throw error
         }
     });
+
+    // create the sleeping button
+    wait(() => document.readyState === 'complete', () => RenderButton(null, { sleeper: true }));
 
 })(new Date);
 
