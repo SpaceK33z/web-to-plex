@@ -179,6 +179,10 @@
             "js": ["utils.js", "sites/webtoplex/index.js"],
             "css": ["sites/webtoplex/index.css", "sites/common.css", "sites/theme.css"]
         },{
+            "matches": ["*://app.plex.tv/desktop/*"],
+            "js": ["utils.js", "sites/plex/index.js"],
+            "css": ["sites/plex/index.css", "sites/common.css", "sites/theme.css"]
+        },{
 			"matches": ["https://*/*"],
 			"js": ["utils.js", "sites/common.js"]
 		}

@@ -20,8 +20,8 @@ let URLRegExp = `
         // *.
     .replace(/\\.\\*/g,'(?:\\\\.[^\\\\/\\\\.]+)?')
         // .*
-    .replace(/\\/\\*/g,'/[^$]*'),'i')
-        // /*
+    .replace(/([\\/\\?\\&\\#])\\*/g,'$1[^$]*'),'i')
+        // /* OR ?* OR &* OR #*
 `;
 
 function load(name, private) {
@@ -460,7 +460,7 @@ ${ URLRegExp }
 
 console.log('[${ name.replace(/^(top\.)?(\w{7}).*$/i, '$1$2') }]', ${ name });
 
-top.onlocationchange = (event) => chrome.runtime.sendMessage({ type: '$INIT$', options: { ${ type }: '${ js }' } }, callback => callback);
+top.onlocationchange = (event) => chrome.runtime.sendMessage({ type: '$INIT$', options: { ${ type }: '${ js }' } });
 
 ;${ name };`
                 ) }, results => handle(results, LAST_ID = id, LAST_INSTANCE = instance, LAST_JS = js, LAST_TYPE = type))
@@ -584,7 +584,7 @@ ${ URLRegExp }
 
 console.log('[${ name.replace(/^(top\.)?(\w{7}).*$/i, '$1$2') }]', ${ name });
 
-top.onlocationchange = (event) => chrome.runtime.sendMessage({ type: '$INIT$', options: { plugin: '${ plugin }' } }, callback => callback);
+top.onlocationchange = (event) => chrome.runtime.sendMessage({ type: '$INIT$', options: { plugin: '${ plugin }' } });
 
 ;${ name };`
 ) }, results => handle(results, LAST_ID = id, LAST_INSTANCE = instance, LAST_JS = plugin, LAST_TYPE = type))
@@ -663,7 +663,7 @@ ${ URLRegExp }
 
 console.log('[${ name.replace(/^(top\.)?(\w{7}).*$/i, '$1$2') }]', ${ name });
 
-top.onlocationchange = (event) => chrome.runtime.sendMessage({ type: '$INIT$', options: { script: '${ script }' } }, callback => callback);
+top.onlocationchange = (event) => chrome.runtime.sendMessage({ type: '$INIT$', options: { script: '${ script }' } });
 
 ;${ name };`
     ) }, results => handle(results, LAST_ID = id, LAST_INSTANCE = instance, LAST_JS = script, LAST_TYPE = type))
@@ -673,16 +673,22 @@ top.onlocationchange = (event) => chrome.runtime.sendMessage({ type: '$INIT$', o
                     .catch(error => { throw error });
                 break;
 
+            // Soft reset (button reset)
             case '_INIT_':
                 chrome.tabs.executeScript(id, { code: LAST }, results => handle(results, LAST_ID, LAST_INSTANCE, LAST_JS, LAST_TYPE));
                 break;
 
+            // Hard reset (program reset)
             case '$INIT$':
-                chrome.tabs.getCurrent(tab => {
-                    instance = RandomName();
+                let t = type.toLowerCase(),
+                    data = {};
 
-                    setTimeout(() => tabchange([ tab ]), 5000);
-                });
+                chrome.tabs.sendMessage(tab.id, { data, instance, [t]: script, instance_type: t, type: 'INITIALIZE' });
+                // chrome.tabs.getCurrent(tab => {
+                //     instance = RandomName();
+                //
+                //     setTimeout(() => tabchange([ tab ]), 5000);
+                // });
                 break;
 
             case 'FOUND':

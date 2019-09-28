@@ -2399,7 +2399,7 @@ let configuration, init, Update;
                 return true;
 
             case 'INITIALIZE':
-                UTILS_TERMINAL.warn('Caught init event [utils]');
+                init && init();
                 return true;
 
             case 'NO_RENDER':
@@ -2485,31 +2485,33 @@ function watchlocationchange(subject) {
 
         watchlocationchange[subject] = location[subject];
 
-        for(let index = 0, length = locationchangecallbacks.length, callback, called; length > 0 && index < length; index++) {
+        for(let index = 0, length = locationchangecallbacks.length, callback, exists, signature; length > 0 && index < length; index++) {
             callback = locationchangecallbacks[index];
-            called = locationchangecallbacks.called[sign(callback)];
+            exists = locationchangecallbacks.exists[signature = sign(callback)];
 
             let event = new Event('locationchange', { bubbles: true });
 
-            if(!called && callback && typeof callback == 'function') {
-                locationchangecallbacks.called[sign(callback)] = true;
+            if(!exists && callback && typeof callback == 'function') {
+                /* The eventlistener does not exist */
+
+                locationchangecallbacks.exists[signature] = true;
                 window.addEventListener('beforeunload', event => {
                     event.preventDefault(false);
-
-                    callback({ event, ...properties });
                 });
+
+                open(to, '_self');
+            } else {
+                /* The eventlistener already exists */
 
                 callback({ event, ...properties });
 
                 open(to, '_self');
-            } else {
-                return /* The eventlistener was already called */;
             }
         }
     }
 }
 watchlocationchange.locationchangecallbacks = watchlocationchange.locationchangecallbacks || [];
-watchlocationchange.locationchangecallbacks.called = watchlocationchange.locationchangecallbacks.called || {};
+watchlocationchange.locationchangecallbacks.exists = watchlocationchange.locationchangecallbacks.exists || {};
 
 if(!('onlocationchange' in window))
     Object.defineProperty(window, 'onlocationchange', {

@@ -159,6 +159,7 @@ const storage = (chrome.storage.sync || chrome.storage.local),
             'builtin_moviemeter',
             'builtin_movieo',
             'builtin_netflix',
+            'builtin_plex',
             'builtin_rottentomatoes',
             'builtin_shanaproject',
             'builtin_showrss',
@@ -1723,6 +1724,7 @@ let builtins = {
     "Tubi": "https://tubitv.com/",
     "Web to Plex": "https://ephellon.github.io/web.to.plex/",
     "Allocine": "https://allocine.fr/",
+    "Plex": "https://app.plex.tv/",
 
     // Dont' forget to add to the __options__ array!
 }, builtin_array = [], builtin_sites = {}, builtinElement = $('#builtin');
