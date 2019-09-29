@@ -53,6 +53,11 @@
             "js": ["download/consistent.js"],
             "all_frames": true
         },
+		{
+			"matches": ["*://app.plex.tv/desktop/*"],
+			"js": ["download/plex.js"],
+			"all_frames": true
+		},
 
         // Testing purposes only
         {

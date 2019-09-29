@@ -2025,6 +2025,7 @@ let configuration, init, Update;
 
                 switch(options.remote) {
                     /* Vumoo & GoStream */
+                    case 'plex':
                     case 'oload':
                     case 'consistent':
                         let href = options.href, path = '';

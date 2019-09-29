@@ -386,7 +386,8 @@ let tabchange = async tabs => {
         return setTimeout(() => cache = {}, 1e6);
     }
 
-    let name = (!PLUGN_DEVELOPER? instance: `top.${ instance }`); // makes debugging easier
+    let name = (!PLUGN_DEVELOPER? instance: `top.${ instance }`), // makes debugging easier
+        topmost = !/^top\./.test(name);
 
     let file = (PLUGN_DEVELOPER)?
                     (type === 'script')?
@@ -402,7 +403,7 @@ let tabchange = async tabs => {
                 await chrome.tabs.executeScript(id, { code:
                     (LAST = cache[ali] =
 `/* ${ type }* (${ (!PLUGN_DEVELOPER? 'on':'off') }line) - "${ url.href }" */
-${ name } = (${ name } || (${ name }$ = $ => {
+${ topmost? 'var ': '' }${ name } = (${ name } || (${ name }$ = $ => {
 'use strict';
 
 /* Required permissions */
@@ -496,7 +497,8 @@ chrome.runtime.onMessage.addListener(processMessage = async(request, sender, cal
     url = new URL(url);
     org = url.origin;
 
-    let name = (!PLUGN_DEVELOPER? instance: `top.${ instance }`); // makes debugging easier
+    let name = (!PLUGN_DEVELOPER? instance: `top.${ instance }`), // makes debugging easier
+        topmost = !/^top\./.test(name);
 
     if(request && request.options) {
         let { type } = request,
@@ -526,7 +528,7 @@ chrome.runtime.onMessage.addListener(processMessage = async(request, sender, cal
                             await chrome.tabs.executeScript(id, { code:
                                 (LAST = cache[plugin] =
 `/* plugin (${ (!PLUGN_DEVELOPER? 'on':'off') }line) - "${ url.href }" */
-${ name } = (${ name } || (${ name }$ = $ => {
+${ topmost? 'var ': '' }${ name } = (${ name } || (${ name }$ = $ => {
 'use strict';
 
 /* Required permissions */
@@ -605,7 +607,7 @@ top.onlocationchange = (event) => chrome.runtime.sendMessage({ type: '$INIT$', o
                             await chrome.tabs.executeScript(id, { code:
                                 (LAST = cache[script] =
 `/* script (${ (!PLUGN_DEVELOPER? 'on':'off') }line) - "${ url.href }" */
-${ name } = (${ name } || (${ name }$ = $ => {
+${ topmost? 'var ': '' }${ name } = (${ name } || (${ name }$ = $ => {
 'use strict';
 
 /* Required permissions */
