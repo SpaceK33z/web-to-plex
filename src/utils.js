@@ -2482,7 +2482,7 @@ function watchlocationchange(subject) {
         let from = watchlocationchange[subject],
             to = location[subject],
             properties = { from, to },
-            sign = code => (code + '').replace(/\s+/g, '');
+            sign = code => (code + '').replace(/\W+/g, '').toLowerCase();
 
         watchlocationchange[subject] = location[subject];
 
@@ -2492,22 +2492,18 @@ function watchlocationchange(subject) {
 
             let event = new Event('locationchange', { bubbles: true });
 
-            if(!exists && callback && typeof callback == 'function') {
+            if(!exists && typeof callback == 'function') {
                 /* The eventlistener does not exist */
-
-                locationchangecallbacks.exists[signature] = true;
                 window.addEventListener('beforeunload', event => {
                     event.preventDefault(false);
+                    callback({ event, ...properties });
                 });
-
-                open(to, '_self');
             } else {
                 /* The eventlistener already exists */
-
                 callback({ event, ...properties });
-
-                open(to, '_self');
             }
+
+            open(to, '_self');
         }
     }
 }
@@ -2516,7 +2512,19 @@ watchlocationchange.locationchangecallbacks.exists = watchlocationchange.locatio
 
 if(!('onlocationchange' in window))
     Object.defineProperty(window, 'onlocationchange', {
-        set: callback => (typeof callback == 'function'? watchlocationchange.locationchangecallbacks.push(callback): null),
+        set: callback => {
+            if(typeof callback != 'function')
+                return null;
+
+            let signature = (callback + '').replace(/\W+/g, '').toLowerCase();
+
+            if(!watchlocationchange.locationchangecallbacks.exists[signature]) {
+                watchlocationchange.locationchangecallbacks.exists[signature] = true;
+
+                return watchlocationchange.locationchangecallbacks.push(callback);
+            }
+            return null;
+        },
         get: () => watchlocationchange.locationchangecallbacks
     });
 

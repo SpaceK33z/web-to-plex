@@ -248,16 +248,16 @@ function prepare(code, alias, type) {
         MONT = DATE.getMonth(),
         DAY  = DATE.getDate();
 
-    return code
-        .replace(/\/\/+\s*"([^\"\n\f\r\v]+?)"\s*requires?\:?\s*(.+)([^]+)/i, ($0, $1, $2, $3, $$, $_) =>
-`let DATE = (new Date),
+    return `let DATE = (new Date),
     YEAR = ${YEAR},
     MONT = ${MONT},
     DAY  = ${DAY};
-${ $3 }
-;(async() => await Require("${ $2 }", "${ alias }", "${ $1 }"))();`
 
-        )
+` + code
+.replace(/\/\/+\s*"([^\"\n\f\r\v]+?)"\s*requires?\:?\s*(.+)([^]+)/i, ($0, $1, $2, $3, $$, $_) => `
+${ $3 }
+;(async() => await Require("${ $2 }", "${ alias }", "${ $1 }"))();
+`)
     ;
 }
 
