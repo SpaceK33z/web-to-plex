@@ -508,7 +508,7 @@ function getOptionValues() {
 	let options = {};
 
     for(let key in __caught)
-        __caught[key] = __caught[key].filter(id => id);
+        __caught[key] = __caught[key].filter(id => id).slice(0, 100);
 
     __theme = __theme.filter(v => v);
 
