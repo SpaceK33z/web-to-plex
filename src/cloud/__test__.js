@@ -10,7 +10,7 @@ let script = {
     // optional
     "ready": () => {
         /* return a boolean to describe if the page is ready */
-        return true;
+        return !!$('#title').first.textContent.length;
     },
 
     // optional

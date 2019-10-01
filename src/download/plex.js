@@ -137,6 +137,7 @@ check = document.body.onload = event => {
                 plxdwnld.init();
             } catch(error) {
                 terminal.error('Failed to post message:', error);
+                setTimeout(check, 5000);
             }
         }, 5000)
     } else {

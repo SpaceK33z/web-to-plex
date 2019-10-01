@@ -54,7 +54,7 @@
             "all_frames": true
         },
 		{
-			"matches": ["*://app.plex.tv/desktop/*"],
+			"matches": ["*://app.plex.tv/desktop#!/server/*/details?*"],
 			"js": ["download/plex.js"],
 			"all_frames": true
 		},
