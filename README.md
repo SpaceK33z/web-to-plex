@@ -61,7 +61,9 @@ The sites used as search engines (IMDb, TMDb, and TVDb) will automatically creat
 
 ## Supported sites
 
-*Given in order of completion*
+<article>
+<details>
+<summary> <i>Sites</i> </summary>
 
 1.  [Movieo](http://movieo.me/)
 2.  [IMDb](http://imdb.com/)
@@ -100,7 +102,10 @@ The sites used as search engines (IMDb, TMDb, and TVDb) will automatically creat
 35. [Kitsu](https://kitsu.io/)<sup>6</sup>
 36. [Redbox](https://redbox.com/)<sup>6</sup>
 
-*Notes*
+</details>
+
+<details>
+<summary> <i>Key</i> </summary>
 
 - `1` *This site uses the `Right click | Web to Plex | Save as...` feature (file download), or a direct link (usually magnet URL).*
 - `2` *This site has a loading issue, simply refresh the page if the button doesn't appear.*
@@ -108,6 +113,10 @@ The sites used as search engines (IMDb, TMDb, and TVDb) will automatically creat
 - `4` *This site is network intensive (loads slowly). Be patient.*
 - `5` *This site is known to update frequently, support may change without notice.*
 - `6` *This site is only supported via a plugin (enabled in the settings)*
+
+</details>
+
+</article>
 
 ## Installing Web to Plex
 

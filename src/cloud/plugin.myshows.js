@@ -2,28 +2,28 @@
 // Aurthor(s) - @enchained (2018)
 
 let plugin = {
-    "url": "*://*.myshows.me/view/\\d+/*",
+	"url": "*://*.myshows.me/view/\\d+/*",
 
-    "init": () => {
-        let specific = /\/\/(\w{2})\./.test(location.origin);
+	"init": () => {
+		let specific = /\/\/(\w{2})\./.test(location.origin);
 
-        let title = (
-                specific ?
-                    document.queryBy('[itemprop="name"]').first.textContent:
-                document.queryBy('main > h1').first.textContent
-            )
-            .trim(),
-            year = +(document.queryBy('div.clear > p.flat')
-                .first.textContent.trim()
-                .replace(/[^]*?(\d{4})[^]*/, '$1')),
-            IMDbID = document.queryBy('[href*="/title/tt"]')
-                .first.href.replace(/[^]*(tt\d+)[^]*/, '$1');
+		let title = (
+				specific ?
+					document.queryBy('[itemprop="name"]').first.textContent:
+				document.queryBy('main > h1').first.textContent
+			)
+			.trim(),
+			year = +(document.queryBy('div.clear > p.flat')
+				.first.textContent.trim()
+				.replace(/[^]*?(\d{4})[^]*/, '$1')),
+			IMDbID = document.queryBy('[href*="/title/tt"]')
+				.first.href.replace(/[^]*(tt\d+)[^]*/, '$1');
 
-        return {
-            type: 'show',
-            title,
-            year,
-            IMDbID
-        };
-    },
+		return {
+			type: 'show',
+			title,
+			year,
+			IMDbID
+		};
+	},
 };

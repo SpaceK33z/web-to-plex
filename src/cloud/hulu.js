@@ -1,48 +1,48 @@
 let script = {
-    "url": "*://*.hulu.com/(watch|series|movie)/*",
+	"url": "*://*.hulu.com/(watch|series|movie)/*",
 
-    "ready": () => !$('[class$="__meta"]').empty,
+	"ready": () => !$('[class$="__meta"]').empty,
 
-    "init": (ready) => {
-        let _title, _year, _image, R = RegExp;
-        let { pathname } = top.location;
-        let type, title, year, image;
+	"init": (ready) => {
+		let _title, _year, _image, R = RegExp;
+		let { pathname } = top.location;
+		let type, title, year, image;
 
-        if(/^\/(series|movie)\//.test(pathname)) {
-            type = R.$1;
-            title = $('[class~="masthead__title"i]').first;
-            year  = $('[class~="masthead__meta"i]').child(type == 'series'? 4: 3);
-            image = $('[class~="masthead__artwork"i]').first;
+		if(/^\/(series|movie)\//.test(pathname)) {
+			type = R.$1;
+			title = $('[class~="masthead__title"i]').first;
+			year  = $('[class~="masthead__meta"i]').child(type == 'series'? 4: 3);
+			image = $('[class~="masthead__artwork"i]').first;
 
-            title = title.textContent;
-            year  = +year.textContent;
-            type  = /\b(tv|show|season|series)\b/i.test(type)? 'show': 'movie';
-            image = image? image.src: null;
-        } else {
-            title = $('[class$="__second-line"]').first;
-            year  = (new Date).getFullYear();
-            type  = script.getType();
+			title = title.textContent;
+			year  = +year.textContent;
+			type  = /\b(tv|show|season|series)\b/i.test(type)? 'show': 'movie';
+			image = image? image.src: null;
+		} else {
+			title = $('[class$="__second-line"]').first;
+			year  = (new Date).getFullYear();
+			type  = script.getType();
 
-            title = title.textContent;
-        }
+			title = title.textContent;
+		}
 
-        if(!title)
-            return 5000;
+		if(!title)
+			return 5000;
 
-        return { type, title, year, image };
-    },
+		return { type, title, year, image };
+	},
 
-    "getType": () => {
-        let { pathname } = top.location;
+	"getType": () => {
+		let { pathname } = top.location;
 
-        if(/^\/series\//.test(pathname)) {
-            return 'show';
-        } else {
-            let tl = $('[class$="__third-line"]').first;
+		if(/^\/series\//.test(pathname)) {
+			return 'show';
+		} else {
+			let tl = $('[class$="__third-line"]').first;
 
-            return /^\s*$/.test(tl.textContent)?
-                'movie':
-            'show';
-        }
-    },
+			return /^\s*$/.test(tl.textContent)?
+				'movie':
+			'show';
+		}
+	},
 };

@@ -4,21 +4,21 @@ let __script__ = document.createElement('script');
 // It can modify objects and functions of the page
 __script__.text = `(${
 function() {
-  let history = window.history,
-      __pushState__ = history.pushState,
-      __replaceState__ = history.replaceState;
+	let history = window.history,
+		__pushState__ = history.pushState,
+		__replaceState__ = history.replaceState;
 
-  history.pushState = function(state, title, url) {
-    __pushState__.call(this, state, title, url);
+	history.pushState = function(state, title, url) {
+	__pushState__.call(this, state, title, url);
 
-    window.dispatchEvent(new CustomEvent('pushstate-changed', { detail: state }));
-  };
+	window.dispatchEvent(new CustomEvent('pushstate-changed', { detail: state }));
+	};
 
-  history.replaceState = function(state, title, url) {
-    __replaceState__.call(this, state, title, url);
+	history.replaceState = function(state, title, url) {
+	__replaceState__.call(this, state, title, url);
 
-    window.dispatchEvent(new CustomEvent('pushstate-changed', { detail: state }));
-  };
+	window.dispatchEvent(new CustomEvent('pushstate-changed', { detail: state }));
+	};
 }
 })();`;
 

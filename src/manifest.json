@@ -1,31 +1,33 @@
 {
-//  "update_url": "https://ephellon.github.com/web.to.plex/update.xml",
+//	"update_url": "https://ephellon.github.com/web.to.plex/update.xml",
 
 	"name": "Web to Plex",
 	"description": "Adds a button on various movie & TV show sites to open the item in Plex, or send to your designated NZB manager for download.",
-    "homepage_url": "https://github.com/SpaceK33z/web-to-plex/",
+	"homepage_url": "https://github.com/SpaceK33z/web-to-plex/",
 
 	"manifest_version": 2,
-    "version": "4.1",
+	"version": "4.1.0.1",
 // Firefox Support =>
-//    "applications": {
-//        "gecko": {
-//            "id": "minkcbos@gmail.com",
-//            "strict_min_version": "57.0"
-//        }
-//    },
+//	"applications": {
+//		"gecko": {
+//			"id": "minkcbos@gmail.com",
+//			"strict_min_version": "57.0"
+//		}
+//	},
 
 	"icons": {
-		"16": "img/16.png",
-		"48": "img/48.png",
+		"16":  "img/16.png",
+		"32":  "img/32.png",
+		"48":  "img/48.png",
+		"96":  "img/96.png",
 		"128": "img/128.png",
-        "256": "img/256.png"
+		"256": "img/256.png"
 	},
 
 	"content_scripts": [
-        // Allows media downloads
-        {
-            "matches": [
+		// Allows media downloads
+		{
+			"matches": [
 				"*://*.openload.co/*", "*://*.oload.co/*",
 				"*://*.openload.com/*", "*://*.oload.com/*",
 				"*://*.openload.fun/*", "*://*.oload.fun/*",
@@ -45,29 +47,29 @@
 				"*://*.openload.name/*", "*://*.oload.name/*",
 				"*://*.openload.global/*", "*://*.oload.global/*"
 			],
-            "js": ["download/oload.js"],
-            "all_frames": true
-        },
-        {
-            "matches": ["*://*.consistent.stream/titles/*", "*://*.consistent.stream/watch/*"],
-            "js": ["download/consistent.js"],
-            "all_frames": true
-        },
+			"js": ["download/oload.js"],
+			"all_frames": true
+		},
+		{
+			"matches": ["*://*.consistent.stream/titles/*", "*://*.consistent.stream/watch/*"],
+			"js": ["download/consistent.js"],
+			"all_frames": true
+		},
 		{
 			"matches": ["*://app.plex.tv/desktop#!/server/*/details?*"],
 			"js": ["download/plex.js"],
 			"all_frames": true
 		},
 
-        // Testing purposes only
-        {
-            "matches": ["*://ephellon.github.io/web.to.plex/test/*"],
-            "js": ["utils.js", "sites/__test__.js"],
-            "css": ["sites/common.css", "sites/theme.css"]
-        },
+		// Testing purposes only
+		{
+			"matches": ["*://ephellon.github.io/web.to.plex/test/*"],
+			"js": ["utils.js", "sites/__test__.js"],
+			"css": ["sites/common.css", "sites/theme.css"]
+		},
 
-        // The sites
-        {
+		// The sites
+		{
 			"matches": ["*://*.movieo.me/*"],
 			"js": ["history-hack.js", "utils.js", "sites/movieo/index.js"],
 			"css": ["sites/movieo/index.css", "sites/common.css", "sites/theme.css"]
@@ -144,10 +146,10 @@
 			"js": ["utils.js", "sites/netflix/index.js"],
 			"css": ["sites/netflix/index.css", "sites/common.css", "sites/theme.css"]
 		},{
-            "matches": ["*://*.vumoo.to/*"],
-            "js": ["utils.js", "sites/vumoo/index.js"],
-            "css": ["sites/vumoo/index.css", "sites/common.css", "sites/theme.css"]
-        },{
+			"matches": ["*://*.vumoo.to/*"],
+			"js": ["utils.js", "sites/vumoo/index.js"],
+			"css": ["sites/vumoo/index.css", "sites/common.css", "sites/theme.css"]
+		},{
 			"matches": ["*://www.google.com/*"],
 			"js": ["utils.js", "sites/google/index.js"],
 			"css": ["sites/google/index.css", "sites/common.css", "sites/theme.css"]
@@ -172,22 +174,22 @@
 			"js": ["utils.js", "sites/allocine/index.js"],
 			"css": ["sites/allocine/index.css", "sites/common.css", "sites/theme.css"]
 		},{
-            "matches": ["*://*.gostream.site/*"],
-            "js": ["utils.js", "sites/gostream/index.js"],
-            "css": ["sites/gostream/index.css", "sites/common.css", "sites/theme.css"]
-        },{
-            "matches": ["*://*.tubitv.com/*"],
-            "js": ["utils.js", "sites/tubi/index.js"],
-            "css": ["sites/tubi/index.css", "sites/common.css", "sites/theme.css"]
-        },{
-            "matches": ["*://ephellon.github.io/web.to.plex/?*", "*://ephellon.github.io/web.to.plex/index.html?*", "*://ephellon.github.io/web.to.plex/login.html?*"],
-            "js": ["utils.js", "sites/webtoplex/index.js"],
-            "css": ["sites/webtoplex/index.css", "sites/common.css", "sites/theme.css"]
-        },{
-            "matches": ["*://app.plex.tv/desktop/*"],
-            "js": ["utils.js", "sites/plex/index.js"],
-            "css": ["sites/plex/index.css", "sites/common.css", "sites/theme.css"]
-        },{
+			"matches": ["*://*.gostream.site/*"],
+			"js": ["utils.js", "sites/gostream/index.js"],
+			"css": ["sites/gostream/index.css", "sites/common.css", "sites/theme.css"]
+		},{
+			"matches": ["*://*.tubitv.com/*"],
+			"js": ["utils.js", "sites/tubi/index.js"],
+			"css": ["sites/tubi/index.css", "sites/common.css", "sites/theme.css"]
+		},{
+			"matches": ["*://ephellon.github.io/web.to.plex/?*", "*://ephellon.github.io/web.to.plex/index.html?*", "*://ephellon.github.io/web.to.plex/login.html?*"],
+			"js": ["utils.js", "sites/webtoplex/index.js"],
+			"css": ["sites/webtoplex/index.css", "sites/common.css", "sites/theme.css"]
+		},{
+			"matches": ["*://app.plex.tv/desktop/*"],
+			"js": ["utils.js", "sites/plex/index.js"],
+			"css": ["sites/plex/index.css", "sites/common.css", "sites/theme.css"]
+		},{
 			"matches": ["https://*/*"],
 			"js": ["utils.js", "sites/common.js"]
 		}
@@ -198,27 +200,30 @@
 		"persistent": true
 	},
 
+	// Disable/Comment "options_page" to enable FF support
 	"options_page": "options/index.html",
-    "options_ui": {
-        "page": "options/index.html",
-        "open_in_tab": true
-    },
+	"options_ui": {
+		"page": "options/index.html",
+		"open_in_tab": true
+	},
 
-    "browser_action": {
-        "default_icon": {
-            "16": "img/16.png",
-            "48": "img/48.png"
-        },
-        "default_title": "Web to Plex",
-        "default_popup": "popup/index.html"
-    },
+	"browser_action": {
+		"default_icon": {
+			"16": "img/16.png",
+			"32": "img/32.png",
+			"48": "img/48.png",
+			"96": "img/96.png"
+		},
+		"default_title": "Web to Plex",
+		"default_popup": "popup/index.html"
+	},
 
 	"permissions": [
-        "tabs",
+		"tabs",
 		"storage",
-        "downloads",
-        "contextMenus",
-        "<all_urls>"
+		"downloads",
+		"contextMenus",
+		"<all_urls>"
 	],
-    "web_accessible_resources": ["img/*", "options/*"]
+	"web_accessible_resources": ["img/*", "options/*"]
 }

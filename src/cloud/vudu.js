@@ -1,32 +1,32 @@
 let script = {
-    "url": "*://*.vudu.com/*",
+	"url": "*://*.vudu.com/*",
 
-    "ready": () => !$('img[src*="poster" i]').empty,
+	"ready": () => !$('img[src*="poster" i]').empty,
 
-    "init": (ready) => {
-        let _title, _year, _image, R = RegExp;
+	"init": (ready) => {
+		let _title, _year, _image, R = RegExp;
 
-        let title = $('.head-big').first,
-            year  = $('.container .row:first-child .row ~ * > .row span').first,
-            image = $('img[src*="poster" i]').first,
-            type  = script.getType();
+		let title = $('.head-big').first,
+			year  = $('.container .row:first-child .row ~ * > .row span').first,
+			image = $('img[src*="poster" i]').first,
+			type  = script.getType();
 
-        title = title.textContent.replace(/\((\d{4})\)/, '').trim();
-        year  = year? year.textContent.split(/\s*\|\s*/): R.$1;
-        image = (image || {}).src;
+		title = title.textContent.replace(/\((\d{4})\)/, '').trim();
+		year  = year? year.textContent.split(/\s*\|\s*/): R.$1;
+		image = (image || {}).src;
 
-        if(!title)
-            return 5000;
+		if(!title)
+			return 5000;
 
-        year = +year[year.length - 1].slice(0, 4);
-        year |= 0;
+		year = +year[year.length - 1].slice(0, 4);
+		year |= 0;
 
-        return { type, title, year, image };
-    },
+		return { type, title, year, image };
+	},
 
-    "getType": () => {
-        return /(?:Season-\d+\/\d+)$/i.test(window.location.pathname)?
-            'show':
-        'movie';
-    },
+	"getType": () => {
+		return /(?:Season-\d+\/\d+)$/i.test(window.location.pathname)?
+			'show':
+		'movie';
+	},
 };

@@ -28,32 +28,32 @@ let plugin = {
 			));
 
 			links.forEach((link, index, array) => OLOAD_EVENTS.push(setTimeout(
-                () => {
-                    link.click();
+				() => {
+					link.click();
 
-                    if(index == links.length -1)
-                        OLOAD_EVENTS.push(setTimeout(
-                            () => Notify('update', 'No download links found'),
-                            7000
-                        ));
-                },
-                index * 4500
-            )));
+					if(index == links.length -1)
+						OLOAD_EVENTS.push(setTimeout(
+							() => Notify('update', 'No download links found'),
+							7000
+						));
+				},
+				index * 4500
+			)));
 		}
 
 		return { type, title, year, image };
-    },
+	},
 },
 	OLOAD_EVENTS = [];
 
 top.addEventListener('message', request => {
-    try {
-        request = request.data;
+	try {
+		request = request.data;
 
-        if(request)
-            if(request.from == 'oload' || request.found == true)
-                OLOAD_EVENTS.forEach(timeout => clearTimeout(timeout));
-    } catch(error) {
-        throw error;
-    }
+		if(request)
+			if(request.from == 'oload' || request.found == true)
+				OLOAD_EVENTS.forEach(timeout => clearTimeout(timeout));
+	} catch(error) {
+		throw error;
+	}
 });

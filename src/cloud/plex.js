@@ -1,36 +1,36 @@
 let script = {
-    "url": "*://app.plex.tv/desktop#!/server/([a-f\\d]+)/(details|list)\\?*",
+	"url": "*://app.plex.tv/desktop#!/server/([a-f\\d]+)/(details|list)\\?*",
 
-    "ready": () => $('.loading').empty,
+	"ready": () => $('.loading').empty,
 
-    "timeout": 5000,
+	"timeout": 5000,
 
-    "init": (ready) => {
-        let _title, _year, _image, R = RegExp;
+	"init": (ready) => {
+		let _title, _year, _image, R = RegExp;
 
-        let title = $('[data-qa-id$="maintitle"i] *').first,
-            year = $('[data-qa-id$="secondtitle"i] *').first,
-            type = script.getType();
+		let title = $('[data-qa-id$="maintitle"i] *').first,
+			year = $('[data-qa-id$="secondtitle"i] *').first,
+			type = script.getType();
 
-        if(!title || !year || type == 'error')
-            return 5000;
+		if(!title || !year || type == 'error')
+			return 5000;
 
-        title = title.textContent;
-        year = year.textContent;
+		title = title.textContent;
+		year = year.textContent;
 
-        year = +(year || YEAR);
+		year = +(year || YEAR);
 
-        return { type, title, year };
-    },
+		return { type, title, year };
+	},
 
-    "getType": () => {
-        let cell = $('[data-qa-id$="celltitle"i]').first;
+	"getType": () => {
+		let cell = $('[data-qa-id$="celltitle"i]').first;
 
-        if(!cell)
-            return 'error';
+		if(!cell)
+			return 'error';
 
-        if(/seasons?/i.test(cell.textContent))
-            return 'show';
-        return 'movie';
-    },
+		if(/seasons?/i.test(cell.textContent))
+			return 'show';
+		return 'movie';
+	},
 };
