@@ -41,15 +41,17 @@ let script = {
 	"getID": (provider) => $(`#${provider}`).first.textContent,
 };
 
-let login = /\blogin\b/.test(location.pathname),
-	apikey = $('#apikey').first;
+(() => {
+	let login = /\blogin\b/.test(location.pathname),
+		apikey = $('#apikey').first;
 
-if(login && configuration.TMDbAPI && !apikey.value) {
-	apikey.value = configuration.TMDbAPI;
+	if(login && configuration.TMDbAPI && !apikey.value) {
+		apikey.value = configuration.TMDbAPI;
 
-	return -1;
-	// no longer needed to run
-} else if(login) {
-	return -1;
-	// don't run on the login page
-}
+		return -1;
+		// no longer needed to run
+	} else if(login) {
+		return -1;
+		// don't run on the login page
+	}
+})();

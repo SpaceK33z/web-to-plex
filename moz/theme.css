@@ -1,0 +1,38 @@
+/* Themes and other stylings for Web to Plex */
+/* Button Layout (Reference)
+
+// <value> - an optional attribute value
+
+// The main button (container)
+BUTTON  .web-to-plex-button.<floating>.<hide|show>.<open|closed>
+
+    // (Container) Holds the LIs that perform the various actions
+   UL
+
+        // The Web to Plex (logo) button
+        LI  #wtp-list-name.list-name
+            // The actionable anchor
+            A   .list-action
+               IMG // Web to Plex logo
+
+        // The Plex It! button
+        LI  #wtp-plexit.list-item
+            IMG // Alarm bell
+
+        // The hide button
+        LI  #wtp-hide.list-item
+            IMG // Eye icon
+
+        // The refresh button
+        LI  #wtp-refresh.list-item
+            IMG // Refresh
+
+        // The settings button
+        LI  #wtp-options.list-item
+            IMG // Gear icon
+*/
+
+.web-to-plex-button.button-location-right {
+    left: unset !important;
+    right: 5px !important;
+}
