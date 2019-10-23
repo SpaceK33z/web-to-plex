@@ -880,7 +880,7 @@ browser.contextMenus.onClicked.addListener(item => {
 });
 
 browser.runtime.onMessage.addListener((request, sender, callback) => {
-	BACKGROUND_TERMINAL.log('From: ' + JSON.stringify(sender));
+	BACKGROUND_TERMINAL.log('From:', sender);
 
 	let item = (request? request.options || request: {}),
 		ITEM_TITLE = item.title,

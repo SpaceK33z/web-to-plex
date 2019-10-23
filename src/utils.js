@@ -583,28 +583,40 @@ let configuration, init, Update, browser;
 	// Send an update query to background.js
 	Update = (type, options = {}, postToo) => {
 		if(configuration)
-			UTILS_TERMINAL.log(`Requesting update [post-to-top: ${ !!postToo }]: ${ type }`, options);
+			console.log(`Requesting update [post-to-top: ${ !!postToo }]: ${ type }`, options);
+		else if(!Update.retry)
+			try {
+				configuration = ParsedOptions();
+
+				Update.retry = true;
+
+				Update(type, options, postToo);
+			} catch(error) {
+				console.warn(`Update failed... "${ error }" Attempting to save configuration...`);
+
+				return sFrame(extURL(`options/index.html#save`), {
+					success: async event => {
+						let self = event.target;
+
+						await ParsedOptions();
+
+						Update(type, options, postToo);
+
+						self.remove();
+					},
+
+					error: async event => {
+						let self = event.target;
+						self.remove();
+
+						new Notification('error', `Fill in missing Web to Plex options`, 15000, Options, false);
+
+						throw `Unable to set configuration variable: ${ JSON.stringify(configuration) }`;
+					}
+				});
+			}
 		else
-			return sFrame(extURL(`options/index.html#save`), {
-				success: async event => {
-					let self = event.target;
-
-					await ParsedOptions();
-
-					Update(type, options, postToo);
-
-					self.remove();
-				},
-
-				error: async event => {
-					let self = event.target;
-					self.remove();
-
-					new Notification('error', `Fill in missing Web to Plex options`, 15000, Options, false);
-
-					throw `Unable to set configuration variable: ${ JSON.stringify(configuration) }`;
-				}
-			});
+			return Update.retry = false;
 
 		chrome.runtime.sendMessage({
 			type,
@@ -2311,6 +2323,9 @@ let configuration, init, Update, browser;
 			return new Promise((resolve, reject) => resolve({ found: false, key: null }));
 
 		return new Promise((resolve, reject) => {
+			// Sanitize the object
+			options = JSON.parse( JSON.stringify(options) );
+
 			chrome.runtime.sendMessage({
 					type: 'SEARCH_PLEX',
 					options,

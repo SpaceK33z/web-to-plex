@@ -124,7 +124,7 @@ The sites used as search engines (IMDb, TMDb, and TVDb) will automatically creat
 
 **Download on [FireFox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/web-to-plex/).**
 
-**Download the [SRC](archive/master.zip).**
+**Download the source code for [Google Chrome/Opera](src.zip), or [Firefox](moz.zip).**
 
 ## Requirements
 

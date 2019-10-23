@@ -87,21 +87,21 @@ async function GetAuthorization(name) {
 			return {};
 
 		function WriteOff(permission) {
-			if(/^(username)/i.test(permission))
+			if(/^(usernames?)$/i.test(permission))
 				Ausername = true;
-			else if(/^(password)/i.test(permission))
+			else if(/^(passwords?)$/i.test(permission))
 				Apassword = true;
-			else if(/^(token)/i.test(permission))
+			else if(/^(tokens?)$/i.test(permission))
 				Atoken = true;
-			else if(/^(api)/i.test(permission))
+			else if(/^(api)$/i.test(permission))
 				Aapi = true;
-			else if(/^(server)/i.test(permission))
+			else if(/^(servers?)$/i.test(permission))
 				Aserver = true;
-			else if(/^(url(?:root)?)/i.test(permission))
+			else if(/^(url(?:root)?)$/i.test(permission))
 				Aurl = true;
-			else if(/^(storage)/i.test(permission))
+			else if(/^(storage)$/i.test(permission))
 				Astorage = true;
-			else if(/^cache/i.test(permission))
+			else if(/^(cache)$/i.test(permission))
 				Acache = true;
 		}
 
@@ -112,7 +112,7 @@ async function GetAuthorization(name) {
 			for(let permission in permissions)
 				WriteOff(permission);
 
-	return { authorized, Ausername, Apassword, Atoken, Aapi, Aserver, Aurl, Astorage };
+	return { authorized, Ausername, Apassword, Atoken, Aapi, Aserver, Aurl, Astorage, Acache };
 }
 
 // get the saved options
@@ -341,17 +341,21 @@ let handle = async(results, tabID, instance, script, type) => {
 		data = { ...data, type, title, year };
 
 		browser.tabs.insertCSS(tabID, { file: 'common.css' });
-		browser.tabs.sendMessage(tabID, { data, instance, [InstanceType.toLowerCase()]: script, instance_type: InstanceType, type: 'POPULATE' })
-			.then(response => {
-				if(browser.runtime.lastError)
-					browser.runtime.lastError.message;
+		browser.tabs.sendMessage(tabID, {
+			data,
+			instance,
+			[InstanceType.toLowerCase()]: script,
+			instance_type: InstanceType,
+			type: 'POPULATE'
+		}).then(response => {
+			if(browser.runtime.lastError)
+				browser.runtime.lastError.message;
 
-				PLUGN_TERMINAL.warn('Response [plugn]:' + JSON.stringify(response));
+			PLUGN_TERMINAL.warn('Response [plugn]: ' + JSON.stringify(response));
 
-				if(!response)
-					throw browser.runtime.lastError;
-
-			});
+			if(!response)
+				PLUGN_TERMINAL.warn(`Terminated execution, response: ${ JSON.stringify(response) }`);
+		});
 	} catch(error) {
 		throw new Error(`${ InstanceWarning } - ${ String(error) }`);
 	}

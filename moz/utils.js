@@ -243,6 +243,11 @@ let configuration, init, Update;
 					)
 				};
 
+			let preX = document.queryBy('.web-to-plex-prompt').first;
+
+			if(preX)
+				return /* Ignore while another prompt is open, prevents double prompts */;
+
 			switch(prompt_type) {
 				/* Allows the user to add and remove items from a list */
 				case 'prompt':
@@ -1016,7 +1021,7 @@ let configuration, init, Update;
 					if(data)
 						json = JSON.parse(data);
 				} catch(error) {
-					UTILS_TERMINAL.error(`Failed to parse JSON: "${ data }"`);
+					UTILS_TERMINAL.warn(`Failed to parse JSON: "${ data }"`);
 				}
 			})
 			.catch(error => {
@@ -1409,7 +1414,7 @@ let configuration, init, Update;
 					'warning',
 					'CouchPotato request failed (see your console)'
 				) ||
-				(!response.silent && UTILS_TERMINAL.error('Error viewing CouchPotato: ' + String(response.error)));
+				(!response.silent && UTILS_TERMINAL.warn('Error viewing CouchPotato: ' + String(response.error)));
 			}
 			if(!movieExists) {
 				__Request_CouchPotato__(options);
@@ -1419,6 +1424,13 @@ let configuration, init, Update;
 				'warning',
 				`Movie already exists in CouchPotato (status: ${response.status})`
 			);
+		}, error => {
+			new Notification(
+				'warning',
+				error
+			);
+
+			throw error;
 		});
 	}
 
@@ -1450,8 +1462,8 @@ let configuration, init, Update;
 
 			if(response && response.error) {
 				return new Notification('warning', `Could not add "${ options.title }" to Ombi: ${ response.error }`) ||
-					(!response.silent && UTILS_TERMINAL.error('Error adding to Ombi: ' + String(response.error), response.location, response.debug));
-			} else if(response && response.success) {
+					(!response.silent && UTILS_TERMINAL.warn('Error adding to Ombi: ' + String(response.error), response.location, response.debug));
+			} else if(response === true || (response && response.success)) {
 				let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-{2,}/g, '-').toLowerCase(),
 					{ IMDbID, TMDbID, TVDbID } = options;
 
@@ -1461,8 +1473,15 @@ let configuration, init, Update;
 				new Notification('update', `Added "${ options.title }" to Ombi`, 7000, () => window.open(__CONFIG__.ombiURL, '_blank'));
 			} else {
 				new Notification('warning', `Could not add "${ options.title }" to Ombi: Unknown Error`) ||
-				(!response.silent && UTILS_TERMINAL.error('Error adding to Ombi: ' + String(response)));
+				(!response.silent && UTILS_TERMINAL.warn('Error adding to Ombi: ' + String(response)));
 			}
+		}, error => {
+			new Notification(
+				'warning',
+				error
+			);
+
+			throw error;
 		});
 	}
 
@@ -1485,7 +1504,7 @@ let configuration, init, Update;
 					'warning',
 					`Could not add "${ options.title }" to CouchPotato (see your console)`
 				) ||
-				(!response.silent && UTILS_TERMINAL.error('Error adding to CouchPotato: ' + String(response.error), response.location, response.debug));
+				(!response.silent && UTILS_TERMINAL.warn('Error adding to CouchPotato: ' + String(response.error), response.location, response.debug));
 			}
 			if(response.success) {
 				let { IMDbID, TMDbID, TVDbID } = options;
@@ -1497,6 +1516,13 @@ let configuration, init, Update;
 			} else {
 				new Notification('warning', `Could not add "${ options.title }" to CouchPotato`);
 			}
+		}, error => {
+			new Notification(
+				'warning',
+				error
+			);
+
+			throw error;
 		});
 	}
 
@@ -1526,7 +1552,7 @@ let configuration, init, Update;
 
 			if(response && response.error) {
 				return new Notification('warning', `Could not add "${ options.title }" to Watcher: ${ response.error }`) ||
-					(!response.silent && UTILS_TERMINAL.error('Error adding to Watcher: ' + String(response.error), response.location, response.debug));
+					(!response.silent && UTILS_TERMINAL.warn('Error adding to Watcher: ' + String(response.error), response.location, response.debug));
 			} else if(response && (response.success || (response.response + "") == "true")) {
 				let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-{2,}/g, '-').toLowerCase(),
 					TMDbID = options.TMDbID || response.tmdbId,
@@ -1538,8 +1564,15 @@ let configuration, init, Update;
 				new Notification('update', `Added "${ options.title }" to Watcher`, 7000, () => window.open(`${__CONFIG__.watcherURL}library/status${TMDbID? `#${title}-${TMDbID}`: '' }`, '_blank'));
 			} else {
 				new Notification('warning', `Could not add "${ options.title }" to Watcher: Unknown Error`) ||
-				(!response.silent && UTILS_TERMINAL.error('Error adding to Watcher: ' + String(response)));
+				(!response.silent && UTILS_TERMINAL.warn('Error adding to Watcher: ' + String(response)));
 			}
+		}, error => {
+			new Notification(
+				'warning',
+				error
+			);
+
+			throw error;
 		});
 	}
 
@@ -1581,8 +1614,8 @@ let configuration, init, Update;
 
 			if(response && response.error) {
 				return new Notification('warning', `Could not add "${ options.title }" to Radarr: ${ response.error }`) ||
-					(!response.silent && UTILS_TERMINAL.error('Error adding to Radarr: ' + String(response.error), response.location, response.debug));
-			} else if(response && response.success) {
+					(!response.silent && UTILS_TERMINAL.warn('Error adding to Radarr: ' + String(response.error), response.location, response.debug));
+			} else if(response === true || (response && response.success)) {
 				let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-{2,}/g, '-').toLowerCase(),
 					TMDbID = options.TMDbID || response.tmdbId,
 					IMDbID = options.IMDbID || response.imdbId;
@@ -1592,9 +1625,16 @@ let configuration, init, Update;
 				UTILS_TERMINAL.honor('Successfully pushed', options);
 				new Notification('update', `Added "${ options.title }" to Radarr`, 7000, () => window.open(`${__CONFIG__.radarrURL}${TMDbID? `movies/${title}-${TMDbID}`: '' }`, '_blank'));
 			} else {
-				new Notification('warning', `Could not add "${ options.title }" to Radarr: Unknown Error`) ||
-				(!response.silent && UTILS_TERMINAL.error('Error adding to Radarr: ' + String(response)));
+				new Notification('warning', `Could not add "${ options.title }" to Radarr: Unknown Error [${ String(response) }]`) ||
+				(!response.silent && UTILS_TERMINAL.warn('Error adding to Radarr: ' + String(response)));
 			}
+		}, error => {
+			new Notification(
+				'warning',
+				error
+			);
+
+			throw error;
 		});
 	}
 
@@ -1635,8 +1675,8 @@ let configuration, init, Update;
 
 			if(response && response.error) {
 				return new Notification('warning', `Could not add "${ options.title }" to Sonarr: ${ response.error }`) ||
-					(!response.silent && UTILS_TERMINAL.error('Error adding to Sonarr: ' + String(response.error), response.location, response.debug));
-			} else if(response && response.success) {
+					(!response.silent && UTILS_TERMINAL.warn('Error adding to Sonarr: ' + String(response.error), response.location, response.debug));
+			} else if(response === true || (response && response.success)) {
 				let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-{2,}/g, '-').toLowerCase(),
 					TVDbID = options.TVDbID || response.tvdbId;
 
@@ -1646,8 +1686,15 @@ let configuration, init, Update;
 				new Notification('update', `Added "${ options.title }" to Sonarr`, 7000, () => window.open(`${__CONFIG__.sonarrURL}series/${title}`, '_blank'));
 			} else {
 				new Notification('warning', `Could not add "${ options.title }" to Sonarr: Unknown Error`) ||
-				(!response.silent && UTILS_TERMINAL.error('Error adding to Sonarr: ' + String(response)));
+				(!response.silent && UTILS_TERMINAL.warn('Error adding to Sonarr: ' + String(response)));
 			}
+		}, error => {
+			new Notification(
+				'warning',
+				error
+			);
+
+			throw error;
 		});
 	}
 
@@ -1689,8 +1736,8 @@ let configuration, init, Update;
 
 			if(response && response.error) {
 				return new Notification('warning', `Could not add "${ options.title }" to Medusa: ${ response.error }`) ||
-					(!response.silent && UTILS_TERMINAL.error('Error adding to Medusa: ' + String(response.error), response.location, response.debug));
-			} else if(response && response.success) {
+					(!response.silent && UTILS_TERMINAL.warn('Error adding to Medusa: ' + String(response.error), response.location, response.debug));
+			} else if(response === true || (response && response.success)) {
 				let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-{2,}/g, '-').toLowerCase(),
 					TVDbID = options.TVDbID || response.tvdbId;
 
@@ -1700,8 +1747,15 @@ let configuration, init, Update;
 				new Notification('update', `Added "${ options.title }" to Medusa`, 7000, () => window.open(`${__CONFIG__.medusaURL}home/displayShow?indexername=tvdb&seriesid=${options.TVDbID}`, '_blank'));
 			} else {
 				new Notification('warning', `Could not add "${ options.title }" to Medusa: Unknown Error`) ||
-				(!response.silent && UTILS_TERMINAL.error('Error adding to Medusa: ' + String(response)));
+				(!response.silent && UTILS_TERMINAL.warn('Error adding to Medusa: ' + String(response)));
 			}
+		}, error => {
+			new Notification(
+				'warning',
+				error
+			);
+
+			throw error;
 		});
 	}
 
@@ -1743,8 +1797,8 @@ let configuration, init, Update;
 
 			if(response && response.error) {
 				return new Notification('warning', `Could not add "${ options.title }" to Sick Beard: ${ response.error }`) ||
-					(!response.silent && UTILS_TERMINAL.error('Error adding to Sick Beard: ' + String(response.error), response.location, response.debug));
-			} else if(response && response.success) {
+					(!response.silent && UTILS_TERMINAL.warn('Error adding to Sick Beard: ' + String(response.error), response.location, response.debug));
+			} else if(response === true || (response && response.success)) {
 				let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-{2,}/g, '-').toLowerCase(),
 					TVDbID = options.TVDbID || response.tvdbId;
 
@@ -1754,8 +1808,15 @@ let configuration, init, Update;
 				new Notification('update', `Added "${ options.title }" to Sick Beard`, 7000, () => window.open(`${__CONFIG__.sickBeardURL}home/displayShow?show=${ TVDbID }`, '_blank'));
 			} else {
 				new Notification('warning', `Could not add "${ options.title }" to Sick Beard: Unknown Error`) ||
-				(!response.silent && UTILS_TERMINAL.error('Error adding to Sick Beard: ' + String(response)));
+				(!response.silent && UTILS_TERMINAL.warn('Error adding to Sick Beard: ' + String(response)));
 			}
+		}, error => {
+			new Notification(
+				'warning',
+				error
+			);
+
+			throw error;
 		});
 	}
 
@@ -1970,7 +2031,7 @@ let configuration, init, Update;
 
 						button.classList.replace('wtp--download', 'wtp--queued');
 					} catch(error) {
-						UTILS_TERMINAL.error(`Failed to get "${ option.title }" (Error #${ ++fail })`)
+						UTILS_TERMINAL.warn(`Failed to get "${ option.title }" (Error #${ ++fail })`)
 					}
 				}
 				NOTIFIED = false;
@@ -2115,6 +2176,8 @@ let configuration, init, Update;
 
 	// Find media on Plex
 	async function FindMediaItems(options, button) {
+		UTILS_TERMINAL.log(`Finding items... ${ JSON.stringify({ options, button }) }`);
+
 		if(!(options && options.length && button))
 			return;
 
@@ -2175,7 +2238,7 @@ let configuration, init, Update;
 						}
 					})
 			} catch(error) {
-				UTILS_TERMINAL.error('Request to Plex failed: ' + String(error));
+				UTILS_TERMINAL.warn('Request to Plex failed: ' + String(error));
 				// new Notification('error', 'Failed to query item #' + (index + 1));
 			}
 		}
@@ -2202,11 +2265,15 @@ let configuration, init, Update;
 		query.multiple = multiple;
 		query.items = items;
 
+		POPULATING = false;
+
 		if(multiple)
 			UpdateButton(button, 'multiple', `Download ${ multiple } ${ items }`, results);
 	}
 
 	async function FindMediaItem(options) {
+		UTILS_TERMINAL.log(`Finding item... ${ JSON.stringify(options) }`);
+
 		if(!(options && options.title))
 			return;
 
@@ -2226,6 +2293,8 @@ let configuration, init, Update;
 		try {
 			return Request_Plex(options)
 				.then(({ found, key }) => {
+					POPULATING = false;
+
 					if(found) {
 							UpdateButton(options.button, 'found', 'On Plex', { ...options, key });
 							opt = { ...opt, url: options.button.href, found: true, status: 'found' };
@@ -2242,6 +2311,8 @@ let configuration, init, Update;
 
 						return Request_Plex(options)
 							.then(({ found, key }) => {
+								POPULATING = false;
+
 								if(found) {
 									UpdateButton(options.button, 'found', 'On Plex', { ...options, key });
 									opt = { ...opt, url: options.button.href, found: true, status: 'found' };
@@ -2284,28 +2355,41 @@ let configuration, init, Update;
 						'Request to Plex Media Server failed',
 						options
 					),
-					UTILS_TERMINAL.error(`Request to Plex failed: ${ String(error) }`),
+					UTILS_TERMINAL.warn(`Request to Plex failed: ${ String(error) }`),
 					false;
 					// new Notification('Failed to communicate with Plex');
 			}
 	}
 
 	function Request_Plex(options) {
+		UTILS_TERMINAL.log('Requesting Plex search...', options);
+
 		if(!(__CONFIG__.plexURL && __CONFIG__.plexToken) || __CONFIG__.IGNORE_PLEX)
 			return new Promise((resolve, reject) => resolve({ found: false, key: null }));
 
 		return new Promise((resolve, reject) => {
+			UTILS_TERMINAL.log('Searching Plex...');
+
+			options = JSON.parse( JSON.stringify(options) );
+
+			UTILS_TERMINAL.log('Sanitized options:', options);
+
 			browser.runtime.sendMessage({
 				type: 'SEARCH_PLEX',
 				options,
 				serverConfig: __CONFIG__.server
-			}).then(response =>
-				(response && response.error)?
-					reject(response.error):
-				(!response)?
-					reject(new Error('Unknown error')):
-				resolve(response)
-			);
+			}).then(response => {
+				if(response && response.error) {
+					UTILS_TERMINAL.warn(`ERROR: ${ response.error }`);
+					reject(response.error);
+				} else if(!response) {
+					UTILS_TERMINAL.warn(`ERROR: Unknown Error`);
+					reject(new Error('Unknown error'));
+				} else {
+					UTILS_TERMINAL.log(`RESPONSE:`, response);
+					resolve(response);
+				}
+			});
 		});
 	}
 
@@ -2314,7 +2398,9 @@ let configuration, init, Update;
 	}
 
 	/* Listen for events */
-	browser.runtime.onMessage.addListener(async(request, sender) => {
+	let POPULATING = false;
+
+	browser.runtime.onMessage.addListener(async(request, sender, callback) => {
 		UTILS_TERMINAL.log(`Listener event [${ request.instance_type }#${ request[request.instance_type.toLowerCase()] }]:`, request);
 
 		let data = request.data,
@@ -2323,16 +2409,27 @@ let configuration, init, Update;
 			BUTTON_ERROR  = `The button failed to render. ${ LOCATION }`,
 			EMPTY_REQUEST = `The given request is empty. ${ LOCATION }`;
 
+		UTILS_TERMINAL.log(`Assuming data... ${ JSON.stringify(data) }`);
+
 		if(!data)
-			return UTILS_TERMINAL.warn(EMPTY_REQUEST);
-		let button = RenderButton();
+			return UTILS_TERMINAL.warn(EMPTY_REQUEST), false;
+		let button = RenderButton(true);
 
 		if(!button)
-			return UTILS_TERMINAL.warn(BUTTON_ERROR);
+			return UTILS_TERMINAL.warn(BUTTON_ERROR), false;
 		button.classList.remove('sleeper');
+
+		UTILS_TERMINAL.log(`Switching request... ${ JSON.stringify(request) }`);
 
 		switch(request.type) {
 			case 'POPULATE':
+
+				if(POPULATING)
+					return UTILS_TERMINAL.log(`Already attempting to populate...`), false;
+				else
+					UTILS_TERMINAL.log(`Populating... ${ JSON.stringify(data) }`);
+
+				POPULATING = true;
 
 				if(data instanceof Array) {
 					for(let index = 0, length = data.length, item; index < length; index++)
@@ -2360,12 +2457,12 @@ let configuration, init, Update;
 					}
 
 					if(!data.length)
-						return UTILS_TERMINAL.error(PARSING_ERROR);
+						return UTILS_TERMINAL.warn(PARSING_ERROR), false;
 					else
 						FindMediaItems(data, button);
 				} else {
 					if(!data || !data.title || !data.type)
-						return UTILS_TERMINAL.error(PARSING_ERROR);
+						return UTILS_TERMINAL.warn(PARSING_ERROR), false;
 
 					let { image, type, title, year, IMDbID, TMDbID, TVDbID } = data;
 					let Db = await Identify(data);
@@ -2442,7 +2539,7 @@ let configuration, init, Update;
 	});
 
 	// create the sleeping button
-	wait(() => document.readyState === 'complete', () => RenderButton(null, { sleeper: true }));
+	wait(() => document.readyState === 'complete', () => RenderButton(false, { sleeper: true }));
 
 })(new Date);
 
