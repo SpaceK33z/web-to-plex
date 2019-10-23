@@ -1,571 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Web To Plex Options</title>
-	<style>
-        html, body {
-            height: 100%;
-        }
+	<meta charset="UTF-8"/>
 
-		body {
-            background: url(../img/noise.png) fixed, url(../img/256.png) no-repeat fixed center, #3f4245 !important;
-			color: #333 !important;
-            font-family: Open Sans Regular, Helvetica Neue, Helvetica, Arial, sans-serif, system;
-            font-size: 18px !important;
-			padding: 1em;
-			width: 90vw;
-            flex-grow: 1;
-            padding: 25px;
-            overflow: auto;
-            position: absolute;
-		}
-
-        a {
-            color: #cc7b19 !important;
-            text-decoration: none !important;
-        }
-
-        h1 {
-            position: sticky;
-            top: 0;
-        }
-
-        h2 {
-            text-align: center;
-        }
-
-        hr {
-            border: 1px solid #6668;
-        }
-        hr:last-child {
-            display: none;
-        }
-
-        section {
-            display: block !important;
-            margin-bottom: 20px;
-            box-sizing: border-box;
-        }
-
-        label {
-            color: #eee !important;
-            font-weight: 400 !important;
-            display: inline-block;
-            margin-bottom: 5px;
-        }
-
-        input[type="text"], input[type="password"], textarea, select {
-            width: 30vw !important;
-            line-height: 1.5em !important;
-            transition: background 0.2s;
-            display: block !important;
-            height: 38px !important;
-            padding: 6px 12px !important;
-            font-size: 16px !important;
-            color: #eee !important;
-            vertical-align: middle;
-            background: rgba(255, 255, 255, 0.25) !important;
-            border: 3px solid rgba(0, 0, 0, 0) !important;
-            border-radius: 3px !important;
-            font-family: inherit;
-            margin: 0;
-        }
-
-		textarea {
-			height: 114px !important;
-		}
-
-        div:not(body > div) {
-            color: rgba(255, 255, 255, 0.45) !important;
-            display: block;
-            margin-top: 5px !important;
-            margin-bottom: 10px !important;
-            box-sizing: border-box;
-            font-size: 14px !important;
-            z-index: 18 !important;
-        }
-
-        button {
-            padding: 10px 18px !important;
-            font-size: 16px !important;
-            line-height: 1.33 !important;
-            border-radius: 3px;
-            font-family: inherit;
-            text-transform: uppercase;
-            border: 0;
-            box-shadow: none !important;
-            position: relative;
-            overflow: hidden;
-            color: #fff !important;
-            background: #cc7b19 !important;
-            margin-bottom: 0;
-            font-weight: 400 !important;
-            vertical-align: middle;
-            cursor: pointer !important;
-            white-space: nowrap;
-            user-select: none;
-			transition: all 0.1s;
-        }
-
-		button:hover {
-			background: #e59029 !important;
-		}
-
-        [id$="_test"] {
-            background: #cc7b19 !important;
-            margin-bottom: 2px;
-            padding: 10px 8px 10px 10px !important;
-        }
-
-        [id$="_status"] {
-            padding: 0 6px !important;
-            font-size: 16px !important;
-            border-radius: 3px;
-            font-family: monospace, sans-serif, sans, arial;
-            border: 0;
-            box-shadow: none !important;
-            color: #fff !important;
-            background: #666 !important;
-            border-radius: 4px;
-        }
-
-        [id$="_status"].false {
-            background: #cc1b19 !important;
-        }
-
-        [id$="_status"].true {
-            background: #7bcc19 !important;
-        }
-
-        [id$="token"], [data-option$="Token"], [data-option$="API"] {
-            font-family: monospace, consolas, sans-serif, sans serif, sans, arial;
-        }
-
-        [id$="-token"]:not(:placeholder-shown), [data-option$="-Token"]:not(:placeholder-shown), [data-option$="-API"]:not(:placeholder-shown) {
-            text-transform: uppercase;
-        }
-
-        em {
-            color: #cc7b19 !important;
-        }
-
-        select {
-            margin-left: 10px !important;
-            font-size: 16px !important;
-            line-height: inherit;
-            text-transform: none;
-        }
-
-        /* notifications */
-        .notification {
-            background: #F45A26;
-            border-radius: 4px;
-            color: #FFF !important;
-            cursor: pointer;
-            display: block;
-            font-family: arial, verdana, sans-serif;
-            font-size: 20px;
-            text-align: center;
-
-            position: fixed;
-            left: 50%;
-            margin-left: -175px;
-            padding: 10px;
-            top: 80px;
-
-            width: 350px;
-            z-index: 999999;
-        }
-
-        /* Web to Plex general information notifications */
-        .notification.info {
-            background: #666!important;
-        }
-
-        /* Web to Plex update notifications */
-        .notification.update {
-            background: #2A2AFF!important;
-        }
-
-        /* Web to Plex warning notifications */
-        .notification.warning {
-            background: #FF2A2A!important;
-        }
-
-		/* Web to Plex prompt */
-		.prompt {
-			background: #0008!important;
-			box-sizing: border-box!important;
-			color: #eee!important;
-			display: block!important;
-			font-family: Open Sans Regular, Helvetica Neue, Helvetica, Arial, sans-serif;
-			font-size: 14px;
-			line-height: 24px;
-			overflow: auto;
-
-			height: 100%!important;
-			width: 100%!important;
-
-			bottom: 0!important;
-			left: 0!important;
-			right: 0!important;
-			top: 0!important;
-			position: fixed!important;
-			z-index: 999999999!important;
-		}
-
-		.prompt-body {
-			background: #282828;
-			box-shadow: 0 5px 15px #0008;
-			display: block;
-
-			left: 20%;
-			top: 5%;
-			padding-top: 10px;
-			padding-bottom: 70px;
-			position: relative;
-
-			height: 60%;
-			width: 60%;
-		}
-
-		.prompt-header, .prompt-footer {
-			background: #323232;
-			border: 1px solid #0000;
-			box-sizing: border-box;
-			color: #eee;
-			text-size-adjust: 100%;
-
-			margin-top: 0;
-			padding: 15px 20px;
-			position: absolute;
-
-			height: 65px;
-			width: 100%;
-
-			-webkit-tap-highlight-color: #0000;
-		}
-
-		.prompt-header {
-			text-align: left;
-			border-bottom-color: #222;
-			border-bottom-width: 1px;
-			border-top-left-radius: 3px;
-			border-top-right-radius: 3px;
-
-			top: 0;
-		}
-
-		.prompt-options {
-			display: block;
-			overflow-x: hidden;
-			overflow-y: auto;
-
-			padding: 12px;
-			position: relative;
-			top: 65px;
-
-			max-height: calc(100% - 65px);
-		}
-
-		.prompt-option {
-			background: #323232;
-			border: 1px solid #202020;
-			border-radius: 3px;
-			color: #999;
-			display: block;
-			text-align: left;
-
-			margin-bottom: 10px;
-			padding: 10px;
-
-			min-height: 20px;
-		}
-
-		.prompt-option.mutable {
-			max-width: 60%;
-		}
-
-		.prompt-option.mutable > *:last-child {
-			background: #ffffff40;
-			border-radius: 3px;
-			transition: all 0.1s;
-
-			height: 30px;
-			width: 30px;
-
-			float: right;
-			margin-right: -9px;
-			margin-top: -9px;
-			padding: 0;
-		}
-
-		.prompt-option.mutable > *:last-child:hover {
-			background: #ffffff4d;
-		}
-
-		.prompt-option.mutable > *:last-child:after {
-			content: '\00d7';
-		}
-
-		.prompt-footer {
-			text-align: right;
-			border-bottom-left-radius: 3px;
-			border-bottom-right-radius: 3px;
-			border-top-color: #222;
-			border-top-width: 1px;
-
-			bottom: 0;
-		}
-
-		.prompt-input {
-			float: left;
-			position: relative;
-			margin-left: -16px!important;
-			margin-top: -11px!important;
-		}
-
-		.prompt-accept, .prompt-decline {
-			transition: all 0.1s;
-		}
-
-		.prompt-accept {
-			background: #cc7b19!important;
-			margin-left: 5px!important;
-		}
-
-		.prompt-accept:hover {
-			background: #e59029!important;
-		}
-
-		.prompt-decline {
-			background: #ffffff40!important;
-		}
-
-		.prompt-decline:hover {
-			background: #ffffff4d!important;
-		}
-
-        [type="password"] ~ .hidden-help {
-            display: none;
-        }
-
-        article {
-            color: #999;
-            background: rgba(0, 0, 0, 0.15) !important;
-            width: 35vw !important;
-            position: relative !important;
-            padding: 15px !important;
-        }
-
-        summary, option {
-            margin-bottom: 20px !important;
-            padding-left: 0;
-            list-style: none !important;
-            margin-top: 0 !important;
-            color: #999;
-            cursor: pointer;
-        }
-
-        option {
-            background: url(../img/noise.png), #3f4245 !important;
-        }
-
-        details:last-child > summary {
-            margin-bottom: 0 !important;
-        }
-
-        details[open] > summary, h1, h2, h3, h4, h5, h6 {
-            color: #cc7b19 !important;
-        }
-
-        /* bbodine @CodePen - https://codepen.io/bbodine1/pen/novBm */
-        .checkbox {
-            width: 80px;
-            height: 26px;
-            background: #000;
-            margin: 15px 0;
-            position: relative;
-            border-radius: 50px;
-            box-shadow: inset 0px 1px 1px rgba(0, 0, 0, 0.5), 0px 1px 0px rgba(255, 255, 255, 0.2);
-        }
-
-        .checkbox:after {
-            content: 'OFF';
-            color: #666;
-            position: absolute;
-            right: 10px;
-            z-index: 0;
-            font: 12px/26px Arial, sans-serif;
-            font-weight: bold;
-            text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.15);
-        }
-
-        .checkbox:before {
-            content: 'ON';
-            color: #cc7b19;
-            position: absolute;
-            left: 10px;
-            z-index: 0;
-            font: 12px/26px Arial, sans-serif;
-            font-weight: bold;
-        }
-
-		.checkbox[prompt-yes]:before {
-			content: attr(prompt-yes);
-			text-transform: uppercase;
-		}
-
-		.checkbox[prompt-no]:after {
-			content: attr(prompt-no);
-			text-transform: uppercase;
-		}
-
-        .checkbox[prompt="y/n"i]:before {
-            content: 'YES';
-        }
-
-        .checkbox[prompt="y/n"i]:after {
-            content: 'NO';
-        }
-
-        .checkbox label {
-            display: block;
-            width: 34px;
-            height: 20px;
-            cursor: pointer;
-            position: absolute;
-            top: 3px;
-            left: 3px;
-            z-index: 1;
-            background: #666;
-            border-radius: 50px;
-            transition: all 0.4s ease;
-            box-shadow: 0px 2px 5px 0px rgba(0, 0, 0, 0.3);
-        }
-
-        .checkbox input[type=checkbox] {
-            visibility: hidden;
-        }
-
-        .checkbox input[type=checkbox]:checked + label {
-            left: 43px;
-            background: #cc7b19;
-        }
-
-        [white] {
-            color: #fff!important;
-        }
-
-        [orange] {
-            color: #cc7b19!important;
-        }
-
-        input[type="range"] {
-            appearance: none;
-            -webkit-appearance: none;
-
-            background: #0004;
-            outline: none;
-
-            height: 5px!important;
-            width: 83%!important;
-        }
-
-        input[type="range"] + output {
-            display: inline-block;
-            position: relative;
-            width: 7%!important;
-            color: #cc7b19;
-            line-height: 20px;
-            text-align: center;
-            border-radius: 3px;
-            background: #000;
-            padding: 5px 10px;
-            margin-left: 8px;
-            vertical-align: sub;
-        }
-
-        input[type="range"] + output:after {
-            position: absolute;
-            top: 8px;
-            left: -7px;
-            width: 0;
-            height: 0;
-            border-top: 7px solid transparent;
-            border-right: 7px solid #000;
-            border-bottom: 7px solid transparent;
-            content: '';
-        }
-
-        input[type="range"]::-webkit-slider-thumb {
-            appearance: none;
-            -webkit-appearance: none;
-
-            background: #cc7b19;
-            border: 1px solid #cc7b19;
-            border-radius: 100%;
-            cursor: pointer;
-
-            height: 32px;
-            width: 32px;
-        }
-
-        input[type="range"]::-moz-range-thumb {
-            background: #cc7b19;
-            border: 1px solid #cc7b19;
-            border-radius: 100%;
-            cursor: pointer;
-
-            height: 32px;
-            width: 32px;
-        }
-
-        #version {
-            color: #fff;
-
-            position: fixed;
-            right: 0;
-            top: calc(100vh - 20px);
-        }
-
-        [disabled] {
-            cursor: not-allowed!important;
-            color: #909090EE!important;
-        }
-
-		[code], code {
-			font-family: monospace, console, consolas, system, arial !important;
-		}
-
-        *::-webkit-scrollbar {
-            width: 10px;
-        }
-
-        *::-webkit-scrollbar-thumb {
-            min-height: 50px;
-            background: rgba(255, 255, 255, 0.15);
-            border: 2px solid rgba(0, 0, 0, 0);
-            border-radius: 8px;
-            background-clip: padding-box;
-        }
-
-        *::-webkit-scrollbar-track {
-            background: #0000!important;
-        }
-
-        *::placeholder {
-            color: #999!important;
-        }
-
-		*::-moz-placeholder, *:-moz-placeholder {
-			color: #999;
-		}
-
-		*::-webkit-input-placeholder {
-			color: #999;
-		}
-	</style>
+	<title>Web To Plex | Options</title>
+	<link rel="stylesheet" type="text/css" href="index.css"/>
 </head>
 
 <body>
@@ -595,38 +34,38 @@ div
 
 	<article>
         <details>
-            <summary>Login</summary>
+            <summary>Login <span in-use="plex_token"></span></summary>
 
             <h2>Login Settings</h2>
-            <section>
-                <label>Use your Plex token</label>
+            <details>
+                <summary>Use your Plex token <span in-use="plex_token"></span></summary>
                 <input type="text" id="plex_token" data-option="plexToken" placeholder="Enter your Plex token"/>
                 <div>
                     How to find your <a href="https://support.plex.tv/hc/en-us/articles/204059436-Finding-your-account-token-X-Plex-Token" title="How to find your token?" target="_blank">Plex token</a>.
                 </div>
-            </section>
+            </details>
 
             <h3 style="width: 35%; text-align: center;"><em>&mdash; OR &mdash;</em></h3>
 
-            <section>
-                <label>Login with Plex</label>
-                <input type="text" id="plex_username" style="border-bottom-left-radius: 0 !important; border-bottom-right-radius: 0 !important;" placeholder="Enter your Plex username"/>
-                <input type="password" id="plex_password" style="border-top-left-radius: 0 !important; border-top-right-radius: 0 !important;" placeholder="Enter your Plex password"/>
+            <details>
+                <summary>Login with Plex</summary>
+                <input type="text" id="plex_username" top placeholder="Enter your Plex username"/>
+                <input type="password" id="plex_password" bottom placeholder="Enter your Plex password"/>
                 <div>
                     Your Plex username and password are never stored, only your <a href="https://support.plex.tv/hc/en-us/articles/204059436-Finding-your-account-token-X-Plex-Token" title="How to find your token?" target="_blank">Plex token</a>.
                     <br>
                     Your username and password are used in order to get a token from Plex itself.
                 </div>
-            </section>
+            </details>
 
             <h3 style="width: 35%; text-align: center;"><em>&mdash; OR &mdash;</em></h3>
 
-            <section>
-                <label>Attach to Ombi<sup><em>*</em></sup></label>
-                <input type="text" id="ombi_url" style="border-bottom-left-radius: 0 !important; border-bottom-right-radius: 0 !important;" placeholder="Enter your Ombi URL"/>
-                <input type="text" id="ombi_api" style="border-top-left-radius: 0 !important; border-top-right-radius: 0 !important;" placeholder="Enter your Ombi API key"/>
+            <details>
+                <summary>Attach to Ombi<sup><em>*</em></sup></summary>
+                <input type="text" id="ombi_url" top placeholder="Enter your Ombi URL"/>
+                <input type="text" id="ombi_api" bottom placeholder="Enter your Ombi API key"/>
                 <br>
-                <em>Fill in Manager Settings with Ombi?</em>
+                <h3><em>Fill in Manager Settings with Ombi?</em></h3>
                 <div class="checkbox" prompt="y/n">
                     <input id="use-ombi" type="checkbox" data-option="UseOmbi" checked="true"/>
                     <label for="use-ombi"></label>
@@ -634,22 +73,21 @@ div
                 <div>
                     Your Ombi <a href="https://support.plex.tv/hc/en-us/articles/204059436-Finding-your-account-token-X-Plex-Token" title="How to find your token?" target="_blank">Plex token</a> will be shared by this extension.
                 </div>
-                <br>
-            </section>
-
+            </details>
+			<hr><br>
             <section>
                 <button type="button" id="plex_test">Test <span id="plex_test_status">?</span></button>
             </section>
             <section>
-                <label>Select a server</label>
-                <select id="plex_servers">
+                <label>Select a preferred server</label>
+                <select data-option="preferredServer">
                     <option value="">Press "Test [?]" first</option>
                 </select>
             </section>
         </details>
 
         <details>
-            <summary>Advanced</summary>
+            <summary>Advance</summary>
 
             <h2>Plex Server Options</h2>
             <section>
@@ -669,7 +107,7 @@ div
 
     <article>
         <details id="ombi">
-            <summary>Ombi (Movies/TV Shows)</summary>
+            <summary>Ombi (Movies/TV Shows) <span class="checkbox" disabled prompt-yes="use" prompt-no="skip"><input id="using-ombi" type="checkbox" data-option="usingOmbi" checked="false" /><label for="using-ombi"></label></span></summary>
 
             <h2>Connection Settings</h2>
             <section>
@@ -708,10 +146,16 @@ div
             <section>
                 <button type="button" id="ombi_test">Test <span id="ombi_test_status">?</span></button>
             </section>
+			<hr><br>
+			<section>
+				<a class="button test" target="_blank" href="https://ephellon.github.io/web.to.plex/test/">try out ombi</a>
+			</section>
         </details>
 
+		<hr>
+
         <details id="watcher">
-            <summary>Watcher (Movies)</summary>
+            <summary>Watcher (Movies) <span class="checkbox" disabled prompt-yes="use" prompt-no="skip"><input id="using-watcher" type="checkbox" data-option="usingWatcher" checked="false" /><label for="using-watcher"></label></span></summary>
 
             <h2>Connection Settings</h2>
             <section>
@@ -764,10 +208,14 @@ div
                     <option value="">Press "Test [?]" first</option>
                 </select>
             </section>
+			<hr><br>
+			<section>
+				<a class="button test" target="_blank" href="https://ephellon.github.io/web.to.plex/test/#movie">try out watcher</a>
+			</section>
         </details>
 
         <details id="radarr">
-            <summary>Radarr (Movies)</summary>
+            <summary>Radarr (Movies) <span class="checkbox" disabled prompt-yes="use" prompt-no="skip"><input id="using-radarr" type="checkbox" data-option="usingRadarr" checked="false" /><label for="using-radarr"></label></span></summary>
 
             <h2>Connection Settings</h2>
             <section>
@@ -783,7 +231,7 @@ div
                 <input type="text" data-option="radarrToken" placeholder="What's your Radarr API key?"/>
                 <div>
                     1. Go to Radarr | Settings | General<br/>
-                    2. Click on "Show advanced," then copy/paste the "API Key."<br/>
+                    2. Click on "Show advance," then copy/paste the "API Key."<br/>
                     Such as <em>aa756d33242f6g8ffbca2b3963586f21</em>
                 </div>
             </section>
@@ -809,7 +257,7 @@ div
 
             <section>
                 <label>Radarr Storage Path</label>
-                <select type="text" data-option="radarrStoragePath">
+                <select data-option="radarrStoragePath">
                     <option value="">Press "Test [?]" first</option>
                 </select>
                 <div>
@@ -822,68 +270,14 @@ div
                     <option value="">Press "Test [?]" first</option>
                 </select>
             </section>
+			<hr><br>
+			<section>
+				<a class="button test" target="_blank" href="https://ephellon.github.io/web.to.plex/test/#movie">try out radarr</a>
+			</section>
         </details>
 
-        <details id="sonarr">
-            <summary>Sonarr (TV Shows)</summary>
-
-            <h2>Connection Settings</h2>
-            <section>
-                <label>Sonarr URL</label>
-                <input type="text" data-option="sonarrURLRoot" placeholder="What's your Sonarr URL?"/>
-                <div>
-                    Such as <em>https://example.com/sonarr</em> or <em>http://192.168.1.100:8989</em>
-                </div>
-            </section>
-
-            <section>
-                <label>Sonarr API Key</label>
-                <input type="text" data-option="sonarrToken" placeholder="What's your Sonarr API key?"/>
-                <div>
-                    1. Go to Sonarr | Settings | General<br/>
-                    2. Click on "Show advanced," then copy/paste the "API Key."<br/>
-                    Such as <em>aa756d33242f6g8ffbca2b3963586f21</em>
-                </div>
-            </section>
-
-            <h3>Login <em>(saved)</em></h3>
-            <section>
-                <label>Username</label>
-                <input type="text" data-option="sonarrBasicAuthUsername" placeholder="Enter your Sonarr username"/>
-                <div>Only use this if you setup a Sonarr username.</div>
-            </section>
-            <section>
-                <label>Password</label>
-                <input type="text" data-option="sonarrBasicAuthPassword" placeholder="Enter your Sonarr password"/>
-                <div>Only use this if you setup a Sonarr password.</div>
-                <div class="hidden-help">Your password will be hidden once saved.</div>
-                <br>
-                <div>This information will be used for <a href="https://wikipedia.org/wiki/Basic_access_authentication" target="_blank">Basic Access Authentication</a> only. This will allow the extension to ask Sonarr for your list of shows, or to add to your list of shows.</div>
-            </section>
-
-            <section>
-                <button type="button" id="sonarr_test">Test <span id="sonarr_test_status">?</span></button>
-            </section>
-
-            <section>
-                <label>Sonarr Storage Path</label>
-                <select type="text" data-option="sonarrStoragePath">
-                    <option value="">Press "Test [?]" first</option>
-                </select>
-                <div>
-                    This should be the same path (verbatim) used in Sonarr.
-                </div>
-            </section>
-            <section>
-                <label>Quality Profile</label>
-                <select data-option="sonarrQualityProfileId">
-                    <option value="">Press "Test [?]" first</option>
-                </select>
-            </section>
-        </details>
-
-        <details id="couchpotato">
-            <summary>CouchPotato (Movies/TV Shows)</summary>
+		<details id="couchpotato">
+            <summary>CouchPotato (Movies) <span class="checkbox" disabled prompt-yes="use" prompt-no="skip"><input id="use-couchpotato" type="checkbox" data-option="usingCouchPotato" checked="false" /><label for="use-couchpotato"></label></span></summary>
 
             <h2>Connection Settings</h2>
             <section>
@@ -921,7 +315,6 @@ div
                 <div>This information will be used for <a href="https://wikipedia.org/wiki/Basic_access_authentication" target="_blank">Basic Access Authentication</a> only. This will allow the extension to ask Couchpotato for your list of videos, or to add to your list of videos.</div>
             </section>
 <!--
-
             <section>
                 <button type="button" id="couchpotato_test" disabled="true">Test <span id="couchpotato_test_status">?</span></button>
             </section>
@@ -932,7 +325,216 @@ div
                 </select>
             </section>
 -->
+			<section>
+				<button id="enable-couchpotato" data-option="enableCouchPotato">Enable CouchPotato</button>
+			</section>
+			<hr><br>
+			<section>
+				<a class="button test" target="_blank" href="https://ephellon.github.io/web.to.plex/test/">try out couchpotato</a>
+			</section>
         </details>
+
+		<hr>
+
+		<details id="medusa">
+		    <summary>Medusa (TV Shows) <span class="checkbox" disabled prompt-yes="use" prompt-no="skip"><input id="using-medusa" type="checkbox" data-option="usingMedusa" checked="false" /><label for="using-medusa"></label></span></summary>
+
+		    <h2>Connection Settings</h2>
+		    <section>
+		        <label>Medusa URL</label>
+		        <input type="text" data-option="medusaURLRoot" placeholder="What's your Medusa URL?"/>
+		        <div>
+		            Such as <em>https://example.com/medusa</em> or <em>http://192.168.1.100:8081</em>
+		        </div>
+		    </section>
+
+		    <section>
+		        <label>Medusa API Key</label>
+		        <input type="text" data-option="medusaToken" placeholder="What's your Medusa API key?"/>
+		        <div>
+		            1. Go to Medusa | Settings | General | Interface | Web Interface<br/>
+		            2. Copy/Paste the "API key."<br/>
+		            Such as <em>aa756d33242f6g8ffbca2b3963586f21</em>
+		        </div>
+		    </section>
+
+		    <h3>Login <em>(saved)</em></h3>
+		    <section>
+		        <label>Username</label>
+		        <input type="text" data-option="medusaBasicAuthUsername" placeholder="Enter your Medusa (HTTP) username"/>
+		    </section>
+		    <section>
+		        <label>Password</label>
+		        <input type="text" data-option="medusaBasicAuthPassword" placeholder="Enter your Medusa (HTTP) password"/>
+		        <div class="hidden-help">Your password will be hidden once saved.</div>
+		        <br>
+		        <div>This information will be used for <a href="https://wikipedia.org/wiki/Basic_access_authentication" target="_blank">Basic Access Authentication</a> only. This will allow the extension to ask Medusa for your list of TV shows, or to add to your list of TV shows.</div>
+		    </section>
+
+		    <section>
+		        <button type="button" id="medusa_test">Test <span id="medusa_test_status">?</span></button>
+		    </section>
+
+            <section>
+                <label>Medusa Storage Path</label>
+                <select data-option="medusaStoragePath">
+                    <option value="">Press "Test [?]" first</option>
+                </select>
+				<div>
+					This should be the same path (verbatim) used in Medusa.
+				</div>
+            </section>
+            <section>
+				<label>Quality Profile Type</label>
+				<select data-option="medusaQualityProfileType">
+					<option>Default</option>
+					<option>User Defined</option>
+					<option>Any Defined Type</option>
+				</select>
+				<hr/>
+                <label>Quality Profile</label>
+                <select data-option="medusaQualityProfileId">
+                    <option value="">Press "Test [?]" first</option>
+				</select>
+            </section>
+			<hr><br>
+			<section>
+				<a class="button test" target="_blank" href="https://ephellon.github.io/web.to.plex/test/#tv-show">try out medusa</a>
+			</section>
+		</details>
+
+        <details id="sonarr">
+            <summary>Sonarr (TV Shows) <span class="checkbox" disabled prompt-yes="use" prompt-no="skip"><input id="using-sonarr" type="checkbox" data-option="usingSonarr" checked="false" /><label for="using-sonarr"></label></span></summary>
+
+            <h2>Connection Settings</h2>
+            <section>
+                <label>Sonarr URL</label>
+                <input type="text" data-option="sonarrURLRoot" placeholder="What's your Sonarr URL?"/>
+                <div>
+                    Such as <em>https://example.com/sonarr</em> or <em>http://192.168.1.100:8989</em>
+                </div>
+            </section>
+
+            <section>
+                <label>Sonarr API Key</label>
+                <input type="text" data-option="sonarrToken" placeholder="What's your Sonarr API key?"/>
+                <div>
+                    1. Go to Sonarr | Settings | General<br/>
+                    2. Click on "Show advance," then copy/paste the "API Key."<br/>
+                    Such as <em>aa756d33242f6g8ffbca2b3963586f21</em>
+                </div>
+            </section>
+
+            <h3>Login <em>(saved)</em></h3>
+            <section>
+                <label>Username</label>
+                <input type="text" data-option="sonarrBasicAuthUsername" placeholder="Enter your Sonarr username"/>
+                <div>Only use this if you setup a Sonarr username.</div>
+            </section>
+            <section>
+                <label>Password</label>
+                <input type="text" data-option="sonarrBasicAuthPassword" placeholder="Enter your Sonarr password"/>
+                <div>Only use this if you setup a Sonarr password.</div>
+                <div class="hidden-help">Your password will be hidden once saved.</div>
+                <br>
+                <div>This information will be used for <a href="https://wikipedia.org/wiki/Basic_access_authentication" target="_blank">Basic Access Authentication</a> only. This will allow the extension to ask Sonarr for your list of TV shows, or to add to your list of TV shows.</div>
+            </section>
+
+            <section>
+                <button type="button" id="sonarr_test">Test <span id="sonarr_test_status">?</span></button>
+            </section>
+
+            <section>
+                <label>Sonarr Storage Path</label>
+                <select data-option="sonarrStoragePath">
+                    <option value="">Press "Test [?]" first</option>
+                </select>
+                <div>
+                    This should be the same path (verbatim) used in Sonarr.
+                </div>
+            </section>
+            <section>
+                <label>Quality Profile</label>
+                <select data-option="sonarrQualityProfileId">
+                    <option value="">Press "Test [?]" first</option>
+                </select>
+            </section>
+			<hr><br>
+			<section>
+				<a class="button test" target="_blank" href="https://ephellon.github.io/web.to.plex/test/#tv-show">try out sonarr</a>
+			</section>
+        </details>
+
+		<details id="sickBeard">
+		    <summary>Sick Beard (TV Shows) <span class="checkbox" disabled prompt-yes="use" prompt-no="skip"><input id="using-sickBeard" type="checkbox" data-option="usingSickBeard" checked="false" /><label for="using-sickBeard"></label></span></summary>
+
+		    <h2>Connection Settings</h2>
+		    <section>
+		        <label>Sick Beard URL</label>
+		        <input type="text" data-option="sickBeardURLRoot" placeholder="What's your Sick Beard URL?"/>
+		        <div>
+		            Such as <em>https://example.com/sickBeard</em> or <em>http://192.168.1.100:8081</em>
+		        </div>
+		    </section>
+
+		    <section>
+		        <label>Sick Beard API Key</label>
+		        <input type="text" data-option="sickBeardToken" placeholder="What's your Sick Beard API key?"/>
+		        <div>
+		            1. Go to Sick Beard | Config | General | API<br/>
+		            &mdash; a. Ensure the checkbox "Enable API" is enabled<br/>
+		            &mdash; b. Press the "Generate" button<br/>
+		            2. Copy/Paste the "API Key."<br/>
+		            Such as <em>aa756d33242f6g8ffbca2b3963586f21</em>
+		        </div>
+		    </section>
+
+		    <h3>Login <em>(saved)</em></h3>
+		    <section>
+		        <label>Username</label>
+		        <input type="text" data-option="sickBeardBasicAuthUsername" placeholder="Enter your Sick Beard (HTTP) username"/>
+		    </section>
+		    <section>
+		        <label>Password</label>
+		        <input type="text" data-option="sickBeardBasicAuthPassword" placeholder="Enter your Sick Beard (HTTP) password"/>
+		        <div class="hidden-help">Your password will be hidden once saved.</div>
+		        <br>
+		        <div>This information will be used for <a href="https://wikipedia.org/wiki/Basic_access_authentication" target="_blank">Basic Access Authentication</a> only. This will allow the extension to ask Sick Beard for your list of TV shows, or to add to your list of TV shows.</div>
+		    </section>
+
+		    <section>
+		        <button type="button" id="sickBeard_test">Test <span id="sickBeard_test_status">?</span></button>
+		    </section>
+
+		    <section>
+		        <label>Sick Beard Storage Path</label>
+		        <select data-option="sickBeardStoragePath">
+		            <option value="">Press "Test [?]" first</option>
+		        </select>
+		        <div>
+		            This should be the same path (verbatim) used in Sick Beard.
+		        </div>
+		    </section>
+		    <section>
+		        <label>Quality Profile Type</label>
+		        <select data-option="sickBeardQualityProfileType">
+					<option>Initial</option>
+		            <option>Archive</option>
+		        </select>
+		        <hr/>
+		        <label>Quality Profile</label>
+		        <select data-option="sickBeardQualityProfileId">
+		            <option value="">Press "Test [?]" first</option>
+		        </select>
+				<!-- <div>
+					Use <code>Ctrl + Click</code> to select multiple items.
+				</div> -->
+		    </section>
+		    <hr><br>
+		    <section>
+		        <a class="button test" target="_blank" href="https://ephellon.github.io/web.to.plex/test/#tv-show">try out Sick Beard</a>
+		    </section>
+		</details>
     </article>
 </div>
 <div>
@@ -940,13 +542,35 @@ div
 
 	<article>
 		<details>
-			<summary>Plugins</summary>
+			<summary>Theme Settings</summary>
+
+			<h2>The Button</h2>
+			<section>
+				Where should the button be?
+				<br>
+				<span class="checkbox" prompt-size="large" prompt-yes="&#8672;" prompt-no="&#8674;">
+					<!-- When true (checked), will be accessed in CSS (/sites/...) as "button-location-right { ... }" -->
+					<input id="theme:button-location" theme="true:right" type="checkbox" />
+					<label for="theme:button-location"></label>
+				</span>
+			</section>
+		</details>
+	</article>
+
+	<article>
+		<details>
+			<summary>Site Settings</summary>
 
             <h2>Experimental Sites</h2>
             <section id="plugins">
                 <!-- Filled in via the index.js script -->
             </section>
-            <hr>
+			<hr>
+
+            <h2>Default Sites</h2>
+            <section id="builtin">
+                <!-- Filled in via the index.js script -->
+            </section>
 		</details>
 	</article>
 
@@ -956,18 +580,20 @@ div
 
 			<h2>Proxy Settings</h2>
 			<section>
-				<label>Force Secure Connections</label>
-                <div class="checkbox">
-                    <input id="always-secure" type="checkbox" data-option="UseProxy"/>
-                    <label for="always-secure"></label>
-                </div>
+				<h3>
+					Force Secure Connections
+					<span class="checkbox">
+	                    <input id="always-secure" type="checkbox" data-option="UseProxy"/>
+	                    <label for="always-secure"></label>
+	                </span>
+				</h3>
 				<div>
-					If enabled, all insecure (HTTP) requests will be through an <a href="https://en.wikipedia.org/wiki/Proxy_server">HTTPS proxy</a>.
+					If enabled, all insecure (HTTP) requests will be through an <a href="https://en.wikipedia.org/wiki/Proxy_server" target="_blank">HTTPS proxy</a>.
 				</div>
 			</section>
 
 			<section>
-				<label>Proxy URL &amp; Syntax</label>
+				<h3>Proxy URL &amp; Syntax</h3>
 				<input type="text" data-option="ProxyURL" placeholder="Enter the Proxy URL and syntax">
 				<div>
 					Please provide the URL of your proxy.
@@ -975,7 +601,7 @@ div
 					If your proxy requires a special syntax, enter that information in as well.
 					<br>
 					<ul>
-						<li><code>{url}</code> <em>OR</em> <code>{raw-url}</code> &mdash; the raw, uneditied URL</li>
+						<li><code>{raw-url}</code> <em>OR</em> <code>{url}</code> &mdash; the raw, uneditied URL</li>
 						<li><code>{enc-url}</code> <em>OR</em> <code>{encode-url}</code> &mdash; an encoded URL</li>
 						<li><code>{b64-url}</code> <em>OR</em> <code>{base64-url}</code> &mdash; a Base-64 encoded URL</li>
 					</ul>
@@ -983,26 +609,26 @@ div
 			</section>
 
 			<section>
-				<label>Proxy Headers</label>
+				<h3>Proxy Headers</h3>
 				<textarea type="text" data-option="ProxyHeaders" placeholder="Enter the Proxy headers" code></textarea>
 				<div>
-					If your proxy requires special headers, enter that information in here.
+					If your proxy requires <a href="https://github.com/SpaceK33z/web-to-plex/wiki/Settings#connection-settings--proxy-settings" target="_blank">special headers</a>, enter that information in here.
 				</div>
 			</section>
 		</details>
 	</article>
 
-    <article>
-        <details>
-            <summary>Advanced Settings</summary>
-
-			<h2>List Options</h2>
+	<article>
+		<details>
+			<summary>Media Settings</summary>
 			<section>
-				<h3>AutoGrab</h3>
-                <div class="checkbox" prompt-yes="all" prompt-no="ask">
-                    <input id="use-autograb" type="checkbox" data-option="UseAutoGrab" checked="false" />
-                    <label for="use-autograb"></label>
-                </div>
+				<h3>
+					Auto Grab
+					<span class="checkbox" prompt-yes="all" prompt-no="ask">
+	                    <input id="use-autograb" type="checkbox" data-option="UseAutoGrab" checked="false" />
+	                    <label for="use-autograb"></label>
+	                </span>
+				</h3>
 				<div>
 					When the user presses the Grab button, the extension should:
 					<ul>
@@ -1010,7 +636,7 @@ div
 						<li><em>ASK</em> user: Find items not on Plex, and grab what the user approves</li>
 					</ul>
 				</div>
-				<h3>Maximum AutoGrabs</h3>
+				<h3>Maximum Auto Grabs</h3>
                 <input type="range" data-option="AutoGrabLimit" min="10" max="100" step="10" value="30"/>
                 <output type="text" value="30"></output>
 				<div>
@@ -1018,13 +644,76 @@ div
 				</div>
 			</section>
 			<hr>
-            <h2>Search Options</h2>
+			<section>
+				<h3>
+					Prompt for Save Location
+					<span class="checkbox" prompt="y/n">
+	                    <input id="prompt-location" type="checkbox" data-option="PromptLocation" checked="false" />
+	                    <label for="prompt-location"></label>
+	                </span>
+				</h3>
+				<div>
+					When the user presses the Grab button should the save location be asked for?
+					<br>
+					<em>Only supports Medusa, Radarr, and Sonarr.</em>
+				</div>
+			</section>
+			<hr>
+			<section>
+				<h3>
+					Prompt for Quality
+					<span class="checkbox" prompt="y/n">
+	                    <input id="prompt-quality" type="checkbox" data-option="PromptQuality" checked="false" />
+	                    <label for="prompt-quality"></label>
+	                </span>
+				</h3>
+				<div>
+					When the user presses the Grab button should the quality be asked for?
+					<br>
+					<em>Only supports Medusa, Radarr, and Sonarr.</em>
+				</div>
+			</section>
+		</details>
+	</article>
+
+	<article>
+		<details>
+			<summary>Notification Settings</summary>
+			<h3>
+				Ignore Found Items
+	            <span class="checkbox" prompt="y/n">
+	                <input id="notify-new-only" type="checkbox" data-option="NotifyNewOnly" checked="false" />
+	                <label for="notify-new-only"></label>
+	            </span>
+			</h3>
+			<div>
+				When the user presses the Grab button and an item already exists, should the notification be ignored or not?
+			</div>
+			<hr>
+			<h3>
+				Ignore Repetitive Notifications
+	            <span class="checkbox" prompt="y/n">
+	                <input id="notify-only-once" type="checkbox" data-option="NotifyOnlyOnce" checked="false" />
+	                <label for="notify-only-once"></label>
+	            </span>
+			</h3>
+			<div>
+				When the user presses the Grab button and there are several incoming notifications of similar information, should the notifications be ignored (after the first one) or not?
+			</div>
+		</details>
+	</article>
+
+	<article>
+		<details>
+			<Summary>Search Settings</Summary>
             <section>
-                <h3>Loose Searching</h3>
-                <div class="checkbox">
-                    <input id="use-loose" type="checkbox" data-option="UseLoose" checked="true"/>
-                    <label for="use-loose"></label>
-                </div>
+                <h3>
+					Loose Searching
+					<span class="checkbox">
+	                    <input id="use-loose" type="checkbox" data-option="UseLoose" checked="true"/>
+	                    <label for="use-loose"></label>
+	                </span>
+				</h3>
                 <label>Searching Sensitivity</label>
                 <br>
                 <input type="range" data-option="UseLooseScore" min="0" max="100" step="5" value="40" symbol="%" />
@@ -1035,19 +724,26 @@ div
                     Higer sensitivity means more strict searches.
                 </div>
             </section>
-
+			<hr>
             <section>
-                <h3>Manager Searching</h3>
-                <div class="checkbox">
-                    <input id="manager-search" type="checkbox" data-option="ManagerSearch"/>
-                    <label for="manager-search"></label>
-                </div>
+                <h3>
+					Manager Searching
+					<span class="checkbox">
+	                    <input id="manager-search" type="checkbox" data-option="ManagerSearch"/>
+	                    <label for="manager-search"></label>
+	                </span>
+				</h3>
                 <div>
                     Allows the extension to use your manager(s) to find media.<br>
-                    Currently supports: Ombi, Radarr, and Sonarr.
+                    Currently supports: Medusa, Ombi, Radarr, and Sonarr.
                 </div>
             </section>
-            <hr>
+		</details>
+	</article>
+
+    <article>
+        <details>
+            <summary>Advance Settings</summary>
             <h2>API Keys</h2>
             <section>
                 <label>OMDb</label>
@@ -1078,16 +774,31 @@ div
             </section>
             <hr>
             <section>
-                <h3>"Local Search" Cache</h3>
-                <label>Would you like to erase all of your cached searches?</label>
+                <h3>Cached Data</h3>
+                <label>Would you like to erase all of your cached data?</label>
                 <br>
                 <button type="button" id="erase_cache">Yes, Erase</button>
                 <div>
-                    This will empty all of you "Local Search" results.
+                    This will remove all of your Local Search, permission, and other cached data.
                     <br>
                     <strong>This action cannot be undone.</strong>
                 </div>
             </section>
+			<hr>
+			<h2>Developer Options</h2>
+			<section>
+				<h3>
+					Developer Mode
+	                <span class="checkbox">
+	                    <input id="extension-branch-type" type="checkbox" checked data-option="DeveloperMode"/>
+	                    <label for="extension-branch-type"></label>
+	                </span>
+				</h3>
+				<label>
+					<em>WARNING</em>: may cause data loss.<br>
+					Enables developer (debugging) mode, showing advance errors and logging to the console when possible.
+				</label>
+			</section>
         </details>
     </article>
 
@@ -1138,15 +849,53 @@ div
                     Download, and/or find more information for <a href="https://ombi.io/" target="_blank">Ombi</a>.
                 </div>
             </section>
+
+            <section>
+                <label>Medusa's Website</label>
+                <div>
+                    Download, and/or find more information for <a href="https://pymedusa.com/" target="_blank">Medusa</a>.
+                </div>
+            </section>
+
+			<section>
+				<label>Sick Beard's Website</label>
+				<div>
+					Download, and/or find more information for <a href="https://sickbeard.com/" target="_blank">Sick Beard</a>.
+				</div>
+			</section>
         </details>
     </article>
 </div>
 
     <br>
 
-	<section>
+	<section id="footer">
 		<button id="save">Save</button>
 	</section>
+
+	<div class="hide">
+		<input data-option="watcherQualities" value />
+		<input data-option="radarrQualities" value />
+		<input data-option="sonarrQualities" value />
+		<input data-option="medusaQualities" value />
+		<input data-option="sickBeardQualities" value />
+		<input data-option="watcherStoragePaths" value />
+		<input data-option="radarrStoragePaths" value />
+		<input data-option="sonarrStoragePaths" value />
+		<input data-option="medusaStoragePaths" value />
+		<input data-option="sickBeardStoragePaths" value />
+		<input data-option="__radarrQuality" value />
+		<input data-option="__sonarrQuality" value />
+		<input data-option="__medusaQuality" value />
+		<input data-option="__sickBeardQuality" value />
+		<input data-option="__radarrStoragePath" value />
+		<input data-option="__sonarrStoragePath" value />
+		<input data-option="__medusaStoragePath" value />
+		<input data-option="__sickBeardStoragePath" value />
+		<input data-option="__domains" value />
+		<input data-option="__caught" value />
+		<input data-option="__theme" value />
+	</div>
 
     <footer id="version"></footer>
 
