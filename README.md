@@ -61,7 +61,9 @@ The sites used as search engines (IMDb, TMDb, and TVDb) will automatically creat
 
 ## Supported sites
 
-*Given in order of completion*
+<article>
+<details>
+<summary> <i>Sites</i> </summary>
 
 1.  [Movieo](http://movieo.me/)
 2.  [IMDb](http://imdb.com/)
@@ -100,7 +102,10 @@ The sites used as search engines (IMDb, TMDb, and TVDb) will automatically creat
 35. [Kitsu](https://kitsu.io/)<sup>6</sup>
 36. [Redbox](https://redbox.com/)<sup>6</sup>
 
-*Notes*
+</details>
+
+<details>
+<summary> <i>Key</i> </summary>
 
 - `1` *This site uses the `Right click | Web to Plex | Save as...` feature (file download), or a direct link (usually magnet URL).*
 - `2` *This site has a loading issue, simply refresh the page if the button doesn't appear.*
@@ -109,13 +114,17 @@ The sites used as search engines (IMDb, TMDb, and TVDb) will automatically creat
 - `5` *This site is known to update frequently, support may change without notice.*
 - `6` *This site is only supported via a plugin (enabled in the settings)*
 
+</details>
+
+</article>
+
 ## Installing Web to Plex
 
 **Download on [Chrome Webstore](https://chrome.google.com/webstore/detail/movieo-to-plex/kmcinnefmnkfnmnmijfmbiaflncfifcn).**
 
 **Download on [FireFox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/web-to-plex/).**
 
-**Download the [SRC](archive/master.zip)**
+**Download the source code for [Google Chrome/Opera](src.zip), or [Firefox](moz.zip).**
 
 ## Requirements
 
@@ -125,6 +134,6 @@ The sites used as search engines (IMDb, TMDb, and TVDb) will automatically creat
 
 ## Issues & Contributions
 
-If you have any problem with the extension, please don't hesitate to [submit an issue](https://github.com/SpaceK33z/web-to-plex/issues/new).
+If you have any problem with the extension, please don't hesitate to [submit an issue](https://github.com/SpaceK33z/web-to-plex/issues/new/choose).
 
 All contributions are welcome.
