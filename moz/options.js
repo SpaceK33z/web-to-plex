@@ -143,7 +143,7 @@ const storage = (chrome.storage.sync || chrome.storage.local),
 			'__caught',
 			'__theme',
 
-			// Builtins
+			// Builtins - End of file, "let builtins ="
 			'builtin_allocine',
 			'builtin_amazon',
 			'builtin_couchpotato',
@@ -177,7 +177,7 @@ const storage = (chrome.storage.sync || chrome.storage.local),
 			'builtin_tubi',
 			'builtin_webtoplex',
 
-			// Plugins - End of file, before "let empty = ..."
+			// Plugins - End of file, "let plugins ="
 			'plugin_toloka',
 			'plugin_shanaproject',
 			'plugin_myanimelist',
@@ -185,6 +185,9 @@ const storage = (chrome.storage.sync || chrome.storage.local),
 			'plugin_indomovie',
 			'plugin_redbox',
 			'plugin_kitsu',
+			'plugin_go',
+			'plugin_snagfilms',
+			'plugin_freemoviescinema',
 		];
 
 let PlexServers = [],
@@ -1825,8 +1828,11 @@ let plugins = {
 	'My Shows': 'https://myshows.me/',
 	'Redbox': 'https://www.redbox.com/',
 	'Kitsu': 'https://kitsu.io/',
+	'Go': 'https://freeform.go.com/',
+	'SnagFilms': 'http://snagfilms.com/',
+	'Free Movies Cinema': 'https://freemoviescinema.com/',
 
-	// Dont' forget to add to the __options__ array!
+	// Don't forget to add to the __options__ array!
 }, plugin_array = [], plugin_sites = {}, pluginElement = $('#plugins');
 
 for(let plugin in plugins)

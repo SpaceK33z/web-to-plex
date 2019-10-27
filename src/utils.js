@@ -23,17 +23,17 @@ let configuration, init, Update, browser;
 		__CONFIG__, ALLOWED, PERMISS;
 
 	let IMG_URL = {
-		'nil':              extURL('img/null.png'),
-		'icon_16':          extURL('img/16.png'),
-		'icon_48':          extURL('img/48.png'),
-		'hide_icon_16':     extURL('img/hide.16.png'),
-		'hide_icon_48':     extURL('img/hide.48.png'),
-		'show_icon_16':     extURL('img/show.16.png'),
-		'show_icon_48':     extURL('img/show.48.png'),
-		'close_icon_16':    extURL('img/close.16.png'),
-		'close_icon_48':    extURL('img/close.48.png'),
-		'icon_white_16':    extURL('img/_16.png'),
-		'icon_white_48':    extURL('img/_48.png'),
+		'nil':			  extURL('img/null.png'),
+		'icon_16':		  extURL('img/16.png'),
+		'icon_48':		  extURL('img/48.png'),
+		'hide_icon_16':	 extURL('img/hide.16.png'),
+		'hide_icon_48':	 extURL('img/hide.48.png'),
+		'show_icon_16':	 extURL('img/show.16.png'),
+		'show_icon_48':	 extURL('img/show.48.png'),
+		'close_icon_16':	extURL('img/close.16.png'),
+		'close_icon_48':	extURL('img/close.48.png'),
+		'icon_white_16':	extURL('img/_16.png'),
+		'icon_white_48':	extURL('img/_48.png'),
 		'plexit_icon_16':   extURL('img/plexit.16.png'),
 		'plexit_icon_48':   extURL('img/plexit.48.png'),
 		'reload_icon_16':   extURL('img/reload.16.png'),
@@ -130,7 +130,7 @@ let configuration, init, Update, browser;
 	// state = "warning" - red
 	// state = "error"
 	// state = "update"  - blue
-	// state = "info"    - grey
+	// state = "info"	- grey
 	// anything else for state will show as orange
 	class Notification {
 		constructor(state, text, timeout = 7000, callback = () => {}, requiresClick = true) {
@@ -173,7 +173,7 @@ let configuration, init, Update, browser;
 				done:  false,
 				index: queue.list.length,
 				job:   setTimeout(() => element.onmouseup({ target: element, requiresClick }), timeout),
-				id:    +element.id,
+				id:	+element.id,
 				callback, element
 			};
 			queue.list.push(queue[element.id]);
@@ -567,8 +567,8 @@ let configuration, init, Update, browser;
 		let frame = document.furnish('iframe#web-to-plex-sframe', {
 			src: url,
 			style: `
-				display:    none   !important;
-				opacity:    0      !important;
+				display:	none   !important;
+				opacity:	0	  !important;
 				visibility: hidden !important;
 			`,
 
@@ -763,8 +763,8 @@ let configuration, init, Update, browser;
 							else
 								/* Do nothing */;
 						// else if(/(^cache-data|paths|qualities)/i.test(key))
-						//     /* Pre-parse JSON - make sure anything accessing thedata handles objects too */
-						//     configuration[key] = JSON.parse(options[key] || null);
+						//	 /* Pre-parse JSON - make sure anything accessing thedata handles objects too */
+						//	 configuration[key] = JSON.parse(options[key] || null);
 						else
 							/* Simple copy */
 							configuration[key] = options[key];
@@ -974,9 +974,9 @@ let configuration, init, Update, browser;
 					`${ __CONFIG__.medusaURLRoot }api/v2/internal/searchIndexersForShowName?query=${ plus(title) }&indexerId=0&api_key=${ __CONFIG__.medusaToken }`:
 				/* TODO: find a way to get CORS to work on Sick Beard URLs (localhost) */
 				// (__CONFIG__.usingSickBeard)?
-				//     (tid)?
-				//         `${ __CONFIG__.sickBeardURLRoot }api/${ __CONFIG__.sickBeardToken }/?cmd=sb.searchtvdb&tvdbid=${ tid }`:
-				//     `${ __CONFIG__.sickBeardURLRoot }api/${ __CONFIG__.sickBeardToken }/?cmd=sb.searchtvdb&name=${ encodeURIComponent(title) }`:
+				//	 (tid)?
+				//		 `${ __CONFIG__.sickBeardURLRoot }api/${ __CONFIG__.sickBeardToken }/?cmd=sb.searchtvdb&tvdbid=${ tid }`:
+				//	 `${ __CONFIG__.sickBeardURLRoot }api/${ __CONFIG__.sickBeardToken }/?cmd=sb.searchtvdb&name=${ encodeURIComponent(title) }`:
 				null:
 			(rqut == 'imdb' || (rqut == '*' && !iid && title) || (rqut == 'tvdb' && !iid && title && !(rerun & 0b1000)) && (rerun |= 0b1000))?
 				(iid)?
@@ -2423,7 +2423,7 @@ let configuration, init, Update, browser;
 				return true;
 
 			default:
-	//            UTILS_TERMINAL.warn(`Unknown event [${ request.type }]`);
+	//			UTILS_TERMINAL.warn(`Unknown event [${ request.type }]`);
 				return false;
 		}
 	});
@@ -2464,7 +2464,7 @@ let configuration, init, Update, browser;
 					return true;
 
 				default:
-		//            UTILS_TERMINAL.warn(`Unknown event [${ request.type }]`);
+		//			UTILS_TERMINAL.warn(`Unknown event [${ request.type }]`);
 					return false;
 			}
 		} catch(error) {
@@ -2602,7 +2602,7 @@ String.prototype.toCaps = String.prototype.toCaps || function toCaps(all) {
  <div>2</div>
  <div>3</div>
  */
-	parent.queryBy = parent.queryBy || function queryBy(selectors, container = parent) {
+	parent.queryBy = parent.queryBy || function queryBy(selectors, container = document) {
 		// Helpers
 		let copy  = array => [...array],
 			query = (SELECTORS, CONTAINER = container) => CONTAINER.querySelectorAll(SELECTORS);
@@ -2618,10 +2618,11 @@ String.prototype.toCaps = String.prototype.toCaps || function toCaps(all) {
 		for(index = 0, length = selectors.length; index++ < length && regexp.test(selectors);)
 			selectors = selectors.replace(regexp, ($0, $1, $$, $_) => '\b--' + pulled.push($1) + '\b');
 
-		let order       = selectors.split(','),
-			dummy       = copy(order),
-			output      = [],
-			generations = 0;
+		let order	   = selectors.split(','),
+			dummy	   = copy(order),
+			output	  = [],
+			generations = 0,
+			cousins		= 0;
 
 		// Replace those syntaxes (they were ignored)
 		for(index = 0, length = dummy.length, order = [], regexp = /[\b]--(\d+)[\b]/g; index < length; index++)
@@ -2629,34 +2630,78 @@ String.prototype.toCaps = String.prototype.toCaps || function toCaps(all) {
 
 		// Make sure to put the elements in order
 		// Handle the :parent (pseudo) selector
-		for(index = 0, length = order.length; index < length; generations = 0, index++) {
-			let selector = order[index], ancestor;
+		for(index = 0, length = order.length; index < length; generations = 0, cousins = 0, index++) {
+			let selector = order[index], ancestor, cousin;
 
 			selector = selector
+			// siblings
+			.replace(/\:nth-sibling\((\d+)\)/g, ($0, $1, $$, $_) => (cousins += +$1, ''))
+			.replace(/(\:{1,2}(next-|previous-)?sibling)/g, ($0, $1, $2, $$, $_) => (cousins += ($2 == 'next'? 1: -1), ''))
+			// parents
 			.replace(/\:nth-parent\((\d+)\)/g, ($0, $1, $$, $_) => (generations -= +$1, ''))
-			.replace(/(\:{1,2}parent\b|<\s*(\*|\s*(,|$)))/g, ($0, $$, $_) => (--generations, ''))
+			.replace(/(\:{1,2}parent\b|<\s*(\s*(,|$)))/g, ($0, $$, $_) => (--generations, ''))
 			.replace(/<([^<,]+)?/g, ($0, $1, $$, $_) => (ancestor = $1, --generations, ''))
+			// miscellaneous
 			.replace(/^\s+|\s+$/g, '');
 
-			let elements = query(selector),
-				parents = [], parent;
+			let elements = [].slice.call(query(selector)),
+				parents = [], parent,
+				siblings = [], sibling;
 
+			// Parents
 			for(; generations < 0; generations++)
-			elements.forEach( element => {
-				let P = element, Q = P.parentElement, R = (Q? Q.parentElement: {}),
-					E = C => [...query(ancestor, C)],
-					F, G;
+				elements = elements.map(element => {
+					let P = element, Q = (P? P.parentElement: {}), R = (Q? Q.parentElement: {}),
+						E = C => [...query(ancestor, C)],
+						F, G;
 
-				for(let I = 0, L = -generations; ancestor && !!R && !!Q && !!P && I < L; I++)
-					parent = !!~E(R).indexOf(Q)? Q: G;
+					for(let I = 0, L = -generations; ancestor && !!R && !!Q && !!P && I < L; I++)
+						parent = !!~E(R).indexOf(Q)? Q: G;
 
-				for(let I = 0, L = -generations; !!Q && !!P && I < L; I++)
-					parent = Q = (P = Q).parentElement;
+					for(let I = 0, L = -generations; !ancestor && !!Q && !!P && I < L; I++)
+						Q = (parent = P = Q).parentElement;
 
-				if(!~parents.indexOf(parent))
-					parents.push(parent);
-			});
+					if((generations === 0 || /\*$/.test(ancestor)) && !~parents.indexOf(parent))
+						parents.push(parent);
+
+					return parent;
+				});
+
+			// Siblings
+			if(cousins === 0)
+				/* Do nothing */;
+			else if(cousins < 0)
+				for(; cousins < 0; cousins++)
+					elements = elements.map(element => {
+						let P = element, Q = (P? P.previousElementSibling: {}),
+							F, G;
+
+						for(let I = 0, L = -cousins; !!Q && !!P && I < L; I++)
+							Q = (sibling = P = Q).previousElementSibling;
+
+						if(cousins === 0 && !~siblings.indexOf(sibling))
+							siblings.push(sibling);
+
+						return sibling;
+					});
+			else
+				for(; cousins > 0; cousins--)
+					elements = elements.map(element => {
+						let P = element, Q = (P? P.nextElementSibling: {}),
+							F, G;
+
+						for(let I = 0, L = -cousins; !!Q && !!P && I > L; I--)
+							Q = (sibling = P = Q).nextElementSibling;
+
+						if(cousins === 0 && !~siblings.indexOf(sibling))
+							siblings.push(sibling);
+
+						return sibling;
+					});
+
 			media.push(parents.length? parents: elements);
+			media.push(siblings.length? siblings: elements);
+			order.splice(index, 1, selector);
 		}
 
 		// Create a continuous array from the sub-arrays
