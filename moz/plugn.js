@@ -739,7 +739,7 @@ top.onlocationchange = (event) => browser.runtime.sendMessage({ type: '$INIT$', 
 			case 'SEARCH_FOR':
 			case 'SAVE_AS':
 			case 'DOWNLOAD_FILE':
-				/* Meant to be hnadled by background.js */
+				/* Meant to be handled by background.js */
 				return true;
 				break;
 

@@ -6,12 +6,12 @@
 	"homepage_url": "https://github.com/SpaceK33z/web-to-plex/",
 
 	"manifest_version": 2,
-	"version": "4.1.0.3",
+	"version": "4.1.0.4",
 // Firefox Support =>
 	"applications": {
 		"gecko": {
 			"id": "minkcbos@gmail.com",
-				//"{05243336-ce19-46df-95af-680070c96134}"
+				//"{05243336-ce19-46df-95af-680070c96134}",
 			"strict_min_version": "57.0"
 		}
 	},

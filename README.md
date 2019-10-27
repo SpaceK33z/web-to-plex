@@ -101,11 +101,13 @@ The sites used as search engines (IMDb, TMDb, and TVDb) will automatically creat
 34. [Indomovie](https://indomovie.club)<sup>5/6</sup>
 35. [Kitsu](https://kitsu.io/)<sup>6</sup>
 36. [Redbox](https://redbox.com/)<sup>6</sup>
+37. [Freeform (Go)](http://freeform.go.com/)<sup>6</sup>
+38. [Free Movies Cinema](https://freemoviescinema.com/)<sup>6</sup>
+39. [SnagFilms](https://snagfilms.com/)<sup>6</sup>
 
 </details>
 
-<details>
-<summary> <i>Key</i> </summary>
+**_Key_**
 
 - `1` *This site uses the `Right click | Web to Plex | Save as...` feature (file download), or a direct link (usually magnet URL).*
 - `2` *This site has a loading issue, simply refresh the page if the button doesn't appear.*
@@ -113,8 +115,6 @@ The sites used as search engines (IMDb, TMDb, and TVDb) will automatically creat
 - `4` *This site is network intensive (loads slowly). Be patient.*
 - `5` *This site is known to update frequently, support may change without notice.*
 - `6` *This site is only supported via a plugin (enabled in the settings)*
-
-</details>
 
 </article>
 

@@ -312,6 +312,7 @@
 
 .web-to-plex-button * {
     border: none !important;
+    text-transform: none !important;
 }
 
 .web-to-plex-button {
