@@ -405,6 +405,10 @@ summary, option {
     cursor: pointer;
 }
 
+summary {
+    list-style: revert !important;
+}
+
 select:not([multiple]) > option {
     background: url(noise.png), #3f4245 !important;
 }
