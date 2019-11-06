@@ -6,7 +6,7 @@
 	"homepage_url": "https://github.com/SpaceK33z/web-to-plex/",
 
 	"manifest_version": 2,
-	"version": "4.1.0.4",
+	"version": "4.1.0.9",
 // Firefox Support =>
 	"applications": {
 		"gecko": {
@@ -65,134 +65,104 @@
 		// Testing purposes only
 		{
 			"matches": ["*://ephellon.github.io/web.to.plex/test/*"],
-			"js": ["utils.js", "__test__.js"],
-			"css": ["common.css", "theme.css"]
+			"js": ["utils.js", "__test__.js"]
 		},
 
 		// The sites
 		{
 			"matches": ["*://*.movieo.me/*"],
-			"js": ["history-hack.js", "utils.js", "movieo$.js"],
-			"css": ["common.css", "theme.css"]
+			"js": ["history-hack.js", "utils.js", "movieo$.js"]
 		},{
 			"matches": ["*://*.imdb.com/*"],
-			"js": ["utils.js", "imdb$.js"],
-			"css": ["common.css", "theme.css"]
+			"js": ["utils.js", "imdb$.js"]
 		},{
 			"matches": ["*://*.trakt.tv/*"],
-			"js": ["history-hack.js", "utils.js", "trakt$.js"],
-			"css": ["common.css", "theme.css"]
+			"js": ["history-hack.js", "utils.js", "trakt$.js"]
 		},{
 			"matches": ["*://*.letterboxd.com/*"],
-			"js": ["utils.js", "letterboxd$.js"],
-			"css": ["common.css", "theme.css"]
+			"js": ["utils.js", "letterboxd$.js"]
 		},{
 			"matches": ["*://*.tvmaze.com/shows/*"],
-			"js": ["utils.js", "tvmaze$.js"],
-			"css": ["common.css", "theme.css"]
+			"js": ["utils.js", "tvmaze$.js"]
 		},{
 			"matches": ["*://*.thetvdb.com/series/*"],
-			"js": ["utils.js", "tvdb$.js"],
-			"css": ["common.css", "theme.css"]
+			"js": ["utils.js", "tvdb$.js"]
 		},{
 			"matches": ["*://*.themoviedb.org/movie/*", "*://*.themoviedb.org/tv/*"],
-			"js": ["utils.js", "tmdb$.js"],
-			"css": ["common.css", "theme.css"]
+			"js": ["utils.js", "tmdb$.js"]
 		},{
 			"matches": ["*://*.vrv.co/*"],
-			"js": ["utils.js", "vrv$.js"],
-			"css": ["common.css", "theme.css"]
+			"js": ["utils.js", "vrv$.js"]
 		},{
 			"matches": ["*://*.hulu.com/*"],
-			"js": ["utils.js", "hulu$.js"],
-			"css": ["common.css", "theme.css"]
+			"js": ["utils.js", "hulu$.js"]
 		},{
 			"matches": ["*://play.google.com/store/*"],
-			"js": ["utils.js", "google.play$.js"],
-			"css": ["common.css", "theme.css"]
+			"js": ["utils.js", "google.play$.js"]
 		},{
 			"matches": ["*://itunes.apple.com/*"],
-			"js": ["utils.js", "itunes$.js"],
-			"css": ["common.css", "theme.css"]
+			"js": ["utils.js", "itunes$.js"]
 		},{
 			"matches": ["*://*.metacritic.com/*"],
-			"js": ["utils.js", "metacritic$.js"],
-			"css": ["common.css", "theme.css"]
+			"js": ["utils.js", "metacritic$.js"]
 		},{
 			"matches": ["*://*.fandango.com/*"],
-			"js": ["utils.js", "fandango$.js"],
-			"css": ["common.css", "theme.css"]
+			"js": ["utils.js", "fandango$.js"]
 		},{
 			"matches": ["*://*.amazon.com/*"],
-			"js": ["utils.js", "amazon$.js"],
-			"css": ["common.css", "theme.css"]
+			"js": ["utils.js", "amazon$.js"]
 		},{
 			"matches": ["*://*.vudu.com/*"],
-			"js": ["utils.js", "vudu$.js"],
-			"css": ["common.css", "theme.css"]
+			"js": ["utils.js", "vudu$.js"]
 		},{
 			"matches": ["*://*.verizon.com/*"],
-			"js": ["utils.js", "verizon$.js"],
-			"css": ["common.css", "theme.css"]
+			"js": ["utils.js", "verizon$.js"]
 		},{
 			"matches": ["*://*.couchpotato.life/*/*"],
-			"js": ["utils.js", "couchpotato$.js"],
-			"css": ["common.css", "theme.css"]
+			"js": ["utils.js", "couchpotato$.js"]
 		},{
 			"matches": ["*://*.rottentomatoes.com/*/*"],
-			"js": ["utils.js", "rottentomatoes$.js"],
-			"css": ["common.css", "theme.css"]
+			"js": ["utils.js", "rottentomatoes$.js"]
 		},{
 			"matches": ["*://*.netflix.com/watch/*"],
-			"js": ["utils.js", "netflix$.js"],
-			"css": ["common.css", "theme.css"]
+			"js": ["utils.js", "netflix$.js"]
 		},{
 			"matches": ["*://*.vumoo.to/*"],
-			"js": ["utils.js", "vumoo$.js"],
-			"css": ["common.css", "theme.css"]
+			"js": ["utils.js", "vumoo$.js"]
 		},{
 			"matches": ["*://www.google.com/*"],
-			"js": ["utils.js", "google$.js"],
-			"css": ["common.css", "theme.css"]
+			"js": ["utils.js", "google$.js"]
 		},{
 			"matches": ["*://www.youtube.com/*"],
-			"js": ["utils.js", "youtube$.js"],
-			"css": ["common.css", "theme.css"]
+			"js": ["utils.js", "youtube$.js"]
 		},{
 			"matches": ["*://*.flickmetrix.com/*"],
-			"js": ["utils.js", "flickmetrix$.js"],
-			"css": ["common.css", "theme.css"]
+			"js": ["utils.js", "flickmetrix$.js"]
 		},{
 			"matches": ["*://*.justwatch.com/*"],
-			"js": ["utils.js", "justwatch$.js"],
-			"css": ["common.css", "theme.css"]
+			"js": ["utils.js", "justwatch$.js"]
 		},{
 			"matches": ["*://*.moviemeter.nl/*"],
-			"js": ["utils.js", "moviemeter$.js"],
-			"css": ["common.css", "theme.css"]
+			"js": ["utils.js", "moviemeter$.js"]
 		},{
 			"matches": ["*://*.allocine.fr/*"],
-			"js": ["utils.js", "allocine$.js"],
-			"css": ["common.css", "theme.css"]
+			"js": ["utils.js", "allocine$.js"]
 		},{
 			"matches": ["*://*.gostream.site/*"],
-			"js": ["utils.js", "gostream$.js"],
-			"css": ["common.css", "theme.css"]
+			"js": ["utils.js", "gostream$.js"]
 		},{
 			"matches": ["*://*.tubitv.com/*"],
-			"js": ["utils.js", "tubi$.js"],
-			"css": ["common.css", "theme.css"]
+			"js": ["utils.js", "tubi$.js"]
 		},{
 			"matches": ["*://ephellon.github.io/web.to.plex/?*", "*://ephellon.github.io/web.to.plex/index.html?*", "*://ephellon.github.io/web.to.plex/login.html?*"],
-			"js": ["utils.js", "webtoplex$.js"],
-			"css": ["common.css", "theme.css"]
+			"js": ["utils.js", "webtoplex$.js"]
 		},{
 			"matches": ["*://app.plex.tv/desktop/*"],
-			"js": ["utils.js", "plex$.js"],
-			"css": ["common.css", "theme.css"]
+			"js": ["utils.js", "plex$.js"]
 		},{
-			"matches": ["https://*/*"],
-			"js": ["utils.js", "common.js"]
+			"matches": ["*://*/*"],
+			"js": ["utils.js", "common.js"],
+			"css": ["common.css", "theme.css"]
 		}
 	],
 

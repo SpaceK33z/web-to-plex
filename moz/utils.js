@@ -90,13 +90,13 @@ let configuration, init, Update;
 			}
 
 			if((UTILS_STORAGE.MAX_ITEMS && array.length >= UTILS_STORAGE.MAX_ITEMS) || bytes >= UTILS_STORAGE.QUOTA_BYTES) {
-				UTILS_TERMINAL.warn('Exceeded quota. Erasing cache...');
+				UTILS_TERMINAL.WARN('Exceeded quota. Erasing cache...');
 
 				for(let item in items)
 					if(/^~\/cache\/(?!get|has)/i.test(item))
 						UTILS_STORAGE.remove(item);
 
-				UTILS_TERMINAL.log('Cache erased');
+				UTILS_TERMINAL.LOG('Cache erased');
 			}
 		});
 
@@ -498,7 +498,7 @@ let configuration, init, Update;
 					if(!(existing = $('.web-to-plex-prompt[type=permission]')).empty)
 						return existing.first;
 
-					UTILS_TERMINAL.log(`Asking for permission(s):`, options);
+					UTILS_TERMINAL.LOG(`Asking for permission(s):`, options);
 
 					remove = element => {
 						let prompter = $('.web-to-plex-prompt').first,
@@ -549,7 +549,7 @@ let configuration, init, Update;
 					break;
 
 				default:
-					return UTILS_TERMINAL.warn(`Unknown prompt type "${ prompt_type }"`);
+					return UTILS_TERMINAL.ERROR(`Unknown prompt type "${ prompt_type }"`);
 					break;
 			}
 
@@ -589,33 +589,69 @@ let configuration, init, Update;
 	// Send an update query to background.js
 	Update = (type, options = {}, postToo) => {
 		if(configuration)
-			UTILS_TERMINAL.log(`Requesting update [post-to-top: ${ !!postToo }]: ${ type }`, options);
+			console.log(`Requesting update (${ type } [post-to-top=${ !!postToo }])`, options);
+		else if(!Update.retry)
+			try {
+				configuration = ParsedOptions();
+
+				Update.retry = true;
+
+				Update(type, options, postToo);
+
+				return;
+			} catch(error) {
+				console.warn(`Update failed... "${ error }" Attempting to save configuration...`);
+
+				return sFrame(extURL(`options/index.html#save`), {
+					success: async event => {
+						let self = event.target;
+
+						await ParsedOptions();
+
+						Update(type, options, postToo);
+
+						self.remove();
+
+						return;
+					},
+
+					error: async event => {
+						let self = event.target;
+						self.remove();
+
+						new Notification('error', `Fill in missing Web to Plex options`, 15000, Options, false);
+
+						throw `Unable to set configuration variable: ${ JSON.stringify(configuration) }`;
+					}
+				});
+			}
 		else
-			return sFrame(extURL(`options.html#save`), {
-				success: async event => {
-					let self = event.target;
+			return Update.retry = false;
 
-					await ParsedOptions();
+		let message = JSON.stringify({ type, options }),
+			index = -1;
 
-					Update(type, options, postToo);
+		Update.messages = Update.messages || [];
 
-					self.remove();
-				},
+		if(!~Update.messages.indexOf(message)) {
+			Update.messages.push(message);
 
-				error: async event => {
-					let self = event.target;
-					self.remove();
-
-					new Notification('error', `Fill in missing Web to Plex options`, 15000, Options, false);
-
-					throw `Unable to set configuration variable: ${ JSON.stringify(configuration) }`;
+			browser.runtime.sendMessage({
+				type,
+				options
+			}).then(response => {
+				if(response === undefined) {
+					console.warn(`Update response (${ type } [post-to-top=${ !!postToo }]): Invalid response...`, { response, options });
+				} else {
+					console.log(`Update response (${ type } [post-to-top=${ !!postToo }]):`, { response, options });
 				}
 			});
+		} else {
+			// the message was already sent, block it
+		}
 
-		browser.runtime.sendMessage({
-			type,
-			options
-		});
+		// the message has only 1s to "live"
+		setTimeout(() => Update.messages.splice(index, 1), 1000);
 
 		if(postToo)
 			top.postMessage(options);
@@ -798,49 +834,131 @@ let configuration, init, Update;
 		UTILS_TERMINAL =
 			UTILS_DEVELOPER?
 				console:
-			{ error: m => m, info: m => m, log: m => m, warn: m => m, group: m => m, groupEnd: m => m, honor: m => m };
+			{ error: m => m, info: m => m, log: m => m, warn: m => m, group: m => m, groupEnd: m => m, LOG: m => m, ERROR: m => m, WARN: m => m };
 
-		UTILS_TERMINAL.honor = UTILS_TERMINAL.honor?
-			UTILS_TERMINAL.honor:
+		UTILS_TERMINAL.LOG = UTILS_TERMINAL.LOG?
+			UTILS_TERMINAL.LOG:
 		(...messages) => {
 			if(messages.length == 1) {
 				let message = messages[0],
 					type = typeof message == 'object'? 'o': 'c';
 
+				(type == 'o')?
+					UTILS_TERMINAL.log(message):
 				UTILS_TERMINAL.log(
-					(type == 'o'? message: `%${ type }>> ${ message } <<`),
-					(
-						type == 'o'?
-							null:
-						`
-							background-color: #00332b;
-							border-bottom: 1px solid #0000;
-							border-top: 1px solid #065;
-							box-sizing: border-box;
-							clear: right;
-							color: #f5f5f5;
-							display: block !important;
-							line-height: 2;
-							user-select: text;
+					`%${ type }\u22b3 ${ message } `,
+					`
+						background-color: #00332b;
+						border-bottom: 1px solid #0000;
+						border-top: 1px solid #065;
+						box-sizing: border-box;
+						clear: right;
+						color: #f5f5f5;
+						display: block !important;
+						line-height: 2;
+						user-select: text;
 
-							flex-basis: 1;
-							flex-shrink: 1;
+						flex-basis: 1;
+						flex-shrink: 1;
 
-							margin: 0;
-							overflow-wrap: break-word;
-							pading: 3px 22px 1px 0;
-							position: fixed;
-							z-index: -1;
+						margin: 0;
+						overflow-wrap: break-word;
+						pading: 3px 22px 1px 0;
+						position: fixed;
+						z-index: -1;
 
-							min-height: 0;
-							min-width: 100%;
-							height: 100%;
-							width: 100%;
-						`
-					)
+						min-height: 0;
+						min-width: 100%;
+						height: 100%;
+						width: 100%;
+					`
 				);
 			} else {
-				messages.forEach(message => UTILS_TERMINAL.honor(message));
+				messages.forEach(message => UTILS_TERMINAL.LOG(message));
+			}
+		};
+
+		UTILS_TERMINAL.ERROR = UTILS_TERMINAL.ERROR?
+			UTILS_TERMINAL.ERROR:
+		(...messages) => {
+			if(messages.length == 1) {
+				let message = messages[0],
+					type = typeof message == 'object'? 'o': 'c';
+
+				(type == 'o')?
+					UTILS_TERMINAL.error(message):
+				UTILS_TERMINAL.log(
+					`%${ type }\u2298 ${ message } `,
+					`
+						background-color: #290000;
+						border-bottom: 1px solid #0000;
+						border-top: 1px solid #5c0000;
+						box-sizing: border-box;
+						clear: right;
+						color: #f5f5f5;
+						display: block !important;
+						line-height: 2;
+						user-select: text;
+
+						flex-basis: 1;
+						flex-shrink: 1;
+
+						margin: 0;
+						overflow-wrap: break-word;
+						pading: 3px 22px 1px 0;
+						position: fixed;
+						z-index: -1;
+
+						min-height: 0;
+						min-width: 100%;
+						height: 100%;
+						width: 100%;
+					`
+				);
+			} else {
+				messages.forEach(message => UTILS_TERMINAL.ERROR(message));
+			}
+		};
+
+		UTILS_TERMINAL.WARN = UTILS_TERMINAL.WARN?
+			UTILS_TERMINAL.WARN:
+		(...messages) => {
+			if(messages.length == 1) {
+				let message = messages[0],
+					type = typeof message == 'object'? 'o': 'c';
+
+				(type == 'o')?
+					UTILS_TERMINAL.warn(message):
+				UTILS_TERMINAL.log(
+					`%${ type }\u26a0 ${ message } `,
+					`
+						background-color: #332b00;
+						border-bottom: 1px solid #0000;
+						border-top: 1px solid #650;
+						box-sizing: border-box;
+						clear: right;
+						color: #f5f5f5;
+						display: block !important;
+						line-height: 2;
+						user-select: text;
+
+						flex-basis: 1;
+						flex-shrink: 1;
+
+						margin: 0;
+						overflow-wrap: break-word;
+						pading: 3px 22px 1px 0;
+						position: fixed;
+						z-index: -1;
+
+						min-height: 0;
+						min-width: 100%;
+						height: 100%;
+						width: 100%;
+					`
+				);
+			} else {
+				messages.forEach(message => UTILS_TERMINAL.WARN(message));
 			}
 		};
 
@@ -944,7 +1062,7 @@ let configuration, init, Update;
 		}
 
 		if(local) {
-			UTILS_TERMINAL.honor('[LOCAL] Search results', local);
+			UTILS_TERMINAL.LOG('[LOCAL] Search results', local);
 			return local;
 		}
 
@@ -1028,7 +1146,7 @@ let configuration, init, Update;
 				throw error;
 			});
 
-		UTILS_TERMINAL.honor('Search results', { title, year, url, json });
+		UTILS_TERMINAL.LOG('Search results', { title, year, url, json });
 
 		/* DO NOT change to else-if, won't work with Sick Beard: { data: { results: ... } } */
 		if('data' in json)
@@ -1281,7 +1399,7 @@ let configuration, init, Update;
 		}
 
 		if((json === undefined || json === null || json === false) && !(rerun & 0b0001))
-			return UTILS_TERMINAL.warn(`Trying to find "${ title }" again (as "${ (alttitle || title) }")`), rerun |= 0b0001, json = Identify({ title: (alttitle || title), year: YEAR, type, IMDbID, TMDbID, TVDbID, APIType, APIID, meta, rerun });
+			return UTILS_TERMINAL.WARN(`Trying to find "${ title }" again (as "${ (alttitle || title) }")`), rerun |= 0b0001, json = Identify({ title: (alttitle || title), year: YEAR, type, IMDbID, TMDbID, TVDbID, APIType, APIID, meta, rerun });
 		else if((json === undefined || json === null))
 			json = { IMDbID, TMDbID, TVDbID };
 
@@ -1376,16 +1494,16 @@ let configuration, init, Update;
 
 		let best = { title, year, data, type, rqut, score: json.score | 0 };
 
-		UTILS_TERMINAL.log('Best match:', url, { best, json });
+		UTILS_TERMINAL.LOG('Best match:', url, { best, json });
 
 		if(best.data.imdb == ei && best.data.tmdb == 0 && best.data.tvdb == 0)
-			return UTILS_TERMINAL.log(`No information was found for "${ title } (${ year })"`), {};
+			return UTILS_TERMINAL.ERROR(`No information was found for "${ title } (${ year })"`), {};
 
 		save(savename, data); // e.g. "Coco (0)" on Netflix before correction / no repeat searches
 		save(savename = `${title} (${year}).${rqut}`.toLowerCase(), data); // e.g. "Coco (2017)" on Netflix after correction / no repeat searches
 		save(`${title}.${rqut}`.toLowerCase(), year);
 
-		UTILS_TERMINAL.log(`Saved as "${ savename }"`, data);
+		UTILS_TERMINAL.LOG(`Saved as "${ savename }"`, data);
 
 		rerun |= 0b00001;
 
@@ -1469,7 +1587,7 @@ let configuration, init, Update;
 
 				CAUGHT.bump({ IMDbID, TMDbID, TVDbID });
 
-				UTILS_TERMINAL.honor('Successfully pushed', options);
+				UTILS_TERMINAL.LOG('Successfully pushed', options);
 				new Notification('update', `Added "${ options.title }" to Ombi`, 7000, () => window.open(__CONFIG__.ombiURL, '_blank'));
 			} else {
 				new Notification('warning', `Could not add "${ options.title }" to Ombi: Unknown Error`) ||
@@ -1511,7 +1629,7 @@ let configuration, init, Update;
 
 				CAUGHT.bump({ IMDbID, TMDbID, TVDbID });
 
-				UTILS_TERMINAL.honor('Successfully pushed', options);
+				UTILS_TERMINAL.LOG('Successfully pushed', options);
 				new Notification('update', `Added "${ options.title }" to CouchPotato`);
 			} else {
 				new Notification('warning', `Could not add "${ options.title }" to CouchPotato`);
@@ -1560,7 +1678,7 @@ let configuration, init, Update;
 
 				CAUGHT.bump({ IMDbID, TMDbID });
 
-				UTILS_TERMINAL.honor('Successfully pushed', options);
+				UTILS_TERMINAL.LOG('Successfully pushed', options);
 				new Notification('update', `Added "${ options.title }" to Watcher`, 7000, () => window.open(`${__CONFIG__.watcherURL}library/status${TMDbID? `#${title}-${TMDbID}`: '' }`, '_blank'));
 			} else {
 				new Notification('warning', `Could not add "${ options.title }" to Watcher: Unknown Error`) ||
@@ -1622,7 +1740,7 @@ let configuration, init, Update;
 
 				CAUGHT.bump({ IMDbID, TMDbID });
 
-				UTILS_TERMINAL.honor('Successfully pushed', options);
+				UTILS_TERMINAL.LOG('Successfully pushed', options);
 				new Notification('update', `Added "${ options.title }" to Radarr`, 7000, () => window.open(`${__CONFIG__.radarrURL}${TMDbID? `movies/${title}-${TMDbID}`: '' }`, '_blank'));
 			} else {
 				new Notification('warning', `Could not add "${ options.title }" to Radarr: Unknown Error [${ String(response) }]`) ||
@@ -1682,7 +1800,7 @@ let configuration, init, Update;
 
 				CAUGHT.bump({ TVDbID });
 
-				UTILS_TERMINAL.honor('Successfully pushed', options);
+				UTILS_TERMINAL.LOG('Successfully pushed', options);
 				new Notification('update', `Added "${ options.title }" to Sonarr`, 7000, () => window.open(`${__CONFIG__.sonarrURL}series/${title}`, '_blank'));
 			} else {
 				new Notification('warning', `Could not add "${ options.title }" to Sonarr: Unknown Error`) ||
@@ -1743,7 +1861,7 @@ let configuration, init, Update;
 
 				CAUGHT.bump({ TVDbID });
 
-				UTILS_TERMINAL.honor('Successfully pushed', options);
+				UTILS_TERMINAL.LOG('Successfully pushed', options);
 				new Notification('update', `Added "${ options.title }" to Medusa`, 7000, () => window.open(`${__CONFIG__.medusaURL}home/displayShow?indexername=tvdb&seriesid=${options.TVDbID}`, '_blank'));
 			} else {
 				new Notification('warning', `Could not add "${ options.title }" to Medusa: Unknown Error`) ||
@@ -1804,7 +1922,7 @@ let configuration, init, Update;
 
 				CAUGHT.bump({ TVDbID });
 
-				UTILS_TERMINAL.honor('Successfully pushed', options);
+				UTILS_TERMINAL.LOG('Successfully pushed', options);
 				new Notification('update', `Added "${ options.title }" to Sick Beard`, 7000, () => window.open(`${__CONFIG__.sickBeardURL}home/displayShow?show=${ TVDbID }`, '_blank'));
 			} else {
 				new Notification('warning', `Could not add "${ options.title }" to Sick Beard: Unknown Error`) ||
@@ -2175,10 +2293,8 @@ let configuration, init, Update;
 	}
 
 	// Find media on Plex
-	async function FindMediaItems(options, button) {
-		UTILS_TERMINAL.log(`Finding items... ${ JSON.stringify({ options, button }) }`);
-
-		if(!(options && options.length && button))
+	async function FindMediaItems(options = [], button) {
+		if(!(options.length && button))
 			return;
 
 		let results = [],
@@ -2237,8 +2353,9 @@ let configuration, init, Update;
 								});
 						}
 					})
+					.catch(error => { throw error });
 			} catch(error) {
-				UTILS_TERMINAL.warn('Request to Plex failed: ' + String(error));
+				UTILS_TERMINAL.error('Request to Plex failed: ' + String(error));
 				// new Notification('error', 'Failed to query item #' + (index + 1));
 			}
 		}
@@ -2271,9 +2388,7 @@ let configuration, init, Update;
 			UpdateButton(button, 'multiple', `Download ${ multiple } ${ items }`, results);
 	}
 
-	async function FindMediaItem(options) {
-		UTILS_TERMINAL.log(`Finding item... ${ JSON.stringify(options) }`);
-
+	async function FindMediaItem(options = {}) {
 		if(!(options && options.title))
 			return;
 
@@ -2291,11 +2406,23 @@ let configuration, init, Update;
 		FindMediaItem.OPTIONS = options;
 
 		try {
-			return Request_Plex(options)
-				.then(({ found, key }) => {
-					POPULATING = false;
+			return Request_Plex(options).then(({ found, key }) => {
+				if(found) {
+					UpdateButton(options.button, 'found', 'On Plex', { ...options, key });
+					opt = { ...opt, url: options.button.href, found: true, status: 'found' };
 
-					if(found) {
+					let po, pi = furnish('li#plexit.list-item', { data: encode(JSON.stringify(opt)) }, img);
+
+					if(po = options.button.querySelector('#plexit'))
+						po.remove();
+					try {
+						options.button.querySelector('ul').insertBefore(pi, op);
+					} catch(e) { /* Don't do anything */ }
+				} else {
+					options.field = 'original_title';
+
+					return Request_Plex(options).then(({ found, key }) => {
+						if(found) {
 							UpdateButton(options.button, 'found', 'On Plex', { ...options, key });
 							opt = { ...opt, url: options.button.href, found: true, status: 'found' };
 
@@ -2306,73 +2433,55 @@ let configuration, init, Update;
 							try {
 								options.button.querySelector('ul').insertBefore(pi, op);
 							} catch(e) { /* Don't do anything */ }
-					} else {
-						options.field = 'original_title';
+						} else {
+							let available = (__CONFIG__.usingOmbi || __CONFIG__.usingWatcher || __CONFIG__.usingRadarr || __CONFIG__.usingSonarr || __CONFIG__.usingMedusa || __CONFIG__.usingSickBeard || __CONFIG__.usingCouchPotato),
+								action = (available ? 'downloader' : 'notfound'),
+								title = available ?
+									'Not on Plex (download available)':
+								'Not on Plex (download not available)';
 
-						return Request_Plex(options)
-							.then(({ found, key }) => {
-								POPULATING = false;
+							UpdateButton(options.button, action, title, options);
+							opt = { ...opt, found: false, status: action };
 
-								if(found) {
-									UpdateButton(options.button, 'found', 'On Plex', { ...options, key });
-									opt = { ...opt, url: options.button.href, found: true, status: 'found' };
+							let po, pi = furnish('li#plexit.list-item', { data: encode(JSON.stringify(opt)) }, img);
 
-									let po, pi = furnish('li#plexit.list-item', { data: encode(JSON.stringify(opt)) }, img);
+							if(po = options.button.querySelector('#plexit'))
+								po.remove();
+							if(!!~[].slice.call(options.button.querySelector('ul').children).indexOf(op))
+								try {
+									options.button.querySelector('ul').insertBefore(pi, op);
+								} catch(e) { /* Don't do anything */ }
+						}
 
-									if(po = options.button.querySelector('#plexit'))
-										po.remove();
-									try {
-										options.button.querySelector('ul').insertBefore(pi, op);
-									} catch(e) { /* Don't do anything */ }
-								} else {
-									let available = (__CONFIG__.usingOmbi || __CONFIG__.usingWatcher || __CONFIG__.usingRadarr || __CONFIG__.usingSonarr || __CONFIG__.usingMedusa || __CONFIG__.usingSickBeard || __CONFIG__.usingCouchPotato),
-										action = (available ? 'downloader' : 'notfound'),
-										title = available ?
-											'Not on Plex (download available)':
-										'Not on Plex (download not available)';
+						return found;
+					});
+				}
 
-									UpdateButton(options.button, action, title, options);
-									opt = { ...opt, found: false, status: action };
-
-									let po, pi = furnish('li#plexit.list-item', { data: encode(JSON.stringify(opt)) }, img);
-
-									if(po = options.button.querySelector('#plexit'))
-										po.remove();
-									if(!!~[].slice.call(options.button.querySelector('ul').children).indexOf(op))
-										try {
-											options.button.querySelector('ul').insertBefore(pi, op);
-										} catch(e) { /* Don't do anything */ }
-								}
-								return found;
-							});
-					}
-					return found;
-				})
-			} catch(error) {
-				return UpdateButton(
-						options.button,
-						'error',
-						'Request to Plex Media Server failed',
-						options
-					),
-					UTILS_TERMINAL.warn(`Request to Plex failed: ${ String(error) }`),
-					false;
-					// new Notification('Failed to communicate with Plex');
-			}
+				return found;
+			})
+			.catch(error => { throw error });
+		} catch(error) {
+			return UpdateButton(
+					options.button,
+					'error',
+					'Request to Plex Media Server failed',
+					options
+				),
+				UTILS_TERMINAL.error(`Request to Plex failed: ${ String(error) }`),
+				false;
+				// new Notification('Failed to communicate with Plex');
+		}
 	}
 
 	function Request_Plex(options) {
-		UTILS_TERMINAL.log('Requesting Plex search...', options);
-
 		if(!(__CONFIG__.plexURL && __CONFIG__.plexToken) || __CONFIG__.IGNORE_PLEX)
 			return new Promise((resolve, reject) => resolve({ found: false, key: null }));
 
 		return new Promise((resolve, reject) => {
-			UTILS_TERMINAL.log('Searching Plex...');
-
+			// Sanitize the object
 			options = JSON.parse( JSON.stringify(options) );
 
-			UTILS_TERMINAL.log('Sanitized options:', options);
+			UTILS_TERMINAL.LOG('Searching for item on Plex', options);
 
 			browser.runtime.sendMessage({
 				type: 'SEARCH_PLEX',
@@ -2398,10 +2507,8 @@ let configuration, init, Update;
 	}
 
 	/* Listen for events */
-	let POPULATING = false;
-
-	browser.runtime.onMessage.addListener(async(request, sender, callback) => {
-		UTILS_TERMINAL.log(`Listener event [${ request.instance_type }#${ request[request.instance_type.toLowerCase()] }]:`, request);
+	browser.runtime.onMessage.addListener(async(request, sender) => {
+		UTILS_TERMINAL.LOG(`Listener event [${ request.instance_type }#${ request[request.instance_type.toLowerCase()] }]:`, request);
 
 		let data = request.data,
 			LOCATION = `${ request.name || 'anonymous' } @ instance ${ request.instance }`,
@@ -2409,27 +2516,16 @@ let configuration, init, Update;
 			BUTTON_ERROR  = `The button failed to render. ${ LOCATION }`,
 			EMPTY_REQUEST = `The given request is empty. ${ LOCATION }`;
 
-		UTILS_TERMINAL.log(`Assuming data... ${ JSON.stringify(data) }`);
-
 		if(!data)
-			return UTILS_TERMINAL.warn(EMPTY_REQUEST), false;
-		let button = RenderButton(true);
+			return UTILS_TERMINAL.WARN(EMPTY_REQUEST), false;
+		let button = RenderButton();
 
 		if(!button)
-			return UTILS_TERMINAL.warn(BUTTON_ERROR), false;
+			return UTILS_TERMINAL.WARN(BUTTON_ERROR), false;
 		button.classList.remove('sleeper');
-
-		UTILS_TERMINAL.log(`Switching request... ${ JSON.stringify(request) }`);
 
 		switch(request.type) {
 			case 'POPULATE':
-
-				if(POPULATING)
-					return UTILS_TERMINAL.log(`Already attempting to populate...`), false;
-				else
-					UTILS_TERMINAL.log(`Populating... ${ JSON.stringify(data) }`);
-
-				POPULATING = true;
 
 				if(data instanceof Array) {
 					for(let index = 0, length = data.length, item; index < length; index++)
@@ -2457,12 +2553,12 @@ let configuration, init, Update;
 					}
 
 					if(!data.length)
-						return UTILS_TERMINAL.warn(PARSING_ERROR), false;
+						return UTILS_TERMINAL.ERROR(PARSING_ERROR);
 					else
 						FindMediaItems(data, button);
 				} else {
 					if(!data || !data.title || !data.type)
-						return UTILS_TERMINAL.warn(PARSING_ERROR), false;
+						return UTILS_TERMINAL.ERROR(PARSING_ERROR);
 
 					let { image, type, title, year, IMDbID, TMDbID, TVDbID } = data;
 					let Db = await Identify(data);
@@ -2480,15 +2576,17 @@ let configuration, init, Update;
 				return true;
 
 			case 'INITIALIZE':
+				UTILS_TERMINAL.LOG('Told to reinitialize...');
 				init && init();
 				return true;
 
 			case 'NO_RENDER':
+				UTILS_TERMINAL.WARN('Told to stop rendering...');
 				document.queryBy('.web-to-plex-button').map(e => e.remove());
 				return true;
 
 			default:
-	//            UTILS_TERMINAL.warn(`Unknown event [${ request.type }]`);
+	//		UTILS_TERMINAL.warn(`Unknown utils event [${ request.type }]`);
 				return false;
 		}
 	});
@@ -2502,7 +2600,7 @@ let configuration, init, Update;
 				case 'SEND_VIDEO_LINK':
 					let options = { ...FindMediaItem.OPTIONS, href: request.href, remote: request.from };
 
-					UTILS_TERMINAL.log(`Download Event [${ options.remote }]:`, options);
+					UTILS_TERMINAL.LOG(`Download Event [${ options.remote }]:`, options);
 
 					UpdateButton(MASTER_BUTTON, 'downloader', 'Download', options);
 					return true;
@@ -2513,7 +2611,11 @@ let configuration, init, Update;
 					return true;
 
 				case 'PERMISSION':
-					let { data } = request;
+					let { data } = request,
+						{ instance } = data;
+
+					if(typeof instance != 'string' || !/[\da-z]{64,}/i.test(instance))
+						throw `Incorrect instance [${ instance.slice(0, 7) }]`;
 
 					if(typeof data.allowed == 'boolean') {
 						ALLOWED = data.allowed;
@@ -2523,13 +2625,13 @@ let configuration, init, Update;
 
 						(init && !RUNNING? (init(), RUNNING = true): RUNNING = false);
 					} else {
-						UTILS_TERMINAL.warn('Permission Request:', data);
+						UTILS_TERMINAL.WARN('Permission Request:', data);
 						new Prompt('permission', data);
 					}
 					return true;
 
 				default:
-		//            UTILS_TERMINAL.warn(`Unknown event [${ request.type }]`);
+		//            UTILS_TERMINAL.WARN(`Unknown event [${ request.type }]`);
 					return false;
 			}
 		} catch(error) {
@@ -2833,3 +2935,6 @@ let PRIMITIVE = Symbol.toPrimitive,
 	furnish = document.furnish;
 
 queryBy[PRIMITIVE] = furnish[PRIMITIVE] = String.prototype.toCaps[PRIMITIVE] = () => "function <foreign>() { [foreign code] }";
+
+if(browser.runtime.lastError)
+	browser.runtime.lastError.message;

@@ -258,9 +258,8 @@ function prepare(code, alias, type) {
 	DAY  = ${DAY};
 
 ` + code
-.replace(/\/\/+\s*"([^\"\n\f\r\v]+?)"\s*requires?\:?\s*(.+)([^]+)/i, ($0, $1, $2, $3, $$, $_) => `
-${ $3 }
-;(async() => await Require("${ $2 }", "${ alias }", "${ $1 }"))();
+.replace(/\/\/+\s*"([^\"\n\f\r\v]+?)"\s*requires?\:?\s*(.+)/i, ($0, $1, $2, $$, $_) => `
+;(async() => await Require("${ $2 }", "${ alias }", "${ $1 }", "${ instance }"))();
 `)
 	;
 }
@@ -270,6 +269,9 @@ let handle = async(results, tabID, instance, script, type) => {
 		InstanceType = type;
 
 	results = await results;
+
+	/* Always display a pretty button */
+	chrome.tabs.insertCSS(tabID, { file: 'sites/common.css' });
 
 	if((!results || !results[0] || !instance) && !FOUND[instance])
 		try {
@@ -334,7 +336,6 @@ let handle = async(results, tabID, instance, script, type) => {
 
 		data = { ...data, type, title, year };
 
-		chrome.tabs.insertCSS(tabID, { file: 'sites/common.css' });
 		chrome.tabs.sendMessage(tabID, { data, instance, [InstanceType.toLowerCase()]: script, instance_type: InstanceType, type: 'POPULATE' });
 	} catch(error) {
 		throw new Error(InstanceWarning + ' - ' + String(error));
@@ -442,23 +443,27 @@ return (${ type }.RegExp = RegExp(
 	${ type }.url
 ${ URLRegExp }
 ).test
-(location.href)?
 /* URL matches pattern */
-	${ type }.ready?
-	/* Injected file has the "ready" property */
-	(InjectedReadyState =
-		${ type }.ready.constructor.name == 'AsyncFunction'?
-		/* "ready" is an async function */
-			${ type }.ready():
-		/* "ready" is a sync (normal) function */
-		${ type }.ready()
-	)?
-		/* Injected file is ready */
-			${ type }.init( InjectedReadyState ):
-		/* Injected file isn't ready */
-		(${ type }.timeout || 1000):
-	/* Injected file doesn't have the "ready" property */
-	${ type }.init():
+(location.href)?
+	/* Injected file is properly structured */
+	(typeof ${ type }.init == "function")?
+		/* Injected file has the "ready" property */
+		${ type }.ready?
+			/* Injected file is ready */
+			(InjectedReadyState =
+				/* "ready" is an async function */
+				${ type }.ready.constructor.name == 'AsyncFunction'?
+					${ type }.ready():
+				/* "ready" is a sync (normal) function */
+				${ type }.ready()
+			)?
+				${ type }.init( InjectedReadyState ):
+			/* Injected file isn't ready */
+			(${ type }.timeout || 1000):
+		/* Injected file doesn't have the "ready" property */
+		${ type }.init():
+	/* Injected file isn't properly structured */
+	(console.warn("The ${ type } (${ js }) is incorrectly structured. Could not find required function ${ type }.init"), -1):
 /* URL doesn't match pattern */
 (console.warn("The domain '${ org }' (" + location.href + ") does not match the domain pattern '" + ${ type }.url + "' (" + ${ type }.RegExp + ")"), -1);
 })(document.queryBy));
@@ -478,7 +483,7 @@ top.onlocationchange = (event) => chrome.runtime.sendMessage({ type: '$INIT$', o
 // listen for message event
 let processMessage;
 
-chrome.runtime.onMessage.addListener(processMessage = async(request, sender, callback) => {
+chrome.runtime.onMessage.addListener(processMessage = async(request = {}, sender, callback = () => {}) => {
 	let { options } = request,
 		tab = TAB || {},
 		{ id, url, href } = tab,
@@ -491,7 +496,7 @@ chrome.runtime.onMessage.addListener(processMessage = async(request, sender, cal
 		|| /^(?:chrome|debugger|view-source)/i.test(url)
 		// || (!!~running.indexOf(id) && !!~running.indexOf(instance))
 	)
-		return /*
+		return callback(null) /*
 			Stop if:
 				a) There isn't a url
 				b) The url is a chrome url
@@ -504,7 +509,7 @@ chrome.runtime.onMessage.addListener(processMessage = async(request, sender, cal
 	let name = (!PLUGN_DEVELOPER? instance: `top.${ instance }`), // makes debugging easier
 		topmost = !/^top\./.test(name);
 
-	if(request && request.options) {
+	if(request.options) {
 		let { type } = request,
 			{ plugin, script } = options,
 			_type = type.toLowerCase(),
@@ -520,17 +525,18 @@ chrome.runtime.onMessage.addListener(processMessage = async(request, sender, cal
 
 		let { authorized, ...A } = await GetAuthorization(options[_type]);
 
-		switch(type) {
-			case 'PLUGIN':
-				allowed = await GetConsent(plugin, false);
+		try {
+			switch(type) {
+				case 'PLUGIN':
+					allowed = await GetConsent(plugin, false);
 
-				await fetch(file, { mode: 'cors' })
-					.then(response => response.text())
-					.then(async code => {
-						await chrome.tabs.executeScript(id, { file: 'helpers.js' }, async() => {
-							// Sorry, but the instance needs to be callable multiple times
-							await chrome.tabs.executeScript(id, { code:
-								(LAST = cache[plugin] =
+					await fetch(file, { mode: 'cors' })
+						.then(response => response.text())
+						.then(async code => {
+							await chrome.tabs.executeScript(id, { file: 'helpers.js' }, async() => {
+								// Sorry, but the instance needs to be callable multiple times
+								await chrome.tabs.executeScript(id, { code:
+									(LAST = cache[plugin] =
 `/* plugin (${ (!PLUGN_DEVELOPER? 'on':'off') }line) - "${ url.href }" */
 ${ topmost? 'var ': '' }${ name } = (${ name } || (${ name }$ = $ => {
 'use strict';
@@ -567,23 +573,27 @@ return (plugin.RegExp = RegExp(
 	plugin.url
 ${ URLRegExp }
 ).test
-(location.href)?
 /* URL matches pattern */
-	plugin.ready?
-	/* Plugin has the "ready" property */
-	(PluginReadyState =
-		plugin.ready.constructor.name == 'AsyncFunction'?
-		/* "ready" is an async function */
-			plugin.ready():
-		/* "ready" is a sync (normal) function */
-		plugin.ready()
-	)?
-		/* Plugin is ready */
-			plugin.init( PluginReadyState ):
-		/* Script isn't ready */
-		(plugin.timeout || 1000):
-	/* Plugin doesn't have the "ready" property */
-	plugin.init():
+(location.href)?
+	/* Injected file is properly structured */
+	(typeof plugin.init == "function")?
+		/* Plugin has the "ready" property */
+		plugin.ready?
+			/* Plugin is ready */
+			(PluginReadyState =
+				/* "ready" is an async function */
+				plugin.ready.constructor.name == 'AsyncFunction'?
+					plugin.ready():
+				/* "ready" is a sync (normal) function */
+				plugin.ready()
+			)?
+				plugin.init( PluginReadyState ):
+			/* Plugin isn't ready */
+			(plugin.timeout || 1000):
+		/* Plugin doesn't have the "ready" property */
+		plugin.init():
+	/* Injected file isn't properly structured */
+	(console.warn("The plugin (${ plugin }) is incorrectly structured. Could not find required function plugin.init"), -1):
 /* URL doesn't match pattern */
 (console.warn("The domain '${ org }' (" + location.href + ") does not match the domain pattern '" + plugin.url + "' (" + plugin.RegExp + ")"), -1);
 })(document.queryBy));
@@ -593,23 +603,23 @@ console.log('[${ name.replace(/^(top\.)?(\w{7}).*$/i, '$1$2') }]', ${ name });
 top.onlocationchange = (event) => chrome.runtime.sendMessage({ type: '$INIT$', options: { plugin: '${ plugin }' } });
 
 ;${ name };`
-) }, results => handle(results, LAST_ID = id, LAST_INSTANCE = instance, LAST_JS = plugin, LAST_TYPE = type))
+	) }, results => handle(results, LAST_ID = id, LAST_INSTANCE = instance, LAST_JS = plugin, LAST_TYPE = type))
+							})
 						})
-					})
-					.then(() => running.push(id, instance))
-					.catch(error => { throw error });
-				break;
+						.then(() => running.push(id, instance))
+						.catch(error => { throw error });
+					break;
 
-			case 'SCRIPT':
-				allowed = await GetConsent(script, true);
+				case 'SCRIPT':
+					allowed = await GetConsent(script, true);
 
-				await fetch(file, { mode: 'cors' })
-					.then(response => response.text())
-					.then(async code => {
-						await chrome.tabs.executeScript(id, { file: 'helpers.js' }, async() => {
-							// Sorry, but the instance needs to be callable multiple times
-							await chrome.tabs.executeScript(id, { code:
-								(LAST = cache[script] =
+					await fetch(file, { mode: 'cors' })
+						.then(response => response.text())
+						.then(async code => {
+							await chrome.tabs.executeScript(id, { file: 'helpers.js' }, async() => {
+								// Sorry, but the instance needs to be callable multiple times
+								await chrome.tabs.executeScript(id, { code:
+									(LAST = cache[script] =
 `/* script (${ (!PLUGN_DEVELOPER? 'on':'off') }line) - "${ url.href }" */
 ${ topmost? 'var ': '' }${ name } = (${ name } || (${ name }$ = $ => {
 'use strict';
@@ -646,23 +656,27 @@ return (script.RegExp = RegExp(
 	script.url
 ${ URLRegExp }
 ).test
-(location.href)?
 /* URL matches pattern */
-	script.ready?
-	/* Script has the "ready" property */
-	(ScriptReadyState =
-		script.ready.constructor.name == 'AsyncFunction'?
-		/* "ready" is an async function */
-			script.ready():
-		/* "ready" is a sync (normal) function */
-		script.ready()
-	)?
-		/* Script is ready */
-			script.init( ScriptReadyState ):
-		/* Script isn't ready */
-		(script.timeout || 1000):
-	/* Script doesn't have the "ready" property */
-	script.init():
+(location.href)?
+    /* Injected file is properly structured */
+    (typeof script.init == "function")?
+        /* Script has the "ready" property */
+        script.ready?
+            /* Script is ready */
+            (ScriptReadyState =
+                /* "ready" is an async function */
+                script.ready.constructor.name == 'AsyncFunction'?
+                    script.ready():
+                /* "ready" is a sync (normal) function */
+                script.ready()
+            )?
+                script.init( ScriptReadyState ):
+            /* Script isn't ready */
+            (script.timeout || 1000):
+        /* Script doesn't have the "ready" property */
+        script.init():
+    /* Injected file isn't properly structured */
+    (console.warn("The script (${ script }) is incorrectly structured. Could not find required function script.init"), -1):
 /* URL doesn't match pattern */
 (console.warn("The domain '${ org }' (" + location.href + ") does not match the domain pattern '" + script.url + "' (" + script.RegExp + ")"), -1);
 })(document.queryBy));
@@ -672,65 +686,71 @@ console.log('[${ name.replace(/^(top\.)?(\w{7}).*$/i, '$1$2') }]', ${ name });
 top.onlocationchange = (event) => chrome.runtime.sendMessage({ type: '$INIT$', options: { script: '${ script }' } });
 
 ;${ name };`
-	) }, results => handle(results, LAST_ID = id, LAST_INSTANCE = instance, LAST_JS = script, LAST_TYPE = type))
+		) }, results => handle(results, LAST_ID = id, LAST_INSTANCE = instance, LAST_JS = script, LAST_TYPE = type))
+							})
 						})
-					})
-					.then(() => running.push(id, instance))
-					.catch(error => { throw error });
-				break;
+						.then(() => running.push(id, instance))
+						.catch(error => { throw error });
+					break;
 
-			// Soft reset (button reset)
-			case '_INIT_':
-				chrome.tabs.executeScript(id, { code: LAST }, results => handle(results, LAST_ID, LAST_INSTANCE, LAST_JS, LAST_TYPE));
-				break;
+				// Soft reset (button reset)
+				case '_INIT_':
+					chrome.tabs.executeScript(id, { code: LAST }, results => handle(results, LAST_ID, LAST_INSTANCE, LAST_JS, LAST_TYPE));
+					break;
 
-			// Hard reset (program reset)
-			case '$INIT$':
-				let t = type.toLowerCase(),
-					data = {};
+				// Hard reset (program reset)
+				case '$INIT$':
+					let t = type.toLowerCase(),
+						data = {};
 
-				chrome.tabs.sendMessage(tab.id, { data, instance, [t]: script, instance_type: t, type: 'INITIALIZE' });
-				// chrome.tabs.getCurrent(tab => {
-				//     instance = RandomName();
-				//
-				//     setTimeout(() => tabchange([ tab ]), 5000);
-				// });
-				break;
+					chrome.tabs.sendMessage(tab.id, { data, instance, [t]: script, instance_type: t, type: 'INITIALIZE' });
+					// chrome.tabs.getCurrent(tab => {
+					//     instance = RandomName();
+					//
+					//     setTimeout(() => tabchange([ tab ]), 5000);
+					// });
+					break;
 
-			case 'FOUND':
-				FOUND[request.instance] = request.found;
-				break;
+				case 'FOUND':
+					FOUND[request.instance] = request.found;
+					break;
 
-			case 'GRANT_PERMISSION':
-				await Save(`has/${ options[_type] }`, options.allowed);
-				await Save(`get/${ options[_type] }`, options.permissions);
-				break;
+				case 'GRANT_PERMISSION':
+					await Save(`has/${ options[_type] }`, options.allowed);
+					await Save(`get/${ options[_type] }`, options.permissions);
+					break;
 
-			case 'SEARCH_PLEX':
-			case 'VIEW_COUCHPOTATO':
-			case 'PUSH_COUCHPOTATO':
-			case 'PUSH_RADARR':
-			case 'PUSH_SONARR':
-			case 'PUSH_MEDUSA':
-			case 'PUSH_WATCHER':
-			case 'PUSH_OMBI':
-			case 'PUSH_SICKBEARD':
-			case 'OPEN_OPTIONS':
-			case 'SEARCH_FOR':
-			case 'SAVE_AS':
-			case 'DOWNLOAD_FILE':
-				/* Meant to be handled by background.js */
-				return true;
-				break;
+				case 'SEARCH_PLEX':
+				case 'VIEW_COUCHPOTATO':
+				case 'PUSH_COUCHPOTATO':
+				case 'PUSH_RADARR':
+				case 'PUSH_SONARR':
+				case 'PUSH_MEDUSA':
+				case 'PUSH_WATCHER':
+				case 'PUSH_OMBI':
+				case 'PUSH_SICKBEARD':
+				case 'OPEN_OPTIONS':
+				case 'SEARCH_FOR':
+				case 'SAVE_AS':
+				case 'DOWNLOAD_FILE':
+					/* Meant to be handled by background.js */
+					break;
 
-			default:
-				PLUGN_TERMINAL.warn(`Unable to find type "${ type }"`);
-				instance = RandomName();
-				return false;
-		};
+				default:
+					PLUGN_TERMINAL.warn(`Unable to find type "${ type }"`);
+					instance = RandomName();
+					return false;
+			}
+
+			return true;
+		} catch(error) {
+			PLUGN_TERMINAL.error(error);
+			// callback(String(error));
+			return false;
+		}
+	} else {
+		return true;
 	}
-
-	return true;
 });
 
 // this doesn't actually work...

@@ -45,11 +45,11 @@ async function Notify(state, text, timeout = 7000, requiresClick = true) {
 	return top.postMessage({ type: 'NOTIFICATION', data: { state, text, timeout, requiresClick } }, '*');
 }
 
-async function Require(permission, name, alias) {
+async function Require(permission, name, alias, instance) {
 	let allowed = await load(`has/${ name }`),
 		allotted = await load(`get/${ name }`);
 
-	top.postMessage({ type: 'PERMISSION', data: { permission, name, alias, allowed, allotted } });
+	top.postMessage({ type: 'PERMISSION', data: { instance, permission, name, alias, allowed, allotted } });
 
 	/* Already asked for permission */
 	if(typeof allowed == 'boolean')
