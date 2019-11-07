@@ -9,10 +9,11 @@ let script = {
 		switch(type) {
 			case 'movie':
 				title = $('[class*="movie-header__title"i]').first.textContent;
-				year  = +$('[datetime]').first.textContent || title.replace(RegExp(`[^]*\\((${ year })\\)[^]*`), '$1');
+				year  = +$('[datetime]').first.textContent;
 				image = ($('[class*="product"] ~ * picture img').first || {}).src;
 
-				title = title.replace(RegExp(`\\s*\\(${ year }\\)`), '');
+				title = title.replace(RegExp(`\\s*\\(${ year }|\\d{4}\\)`), '');
+				year  = year || +R.$1;
 				break;
 
 			case 'tv':

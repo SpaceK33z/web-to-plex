@@ -1100,7 +1100,7 @@ let configuration, init, Update;
 			(rqut == 'tmdb' || (rqut == '*' && !mid && title && year) || apit == 'movie')?
 				(apit && apid)?
 					`https://api.themoviedb.org/3/${ apit }/${ apid }?api_key=${ api.tmdb }`:
-				(iid)?
+				(iid || mid || tid)?
 					`https://api.themoviedb.org/3/find/${ iid || mid || tid }?api_key=${ api.tmdb }&external_source=${ iid? 'imdb': mid? 'tmdb': 'tvdb' }_id`:
 				`https://api.themoviedb.org/3/search/${ apit }?api_key=${ api.tmdb }&query=${ encodeURI(title) }${ year? '&year=' + year: '' }`:
 			(rqut == 'tvdb' || (rqut == '*' && !tid && title) || (apid == tid))?
