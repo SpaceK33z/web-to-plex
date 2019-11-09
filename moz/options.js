@@ -188,6 +188,7 @@ const storage = (chrome.storage.sync || chrome.storage.local),
 			'plugin_go',
 			'plugin_snagfilms',
 			'plugin_freemoviescinema',
+			'plugin_foxsearchlight',
 		];
 
 let PlexServers = [],
@@ -1831,6 +1832,7 @@ let plugins = {
 	'Go': 'https://freeform.go.com/',
 	'SnagFilms': 'http://snagfilms.com/',
 	'Free Movies Cinema': 'https://freemoviescinema.com/',
+	'Fox Searchlight': 'http://foxsearchlight.com/',
 
 	// Don't forget to add to the __options__ array!
 }, plugin_array = [], plugin_sites = {}, pluginElement = $('#plugins');

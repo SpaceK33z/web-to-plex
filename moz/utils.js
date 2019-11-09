@@ -802,8 +802,20 @@ let configuration, init, Update;
 
 					CAUGHT = JSON.parse(options.__caught);
 					CAUGHT.bump = async(ids) => {
-						for(let id in ids)
-							CAUGHT[id.toLowerCase().slice(0, 4)].push(ids[id]);
+						bumping:
+						for(let id in ids) {
+							let ID = id.toLowerCase().slice(0, 4);
+
+							if(!!~CAUGHT[ID].indexOf(ids[id]))
+								continue bumping;
+
+							if(CAUGHT[ID].length >= 100)
+								CAUGHT[ID].splice(0, 1 + (CAUGHT[ID].length - 100));
+
+							CAUGHT[ID].push(ids[id]);
+							CAUGHT[ID].filter(v => typeof v == 'number'? v: null);
+							CAUGHT[ID] = CAUGHT[ID].slice(0, 100);
+						}
 
 						let __caught = JSON.stringify(CAUGHT);
 
