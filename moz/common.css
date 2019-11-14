@@ -522,7 +522,11 @@
 }
 
 /* bbodine @CodePen - https://codepen.io/bbodine1/pen/novBm */
+<<<<<<< Updated upstream
 .checkbox {
+=======
+[class*="web-to-plex"] .checkbox {
+>>>>>>> Stashed changes
     width: 80px;
     height: 26px;
     background: #000;
@@ -532,14 +536,22 @@
     box-shadow: inset 0px 1px 1px rgba(0, 0, 0, 0.5), 0px 1px 0px rgba(255, 255, 255, 0.2);
 }
 
+<<<<<<< Updated upstream
 span.checkbox {
+=======
+[class*="web-to-plex"] span.checkbox {
+>>>>>>> Stashed changes
     display: inline-block;
 
     margin: 0;
     vertical-align: text-bottom;
 }
 
+<<<<<<< Updated upstream
 .checkbox::after {
+=======
+[class*="web-to-plex"] .checkbox::after {
+>>>>>>> Stashed changes
     content: 'OFF';
     color: #666;
     position: absolute;
@@ -550,7 +562,11 @@ span.checkbox {
     text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.15);
 }
 
+<<<<<<< Updated upstream
 .checkbox::before {
+=======
+[class*="web-to-plex"] .checkbox::before {
+>>>>>>> Stashed changes
     content: 'ON';
     color: #cc7b19;
     position: absolute;
@@ -560,16 +576,25 @@ span.checkbox {
     font-weight: bold;
 }
 
+<<<<<<< Updated upstream
 .checkbox[prompt-yes]::before {
+=======
+[class*="web-to-plex"] .checkbox[prompt-yes]::before {
+>>>>>>> Stashed changes
     content: attr(prompt-yes);
     text-transform: uppercase;
 }
 
+<<<<<<< Updated upstream
 .checkbox[prompt-no]::after {
+=======
+[class*="web-to-plex"] .checkbox[prompt-no]::after {
+>>>>>>> Stashed changes
     content: attr(prompt-no);
     text-transform: uppercase;
 }
 
+<<<<<<< Updated upstream
 .checkbox[prompt-size="large"i]::before, .checkbox[prompt-size="large"i]::after {
     font-size: 30px !important;
 }
@@ -595,6 +620,33 @@ span.checkbox {
 }
 
 .checkbox label {
+=======
+[class*="web-to-plex"] .checkbox[prompt-size="large"i]::before, .checkbox[prompt-size="large"i]::after {
+    font-size: 30px !important;
+}
+
+[class*="web-to-plex"] .checkbox[prompt-size="medium"i]::before, .checkbox[prompt-size="medium"i]::after {
+    font-size: 21px !important;
+}
+
+[class*="web-to-plex"] .checkbox[prompt-size="normal"i]::before, .checkbox[prompt-size="normal"i]::after {
+    font-size: 12px !important;
+}
+
+[class*="web-to-plex"] .checkbox[prompt-size="small"i]::before, .checkbox[prompt-size="small"i]::after {
+    font-size: 6px !important;
+}
+
+[class*="web-to-plex"] .checkbox[prompt="y/n"i]::before {
+    content: 'YES';
+}
+
+[class*="web-to-plex"] .checkbox[prompt="y/n"i]::after {
+    content: 'NO';
+}
+
+[class*="web-to-plex"] .checkbox label {
+>>>>>>> Stashed changes
     display: block;
     width: 34px;
     height: 20px;
@@ -609,15 +661,27 @@ span.checkbox {
     box-shadow: 0px 2px 5px 0px rgba(0, 0, 0, 0.3);
 }
 
+<<<<<<< Updated upstream
 .checkbox input[type=checkbox] {
     visibility: hidden;
 }
 
 .checkbox input[type=checkbox]:checked + label {
+=======
+[class*="web-to-plex"] .checkbox input[type=checkbox] {
+    visibility: hidden;
+}
+
+[class*="web-to-plex"] .checkbox input[type=checkbox]:checked + label {
+>>>>>>> Stashed changes
     left: 43px;
     background: #cc7b19;
 }
 
+<<<<<<< Updated upstream
 .checkbox[disabled] {
+=======
+[class*="web-to-plex"] .checkbox[disabled] {
+>>>>>>> Stashed changes
     opacity: 0.25 !important;
 }

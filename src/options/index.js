@@ -459,12 +459,17 @@ function performPlexLogin() {
 function performPlexTest(ServerID) {
 	let plexToken = $('#plex_token').value,
 		teststatus = $('#plex_test_status'),
+<<<<<<< Updated upstream
 		inusestataus = [...$('[in-use="plex_token"]', true)];
+=======
+		inusestatus = [...$('[in-use="plex_token"]', true)];
+>>>>>>> Stashed changes
 
 	__save__.disabled = true;
 	__servers__.innerHTML = '';
 	teststatus.textContent = '?';
 
+<<<<<<< Updated upstream
 	getServers(plexToken).then(servers => {
 		PlexServers = servers || [];
 		teststatus.textContent = '!';
@@ -473,6 +478,16 @@ function performPlexTest(ServerID) {
 		if(!servers)
 			return teststatus.title = 'Failed to communicate with Plex', teststatus.classList = false;
 		inusestataus.map(e => e.setAttribute('in-use', true));
+=======
+	getServers(plexToken).then((servers = []) => {
+		PlexServers = servers;
+		teststatus.textContent = '!';
+		inusestatus.map(e => e.setAttribute('in-use', false));
+
+		if(!servers)
+			return teststatus.title = 'Failed to communicate with Plex', teststatus.classList = false;
+		inusestatus.map(e => e.setAttribute('in-use', true));
+>>>>>>> Stashed changes
 
 		__save__.disabled = false;
 		teststatus.classList = true;

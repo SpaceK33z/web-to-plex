@@ -1,6 +1,7 @@
 ---
 name: Bug report
 about: Used for minor bugs that don't make the extension unusable
+=======
 title: 'Issue: [Something Broke]'
 labels: bug, enhancement
 assignees: ''
