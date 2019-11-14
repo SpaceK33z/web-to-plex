@@ -102,6 +102,7 @@ The sites used as search engines (IMDb, TMDb, and TVDb) will automatically creat
 37. [Freeform (Go)](http://freeform.go.com/)<sup>6</sup>
 38. [Free Movies Cinema](https://freemoviescinema.com/)<sup>6</sup>
 39. [SnagFilms](https://snagfilms.com/)<sup>6</sup>
+40. [Fox Searchlight](http://foxsearchlight.com/)<sup>6</sup>
 
 </details>
 
@@ -132,7 +133,8 @@ The sites used as search engines (IMDb, TMDb, and TVDb) will automatically creat
 
 ## Issues & Contributions
 
-[![DeepScan grade](https://deepscan.io/api/teams/5912/projects/7762/branches/83413/badge/grade.svg)](https://deepscan.io/dashboard#view=project&tid=5912&pid=7762&bid=83413)
+[![DeepScan grade](https://deepscan.io/api/teams/5912/projects/7762/branches/83438/badge/grade.svg)](https://deepscan.io/dashboard#view=project&tid=5912&pid=7762&bid=83438)
+
 
 <!--
     master:         83413
