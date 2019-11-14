@@ -116,13 +116,8 @@
     background: #2A2AFF !important;
 }
 
-/* Web to Plex success notifications */
-.web-to-plex-notification.success {
-    background: #03BDF9 !important;
-}
-
-/* Web to Plex error/warning notifications */
-.web-to-plex-notification.warning, .web-to-plex-notification.error {
+/* Web to Plex warning notifications */
+.web-to-plex-notification.warning {
 	background: #FF2A2A !important;
 }
 
@@ -223,17 +218,7 @@
 	max-width: 60% !important;
 }
 
-.web-to-plex-prompt-option.mutable > h2 {
-    background: #0000 !important;
-    color: inherit !important;
-    font-family: inherit !important;
-    font-size: initial !important;
-    text-align: inherit !important;
-
-    margin: inherit !important;
-}
-
-.web-to-plex-prompt-option.mutable > .remove {
+.web-to-plex-prompt-option.mutable > *:last-child {
 	background: #ffffff40 !important;
 	border-radius: 3px !important;
 	transition: all 0.1s !important;
@@ -243,28 +228,16 @@
 
 	float: right !important;
 	margin-right: -9px !important;
-	margin-top: -42px !important;
+	margin-top: -9px !important;
 	padding: 0 !important;
 }
 
-.web-to-plex-prompt-option.mutable > .remove:hover {
+.web-to-plex-prompt-option.mutable > *:last-child:hover {
 	background: #ffffff4d !important;
 }
 
-.web-to-plex-prompt-option.mutable > .remove::after {
+.web-to-plex-prompt-option.mutable > *:last-child:after {
 	content: '\00d7' !important;
-}
-
-.web-to-plex-prompt-option.mutable > .quality {
-    width: 50% !important;
-}
-
-.web-to-plex-prompt-option.mutable > .location {
-    width: 90% !important;
-}
-
-.web-to-plex-prompt-option.mutable > .location:last-child:not(:first-child) {
-    margin-top: 5px !important;
 }
 
 .web-to-plex-prompt-footer {
@@ -312,7 +285,6 @@
 
 .web-to-plex-button * {
     border: none !important;
-    text-transform: none !important;
 }
 
 .web-to-plex-button {
@@ -328,11 +300,8 @@
     left: 5px !important;
     padding: 10px !important;
     position: fixed !important;
-    right: unset !important;
     z-index: 999999 !important;
 
-    min-height: 0 !important;
-    min-width: 0 !important;
     height: 72px !important;
     width: 180px !important;
 
@@ -344,7 +313,7 @@
     display: initial !important;
 }
 
-.web-to-plex-button.hide:not(:hover), .web-to-plex-button.sleeper {
+.web-to-plex-button.hide:not(:hover) {
     opacity: 0.1;
 }
 
@@ -394,16 +363,12 @@
     outline: none !important;
 }
 
-.web-to-plex-button.wtp--download::after, .web-to-plex-button.wtp--download::before {
-    background: #265AF4 !important;
-}
-
-.web-to-plex-button.wtp--queued::after, .web-to-plex-button.wtp--queued::before {
-    background: #568AF4 !important;
-}
-
 .web-to-plex-button.wtp--found::after, .web-to-plex-button.wtp--found::before {
     background: #F9BD03 !important;
+}
+
+.web-to-plex-button.wtp--download::after, .web-to-plex-button.wtp--download::before {
+    background: #265AF4 !important;
 }
 
 .web-to-plex-button.wtp--error::after, .web-to-plex-button.wtp--error::before {
@@ -519,169 +484,4 @@
     left: 35px !important;
     padding: 3px 6px !important;
     position: absolute !important;
-}
-
-/* bbodine @CodePen - https://codepen.io/bbodine1/pen/novBm */
-<<<<<<< Updated upstream
-.checkbox {
-=======
-[class*="web-to-plex"] .checkbox {
->>>>>>> Stashed changes
-    width: 80px;
-    height: 26px;
-    background: #000;
-    margin: 15px 0;
-    position: relative;
-    border-radius: 50px;
-    box-shadow: inset 0px 1px 1px rgba(0, 0, 0, 0.5), 0px 1px 0px rgba(255, 255, 255, 0.2);
-}
-
-<<<<<<< Updated upstream
-span.checkbox {
-=======
-[class*="web-to-plex"] span.checkbox {
->>>>>>> Stashed changes
-    display: inline-block;
-
-    margin: 0;
-    vertical-align: text-bottom;
-}
-
-<<<<<<< Updated upstream
-.checkbox::after {
-=======
-[class*="web-to-plex"] .checkbox::after {
->>>>>>> Stashed changes
-    content: 'OFF';
-    color: #666;
-    position: absolute;
-    right: 10px;
-    z-index: 0;
-    font: 12px/26px Arial, sans-serif;
-    font-weight: bold;
-    text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.15);
-}
-
-<<<<<<< Updated upstream
-.checkbox::before {
-=======
-[class*="web-to-plex"] .checkbox::before {
->>>>>>> Stashed changes
-    content: 'ON';
-    color: #cc7b19;
-    position: absolute;
-    left: 10px;
-    z-index: 0;
-    font: 12px/26px Arial, sans-serif;
-    font-weight: bold;
-}
-
-<<<<<<< Updated upstream
-.checkbox[prompt-yes]::before {
-=======
-[class*="web-to-plex"] .checkbox[prompt-yes]::before {
->>>>>>> Stashed changes
-    content: attr(prompt-yes);
-    text-transform: uppercase;
-}
-
-<<<<<<< Updated upstream
-.checkbox[prompt-no]::after {
-=======
-[class*="web-to-plex"] .checkbox[prompt-no]::after {
->>>>>>> Stashed changes
-    content: attr(prompt-no);
-    text-transform: uppercase;
-}
-
-<<<<<<< Updated upstream
-.checkbox[prompt-size="large"i]::before, .checkbox[prompt-size="large"i]::after {
-    font-size: 30px !important;
-}
-
-.checkbox[prompt-size="medium"i]::before, .checkbox[prompt-size="medium"i]::after {
-    font-size: 21px !important;
-}
-
-.checkbox[prompt-size="normal"i]::before, .checkbox[prompt-size="normal"i]::after {
-    font-size: 12px !important;
-}
-
-.checkbox[prompt-size="small"i]::before, .checkbox[prompt-size="small"i]::after {
-    font-size: 6px !important;
-}
-
-.checkbox[prompt="y/n"i]::before {
-    content: 'YES';
-}
-
-.checkbox[prompt="y/n"i]::after {
-    content: 'NO';
-}
-
-.checkbox label {
-=======
-[class*="web-to-plex"] .checkbox[prompt-size="large"i]::before, .checkbox[prompt-size="large"i]::after {
-    font-size: 30px !important;
-}
-
-[class*="web-to-plex"] .checkbox[prompt-size="medium"i]::before, .checkbox[prompt-size="medium"i]::after {
-    font-size: 21px !important;
-}
-
-[class*="web-to-plex"] .checkbox[prompt-size="normal"i]::before, .checkbox[prompt-size="normal"i]::after {
-    font-size: 12px !important;
-}
-
-[class*="web-to-plex"] .checkbox[prompt-size="small"i]::before, .checkbox[prompt-size="small"i]::after {
-    font-size: 6px !important;
-}
-
-[class*="web-to-plex"] .checkbox[prompt="y/n"i]::before {
-    content: 'YES';
-}
-
-[class*="web-to-plex"] .checkbox[prompt="y/n"i]::after {
-    content: 'NO';
-}
-
-[class*="web-to-plex"] .checkbox label {
->>>>>>> Stashed changes
-    display: block;
-    width: 34px;
-    height: 20px;
-    cursor: pointer;
-    position: absolute;
-    top: 3px;
-    left: 3px;
-    z-index: 1;
-    background: #666;
-    border-radius: 50px;
-    transition: all 0.4s ease;
-    box-shadow: 0px 2px 5px 0px rgba(0, 0, 0, 0.3);
-}
-
-<<<<<<< Updated upstream
-.checkbox input[type=checkbox] {
-    visibility: hidden;
-}
-
-.checkbox input[type=checkbox]:checked + label {
-=======
-[class*="web-to-plex"] .checkbox input[type=checkbox] {
-    visibility: hidden;
-}
-
-[class*="web-to-plex"] .checkbox input[type=checkbox]:checked + label {
->>>>>>> Stashed changes
-    left: 43px;
-    background: #cc7b19;
-}
-
-<<<<<<< Updated upstream
-.checkbox[disabled] {
-=======
-[class*="web-to-plex"] .checkbox[disabled] {
->>>>>>> Stashed changes
-    opacity: 0.25 !important;
 }

@@ -9,11 +9,11 @@ function _flatten(object) {
 
 function _parse(xml) {
 	let data = {},
-		isText = xml.nodeType === 3,
-		isElement = xml.nodeType === 1,
-		body = xml.textContent && xml.textContent.trim(),
-		hasChildren = xml.children && xml.children.length,
-		hasAttributes = xml.attributes && xml.attributes.length;
+        isText = xml.nodeType === 3,
+        isElement = xml.nodeType === 1,
+        body = xml.textContent && xml.textContent.trim(),
+        hasChildren = xml.children && xml.children.length,
+        hasAttributes = xml.attributes && xml.attributes.length;
 
 	// if it's text just return it
 	if (isText) {
