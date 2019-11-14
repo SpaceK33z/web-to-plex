@@ -35,7 +35,8 @@ let script = {
 				break;
 
 			case 'list':
-				let options, elements = $('.mb-movie');
+				let options = [],
+					elements = $('.mb-movie');
 
 				elements.forEach((element, index, array) => {
 					let option = script.process(element);

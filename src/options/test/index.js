@@ -26,8 +26,6 @@ function modify({ type, title, year, info }) {
 			ids[id]?
 				id == 'imdb'?
 					`https://www.imdb.com/videoembed/${ object[id.toUpperCase()] }/`:
-				id == 'tmdb'?
-					`https://www.youtube.com/embed/${ object[id.toUpperCase()] }`:
 				`https://www.youtube.com/embed/${ object[id.toUpperCase()] }`:
 			'blank.html'
 		));
