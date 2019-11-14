@@ -31,7 +31,11 @@ let script = {
 			return null;
 		}
 
+<<<<<<< Updated upstream
 		(_year.textContent + '').replace(/(\d{4})/);
+=======
+		(_year.textContent + '').replace(/(\d{4})/, '');
+>>>>>>> Stashed changes
 
 		let year  = +R.$1,
 			title = _title.textContent.replace((type == 'movie'? /^(.+)$/: /(.+)(?:(?:\:\s*series\s+info|\-\s*(?:all\s+episodes|season)).+)$/i), '$1').trim(),
