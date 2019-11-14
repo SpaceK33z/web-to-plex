@@ -392,6 +392,49 @@ class Prompt {
 	}
 }
 
+function addListener(element, eventName, callback = event => {}) {
+	eventName = eventName.replace(/^(on)?/, 'on');
+	callback = callback.toString().replace(/;+$/g, '');
+
+	let event = element.getAttribute(eventName);
+
+	if(event && event.length)
+		event = `${ event }; ${ callback }`;
+	else
+		event = callback;
+
+	element[eventName] = eval(event);
+}
+
+function traverse(element, until, siblings = false) {
+	let elements;
+
+	if(siblings) {
+		if(element instanceof Array || element instanceof NodeList) {
+			for(elements = [...element], element = elements[0]; until(element) === false && element;)
+				if(element.previousElementSibling)
+					element = element.previousElementSibling;
+				else
+					elements.splice(0, 1),
+					element = elements[0];
+		} else {
+			while(until(element) === false && element)
+				element = element.previousElementSibling || element.parentElement;
+		}
+	}
+
+	if(element instanceof Array || element instanceof NodeList) {
+		for(element = [...element]; until(element[0]) === false && element.length; element.splice(0, 1))
+			continue;
+		element = element[0];
+	} else {
+		while(until(element) === false && element)
+			element = element.parentElement;
+	}
+
+	return element;
+}
+
 function load(name) {
 	return JSON.parse(localStorage.getItem(btoa(name)));
 }
@@ -1306,7 +1349,7 @@ function saveOptions() {
 	if((r = !options.radarrURLRoot && options.radarrToken) || (s = !options.sonarrURLRoot && options.sonarrToken) || (w = !options.watcherURLRoot && options.watcherToken) || (o = !options.ombiURLRoot && options.ombiToken) || (m = !options.medusaURLRoot && options.medusaToken) || (i = !options.sickBeardURLRoot && options.sickBeardToken)) {
 		return new Notification('error', `Please enter a valid URL for ${ who() }`),
 			null;
-	} if((options.radarrURLRoot && !options.radarrStoragePath) && (options.sonarrURLRoot && !options.sonarrStoragePath) && (options.medusaURLRoot && !options.medusaStoragePath) && (options.sickBeardURLRoot && !options.sickBeardStoragePath)) {
+	} if((r = options.radarrURLRoot && !options.radarrStoragePath) || (s = options.sonarrURLRoot && !options.sonarrStoragePath) || (m = options.medusaURLRoot && !options.medusaStoragePath) || (i = options.sickBeardURLRoot && !options.sickBeardStoragePath)) {
 		return new Notification('error', `Please enter a valid storage path for ${ who() }`),
 			null;
 	} if(options.watcherURLRoot && !options.watcherQualityProfileId) {
@@ -1436,7 +1479,7 @@ function saveOptionsWithoutPlex() {
 	if((r = !options.radarrURLRoot && options.radarrToken) || (s = !options.sonarrURLRoot && options.sonarrToken) || (w = !options.watcherURLRoot && options.watcherToken) || (o = !options.ombiURLRoot && options.ombiToken) || (m = !options.medusaURLRoot && options.medusaToken) || (i = !options.sickBeardURLRoot && options.sickBeardToken)) {
 		return new Notification('error', `Please enter a valid URL for ${ who() }`),
 			null;
-	} if((options.radarrURLRoot && !options.radarrStoragePath) && (options.sonarrURLRoot && !options.sonarrStoragePath) && (options.medusaURLRoot && !options.medusaStoragePath) && (options.sickBeardURLRoot && !options.sickBeardStoragePath)) {
+	} if((r = options.radarrURLRoot && !options.radarrStoragePath) || (s = options.sonarrURLRoot && !options.sonarrStoragePath) || (m = options.medusaURLRoot && !options.medusaStoragePath) || (i = options.sickBeardURLRoot && !options.sickBeardStoragePath)) {
 		return new Notification('error', `Please enter a valid storage path for ${ who() }`),
 			null;
 	} if(options.watcherURLRoot && !options.watcherQualityProfileId) {
@@ -1509,6 +1552,7 @@ function saveOptionsWithoutPlex() {
 	requestURLPermissions(options.sonarrURLRoot);
 	requestURLPermissions(options.medusaURLRoot);
 	requestURLPermissions(options.ombiURLRoot);
+	requestURLPermissions(options.sickBeardURLRoot);
 
 	// Handle the proxy settings
 	options.proxy = HandleProxySettings(options);
@@ -1678,7 +1722,7 @@ document.furnish = function furnish(name, attributes = {}, ...children) {
 	Object.entries(attributes).forEach(
 		([name, value]) => (/^(on|(?:inner|outer)(?:HTML|Text)|textContent|class(?:List|Name)$|value)/.test(name))?
 			element[name] = value:
-			element.setAttribute(name, value)
+		element.setAttribute(name, value)
 	);
 
 	children
@@ -1799,8 +1843,8 @@ for(let index = 0, length = builtin_array.length; builtinElement && index < leng
 save('builtin.sites', builtin_sites);
 
 $('[id^="builtin_"]', true)
-	.forEach(element => element.addEventListener('click', event => {
-		let self = event.target,
+	.forEach(element => addListener(element, 'click', event => {
+		let self = traverse(event.target, element => /^builtin_/.test(element.id), true),
 			bid = self.getAttribute('bid'),
 			js = self.getAttribute('js');
 
@@ -1898,8 +1942,8 @@ for(let index = 0, length = plugin_array.length; pluginElement && index < length
 save('optional.sites', plugin_sites);
 
 $('[id^="plugin_"]', true)
-	.forEach(element => element.addEventListener('click', event => {
-		let self = event.target,
+	.forEach(element => addListener(element, 'click', event => {
+		let self = traverse(event.target, element => /^plugin_/.test(element.id), true),
 			pid = self.getAttribute('pid'),
 			js = self.getAttribute('js');
 
@@ -1923,31 +1967,30 @@ let empty = () => {};
 document.addEventListener('DOMContentLoaded', restoreOptions);
 __save__.addEventListener('click', saveOptions);
 
-$('#plex_test')
-	.addEventListener('click', event => {
-		let pt = $('#plex_token').value,
-			pu = $('#plex_username').value,
-			pp = $('#plex_password').value,
-			ou = $('#ombi_url').value,
-			oa = $('#ombi_api').value;
+addListener($('#plex_test'), 'click', event => {
+	let pt = $('#plex_token').value,
+		pu = $('#plex_username').value,
+		pp = $('#plex_password').value,
+		ou = $('#ombi_url').value,
+		oa = $('#ombi_api').value;
 
-		if(pt)
-			performPlexTest(ServerID);
-		else if(pu && pp)
-			performPlexLogin();
-		else if(ou && oa)
-			performOmbiLogin();
-	});
-$('#watcher_test', true).forEach(element => element.addEventListener('click', event => performWatcherTest()));
-$('#radarr_test', true).forEach(element => element.addEventListener('click', event => performRadarrTest()));
-$('#sonarr_test', true).forEach(element => element.addEventListener('click', event => performSonarrTest()));
-$('#medusa_test', true).forEach(element => element.addEventListener('click', event => performMedusaTest()));
-$('#ombi_test', true).forEach(element => element.addEventListener('click', event => performOmbiTest()));
-$('#sickBeard_test', true).forEach(element => element.addEventListener('click', event => performSickBeardTest()));
-$('#enable-couchpotato', true).forEach(element => element.addEventListener('click', event => enableCouchPotato()));
+	if(pt)
+		performPlexTest(ServerID);
+	else if(pu && pp)
+		performPlexLogin();
+	else if(ou && oa)
+		performOmbiLogin();
+});
+$('#watcher_test', true).forEach(element => addListener(element, 'click', event => performWatcherTest()));
+$('#radarr_test', true).forEach(element => addListener(element, 'click', event => performRadarrTest()));
+$('#sonarr_test', true).forEach(element => addListener(element, 'click', event => performSonarrTest()));
+$('#medusa_test', true).forEach(element => addListener(element, 'click', event => performMedusaTest()));
+$('#ombi_test', true).forEach(element => addListener(element, 'click', event => performOmbiTest()));
+$('#sickBeard_test', true).forEach(element => addListener(element, 'click', event => performSickBeardTest()));
+$('#enable-couchpotato', true).forEach(element => addListener(element, 'click', event => enableCouchPotato()));
 
 /* INPUT | Get the JSON data */
-$('#json_get').addEventListener('click', event => {
+addListener($('#json_get'), 'click', event => {
 	let data_container = $('#json_data'),
 		data = atob((data_container.value || data_container.textContent).replace(/\s*\[.+\]\s*/, ''));
 
@@ -1963,7 +2006,7 @@ $('#json_get').addEventListener('click', event => {
 });
 
 /* OUTPUT | Set the JSON data */
-$('#json_set').addEventListener('click', event => {
+addListener($('#json_set'), 'click', event => {
 	let data_container = $('#json_data'),
 		data = getOptionValues();
 
@@ -1973,7 +2016,7 @@ $('#json_set').addEventListener('click', event => {
 });
 
 /* Erase Cached Searches */
-$('#erase_cache').addEventListener('click', event => {
+addListener($('#erase_cache'), 'click', event => {
 	let options = JSON.stringify(getOptionValues());
 
 	new Notification('info', 'Clearing...', 3000);
@@ -2001,11 +2044,8 @@ $('[type="range"]', true)
 
 $('.checkbox', true)
 	.forEach((element, index, array) => {
-		element.addEventListener('click', event => {
-			let self = event.target;
-
-			while(!~[...self.classList].indexOf('checkbox') && self.parentElement && self.parentElement != self)
-				self = self.parentElement;
+		addListener(element, 'click', event => {
+			let self = traverse(path(event), element => !!~[...element.classList].indexOf('checkbox'), true);
 
 			if('disabled' in self.attributes)
 				return event.preventDefault(true);
@@ -2015,10 +2055,10 @@ $('.checkbox', true)
 
 $('.test', true)
 	.forEach((element, index, array) => {
-		element.addEventListener('click', async event => {
+		addListener(element, 'click', async event => {
 			event.preventDefault(true);
 
-			let self = event.target;
+			let self = traverse(event.target, element => !!~[...element.classList].indexOf('test'));
 
 			await saveOptions(event);
 
@@ -2028,8 +2068,8 @@ $('.test', true)
 
 $('[id^="theme:"i]', true)
 	.forEach((element, index, array) => {
-		element.addEventListener('click', async event => {
-			let self = event.target,
+		addListener(element, 'click', async event => {
+			let self = traverse(event.target, element => /^theme:/i.test(element.id)),
 				R = RegExp;
 
 			let [a, b] = self.getAttribute('theme').split(/\s*:\s*/).filter(v => v),
@@ -2042,6 +2082,70 @@ $('[id^="theme:"i]', true)
 			else
 				__theme = __theme.filter(v => v != value);
 		});
+	});
+
+let hold = document.createElement('summary'),
+	/* swap(from, to[, ...new from children]) */
+	swap = (a, b, ...c) => {
+		let d = a.children;
+
+		(c = c.flat(Infinity)).forEach(e => a.insertBefore(e, d[0]));
+
+		for(let f = c.length; d.length > f;)
+			b.appendChild(d[f]);
+	},
+	uuid = e => {
+		let u = [];
+
+		for(let _; e; e = e.parentElement) {
+			_ = e.tagName.toLowerCase();
+
+			if(/^html$/i.test(_))
+				break;
+			if(e.id)
+				_ += '#' + (
+					/\s/.test(e.id)?
+						`[id="${ e.id }"]`:
+					e.id
+				);
+			if(e.className)
+				_ += '.' + e.className.replace(/ /g, '.');
+			if(e.parentElement.querySelector(_) !== e)
+				_ += `:nth-child(${( [...e.parentElement.children].indexOf(e) + 1 )})`;
+			u.push(_);
+		}
+		u.reverse();
+
+		return u.join('>');
+	};
+
+$('.bar > article > details', true)
+	.forEach((element, index, array) => {
+		element.addEventListener('mouseup', event => {
+			let self = path(event).filter(e => /^details$/i.test(e.tagName))[0],
+				head = path(event).filter(e => /\bbar\b/i.test(e.classList))[0].querySelector('header'),
+				open = e => {try {e.setAttribute('open', true);} catch(r) {/* not actually an error */}},
+				disp = $('display');
+
+			if(uuid(self) == disp.value) {
+				return;
+			} else if(disp.value) {
+				swap(disp, $(disp.value));
+			}
+
+			if(!('open' in self.attributes)) {
+				hold.innerHTML = self.querySelector('summary').innerHTML;
+
+				disp.setAttribute('_title_', head.innerText.toCaps());
+				disp.setAttribute('_sub-title_', hold.innerText);
+				disp.value = uuid(self);
+
+				swap(self, disp, hold);
+
+				$('.bar > article > details[open]', true).forEach(e => e.removeAttribute('open'));
+				open(self);
+			}
+		})
 	});
 
 // CORS exception: SecurityError
@@ -2062,3 +2166,60 @@ if(hash.length > 1)
 			terminal.log(`Unknown event "${ hash }"`);
 			break;
 	};
+
+String.prototype.toCaps = String.prototype.toCaps || function toCaps(all) {
+	/** Titling Caplitalization
+ 	* Articles: a, an, & the
+ 	* Conjunctions: and, but, for, nor, or, so, & yet
+ 	* Prepositions: across, after, although, at, because, before, between, by, during, from, if, in, into, of, on, to, through, under, with, & without
+ 	*/
+	let array = this.toLowerCase(),
+		titles = /(?!^|(?:an?|the)\s+)\b(a([st]|nd?|cross|fter|lthough)?|b(e(cause|fore|tween)?|ut|y)|during|from|in(to)?|[io][fn]|[fn]?or|the|[st]o|through|under|with(out)?|yet)(?!\s*$)\b/gi,
+		cap_exceptions = /([\|\"\(]\s*[a-z]|[\:\.\!\?]\s+[a-z]|(?:^\b|[^\'\-\+]\b)[^aeiouy\d\W]+\b)/gi, // Punctuation exceptions, e.g. "And not I"
+		all_exceptions = /\b((?:ww)?(?:m{1,4}(?:c?d(?:c{0,3}(?:x?l(?:x{0,3}(?:i?vi{0,3})?)?)?)?)?|c?d(?:c{0,3}(?:x?l(?:x{0,3}(?:i?vi{0,3})?)?)?)?|c{1,3}(?:x?l(?:x{0,3}(?:i?vi{0,3})?)?)?|x?l(?:x{0,3}(?:i?vi{0,3})?)?|x{1,3}(?:i?vi{0,3})?|i?vi{0,3}|i{1,3}))\b/gi, // Roman Numberals
+		cam_exceptions = /\b((?:mr?s|[sdjm]r|mx)|(?:adm|cm?dr?|chf|c[op][lmr]|cpt|gen|lt|mjr|sgt)|doc|hon|prof)(?:\.|\b)/gi, // Titles (Most Common?)
+		low_exceptions = /'([\w]+)/gi; // Apostrphe cases
+
+	array = array.split(/\s+/);
+
+	let index, length, string, word;
+	for(index = 0, length = array.length, string = [], word; index < length; index++) {
+		word = array[index];
+
+		if(word)
+			string.push( word[0].toUpperCase() + word.slice(1, word.length) );
+	}
+
+	string = string.join(' ');
+
+	if(!all)
+		string = string
+		.replace(titles, ($0, $1, $$, $_) => $1.toLowerCase())
+		.replace(all_exceptions, ($0, $1, $$, $_) => $1.toUpperCase())
+		.replace(cap_exceptions, ($0, $1, $$, $_) => $1.toUpperCase())
+		.replace(low_exceptions, ($0, $1, $$, $_) => $0.toLowerCase())
+		.replace(cam_exceptions, ($0, $1, $$, $_) => $1[0].toUpperCase() + $1.slice(1, $1.length).toLowerCase() + '.');
+
+	return string;
+};
+
+function path(element) {
+	if(element.path)
+		return element.path;
+	else if(element.composedPath)
+		return element.composedPath();
+
+	let path = [];
+
+	while(element) {
+		path.push(element);
+
+		if(element.parentElement === undefined || element.parentElement === null) {
+			path.push(document, top);
+
+			return path;
+		}
+
+		element = element.parentElement;
+	}
+};

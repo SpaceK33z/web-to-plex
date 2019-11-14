@@ -1236,7 +1236,7 @@ let configuration, init, Update;
 						$data:
 					found;
 				//api.themoviedb.org/ \local
-				else if(('movie_results' in $data || 'tv_results' in $data || 'results' in $data) && $data.release_date)
+				else if($data && ('movie_results' in $data || 'tv_results' in $data || 'results' in $data) && $data.release_date)
 					found = (DATA => {
 						if(DATA.results)
 							if(rqut == 'tmdb')
@@ -1255,12 +1255,12 @@ let configuration, init, Update;
 						return f? o: f = !!iid;
 					})($data);
 				//api.themoviedb.org/ \remote
-				else if(('original_name' in $data || 'original_title' in $data) && $data.release_date)
+				else if($data && ('original_name' in $data || 'original_title' in $data) && $data.release_date)
 					found = (tid == $data.id || (t($data.original_name || $data.original_title) == t(title) || t($data.name) == t(title)) && year == ($data || b).release_date.slice(0, 4))?
 						$data:
 					found;
 				//theimdbapi.org/
-				else if($data.release_date)
+				else if($data && $data.release_date)
 					found = (t($data.title) == t(title) && year == ($data.url || $data || b).release_date.slice(0, 4))?
 						$data:
 					found;

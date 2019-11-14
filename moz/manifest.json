@@ -6,7 +6,7 @@
 	"homepage_url": "https://github.com/SpaceK33z/web-to-plex/",
 
 	"manifest_version": 2,
-	"version": "4.1.0.11",
+	"version": "4.1.0.12",
 // Firefox Support =>
 	"applications": {
 		"gecko": {
@@ -24,6 +24,8 @@
 		"128": "128.png",
 		"256": "256.png"
 	},
+
+	"content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
 
 	"content_scripts": [
 		// Allows media downloads
