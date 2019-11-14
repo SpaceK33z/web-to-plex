@@ -18,7 +18,7 @@ if(array && array.length) {
 	for(let count = 0, length = Math.ceil(array.length / width); count < length;)
 		for(let index = width * count++, name, url; index < count * width; index++)
 			object[name = array[index]] = (!/^(null|undefined)?$/.test( url = load(`${ name }.url`) || '' ))?
-			`            <td id="local-${ name }" local="{:name} ({:url})" name="${ name }" url="${ url.replace(/^(.*?\/\/.*?\/).*$/, '$1') }">
+`            <td id="local-${ name }" local="{:name} ({:url})" name="${ name }" url="${ url.replace(/^(.*?\/\/.*?\/).*$/, '$1') }">
 				<a href="${ url }" target="_blank">
 					<img alt="${ name }" src="../img/local.${ name }.png" />
 					<label>${ name }</label>

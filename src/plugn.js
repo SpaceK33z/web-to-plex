@@ -13,17 +13,6 @@ let LAST, LAST_JS, LAST_INSTANCE, LAST_ID, LAST_TYPE, FOUND = {};
 let PLUGN_STORAGE = chrome.storage.sync || chrome.storage.local;
 let PLUGN_CONFIGURATION;
 
-let URLRegExp = `
-	.replace(/^\\*\\:/,'\\\\w{3,}:')
-		// *://
-	.replace(/\\*\\./g,'(?:[^\\\\.]+\\\\.)?')
-		// *.
-	.replace(/\\.\\*/g,'(?:\\\\.[^\\\\/\\\\.]+)?')
-		// .*
-	.replace(/([\\/\\?\\&\\#])\\*/g,'$1[^$]*'),'i')
-		// /* OR ?* OR &* OR #*
-`;
-
 function load(name, private) {
 	return JSON.parse((private && sessionStorage? sessionStorage: localStorage).getItem(btoa(name)));
 }
@@ -245,29 +234,108 @@ function RandomName(length = 16, symbol = '') {
 	return values.join(symbol).replace(/^[^a-z]+/i, '');
 };
 
-function prepare(code, alias, type) {
+async function prepare({ code, alias, type, allowed, url }) {
 
 	let DATE = (new Date),
 		YEAR = DATE.getFullYear(),
 		MONT = DATE.getMonth(),
 		DAY  = DATE.getDate();
 
-	return `let DATE = (new Date),
+	let name = (!PLUGN_DEVELOPER? instance: `top.${ instance }`), // makes debugging easier
+		topmost = !/^top\./.test(name),
+		Type = type.replace(/^\w/, ($0, $$, $_) => $0.toUpperCase());
+
+	let org = url.origin,
+		ali = url.host.replace(/^(ww\w+\.|\w{2}\.)/i, '');
+
+	let { authorized, ...A } = await GetAuthorization(alias);
+
+return `/* ${ type } (${ (!PLUGN_DEVELOPER? 'on':'off') }line) - "${ url.href }" @ ${ DATE } */
+
+${ topmost? 'var ': '' }${ name } = (${ name } || (${ name }$ = $ => {
+'use strict';
+
+let DATE = (new Date),
 	YEAR = ${YEAR},
 	MONT = ${MONT},
 	DAY  = ${DAY};
 
-` + code
-<<<<<<< Updated upstream
-.replace(/\/\/+\s*"([^\"\n\f\r\v]+?)"\s*requires?\:?\s*(.+)([^]+)/i, ($0, $1, $2, $3, $$, $_) => `
-${ $3 }
-;(async() => await Require("${ $2 }", "${ alias }", "${ $1 }"))();
-=======
-.replace(/\/\/+\s*"([^\"\n\f\r\v]+?)"\s*requires?\:?\s*(.+)/i, ($0, $1, $2, $$, $_) => `
-;(async() => await Require("${ $2 }", "${ alias }", "${ $1 }", "${ instance }"))();
->>>>>>> Stashed changes
-`)
-	;
+/* Required permissions */
+if(${ allowed } === false)
+	return '<allowed>';
+if(${ authorized } === false)
+	return '<authorized>';
+${
+(() => {
+	let o = [];
+
+	for(let a in A)
+		o.push(
+`if(${ A[a] } === false)
+	return '<${ a.slice(1) }>';
+`
+		);
+
+	return o.join('');
+})()
+}
+/* Start Injected ${ Type } */
+${
+	code
+		.replace(/\/\/+\s*"([^\"\n\f\r\v]+?)"\s*requires?\:?\s*(.+)/i, ($0, $1, $2, $$, $_) =>
+			`;(async() => await Require("${ $2 }", "${ alias }", "${ $1 }", "${ instance }"))();`
+		)
+}
+/* End Injected ${ Type } */
+
+let ${ Type }ReadyState;
+
+top.addEventListener('popstate', ${ type }.init);
+top.addEventListener('pushstate-changed', ${ type }.init);
+
+return (
+	${ type }.RegExp = RegExp(
+		${ type }.url
+			.replace(/^\\*\\:/,'\\\\w{3,}:')
+				// *://
+			.replace(/\\*\\./g,'(?:[^\\\\.]+\\\\.)?')
+				// *.
+			.replace(/\\.\\*/g,'(?:\\\\.[^\\\\/\\\\.]+)?')
+				// .*
+			.replace(/([\\/\\?\\&\\#])\\*/g,'$1[^$]*')
+				// /* OR ?* OR &* OR #*
+	, 'i')
+).test
+/* URL matches pattern */
+(location.href)?
+	/* Injected ${ type } is properly structured */
+	(typeof ${ type }.init == "function")?
+		/* Injected ${ type } has the "ready" property */
+		${ type }.ready?
+			/* Injected ${ type } is ready */
+			(${ Type }ReadyState =
+				/* "ready" is an async function */
+				${ type }.ready.constructor.name == 'AsyncFunction'?
+					${ type }.ready():
+				/* "ready" is a sync (normal) function */
+				${ type }.ready()
+			)?
+				${ type }.init( ${ Type }ReadyState ):
+			/* Injected ${ type } isn't ready */
+			(${ type }.timeout || 1000):
+		/* Injected ${ type } doesn't have the "ready" property */
+		${ type }.init():
+	/* Injected ${ type } isn't properly structured */
+	(console.warn("The ${ type } (${ alias }) is incorrectly structured. Could not find required function ${ type }.init"), -1):
+/* URL doesn't match pattern */
+(console.warn("The domain '${ org }' (" + location.href + ") does not match the domain pattern '" + ${ type }.url + "' (" + ${ type }.RegExp + ")"), -1);
+})(document.queryBy));
+
+console.log('[${ name.replace(/^(top\.)?(\w{7}).*$/i, '$1$2') }]', ${ name });
+
+top.onlocationchange = (event) => chrome.runtime.sendMessage({ type: '$INIT$', options: { ${ type }: '${ alias }' } });
+
+;${ name };`
 }
 
 let handle = async(results, tabID, instance, script, type) => {
@@ -276,30 +344,6 @@ let handle = async(results, tabID, instance, script, type) => {
 
 	results = await results;
 
-<<<<<<< Updated upstream
-	if((!results || !results[0] || !instance) && !FOUND[instance])
-		try {
-			instance = RandomName();
-			tabchange([ TAB ]);
-			return;
-		} catch(error) {
-			return PLUGN_TERMINAL.warn(InstanceWarning);
-		}
-
-	let data = await results[0];
-
-	if(typeof data == 'number') {
-		if(handle.timeout)
-			return /* already running */;
-		if(data < 0)
-			return chrome.tabs.sendMessage(tabID, { data, instance, [InstanceType.toLowerCase()]: script, instance_type: InstanceType, type: 'NO_RENDER' })
-			/* stop execution and timeouts/intervals */;
-
-		return handle.timeout = setTimeout(() => { let { request, sender, callback } = (processMessage.properties || {}); handle.timeout = null; processMessage(request, sender, callback) }, data);
-	} else if(typeof data == 'string') {
-		let R = RegExp;
-
-=======
 	/* Always display a pretty button */
 	chrome.tabs.insertCSS(tabID, { file: 'sites/common.css' });
 
@@ -325,7 +369,6 @@ let handle = async(results, tabID, instance, script, type) => {
 	} else if(typeof data == 'string') {
 		let R = RegExp;
 
->>>>>>> Stashed changes
 		if(/^<([^<>]+)>$/.test(data))
 			return PLUGN_TERMINAL.warn(`The instance requires the "${ R.$1 }" permission: ${ instance }`);
 
@@ -334,7 +377,6 @@ let handle = async(results, tabID, instance, script, type) => {
 		let title = R.$1,
 			year  = R.$2,
 			type  = R.$3;
-<<<<<<< Updated upstream
 
 		data = { type, title, year };
 	}
@@ -353,26 +395,6 @@ let handle = async(results, tabID, instance, script, type) => {
 				return /* done */;
 			}
 
-=======
-
-		data = { type, title, year };
-	}
-
-	if(typeof data == 'number')
-		return setTimeout(() => { let { request, sender, callback } = (processMessage.properties || {}); processMessage(request, sender, callback) }, data);
-	if(typeof data != 'object')
-		return /* setTimeout */;
-
-	try {
-		if(data instanceof Array) {
-			data = data.filter(d => d);
-
-			if(data.length > 1) {
-				chrome.tabs.sendMessage(tabID, { data, instance, [InstanceType.toLowerCase()]: script, instance_type: InstanceType, type: 'POPULATE' });
-				return /* done */;
-			}
-
->>>>>>> Stashed changes
 			/* the array is too small to parse, set it as a single item */
 			data = data[0];
 		}
@@ -388,10 +410,6 @@ let handle = async(results, tabID, instance, script, type) => {
 
 		data = { ...data, type, title, year };
 
-<<<<<<< Updated upstream
-		chrome.tabs.insertCSS(tabID, { file: 'sites/common.css' });
-=======
->>>>>>> Stashed changes
 		chrome.tabs.sendMessage(tabID, { data, instance, [InstanceType.toLowerCase()]: script, instance_type: InstanceType, type: 'POPULATE' });
 	} catch(error) {
 		throw new Error(InstanceWarning + ' - ' + String(error));
@@ -436,8 +454,6 @@ let tabchange = async tabs => {
 
 	if(!allowed || !js) return;
 
-	let { authorized, ...A } = await GetAuthorization(js);
-
 	if(code) {
 		chrome.tabs.executeScript(id, { file: 'helpers.js' }, () => {
 			// Sorry, but the instance needs to be callable multiple times
@@ -447,109 +463,20 @@ let tabchange = async tabs => {
 		return setTimeout(() => cache = {}, 1e6);
 	}
 
-	let name = (!PLUGN_DEVELOPER? instance: `top.${ instance }`), // makes debugging easier
-		topmost = !/^top\./.test(name);
-
 	let file = (PLUGN_DEVELOPER)?
-					(type === 'script')?
-						chrome.runtime.getURL(`cloud/${ js }.js`):
-					chrome.runtime.getURL(`cloud/plugin.${ js }.js`):
-				`https://ephellon.github.io/web.to.plex/${ type }s/${ js }.js`;
+		(type === 'script')?
+			chrome.runtime.getURL(`cloud/${ js }.js`):
+		chrome.runtime.getURL(`cloud/plugin.${ js }.js`):
+	`https://ephellon.github.io/web.to.plex/${ type }s/${ js }.js`;
 
 	await fetch(file, { mode: 'cors' })
 		.then(response => response.text())
 		.then(async code => {
 			await chrome.tabs.executeScript(id, { file: 'helpers.js' }, async() => {
 				// Sorry, but the instance needs to be callable multiple times
-				await chrome.tabs.executeScript(id, { code:
-					(LAST = cache[ali] =
-`/* ${ type }* (${ (!PLUGN_DEVELOPER? 'on':'off') }line) - "${ url.href }" */
-${ topmost? 'var ': '' }${ name } = (${ name } || (${ name }$ = $ => {
-'use strict';
-
-/* Required permissions */
-if(${ allowed } === false)
-	return '<allowed>';
-if(${ authorized } === false)
-	return '<authorized>';
-${
-	(() => {
-		let o = [];
-
-		for(let a in A)
-			o.push(
-`if(${ A[a] } === false)
-	return '<${ a.slice(1) }>';
-`
-			);
-
-		return o.join('');
-	})()
-}
-/* Start Injected */
-${ prepare(code, js, type) }
-/* End Injected */
-
-let InjectedReadyState;
-
-top.addEventListener('popstate', ${ type }.init);
-top.addEventListener('pushstate-changed', ${ type }.init);
-
-return (${ type }.RegExp = RegExp(
-	${ type }.url
-${ URLRegExp }
-).test
-<<<<<<< Updated upstream
-(location.href)?
-/* URL matches pattern */
-	${ type }.ready?
-	/* Injected file has the "ready" property */
-	(InjectedReadyState =
-		${ type }.ready.constructor.name == 'AsyncFunction'?
-		/* "ready" is an async function */
-			${ type }.ready():
-		/* "ready" is a sync (normal) function */
-		${ type }.ready()
-	)?
-		/* Injected file is ready */
-			${ type }.init( InjectedReadyState ):
-		/* Injected file isn't ready */
-		(${ type }.timeout || 1000):
-	/* Injected file doesn't have the "ready" property */
-	${ type }.init():
-=======
-/* URL matches pattern */
-(location.href)?
-	/* Injected file is properly structured */
-	(typeof ${ type }.init == "function")?
-		/* Injected file has the "ready" property */
-		${ type }.ready?
-			/* Injected file is ready */
-			(InjectedReadyState =
-				/* "ready" is an async function */
-				${ type }.ready.constructor.name == 'AsyncFunction'?
-					${ type }.ready():
-				/* "ready" is a sync (normal) function */
-				${ type }.ready()
-			)?
-				${ type }.init( InjectedReadyState ):
-			/* Injected file isn't ready */
-			(${ type }.timeout || 1000):
-		/* Injected file doesn't have the "ready" property */
-		${ type }.init():
-	/* Injected file isn't properly structured */
-	(console.warn("The ${ type } (${ js }) is incorrectly structured. Could not find required function ${ type }.init"), -1):
->>>>>>> Stashed changes
-/* URL doesn't match pattern */
-(console.warn("The domain '${ org }' (" + location.href + ") does not match the domain pattern '" + ${ type }.url + "' (" + ${ type }.RegExp + ")"), -1);
-})(document.queryBy));
-
-console.log('[${ name.replace(/^(top\.)?(\w{7}).*$/i, '$1$2') }]', ${ name });
-
-top.onlocationchange = (event) => chrome.runtime.sendMessage({ type: '$INIT$', options: { ${ type }: '${ js }' } });
-
-;${ name };`
-				) }, results => handle(results, LAST_ID = id, LAST_INSTANCE = instance, LAST_JS = js, LAST_TYPE = type))
+				await chrome.tabs.executeScript(id, {
+					code: (LAST = cache[ali] = await prepare({ code, alias: js, type, allowed, url })),
+				}, results => handle(results, LAST_ID = id, LAST_INSTANCE = instance, LAST_JS = js, LAST_TYPE = type))
 			})
 		})
 		.then(() => running.push(id, instance))
@@ -559,11 +486,7 @@ top.onlocationchange = (event) => chrome.runtime.sendMessage({ type: '$INIT$', o
 // listen for message event
 let processMessage;
 
-<<<<<<< Updated upstream
-chrome.runtime.onMessage.addListener(processMessage = async(request, sender, callback) => {
-=======
 chrome.runtime.onMessage.addListener(processMessage = async(request = {}, sender, callback = () => {}) => {
->>>>>>> Stashed changes
 	let { options } = request,
 		tab = TAB || {},
 		{ id, url, href } = tab,
@@ -576,11 +499,7 @@ chrome.runtime.onMessage.addListener(processMessage = async(request = {}, sender
 		|| /^(?:chrome|debugger|view-source)/i.test(url)
 		// || (!!~running.indexOf(id) && !!~running.indexOf(instance))
 	)
-<<<<<<< Updated upstream
-		return /*
-=======
 		return callback(null) /*
->>>>>>> Stashed changes
 			Stop if:
 				a) There isn't a url
 				b) The url is a chrome url
@@ -593,11 +512,7 @@ chrome.runtime.onMessage.addListener(processMessage = async(request = {}, sender
 	let name = (!PLUGN_DEVELOPER? instance: `top.${ instance }`), // makes debugging easier
 		topmost = !/^top\./.test(name);
 
-<<<<<<< Updated upstream
-	if(request && request.options) {
-=======
 	if(request.options) {
->>>>>>> Stashed changes
 		let { type } = request,
 			{ plugin, script } = options,
 			_type = type.toLowerCase(),
@@ -606,26 +521,13 @@ chrome.runtime.onMessage.addListener(processMessage = async(request = {}, sender
 		type = type.toUpperCase();
 
 		let file = (PLUGN_DEVELOPER)?
-						(_type === 'script')?
-							chrome.runtime.getURL(`cloud/${ script }.js`):
-						chrome.runtime.getURL(`cloud/plugin.${ plugin }.js`):
-					`https://ephellon.github.io/web.to.plex/${ _type }s/${ options[_type] }.js`;
+			(_type === 'script')?
+				chrome.runtime.getURL(`cloud/${ script }.js`):
+			chrome.runtime.getURL(`cloud/plugin.${ plugin }.js`):
+		`https://ephellon.github.io/web.to.plex/${ _type }s/${ options[_type] }.js`;
 
 		let { authorized, ...A } = await GetAuthorization(options[_type]);
 
-<<<<<<< Updated upstream
-		switch(type) {
-			case 'PLUGIN':
-				allowed = await GetConsent(plugin, false);
-
-				await fetch(file, { mode: 'cors' })
-					.then(response => response.text())
-					.then(async code => {
-						await chrome.tabs.executeScript(id, { file: 'helpers.js' }, async() => {
-							// Sorry, but the instance needs to be callable multiple times
-							await chrome.tabs.executeScript(id, { code:
-								(LAST = cache[plugin] =
-=======
 		try {
 			switch(type) {
 				case 'PLUGIN':
@@ -636,115 +538,9 @@ chrome.runtime.onMessage.addListener(processMessage = async(request = {}, sender
 						.then(async code => {
 							await chrome.tabs.executeScript(id, { file: 'helpers.js' }, async() => {
 								// Sorry, but the instance needs to be callable multiple times
-								await chrome.tabs.executeScript(id, { code:
-									(LAST = cache[plugin] =
->>>>>>> Stashed changes
-`/* plugin (${ (!PLUGN_DEVELOPER? 'on':'off') }line) - "${ url.href }" */
-${ topmost? 'var ': '' }${ name } = (${ name } || (${ name }$ = $ => {
-'use strict';
-
-/* Required permissions */
-if(${ allowed } === false)
-	return '<allowed>';
-if(${ authorized } === false)
-	return '<authorized>';
-${
-	(() => {
-		let o = [];
-
-		for(let a in A)
-			o.push(
-`if(${ A[a] } === false)
-	return '<${ a.slice(1) }>';
-`
-			);
-
-		return o.join('');
-	})()
-}
-/* Start Injected (Plugin) */
-${ prepare(code, plugin, _type) }
-/* End Injected */
-
-let PluginReadyState;
-
-top.addEventListener('popstate', plugin.init);
-top.addEventListener('pushstate-changed', plugin.init);
-
-return (plugin.RegExp = RegExp(
-	plugin.url
-${ URLRegExp }
-).test
-<<<<<<< Updated upstream
-(location.href)?
-/* URL matches pattern */
-	plugin.ready?
-	/* Plugin has the "ready" property */
-	(PluginReadyState =
-		plugin.ready.constructor.name == 'AsyncFunction'?
-		/* "ready" is an async function */
-			plugin.ready():
-		/* "ready" is a sync (normal) function */
-		plugin.ready()
-	)?
-		/* Plugin is ready */
-			plugin.init( PluginReadyState ):
-		/* Script isn't ready */
-		(plugin.timeout || 1000):
-	/* Plugin doesn't have the "ready" property */
-	plugin.init():
-=======
-/* URL matches pattern */
-(location.href)?
-	/* Injected file is properly structured */
-	(typeof plugin.init == "function")?
-		/* Plugin has the "ready" property */
-		plugin.ready?
-			/* Plugin is ready */
-			(PluginReadyState =
-				/* "ready" is an async function */
-				plugin.ready.constructor.name == 'AsyncFunction'?
-					plugin.ready():
-				/* "ready" is a sync (normal) function */
-				plugin.ready()
-			)?
-				plugin.init( PluginReadyState ):
-			/* Plugin isn't ready */
-			(plugin.timeout || 1000):
-		/* Plugin doesn't have the "ready" property */
-		plugin.init():
-	/* Injected file isn't properly structured */
-	(console.warn("The plugin (${ plugin }) is incorrectly structured. Could not find required function plugin.init"), -1):
->>>>>>> Stashed changes
-/* URL doesn't match pattern */
-(console.warn("The domain '${ org }' (" + location.href + ") does not match the domain pattern '" + plugin.url + "' (" + plugin.RegExp + ")"), -1);
-})(document.queryBy));
-
-console.log('[${ name.replace(/^(top\.)?(\w{7}).*$/i, '$1$2') }]', ${ name });
-
-top.onlocationchange = (event) => chrome.runtime.sendMessage({ type: '$INIT$', options: { plugin: '${ plugin }' } });
-
-;${ name };`
-<<<<<<< Updated upstream
-) }, results => handle(results, LAST_ID = id, LAST_INSTANCE = instance, LAST_JS = plugin, LAST_TYPE = type))
-						})
-					})
-					.then(() => running.push(id, instance))
-					.catch(error => { throw error });
-				break;
-
-			case 'SCRIPT':
-				allowed = await GetConsent(script, true);
-
-				await fetch(file, { mode: 'cors' })
-					.then(response => response.text())
-					.then(async code => {
-						await chrome.tabs.executeScript(id, { file: 'helpers.js' }, async() => {
-							// Sorry, but the instance needs to be callable multiple times
-							await chrome.tabs.executeScript(id, { code:
-								(LAST = cache[script] =
-=======
-	) }, results => handle(results, LAST_ID = id, LAST_INSTANCE = instance, LAST_JS = plugin, LAST_TYPE = type))
+								await chrome.tabs.executeScript(id, {
+									code: (LAST = cache[plugin] = await prepare({ code, alias: plugin, type: 'plugin', allowed, url }))
+								}, results => handle(results, LAST_ID = id, LAST_INSTANCE = instance, LAST_JS = plugin, LAST_TYPE = type))
 							})
 						})
 						.then(() => running.push(id, instance))
@@ -759,157 +555,9 @@ top.onlocationchange = (event) => chrome.runtime.sendMessage({ type: '$INIT$', o
 						.then(async code => {
 							await chrome.tabs.executeScript(id, { file: 'helpers.js' }, async() => {
 								// Sorry, but the instance needs to be callable multiple times
-								await chrome.tabs.executeScript(id, { code:
-									(LAST = cache[script] =
->>>>>>> Stashed changes
-`/* script (${ (!PLUGN_DEVELOPER? 'on':'off') }line) - "${ url.href }" */
-${ topmost? 'var ': '' }${ name } = (${ name } || (${ name }$ = $ => {
-'use strict';
-
-/* Required permissions */
-if(${ allowed } === false)
-	return '<allowed>';
-if(${ authorized } === false)
-	return '<authorized>';
-${
-	(() => {
-		let o = [];
-
-		for(let a in A)
-			o.push(
-`if(${ A[a] } === false)
-	return '<${ a.slice(1) }>';
-`
-			);
-
-		return o.join('');
-	})()
-}
-/* Start Injected (Script) */
-${ prepare(code, script, _type) }
-/* End Injected */
-
-let ScriptReadyState;
-
-top.addEventListener('popstate', script.init);
-top.addEventListener('pushstate-changed', script.init);
-
-return (script.RegExp = RegExp(
-	script.url
-${ URLRegExp }
-).test
-<<<<<<< Updated upstream
-(location.href)?
-/* URL matches pattern */
-	script.ready?
-	/* Script has the "ready" property */
-	(ScriptReadyState =
-		script.ready.constructor.name == 'AsyncFunction'?
-		/* "ready" is an async function */
-			script.ready():
-		/* "ready" is a sync (normal) function */
-		script.ready()
-	)?
-		/* Script is ready */
-			script.init( ScriptReadyState ):
-		/* Script isn't ready */
-		(script.timeout || 1000):
-	/* Script doesn't have the "ready" property */
-	script.init():
-=======
-/* URL matches pattern */
-(location.href)?
-    /* Injected file is properly structured */
-    (typeof script.init == "function")?
-        /* Script has the "ready" property */
-        script.ready?
-            /* Script is ready */
-            (ScriptReadyState =
-                /* "ready" is an async function */
-                script.ready.constructor.name == 'AsyncFunction'?
-                    script.ready():
-                /* "ready" is a sync (normal) function */
-                script.ready()
-            )?
-                script.init( ScriptReadyState ):
-            /* Script isn't ready */
-            (script.timeout || 1000):
-        /* Script doesn't have the "ready" property */
-        script.init():
-    /* Injected file isn't properly structured */
-    (console.warn("The script (${ script }) is incorrectly structured. Could not find required function script.init"), -1):
->>>>>>> Stashed changes
-/* URL doesn't match pattern */
-(console.warn("The domain '${ org }' (" + location.href + ") does not match the domain pattern '" + script.url + "' (" + script.RegExp + ")"), -1);
-})(document.queryBy));
-
-console.log('[${ name.replace(/^(top\.)?(\w{7}).*$/i, '$1$2') }]', ${ name });
-
-top.onlocationchange = (event) => chrome.runtime.sendMessage({ type: '$INIT$', options: { script: '${ script }' } });
-
-;${ name };`
-<<<<<<< Updated upstream
-	) }, results => handle(results, LAST_ID = id, LAST_INSTANCE = instance, LAST_JS = script, LAST_TYPE = type))
-						})
-					})
-					.then(() => running.push(id, instance))
-					.catch(error => { throw error });
-				break;
-
-			// Soft reset (button reset)
-			case '_INIT_':
-				chrome.tabs.executeScript(id, { code: LAST }, results => handle(results, LAST_ID, LAST_INSTANCE, LAST_JS, LAST_TYPE));
-				break;
-
-			// Hard reset (program reset)
-			case '$INIT$':
-				let t = type.toLowerCase(),
-					data = {};
-
-				chrome.tabs.sendMessage(tab.id, { data, instance, [t]: script, instance_type: t, type: 'INITIALIZE' });
-				// chrome.tabs.getCurrent(tab => {
-				//     instance = RandomName();
-				//
-				//     setTimeout(() => tabchange([ tab ]), 5000);
-				// });
-				break;
-
-			case 'FOUND':
-				FOUND[request.instance] = request.found;
-				break;
-
-			case 'GRANT_PERMISSION':
-				await Save(`has/${ options[_type] }`, options.allowed);
-				await Save(`get/${ options[_type] }`, options.permissions);
-				break;
-
-			case 'SEARCH_PLEX':
-			case 'VIEW_COUCHPOTATO':
-			case 'PUSH_COUCHPOTATO':
-			case 'PUSH_RADARR':
-			case 'PUSH_SONARR':
-			case 'PUSH_MEDUSA':
-			case 'PUSH_WATCHER':
-			case 'PUSH_OMBI':
-			case 'PUSH_SICKBEARD':
-			case 'OPEN_OPTIONS':
-			case 'SEARCH_FOR':
-			case 'SAVE_AS':
-			case 'DOWNLOAD_FILE':
-				/* Meant to be handled by background.js */
-				return true;
-				break;
-
-			default:
-				PLUGN_TERMINAL.warn(`Unable to find type "${ type }"`);
-				instance = RandomName();
-				return false;
-		};
-	}
-
-	return true;
-=======
-		) }, results => handle(results, LAST_ID = id, LAST_INSTANCE = instance, LAST_JS = script, LAST_TYPE = type))
+								await chrome.tabs.executeScript(id, {
+									code: (LAST = cache[script] = await prepare({ code, alias: script, type: 'script', allowed, url }))
+								}, results => handle(results, LAST_ID = id, LAST_INSTANCE = instance, LAST_JS = script, LAST_TYPE = type))
 							})
 						})
 						.then(() => running.push(id, instance))
@@ -974,7 +622,6 @@ top.onlocationchange = (event) => chrome.runtime.sendMessage({ type: '$INIT$', o
 	} else {
 		return true;
 	}
->>>>>>> Stashed changes
 });
 
 // this doesn't actually work...

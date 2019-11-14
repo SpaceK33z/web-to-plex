@@ -1,3 +1,5 @@
+**We're currently in the process of making a v4 release which will contain the features listed below. The currently available version on the Chrome and Firefox webstore won't contain these features!**
+
 # Web to Plex ![Icon](src/img/48.png)
 
 ![Examples](example.png)
@@ -102,6 +104,7 @@ The sites used as search engines (IMDb, TMDb, and TVDb) will automatically creat
 37. [Freeform (Go)](http://freeform.go.com/)<sup>6</sup>
 38. [Free Movies Cinema](https://freemoviescinema.com/)<sup>6</sup>
 39. [SnagFilms](https://snagfilms.com/)<sup>6</sup>
+40. [Fox Searchlight](http://foxsearchlight.com/)<sup>6</sup>
 
 </details>
 
@@ -132,16 +135,13 @@ The sites used as search engines (IMDb, TMDb, and TVDb) will automatically creat
 
 ## Issues & Contributions
 
-<<<<<<< Updated upstream
-=======
-[![DeepScan grade](https://deepscan.io/api/teams/5912/projects/7762/branches/83413/badge/grade.svg)](https://deepscan.io/dashboard#view=project&tid=5912&pid=7762&bid=83413)
+[![DeepScan grade](https://deepscan.io/api/teams/5912/projects/7762/branches/83438/badge/grade.svg)](https://deepscan.io/dashboard#view=project&tid=5912&pid=7762&bid=83438)
 
 <!--
     master:         83413
     beta-branch:    83438
 -->
 
->>>>>>> Stashed changes
 If you have any problem with the extension, please don't hesitate to [submit an issue](https://github.com/SpaceK33z/web-to-plex/issues/new/choose).
 
 All contributions are welcome.

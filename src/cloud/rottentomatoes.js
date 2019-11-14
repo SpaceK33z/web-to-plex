@@ -35,12 +35,8 @@ let script = {
 				break;
 
 			case 'list':
-<<<<<<< Updated upstream
-				let options, elements = $('.mb-movie');
-=======
 				let options = [],
 					elements = $('.mb-movie');
->>>>>>> Stashed changes
 
 				elements.forEach((element, index, array) => {
 					let option = script.process(element);
