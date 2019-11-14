@@ -6,7 +6,7 @@ let script = {
 	"init": (ready) => {
 		let _title, _year, _image, R = RegExp;
 
-		let title  = $('[itemprop="name"]:not(meta)').first,
+		let title  = $('h3[itemprop="name"]').first,
 			year   = $('.mvic-desc [href*="year/"]').first,
 			image  = $('.hiddenz, [itemprop="image"]').first,
 			type   = 'movie';

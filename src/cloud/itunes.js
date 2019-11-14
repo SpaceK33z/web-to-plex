@@ -9,18 +9,11 @@ let script = {
 		switch(type) {
 			case 'movie':
 				title = $('[class*="movie-header__title"i]').first.textContent;
-<<<<<<< Updated upstream
-				year  = +$('[datetime]').first.textContent || title.replace(RegExp(`[^]*\\((${ year })\\)[^]*`), '$1');
-				image = ($('[class*="product"] ~ * picture img').first || {}).src;
-
-				title = title.replace(RegExp(`\\s*\\(${ year }\\)`), '');
-=======
 				year  = +$('[datetime]').first.textContent;
 				image = ($('[class*="product"] ~ * picture img').first || {}).src;
 
 				title = title.replace(RegExp(`\\s*\\(${ year }|\\d{4}\\)`), '');
 				year  = year || +R.$1;
->>>>>>> Stashed changes
 				break;
 
 			case 'tv':

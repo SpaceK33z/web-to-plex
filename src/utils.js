@@ -1,11 +1,7 @@
 /* eslint-disable no-unused-vars */
 /* global configuration, init, Update, "Helpers" */
 
-<<<<<<< Updated upstream
-let configuration, init, Update, browser;
-=======
 let configuration, init, Update;
->>>>>>> Stashed changes
 
 (async date => {
 
@@ -21,25 +17,12 @@ let configuration, init, Update;
 		CAUGHT;
 
 	// simple helpers
-<<<<<<< Updated upstream
-	let extURL = url => (browser? browser.runtime: chrome.extension).getURL(url),
-=======
 	let extURL = url => chrome.extension.getURL(url),
->>>>>>> Stashed changes
 		$ = (selector, container) => queryBy(selector, container),
 		// DO NOT EXPOSE
 		__CONFIG__, ALLOWED, PERMISS;
 
 	let IMG_URL = {
-<<<<<<< Updated upstream
-		'nil':			  extURL('img/null.png'),
-		'icon_16':		  extURL('img/16.png'),
-		'icon_48':		  extURL('img/48.png'),
-		'hide_icon_16':	 extURL('img/hide.16.png'),
-		'hide_icon_48':	 extURL('img/hide.48.png'),
-		'show_icon_16':	 extURL('img/show.16.png'),
-		'show_icon_48':	 extURL('img/show.48.png'),
-=======
 		'nil':				extURL('img/null.png'),
 		'icon_16':			extURL('img/16.png'),
 		'icon_48':			extURL('img/48.png'),
@@ -47,7 +30,6 @@ let configuration, init, Update;
 		'hide_icon_48':		extURL('img/hide.48.png'),
 		'show_icon_16':		extURL('img/show.16.png'),
 		'show_icon_48':		extURL('img/show.48.png'),
->>>>>>> Stashed changes
 		'close_icon_16':	extURL('img/close.16.png'),
 		'close_icon_48':	extURL('img/close.48.png'),
 		'icon_white_16':	extURL('img/_16.png'),
@@ -107,21 +89,13 @@ let configuration, init, Update;
 			}
 
 			if((UTILS_STORAGE.MAX_ITEMS && array.length >= UTILS_STORAGE.MAX_ITEMS) || bytes >= UTILS_STORAGE.QUOTA_BYTES) {
-<<<<<<< Updated upstream
-				UTILS_TERMINAL.warn('Exceeded quota. Erasing cache...');
-=======
 				UTILS_TERMINAL.WARN('Exceeded quota. Erasing cache...');
->>>>>>> Stashed changes
 
 				for(let item in items)
 					if(/^~\/cache\/(?!get|has)/i.test(item))
 						UTILS_STORAGE.remove(item);
 
-<<<<<<< Updated upstream
-				UTILS_TERMINAL.log('Cache erased');
-=======
 				UTILS_TERMINAL.LOG('Cache erased');
->>>>>>> Stashed changes
 			}
 		});
 
@@ -156,11 +130,7 @@ let configuration, init, Update;
 	// state = "warning" - red
 	// state = "error"
 	// state = "update"  - blue
-<<<<<<< Updated upstream
-	// state = "info"	- grey
-=======
 	// state = "info"	 - grey
->>>>>>> Stashed changes
 	// anything else for state will show as orange
 	class Notification {
 		constructor(state, text, timeout = 7000, callback = () => {}, requiresClick = true) {
@@ -203,11 +173,7 @@ let configuration, init, Update;
 				done:  false,
 				index: queue.list.length,
 				job:   setTimeout(() => element.onmouseup({ target: element, requiresClick }), timeout),
-<<<<<<< Updated upstream
-				id:	+element.id,
-=======
 				id:    +element.id,
->>>>>>> Stashed changes
 				callback, element
 			};
 			queue.list.push(queue[element.id]);
@@ -276,14 +242,11 @@ let configuration, init, Update;
 					)
 				};
 
-<<<<<<< Updated upstream
-=======
 			let preX = document.queryBy('.web-to-plex-prompt').first;
 
 			if(preX)
 				return /* Ignore while another prompt is open, prevents double prompts */;
 
->>>>>>> Stashed changes
 			switch(prompt_type) {
 				/* Allows the user to add and remove items from a list */
 				case 'prompt':
@@ -534,11 +497,7 @@ let configuration, init, Update;
 					if(!(existing = $('.web-to-plex-prompt[type=permission]')).empty)
 						return existing.first;
 
-<<<<<<< Updated upstream
-					UTILS_TERMINAL.log(`Asking for permission(s):`, options);
-=======
 					UTILS_TERMINAL.LOG(`Asking for permission(s):`, options);
->>>>>>> Stashed changes
 
 					remove = element => {
 						let prompter = $('.web-to-plex-prompt').first,
@@ -589,11 +548,7 @@ let configuration, init, Update;
 					break;
 
 				default:
-<<<<<<< Updated upstream
-					return UTILS_TERMINAL.warn(`Unknown prompt type "${ prompt_type }"`);
-=======
 					return UTILS_TERMINAL.ERROR(`Unknown prompt type "${ prompt_type }"`);
->>>>>>> Stashed changes
 					break;
 			}
 
@@ -602,313 +557,6 @@ let configuration, init, Update;
 			return container.append(prompt), prompt;
 		}
 	}
-<<<<<<< Updated upstream
-
-	// open up the options page
-	function Options() {
-		chrome.runtime.sendMessage({
-			type: 'OPEN_OPTIONS'
-		});
-	}
-
-	// "secret frame"
-	function sFrame(url, callbacks) {
-		let { success, error } = callbacks;
-
-		let frame = document.furnish('iframe#web-to-plex-sframe', {
-			src: url,
-			style: `
-				display:	none   !important;
-				opacity:	0	  !important;
-				visibility: hidden !important;
-			`,
-
-			onload:  success,
-			onerror: error,
-		});
-
-		// todo: make iframe, load, delete
-		document.body.append(frame);
-	}
-
-	// Send an update query to background.js
-	Update = (type, options = {}, postToo) => {
-		if(configuration)
-			console.log(`Requesting update [post-to-top: ${ !!postToo }]: ${ type }`, options);
-		else if(!Update.retry)
-			try {
-				configuration = ParsedOptions();
-
-				Update.retry = true;
-
-				Update(type, options, postToo);
-			} catch(error) {
-				console.warn(`Update failed... "${ error }" Attempting to save configuration...`);
-
-				return sFrame(extURL(`options/index.html#save`), {
-					success: async event => {
-						let self = event.target;
-
-						await ParsedOptions();
-
-						Update(type, options, postToo);
-
-						self.remove();
-					},
-
-					error: async event => {
-						let self = event.target;
-						self.remove();
-
-						new Notification('error', `Fill in missing Web to Plex options`, 15000, Options, false);
-
-						throw `Unable to set configuration variable: ${ JSON.stringify(configuration) }`;
-					}
-				});
-			}
-		else
-			return Update.retry = false;
-
-		chrome.runtime.sendMessage({
-			type,
-			options
-		});
-
-		if(postToo)
-			top.postMessage(options);
-	};
-
-	// get the saved options
-	function options() {
-		return new Promise((resolve, reject) => {
-			function handleOptions(options) {
-				if((!options.plexToken || !options.servers) && !options.IGNORE_PLEX)
-					return reject(new Error('Required options are missing')),
-						null;
-
-				let server, o;
-
-				if(!options.IGNORE_PLEX) {
-					// For now we support only one Plex server, but the options already
-					// allow multiple for easy migration in the future.
-					server = options.servers[0];
-					o = {
-						server: {
-							...server,
-							// Compatibility for users who have not updated their settings yet.
-							connections: server.connections || [{ uri: server.url }]
-						},
-						...options
-					};
-
-					options.plexURL = o.plexURL?
-						`${ o.plexURL }web#!/server/${ o.server.id }/`:
-					`https://app.plex.tv/web/app#!/server/${ o.server.id }/`;
-				} else {
-					o = options;
-				}
-
-				if(o.couchpotatoBasicAuthUsername)
-					o.couchpotatoBasicAuth = {
-						username: o.couchpotatoBasicAuthUsername,
-						password: o.couchpotatoBasicAuthPassword
-					};
-
-				// TODO: stupid copy/pasta
-				if(o.watcherBasicAuthUsername)
-					o.watcherBasicAuth = {
-						username: o.watcherBasicAuthUsername,
-						password: o.watcherBasicAuthPassword
-					};
-
-				if(o.radarrBasicAuthUsername)
-					o.radarrBasicAuth = {
-						username: o.radarrBasicAuthUsername,
-						password: o.radarrBasicAuthPassword
-					};
-
-				if(o.sonarrBasicAuthUsername)
-					o.sonarrBasicAuth = {
-						username: o.sonarrBasicAuthUsername,
-						password: o.sonarrBasicAuthPassword
-					};
-
-				if(o.medusaBasicAuthUsername)
-					o.medusaBasicAuth = {
-						username: o.medusaBasicAuthUsername,
-						password: o.medusaBasicAuthPassword
-					};
-
-				if(o.sickBeardBasicAuthUsername)
-					o.sickBeardBasicAuth = {
-						username: o.sickBeardBasicAuthUsername,
-						password: o.sickBeardBasicAuthPassword
-					};
-
-				if(o.usingOmbi && o.ombiURLRoot && o.ombiToken) {
-					o.ombiURL = o.ombiURLRoot;
-				} else {
-					delete o.ombiURL; // prevent variable ghosting
-				}
-
-				if(o.usingCouchPotato && o.couchpotatoURLRoot && o.couchpotatoToken) {
-					o.couchpotatoURL = `${ items.couchpotatoURLRoot }/api/${encodeURIComponent(o.couchpotatoToken)}`;
-				} else {
-					delete o.couchpotatoURL; // prevent variable ghosting
-				}
-
-				if(o.usingWatcher && o.watcherURLRoot && o.watcherToken) {
-					o.watcherURL = o.watcherURLRoot;
-				} else {
-					delete o.watcherURL; // prevent variable ghosting
-				}
-
-				if(o.usingRadarr && o.radarrURLRoot && o.radarrToken) {
-					o.radarrURL = o.radarrURLRoot;
-				} else {
-					delete o.radarrURL; // prevent variable ghosting
-				}
-
-				if(o.usingSonarr && o.sonarrURLRoot && o.sonarrToken) {
-					o.sonarrURL = o.sonarrURLRoot;
-				} else {
-					delete o.sonarrURL; // prevent variable ghosting
-				}
-
-				if(o.usingMedusa && o.medusaURLRoot && o.medusaToken) {
-					o.medusaURL = o.medusaURLRoot;
-				} else {
-					delete o.medusaURL; // prevent variable ghosting
-				}
-
-				if(o.usingSickBeard && o.sickBeardURLRoot && o.sickBeardToken) {
-					o.sickBeardURL = o.sickBeardURLRoot;
-				} else {
-					delete o.sickBeardURL; // prevent variable ghosting
-				}
-
-				resolve(o);
-			}
-
-			UTILS_STORAGE.get(null, options => {
-				if(chrome.runtime.lastError)
-					chrome.storage.local.get(null, handleOptions);
-				else
-					handleOptions(options);
-			});
-		});
-	}
-
-	// self explanatory, returns an object; sets the configuration variable
-	function ParsedOptions() {
-		return options()
-			.then(
-				options => {
-					configuration = {};
-
-					/* Don't expose the user's authentication information to sites */
-					for(let key in options)
-						if(/username|password|token|api|server|url|storage|cache/i.test(key))
-							if(ALLOWED && RegExp(PERMISS.join('|'),'i').test(key))
-								configuration[key] = options[key];
-							else
-								/* Do nothing */;
-						// else if(/(^cache-data|paths|qualities)/i.test(key))
-						//	 /* Pre-parse JSON - make sure anything accessing thedata handles objects too */
-						//	 configuration[key] = JSON.parse(options[key] || null);
-						else
-							/* Simple copy */
-							configuration[key] = options[key];
-
-					CAUGHT = JSON.parse(options.__caught);
-					CAUGHT.bump = async(ids) => {
-						for(let id in ids)
-							CAUGHT[id.toLowerCase().slice(0, 4)].push(ids[id]);
-
-						let __caught = JSON.stringify(CAUGHT);
-
-						await UTILS_STORAGE.set({ __caught }, () => configuration.__caught = __caught);
-					};
-
-					return __CONFIG__ = options;
-				},
-				error => {
-					new Notification(
-						'warning',
-						'Fill in missing Web to Plex options',
-						15000,
-						Options
-					);
-					throw error;
-				}
-			);
-	}
-
-	await ParsedOptions();
-
-	let AUTO_GRAB = {
-			ENABLED: __CONFIG__.UseAutoGrab,
-			LIMIT:   __CONFIG__.AutoGrabLimit,
-		},
-		UTILS_DEVELOPER = __CONFIG__.DeveloperMode, // = { true: Developer Mode, fase: Standard Mode }
-		UTILS_TERMINAL =
-			UTILS_DEVELOPER?
-				console:
-			{ error: m => m, info: m => m, log: m => m, warn: m => m, group: m => m, groupEnd: m => m, honor: m => m };
-
-		UTILS_TERMINAL.honor = UTILS_TERMINAL.honor?
-			UTILS_TERMINAL.honor:
-		(...messages) => {
-			if(messages.length == 1) {
-				let message = messages[0],
-					type = typeof message == 'object'? 'o': 'c';
-
-				UTILS_TERMINAL.log(
-					(type == 'o'? message: `%${ type }>> ${ message } <<`),
-					(
-						type == 'o'?
-							null:
-						`
-							background-color: #00332b;
-							border-bottom: 1px solid #0000;
-							border-top: 1px solid #065;
-							box-sizing: border-box;
-							clear: right;
-							color: #f5f5f5;
-							display: block !important;
-							line-height: 2;
-							user-select: text;
-
-							flex-basis: 1;
-							flex-shrink: 1;
-
-							margin: 0;
-							overflow-wrap: break-word;
-							pading: 3px 22px 1px 0;
-							position: fixed;
-							z-index: -1;
-
-							min-height: 0;
-							min-width: 100%;
-							height: 100%;
-							width: 100%;
-						`
-					)
-				);
-			} else {
-				messages.forEach(message => UTILS_TERMINAL.honor(message));
-			}
-		};
-
-	if(configuration) {
-		let host = location.host.replace(/^(ww\w+\.)/, ''),
-			doms = configuration.__domains.split(',');
-
-		if(!~doms.indexOf(host))
-			return;
-	}
-
-=======
 
 	// open up the options page
 	function Options() {
@@ -1152,8 +800,20 @@ let configuration, init, Update;
 
 					CAUGHT = JSON.parse(options.__caught);
 					CAUGHT.bump = async(ids) => {
-						for(let id in ids)
-							CAUGHT[id.toLowerCase().slice(0, 4)].push(ids[id]);
+						bumping:
+						for(let id in ids) {
+							let ID = id.toLowerCase().slice(0, 4);
+
+							if(!!~CAUGHT[ID].indexOf(ids[id]))
+								continue bumping;
+
+							if(CAUGHT[ID].length >= 100)
+								CAUGHT[ID].splice(0, 1 + (CAUGHT[ID].length - 100));
+
+							CAUGHT[ID].push(ids[id]);
+							CAUGHT[ID].filter(v => typeof v == 'number'? v: null);
+							CAUGHT[ID] = CAUGHT[ID].slice(0, 100);
+						}
 
 						let __caught = JSON.stringify(CAUGHT);
 
@@ -1320,7 +980,6 @@ let configuration, init, Update;
 			return;
 	}
 
->>>>>>> Stashed changes
 	UTILS_TERMINAL.log('UTILS_DEVELOPER:', UTILS_DEVELOPER, configuration);
 
 	// parse the formatted headers and URL
@@ -1413,11 +1072,7 @@ let configuration, init, Update;
 		}
 
 		if(local) {
-<<<<<<< Updated upstream
-			UTILS_TERMINAL.honor('[LOCAL] Search results', local);
-=======
 			UTILS_TERMINAL.LOG('[LOCAL] Search results', local);
->>>>>>> Stashed changes
 			return local;
 		}
 
@@ -1455,11 +1110,7 @@ let configuration, init, Update;
 			(rqut == 'tmdb' || (rqut == '*' && !mid && title && year) || apit == 'movie')?
 				(apit && apid)?
 					`https://api.themoviedb.org/3/${ apit }/${ apid }?api_key=${ api.tmdb }`:
-<<<<<<< Updated upstream
-				(iid)?
-=======
 				(iid || mid || tid)?
->>>>>>> Stashed changes
 					`https://api.themoviedb.org/3/find/${ iid || mid || tid }?api_key=${ api.tmdb }&external_source=${ iid? 'imdb': mid? 'tmdb': 'tvdb' }_id`:
 				`https://api.themoviedb.org/3/search/${ apit }?api_key=${ api.tmdb }&query=${ encodeURI(title) }${ year? '&year=' + year: '' }`:
 			(rqut == 'tvdb' || (rqut == '*' && !tid && title) || (apid == tid))?
@@ -1489,11 +1140,7 @@ let configuration, init, Update;
 			UTILS_TERMINAL.log({ proxy, url, headers });
 		}
 
-<<<<<<< Updated upstream
-		UTILS_TERMINAL.log(`Searching for "${ title } (${ year })" in ${ type || apit }/${ rqut }${ proxy.enabled? '[PROXY]': '' } => ${ url }`);
-=======
 		UTILS_TERMINAL.LOG(`Searching for "${ title } (${ year })" in ${ type || apit }/${ rqut }${ proxy.enabled? '[PROXY]': '' } => ${ url }`);
->>>>>>> Stashed changes
 
 		await(proxy.enabled? fetch(url, { mode: "cors", headers }): fetch(url))
 			.then(response => response.text())
@@ -1509,11 +1156,7 @@ let configuration, init, Update;
 				throw error;
 			});
 
-<<<<<<< Updated upstream
-		UTILS_TERMINAL.honor('Search results', { title, year, url, json });
-=======
 		UTILS_TERMINAL.LOG('Search results', { title, year, url, json });
->>>>>>> Stashed changes
 
 		/* DO NOT change to else-if, won't work with Sick Beard: { data: { results: ... } } */
 		if('data' in json)
@@ -1552,15 +1195,9 @@ let configuration, init, Update;
 						score = 100 * (((S.match(E = RegExp(`\\b(${k(s)})\\b`, 'gi')) || [null]).length) / (L || 1)),
 						passing = __CONFIG__.UseLooseScore | 0;
 
-<<<<<<< Updated upstream
-					UTILS_TERMINAL.log(`\tQuick Match => "${ s }"/"${ S }" = ${ score }% (${ E })`);
-					score *= (l > L? (L||1)/l: L > l? (l||1)/L: 1);
-					UTILS_TERMINAL.log(`\tActual Match (${ passing }% to pass) ~> ... = ${ score }%`);
-=======
 					UTILS_TERMINAL.LOG(`\tQuick Match => "${ s }"/"${ S }" = ${ score }% (${ E })`);
 					score *= (l > L? (L||1)/l: L > l? (l||1)/L: 1);
 					UTILS_TERMINAL.LOG(`\tActual Match (${ passing }% to pass) ~> ... = ${ score }%`);
->>>>>>> Stashed changes
 
 					return (S != '' && score >= passing) || (n? R(S, s, !n): n);
 				},
@@ -1597,7 +1234,7 @@ let configuration, init, Update;
 						$data:
 					found;
 				//api.themoviedb.org/ \local
-				else if(('movie_results' in $data || 'tv_results' in $data || 'results' in $data) && $data.release_date)
+				else if($data && ('movie_results' in $data || 'tv_results' in $data || 'results' in $data) && $data.release_date)
 					found = (DATA => {
 						if(DATA.results)
 							if(rqut == 'tmdb')
@@ -1616,21 +1253,17 @@ let configuration, init, Update;
 						return f? o: f = !!iid;
 					})($data);
 				//api.themoviedb.org/ \remote
-				else if(('original_name' in $data || 'original_title' in $data) && $data.release_date)
+				else if($data && ('original_name' in $data || 'original_title' in $data) && $data.release_date)
 					found = (tid == $data.id || (t($data.original_name || $data.original_title) == t(title) || t($data.name) == t(title)) && year == ($data || b).release_date.slice(0, 4))?
 						$data:
 					found;
 				//theimdbapi.org/
-				else if($data.release_date)
+				else if($data && $data.release_date)
 					found = (t($data.title) == t(title) && year == ($data.url || $data || b).release_date.slice(0, 4))?
 						$data:
 					found;
 
-<<<<<<< Updated upstream
-				UTILS_TERMINAL.log(`Strict Matching: ${ !!found }`, !!found? found: null);
-=======
 				UTILS_TERMINAL.LOG(`Strict Matching: ${ !!found }`, !!found? found: null);
->>>>>>> Stashed changes
 			}
 
 			// Find a close match: Title
@@ -1697,11 +1330,7 @@ let configuration, init, Update;
 						$data:
 					found;
 
-<<<<<<< Updated upstream
-				UTILS_TERMINAL.log(`Title Matching: ${ !!found }`, !!found? found: null);
-=======
 				UTILS_TERMINAL.LOG(`Title Matching: ${ !!found }`, !!found? found: null);
->>>>>>> Stashed changes
 			}
 
 			// Find an OK match (Loose Searching): Title ~ Title
@@ -1743,11 +1372,7 @@ let configuration, init, Update;
 				else if('externals' in ($data = $data.show || $data) || 'show' in $data)
 					found =
 						// ignore language barriers
-<<<<<<< Updated upstream
-						(R($data.name, title) || UTILS_TERMINAL.log('Matching:', [$data.name, title], R($data.name, title)))?
-=======
 						(R($data.name, title) || UTILS_TERMINAL.LOG('Matching:', [$data.name, title], R($data.name, title)))?
->>>>>>> Stashed changes
 							$data:
 						// trust the api matching
 						($data.score > lastscore)?
@@ -1777,22 +1402,14 @@ let configuration, init, Update;
 						$data:
 					found;
 
-<<<<<<< Updated upstream
-				UTILS_TERMINAL.log(`Loose Matching: ${ !!found }`, !!found? found: null);
-=======
 				UTILS_TERMINAL.LOG(`Loose Matching: ${ !!found }`, !!found? found: null);
->>>>>>> Stashed changes
 			}
 
 			json = found;
 		}
 
 		if((json === undefined || json === null || json === false) && !(rerun & 0b0001))
-<<<<<<< Updated upstream
-			return UTILS_TERMINAL.warn(`Trying to find "${ title }" again (as "${ (alttitle || title) }")`), rerun |= 0b0001, json = Identify({ title: (alttitle || title), year: YEAR, type, IMDbID, TMDbID, TVDbID, APIType, APIID, meta, rerun });
-=======
 			return UTILS_TERMINAL.WARN(`Trying to find "${ title }" again (as "${ (alttitle || title) }")`), rerun |= 0b0001, json = Identify({ title: (alttitle || title), year: YEAR, type, IMDbID, TMDbID, TVDbID, APIType, APIID, meta, rerun });
->>>>>>> Stashed changes
 		else if((json === undefined || json === null))
 			json = { IMDbID, TMDbID, TVDbID };
 
@@ -1887,27 +1504,16 @@ let configuration, init, Update;
 
 		let best = { title, year, data, type, rqut, score: json.score | 0 };
 
-<<<<<<< Updated upstream
-		UTILS_TERMINAL.log('Best match:', url, { best, json });
-
-		if(best.data.imdb == ei && best.data.tmdb == 0 && best.data.tvdb == 0)
-			return UTILS_TERMINAL.log(`No information was found for "${ title } (${ year })"`), {};
-=======
 		UTILS_TERMINAL.LOG(`Best match: ${ url }`, { best, json });
 
 		if(best.data.imdb == ei && best.data.tmdb == 0 && best.data.tvdb == 0)
 			return UTILS_TERMINAL.ERROR(`No information was found for "${ title } (${ year })"`), {};
->>>>>>> Stashed changes
 
 		save(savename, data); // e.g. "Coco (0)" on Netflix before correction / no repeat searches
 		save(savename = `${title} (${year}).${rqut}`.toLowerCase(), data); // e.g. "Coco (2017)" on Netflix after correction / no repeat searches
 		save(`${title}.${rqut}`.toLowerCase(), year);
 
-<<<<<<< Updated upstream
-		UTILS_TERMINAL.log(`Saved as "${ savename }"`, data);
-=======
 		UTILS_TERMINAL.LOG(`Saved as "${ savename }"`, data);
->>>>>>> Stashed changes
 
 		rerun |= 0b00001;
 
@@ -1988,62 +1594,16 @@ let configuration, init, Update;
 
 					CAUGHT.bump({ IMDbID, TMDbID, TVDbID });
 
-<<<<<<< Updated upstream
-					UTILS_TERMINAL.honor('Successfully pushed', options);
-=======
 					UTILS_TERMINAL.LOG('Successfully pushed', options);
->>>>>>> Stashed changes
 					new Notification('update', `Added "${ options.title }" to Ombi`, 7000, () => window.open(__CONFIG__.ombiURL, '_blank'));
 				} else {
 					new Notification('warning', `Could not add "${ options.title }" to Ombi: Unknown Error`) ||
 					(!response.silent && UTILS_TERMINAL.error('Error adding to Ombi: ' + String(response)));
 				}
-<<<<<<< Updated upstream
 			}
 		);
 	}
 
-	// Movies/TV Shows
-	function __Request_CouchPotato__(options) {
-		new Notification('info', `Sending "${ options.title }" to CouchPotato`, 3000);
-
-		chrome.runtime.sendMessage(
-			{
-				type: 'PUSH_COUCHPOTATO',
-				url: `${ __CONFIG__.couchpotatoURL }/movie.add`,
-				IMDbID: options.IMDbID,
-				TMDbID: options.TMDbID,
-				TVDbID: options.TVDbID,
-				basicAuth: __CONFIG__.couchpotatoBasicAuth,
-			},
-			response => {
-				UTILS_TERMINAL.log('Pushing to CouchPotato', response);
-
-				if(response.error) {
-					return new Notification(
-						'warning',
-						`Could not add "${ options.title }" to CouchPotato (see your console)`
-					) ||
-					(!response.silent && UTILS_TERMINAL.error('Error adding to CouchPotato: ' + String(response.error), response.location, response.debug));
-				}
-				if(response.success) {
-					let { IMDbID, TMDbID, TVDbID } = options;
-
-					CAUGHT.bump({ IMDbID, TMDbID, TVDbID });
-
-					UTILS_TERMINAL.honor('Successfully pushed', options);
-					new Notification('update', `Added "${ options.title }" to CouchPotato`);
-				} else {
-					new Notification('warning', `Could not add "${ options.title }" to CouchPotato`);
-				}
-=======
->>>>>>> Stashed changes
-			}
-		);
-	}
-
-<<<<<<< Updated upstream
-=======
 	// Movies/TV Shows
 	function __Request_CouchPotato__(options) {
 		new Notification('info', `Sending "${ options.title }" to CouchPotato`, 3000);
@@ -2081,7 +1641,6 @@ let configuration, init, Update;
 		);
 	}
 
->>>>>>> Stashed changes
 	// Movies
 	function Request_Watcher(options) {
 		new Notification('info', `Sending "${ options.title }" to Watcher`, 3000);
@@ -2117,11 +1676,7 @@ let configuration, init, Update;
 
 					CAUGHT.bump({ IMDbID, TMDbID });
 
-<<<<<<< Updated upstream
-					UTILS_TERMINAL.honor('Successfully pushed', options);
-=======
 					UTILS_TERMINAL.LOG('Successfully pushed', options);
->>>>>>> Stashed changes
 					new Notification('update', `Added "${ options.title }" to Watcher`, 7000, () => window.open(`${__CONFIG__.watcherURL}library/status${TMDbID? `#${title}-${TMDbID}`: '' }`, '_blank'));
 				} else {
 					new Notification('warning', `Could not add "${ options.title }" to Watcher: Unknown Error`) ||
@@ -2178,11 +1733,7 @@ let configuration, init, Update;
 
 					CAUGHT.bump({ IMDbID, TMDbID });
 
-<<<<<<< Updated upstream
-					UTILS_TERMINAL.honor('Successfully pushed', options);
-=======
 					UTILS_TERMINAL.LOG('Successfully pushed', options);
->>>>>>> Stashed changes
 					new Notification('update', `Added "${ options.title }" to Radarr`, 7000, () => window.open(`${__CONFIG__.radarrURL}${TMDbID? `movies/${title}-${TMDbID}`: '' }`, '_blank'));
 				} else {
 					new Notification('warning', `Could not add "${ options.title }" to Radarr: Unknown Error`) ||
@@ -2237,11 +1788,7 @@ let configuration, init, Update;
 
 					CAUGHT.bump({ TVDbID });
 
-<<<<<<< Updated upstream
-					UTILS_TERMINAL.honor('Successfully pushed', options);
-=======
 					UTILS_TERMINAL.LOG('Successfully pushed', options);
->>>>>>> Stashed changes
 					new Notification('update', `Added "${ options.title }" to Sonarr`, 7000, () => window.open(`${__CONFIG__.sonarrURL}series/${title}`, '_blank'));
 				} else {
 					new Notification('warning', `Could not add "${ options.title }" to Sonarr: Unknown Error`) ||
@@ -2297,11 +1844,7 @@ let configuration, init, Update;
 
 					CAUGHT.bump({ TVDbID });
 
-<<<<<<< Updated upstream
-					UTILS_TERMINAL.honor('Successfully pushed', options);
-=======
 					UTILS_TERMINAL.LOG('Successfully pushed', options);
->>>>>>> Stashed changes
 					new Notification('update', `Added "${ options.title }" to Medusa`, 7000, () => window.open(`${__CONFIG__.medusaURL}home/displayShow?indexername=tvdb&seriesid=${options.TVDbID}`, '_blank'));
 				} else {
 					new Notification('warning', `Could not add "${ options.title }" to Medusa: Unknown Error`) ||
@@ -2357,11 +1900,7 @@ let configuration, init, Update;
 
 					CAUGHT.bump({ TVDbID });
 
-<<<<<<< Updated upstream
-					UTILS_TERMINAL.honor('Successfully pushed', options);
-=======
 					UTILS_TERMINAL.LOG('Successfully pushed', options);
->>>>>>> Stashed changes
 					new Notification('update', `Added "${ options.title }" to Sick Beard`, 7000, () => window.open(`${__CONFIG__.sickBeardURL}home/displayShow?show=${ TVDbID }`, '_blank'));
 				} else {
 					new Notification('warning', `Could not add "${ options.title }" to Sick Beard: Unknown Error`) ||
@@ -2500,11 +2039,7 @@ let configuration, init, Update;
 
 	function UpdateButton(button, action, title, options = {}) {
 		if(!button)
-<<<<<<< Updated upstream
-			return /*  Rare, but happens: especially on failed download links sent*/;
-=======
 			return /* Rare, but happens: especially on failed download links sent */;
->>>>>>> Stashed changes
 
 		let multiple = (action == 'multiple' || options instanceof Array),
 			element = button.querySelector('.w2p-action, .list-action'),
@@ -2730,13 +2265,8 @@ let configuration, init, Update;
 	}
 
 	// Find media on Plex
-<<<<<<< Updated upstream
-	async function FindMediaItems(options, button) {
-		if(!(options && options.length && button))
-=======
 	async function FindMediaItems(options = [], button) {
 		if(!(options.length && button))
->>>>>>> Stashed changes
 			return;
 
 		let results = [],
@@ -2755,300 +2285,6 @@ let configuration, init, Update;
 			let { results, multiple, items } = query;
 
 			new Notification('update', `Welcome back. ${ multiple } new ${ items } can be grabbed`, 7000, (event, target = button.querySelector('.list-action')) => target.click({ ...event, target }));
-<<<<<<< Updated upstream
-
-			if(multiple)
-				UpdateButton(button, 'multiple', `Download ${ multiple } ${ items }`, results);
-
-			return;
-		}
-
-		query.running = true;
-
-		new Notification('info', `Processing ${ length } item${ 's'[+(length === 1)] || '' }...`);
-
-		for(let index = 0, option, opt; index < length; index++) {
-			let { IMDbID, TMDbID, TVDbID } = (option = await options[index]);
-
-			opt = { name: option.title, title: option.title, year: option.year, image: options.image, type: option.type, imdb: IMDbID, IMDbID, tmdb: TMDbID, TMDbID, tvdb: TVDbID, TVDbID };
-
-			try {
-				await Request_Plex(option)
-					.then(async({ found, key }) => {
-						if(found) {
-							// ignore found items, we only want new items
-						} else {
-							option.field = 'original_title';
-
-							return await Request_Plex(option)
-								.then(({ found, key }) => {
-									if(found) {
-										// ignore found items, we only want new items
-									} else {
-										let available = (__CONFIG__.usingOmbi || __CONFIG__.usingWatcher || __CONFIG__.usingRadarr || __CONFIG__.usingSonarr || __CONFIG__.usingMedusa || __CONFIG__.usingSickBeard || __CONFIG__.usingCouchPotato),
-											action = (available ? 'downloader' : 'notfound'),
-											title = available ?
-												'Not on Plex (download available)':
-											'Not on Plex (download not available)';
-
-										results.push({ ...opt, found: false, status: action });
-									}
-								});
-						}
-					})
-			} catch(error) {
-				UTILS_TERMINAL.error('Request to Plex failed: ' + String(error));
-				// new Notification('error', 'Failed to query item #' + (index + 1));
-			}
-		}
-
-		results = results.filter(v => v.status == 'downloader');
-
-		let img = furnish('img', { title: 'Add to Plex It!', src: IMG_URL.plexit_icon_48, onmouseup: event => {let frame = document.querySelector('#plexit-bookmarklet-frame'); frame.src = frame.src.replace(/(#plexit:.*)?$/, '#plexit:' + event.target.parentElement.getAttribute('data'))} }),
-			po, pi = furnish('li#plexit.list-item', { data: encode(JSON.stringify(results)) }, img),
-			op  = document.querySelector('#wtp-plexit');
-
-		if(po = button.querySelector('#plexit'))
-			po.remove();
-		try {
-			button.querySelector('ul').insertBefore(pi, op);
-		} catch(e) { /* Don't do anything */ }
-
-		let multiple = results.length,
-			items = multiple == 1? 'item': 'items';
-
-		new Notification('update', `Done. ${ multiple } new ${ items } can be grabbed`, 7000, (event, target = button.querySelector('.list-action')) => target.click({ ...event, target }));
-
-		query.running = false;
-		query.results = results;
-		query.multiple = multiple;
-		query.items = items;
-
-		if(multiple)
-			UpdateButton(button, 'multiple', `Download ${ multiple } ${ items }`, results);
-	}
-
-	async function FindMediaItem(options) {
-		if(!(options && options.title))
-			return;
-
-		let { IMDbID, TMDbID, TVDbID } = options;
-
-		TMDbID = +TMDbID;
-		TVDbID = +TVDbID;
-
-		let opt = { name: options.title, year: options.year, image: options.image || IMG_URL.nil, type: options.type, imdb: IMDbID, IMDbID, tmdb: TMDbID, TMDbID, tvdb: TVDbID, TVDbID },
-			op  = document.querySelector('#wtp-plexit'),
-			img = (options.image)?
-				furnish('div', { tooltip: 'Add to Plex It!', style: `background: url(${ IMG_URL.plexit_icon_16 }) top right/60% no-repeat, #0004 url(${ opt.image }) center/contain no-repeat; height: 48px; width: 34px;`, draggable: true, onmouseup: event => {let frame = document.querySelector('#plexit-bookmarklet-frame'); frame.src = frame.src.replace(/(#plexit:.*)?$/, '#plexit:' + event.target.parentElement.getAttribute('data'))} }):
-			furnish('img', { title: 'Add to Plex It!', src: IMG_URL.plexit_icon_48, onmouseup: event => {let frame = document.querySelector('#plexit-bookmarklet-frame'); frame.src = frame.src.replace(/(#plexit:.*)?$/, '#plexit:' + event.target.parentElement.getAttribute('data'))} });
-
-		FindMediaItem.OPTIONS = options;
-
-		try {
-			return Request_Plex(options)
-				.then(({ found, key }) => {
-					if(found) {
-							UpdateButton(options.button, 'found', 'On Plex', { ...options, key });
-							opt = { ...opt, url: options.button.href, found: true, status: 'found' };
-
-							let po, pi = furnish('li#plexit.list-item', { data: encode(JSON.stringify(opt)) }, img);
-
-							if(po = options.button.querySelector('#plexit'))
-								po.remove();
-							try {
-								options.button.querySelector('ul').insertBefore(pi, op);
-							} catch(e) { /* Don't do anything */ }
-					} else {
-						options.field = 'original_title';
-
-						return Request_Plex(options)
-							.then(({ found, key }) => {
-								if(found) {
-									UpdateButton(options.button, 'found', 'On Plex', { ...options, key });
-									opt = { ...opt, url: options.button.href, found: true, status: 'found' };
-
-									let po, pi = furnish('li#plexit.list-item', { data: encode(JSON.stringify(opt)) }, img);
-
-									if(po = options.button.querySelector('#plexit'))
-										po.remove();
-									try {
-										options.button.querySelector('ul').insertBefore(pi, op);
-									} catch(e) { /* Don't do anything */ }
-								} else {
-									let available = (__CONFIG__.usingOmbi || __CONFIG__.usingWatcher || __CONFIG__.usingRadarr || __CONFIG__.usingSonarr || __CONFIG__.usingMedusa || __CONFIG__.usingSickBeard || __CONFIG__.usingCouchPotato),
-										action = (available ? 'downloader' : 'notfound'),
-										title = available ?
-											'Not on Plex (download available)':
-										'Not on Plex (download not available)';
-
-									UpdateButton(options.button, action, title, options);
-									opt = { ...opt, found: false, status: action };
-
-									let po, pi = furnish('li#plexit.list-item', { data: encode(JSON.stringify(opt)) }, img);
-
-									if(po = options.button.querySelector('#plexit'))
-										po.remove();
-									if(!!~[].slice.call(options.button.querySelector('ul').children).indexOf(op))
-										try {
-											options.button.querySelector('ul').insertBefore(pi, op);
-										} catch(e) { /* Don't do anything */ }
-								}
-								return found;
-							});
-					}
-					return found;
-				})
-			} catch(error) {
-				return UpdateButton(
-						options.button,
-						'error',
-						'Request to Plex Media Server failed',
-						options
-					),
-					UTILS_TERMINAL.error(`Request to Plex failed: ${ String(error) }`),
-					false;
-					// new Notification('Failed to communicate with Plex');
-			}
-	}
-
-	function Request_Plex(options) {
-		if(!(__CONFIG__.plexURL && __CONFIG__.plexToken) || __CONFIG__.IGNORE_PLEX)
-			return new Promise((resolve, reject) => resolve({ found: false, key: null }));
-
-		return new Promise((resolve, reject) => {
-			// Sanitize the object
-			options = JSON.parse( JSON.stringify(options) );
-
-			chrome.runtime.sendMessage({
-					type: 'SEARCH_PLEX',
-					options,
-					serverConfig: __CONFIG__.server
-				},
-				response =>
-					(response && response.error)?
-						reject(response.error):
-					(!response)?
-						reject(new Error('Unknown error')):
-					resolve(response)
-				);
-			});
-	}
-
-	function Request_PlexURL(PlexUIID, key) {
-		return __CONFIG__.plexURL.replace(RegExp(`\/(${ __CONFIG__.server.id })?$`), `/web#!/server/` + PlexUIID) + `/details?key=${encodeURIComponent( key )}`;
-	}
-
-	/* Listen for events */
-	chrome.runtime.onMessage.addListener(async(request, sender) => {
-		UTILS_TERMINAL.log(`Listener event [${ request.instance_type }#${ request[request.instance_type.toLowerCase()] }]:`, request);
-
-		let data = request.data,
-			LOCATION = `${ request.name || 'anonymous' } @ instance ${ request.instance }`,
-			PARSING_ERROR = `Can't parse missing information. ${ LOCATION }`,
-			BUTTON_ERROR  = `The button failed to render. ${ LOCATION }`,
-			EMPTY_REQUEST = `The given request is empty. ${ LOCATION }`;
-
-		if(!data)
-			return UTILS_TERMINAL.warn(EMPTY_REQUEST);
-		let button = RenderButton();
-
-		if(!button)
-			return UTILS_TERMINAL.warn(BUTTON_ERROR);
-		button.classList.remove('sleeper');
-
-		switch(request.type) {
-			case 'POPULATE':
-
-				if(data instanceof Array) {
-					for(let index = 0, length = data.length, item; index < length; index++)
-						if(!(item = data[index]) || !item.type)
-							data.splice(index, 1, null);
-
-					data = data.filter(value => value !== null && value !== undefined);
-
-					for(let index = 0, length = data.length, item; index < length; index++) {
-						let { image, type, title, year, IMDbID, TMDbID, TVDbID } = (item = data[index]);
-
-						if(!item.title || !item.type)
-							continue;
-
-						let Db = await Identify(item);
-
-						IMDbID = IMDbID || Db.imdb || 'tt';
-						TMDbID = TMDbID || Db.tmdb || 0;
-						TVDbID = TVDbID || Db.tvdb || 0;
-
-						title = title || Db.title;
-						year = +(year || Db.year || 0);
-
-						data.splice(index, 1, { type, title, year, image, button, IMDbID, TMDbID, TVDbID });
-					}
-
-					if(!data.length)
-						return UTILS_TERMINAL.error(PARSING_ERROR);
-					else
-						FindMediaItems(data, button);
-				} else {
-					if(!data || !data.title || !data.type)
-						return UTILS_TERMINAL.error(PARSING_ERROR);
-
-					let { image, type, title, year, IMDbID, TMDbID, TVDbID } = data;
-					let Db = await Identify(data);
-
-					IMDbID = IMDbID || Db.imdb || 'tt';
-					TMDbID = TMDbID || Db.tmdb || 0;
-					TVDbID = TVDbID || Db.tvdb || 0;
-
-					title = title || Db.title;
-					year = +(year || Db.year || 0);
-
-					let found = await FindMediaItem({ type, title, year, image, button, IMDbID, TMDbID, TVDbID });
-					Update('FOUND', { ...request, found }, true);
-				}
-				return true;
-
-			case 'INITIALIZE':
-				init && init();
-				return true;
-
-			case 'NO_RENDER':
-				document.queryBy('.web-to-plex-button').map(e => e.remove());
-				return true;
-
-			default:
-	//			UTILS_TERMINAL.warn(`Unknown event [${ request.type }]`);
-				return false;
-		}
-	});
-
-	/* Listen for Window events - from iframes, etc. */
-	top.addEventListener('message', async request => {
-		try {
-			request = request.data;
-
-			switch(request.type) {
-				case 'SEND_VIDEO_LINK':
-					let options = { ...FindMediaItem.OPTIONS, href: request.href, remote: request.from };
-
-					UTILS_TERMINAL.log(`Download Event [${ options.remote }]:`, options);
-
-					UpdateButton(MASTER_BUTTON, 'downloader', 'Download', options);
-					return true;
-
-				case 'NOTIFICATION':
-					let { state, text, timeout = 7000, callback = () => {}, requiresClick = true } = request.data;
-					new Notification(state, text, timeout, callback, requiresClick);
-					return true;
-
-				case 'PERMISSION':
-					let { data } = request;
-
-					if(typeof data.allowed == 'boolean') {
-						ALLOWED = data.allowed;
-						PERMISS = data.allotted;
-
-=======
 
 			if(multiple)
 				UpdateButton(button, 'multiple', `Download ${ multiple } ${ items }`, results);
@@ -3351,26 +2587,17 @@ let configuration, init, Update;
 						ALLOWED = data.allowed;
 						PERMISS = data.allotted;
 
->>>>>>> Stashed changes
 						await ParsedOptions();
 
 						(init && !RUNNING? (init(), RUNNING = true): RUNNING = false);
 					} else {
-<<<<<<< Updated upstream
-						UTILS_TERMINAL.warn('Permission Request:', data);
-=======
 						UTILS_TERMINAL.WARN('Permission Request:', data);
->>>>>>> Stashed changes
 						new Prompt('permission', data);
 					}
 					return true;
 
 				default:
-<<<<<<< Updated upstream
-		//			UTILS_TERMINAL.warn(`Unknown event [${ request.type }]`);
-=======
 		//			UTILS_TERMINAL.WARN(`Unknown utils event [${ request.type }]`);
->>>>>>> Stashed changes
 					return false;
 			}
 		} catch(error) {
