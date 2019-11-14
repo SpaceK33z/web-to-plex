@@ -44,19 +44,11 @@ async function Notify(state, text, timeout = 7000, requiresClick = true) {
 	return top.postMessage({ type: 'NOTIFICATION', data: { state, text, timeout, requiresClick } }, '*');
 }
 
-<<<<<<< Updated upstream
-async function Require(permission, name, alias) {
-	let allowed = await load(`has/${ name }`),
-		allotted = await load(`get/${ name }`);
-
-	top.postMessage({ type: 'PERMISSION', data: { permission, name, alias, allowed, allotted } });
-=======
 async function Require(permission, name, alias, instance) {
 	let allowed = await load(`has/${ name }`),
 		allotted = await load(`get/${ name }`);
 
 	top.postMessage({ type: 'PERMISSION', data: { instance, permission, name, alias, allowed, allotted } });
->>>>>>> Stashed changes
 
 	/* Already asked for permission */
 	if(typeof allowed == 'boolean')

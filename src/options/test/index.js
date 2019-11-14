@@ -26,11 +26,6 @@ function modify({ type, title, year, info }) {
 			ids[id]?
 				id == 'imdb'?
 					`https://www.imdb.com/videoembed/${ object[id.toUpperCase()] }/`:
-<<<<<<< Updated upstream
-				id == 'tmdb'?
-					`https://www.youtube.com/embed/${ object[id.toUpperCase()] }`:
-=======
->>>>>>> Stashed changes
 				`https://www.youtube.com/embed/${ object[id.toUpperCase()] }`:
 			'blank.html'
 		));

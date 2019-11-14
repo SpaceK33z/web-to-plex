@@ -19,11 +19,7 @@ let BACKGROUND_CONFIGURATION;
 
 
 // returns the proper CORS mode of the URL
-<<<<<<< Updated upstream
-let cors = url => ((/^(https|sftp)\b/i.test(url) || /\:(443|22)\b/? '': 'no-') + 'cors');
-=======
 let cors = url => ((/^(https|sftp)\b/i.test(url) || /\:(443|22)\b/i.test(url)? '': 'no-') + 'cors');
->>>>>>> Stashed changes
 
 // Create a Crypto-Key
 // new Key(number:integer, string:symbol) -> string
@@ -54,11 +50,7 @@ class Headers {
 	constructor(Authorization) {
 		let headers = { Accept: 'application/json' };
 
-<<<<<<< Updated upstream
-		if (!Authorization)
-=======
 		if(!Authorization)
->>>>>>> Stashed changes
 			return headers;
 
 		return {
@@ -276,11 +268,7 @@ function Push_Radarr(request, sendResponse) {
 					}
 				};
 
-<<<<<<< Updated upstream
-			if (!data instanceof Array && !data.length && !data.title) {
-=======
 			if(!(data instanceof Array) && !data.length && !data.title) {
->>>>>>> Stashed changes
 				throw new Error('Movie not found');
 			} else if(data.length) {
 				body = {
@@ -315,21 +303,13 @@ function Push_Radarr(request, sendResponse) {
 			debug.data =
 			data = JSON.parse(data || `{"path":"${ request.StoragePath.replace(/\\/g, '\\\\') }${ request.title } (${ request.year })"}`);
 
-<<<<<<< Updated upstream
-			if (data && data[0] && data[0].errorMessage) {
-=======
 			if(data && data[0] && data[0].errorMessage) {
->>>>>>> Stashed changes
 				sendResponse({
 					error: data[0].errorMessage,
 					location: `@0B: Push_Radarr => fetch("${ request.url }", { headers }).then(data => { if })`,
 					debug
 				});
-<<<<<<< Updated upstream
-			} else if (data && data.path) {
-=======
 			} else if(data && data.path) {
->>>>>>> Stashed changes
 				sendResponse({
 					success: 'Added to ' + data.path
 				});
@@ -366,11 +346,7 @@ function Push_Sonarr(request, sendResponse) {
 		.then(response => response.json())
 		.catch(error => sendResponse({ error: 'TV Show not found', location: '@0B: Push_Sonarr => fetch.then.catch', silent: true }))
 		.then(data => {
-<<<<<<< Updated upstream
-			if (!data instanceof Array || !data.length)
-=======
 			if(!(data instanceof Array) || !data.length)
->>>>>>> Stashed changes
 				throw new Error('TV Show not found');
 
 			// Monitor, search, and download series ASAP
@@ -407,21 +383,13 @@ function Push_Sonarr(request, sendResponse) {
 			debug.data =
 			data = JSON.parse(data || `{"path":"${ request.StoragePath.replace(/\\/g, '\\\\') }${ request.title } (${ request.year })"}`);
 
-<<<<<<< Updated upstream
-			if (data && data[0] && data[0].errorMessage) {
-=======
 			if(data && data[0] && data[0].errorMessage) {
->>>>>>> Stashed changes
 				sendResponse({
 					error: data[0].errorMessage,
 					location: `@0B: Push_Sonarr => fetch("${ request.url }", { headers }).then(data => { if })`,
 					debug
 				});
-<<<<<<< Updated upstream
-			} else if (data && data.path) {
-=======
 			} else if(data && data.path) {
->>>>>>> Stashed changes
 				sendResponse({
 					success: 'Added to ' + data.path
 				});
@@ -460,11 +428,7 @@ function Push_Medusa(request, sendResponse) {
 		.then(data => {
 			data = data.results;
 
-<<<<<<< Updated upstream
-			if (!data instanceof Array || !data.length)
-=======
 			if(!(data instanceof Array) || !data.length)
->>>>>>> Stashed changes
 				throw new Error('TV Show not found');
 
 			// Monitor, search, and download series ASAP
@@ -493,21 +457,13 @@ function Push_Medusa(request, sendResponse) {
 			debug.data =
 			data = JSON.parse(data || `{"path":"${ path }${ request.title } (${ request.year })"}`);
 
-<<<<<<< Updated upstream
-			if (data && data.error) {
-=======
 			if(data && data.error) {
->>>>>>> Stashed changes
 				sendResponse({
 					error: data.error,
 					location: `@0B: Push_Medusa => fetch("${ request.url }", { headers }).then(data => { if })`,
 					debug
 				});
-<<<<<<< Updated upstream
-			} else if (data && data.id) {
-=======
 			} else if(data && data.id) {
->>>>>>> Stashed changes
 				sendResponse({
 					success: `Added to ${ path }${ request.title }(${ request.year })`
 				});
@@ -546,11 +502,7 @@ function addMedusa(request, sendResponse) {
 		.then(data => {
 			data = data.results;
 
-<<<<<<< Updated upstream
-			if (!data instanceof Array || !data.length)
-=======
 			if(!(data instanceof Array) || !data.length)
->>>>>>> Stashed changes
 				throw new Error('TV Show not found');
 
 			// Monitor, search, and download series ASAP
@@ -579,21 +531,13 @@ function addMedusa(request, sendResponse) {
 			debug.data =
 			data = JSON.parse(data || `{"path":"${ path }${ request.title } (${ request.year })"}`);
 
-<<<<<<< Updated upstream
-			if (data && data.error) {
-=======
 			if(data && data.error) {
->>>>>>> Stashed changes
 				sendResponse({
 					error: data.error,
 					location: `addMedusa => fetch("${ request.url }", { headers }).then(data => { if })`,
 					debug
 				});
-<<<<<<< Updated upstream
-			} else if (data && data.id) {
-=======
 			} else if(data && data.id) {
->>>>>>> Stashed changes
 				sendResponse({
 					success: `Added to ${ path }${ request.title }(${ request.year })`
 				});
@@ -631,11 +575,7 @@ function Push_SickBeard(request, sendResponse) {
 		.then(response => response.json())
 		.catch(error => sendResponse({ error: 'TV Show not found', location: '@0B: Push_SickBeard => fetch.then.catch', silent: true }))
 		.then(data => {
-<<<<<<< Updated upstream
-			if (!/^success$/i.test(data.result))
-=======
 			if(!/^success$/i.test(data.result))
->>>>>>> Stashed changes
 				throw new Error('TV Show not found');
 
 			data = data.data.results;
@@ -673,27 +613,15 @@ function Push_SickBeard(request, sendResponse) {
 
 			let { data, message, result } = results;
 
-<<<<<<< Updated upstream
-			data.path = `${ request.StoragePath }${ request.title } (${ request.year })`;
-
-			if (data && !/^success$/i.test(result) && message) {
-=======
 			if(data && !/^success$/i.test(result) && message) {
->>>>>>> Stashed changes
 				sendResponse({
 					error: message,
 					location: `@0B: Push_SickBeard => fetch("${ request.url }", { headers }).then(results => { if })`,
 					debug
 				});
-<<<<<<< Updated upstream
-			} else if (data && data.path) {
-				sendResponse({
-					success: 'Added to ' + data.path
-=======
 			} else if(data && data.path) {
 				sendResponse({
 					success: `Added to ${ request.StoragePath }${ request.title } (${ request.year })`
->>>>>>> Stashed changes
 				});
 			} else {
 				sendResponse({
@@ -742,11 +670,7 @@ function Push_Ombi(request, sendResponse) {
 			debug.data =
 			data = JSON.parse(data);
 
-<<<<<<< Updated upstream
-			if (data && data.isError) {
-=======
 			if(data && data.isError) {
->>>>>>> Stashed changes
 				if(/already +been +requested/i.test(data.errorMessage))
 					sendResponse({
 						success: 'Already requested on Ombi'
@@ -757,11 +681,7 @@ function Push_Ombi(request, sendResponse) {
 						location: `@0B: Push_Ombi => fetch("${ request.url }", { headers }).then(data => { if })`,
 						debug
 					});
-<<<<<<< Updated upstream
-			} else if (data && data.path) {
-=======
 			} else if(data && data.path) {
->>>>>>> Stashed changes
 				sendResponse({
 					success: 'Added to Ombi'
 				});
@@ -786,11 +706,7 @@ function Push_Ombi(request, sendResponse) {
 // If one promise (Plex request) fails, we still want the other requests to continue racing.
 // See https://www.jcore.com/2016/12/18/promise-me-you-wont-use-promise-race/ for an explanation
 function PromiseRace(promises) {
-<<<<<<< Updated upstream
-	if (!~promises.length) {
-=======
 	if(!~promises.length) {
->>>>>>> Stashed changes
 		return Promise.reject('Cannot start a race without promises!');
 	}
 
@@ -835,11 +751,7 @@ function $Search_Plex(connection, headers, options) {
 		.then(data => {
 			let Hub = data.MediaContainer.Hub.find(hub => hub.type === type);
 
-<<<<<<< Updated upstream
-			if (!Hub || !Hub.Metadata) {
-=======
 			if(!Hub || !Hub.Metadata) {
->>>>>>> Stashed changes
 				return { found: false };
 			}
 
@@ -863,11 +775,7 @@ function $Search_Plex(connection, headers, options) {
 			let media = movies.find(meta => ((meta.year == +options.year) && strip(meta.title) == strip(options.title))),
 				key = null;
 
-<<<<<<< Updated upstream
-			if (!media) {
-=======
 			if(!media) {
->>>>>>> Stashed changes
 				media = movies.find(meta => ((meta.year == +options.year + 1) && strip(meta.title) == strip(options.title)));
 			}
 
@@ -954,22 +862,14 @@ browser.contextMenus.onClicked.addListener(item => {
 
 	if(!dnl)
 		window.open(`https://${ url }`, '_blank');
-<<<<<<< Updated upstream
-	else if (dnl)
-=======
 	else if(dnl)
->>>>>>> Stashed changes
 		// try/catch won't work here, so use the first download's callback as an error catcher
 		browser.downloads.download({
 			url: item.href,
 			filename: `${ fp }${ lt } (${ yr }).${ ft }`,
 			saveAs: true
 		}, id => {
-<<<<<<< Updated upstream
-			if(id == undefined || id == null)
-=======
 			if(id === undefined || id === null)
->>>>>>> Stashed changes
 				browser.downloads.download({
 					url: item.href,
 					saveAs: true
@@ -977,17 +877,10 @@ browser.contextMenus.onClicked.addListener(item => {
 		});
 });
 
-<<<<<<< Updated upstream
-browser.runtime.onMessage.addListener((request, sender, callback) => {
-	BACKGROUND_TERMINAL.log('From:', sender);
-
-	let item = (request? request.options || request: {}),
-=======
 browser.runtime.onMessage.addListener((request = {}, sender, callback) => {
 	BACKGROUND_TERMINAL.log('From:', sender);
 
 	let item = (request.options || request),
->>>>>>> Stashed changes
 		ITEM_TITLE = item.title,
 		ITEM_YEAR = item.year,
 		ITEM_TYPE = item.type,
@@ -997,95 +890,6 @@ browser.runtime.onMessage.addListener((request = {}, sender, callback) => {
 		FILE_PATH = (item.path || ''),
 		ITEM_ID = ((i, I)=>{for(let p in i)if(RegExp('^'+I,'i').test(p))return i[p]})(item, ID_PROVIDER);
 
-<<<<<<< Updated upstream
-	try {
-		switch (request.type) {
-			case 'SEARCH_PLEX':
-				Search_Plex(request, callback);
-				return true;
-
-			case 'VIEW_COUCHPOTATO':
-				Open_CouchPotato(request, callback);
-				return true;
-
-			case 'PUSH_COUCHPOTATO':
-				Push_CouchPotato(request, callback);
-				return true;
-
-			case 'PUSH_RADARR':
-				Push_Radarr(request, callback);
-				return true;
-
-			case 'PUSH_SONARR':
-				Push_Sonarr(request, callback);
-				return true;
-
-			case 'PUSH_MEDUSA':
-				Push_Medusa(request, callback);
-				return true;
-
-			case 'PUSH_WATCHER':
-				Push_Watcher(request, callback);
-				return true;
-
-			case 'PUSH_OMBI':
-				Push_Ombi(request, callback);
-				return true;
-
-			case 'PUSH_SICKBEARD':
-				Push_SickBeard(request, callback);
-				return true;
-
-			case 'OPEN_OPTIONS':
-				browser.runtime.openOptionsPage();
-				return true;
-
-			case 'SEARCH_FOR':
-				if(ITEM_TITLE && ITEM_TYPE)
-					ChangeStatus({ ITEM_ID, ITEM_TITLE, ITEM_TYPE, ID_PROVIDER, ITEM_YEAR, ITEM_URL, FILE_TYPE, FILE_PATH });
-				return true;
-
-			case 'SAVE_AS':
-				browser.contextMenus.update('W2P-DL', {
-					title: `Save as "${ ITEM_TITLE } (${ ITEM_YEAR })" (${ FILE_TYPE })`
-				});
-				return true;
-
-			case 'DOWNLOAD_FILE':
-				let FILE_TITLE = ITEM_TITLE.replace(/\-/g, ' ').replace(/[\s\:]{2,}/g, ' - ').replace(/[^\w\s\-\']+/g, '');
-
-				// no try/catch, use callback for that
-				browser.downloads.download({
-					url: item.href,
-					filename: `${ FILE_TITLE } (${ ITEM_YEAR }).${ FILE_TYPE }`,
-					saveAs: true
-				}, id => {
-					// Error Occured
-					if(id == undefined || id == null)
-						browser.downloads.download({
-						url: item.href,
-						filename: `${ FILE_TITLE } (${ ITEM_YEAR })`,
-						saveAs: true
-					});
-				});
-				return true;
-
-			case 'PLUGIN':
-			case 'SCRIPT':
-			case '_INIT_':
-			case '$INIT$':
-			case 'FOUND':
-			case 'GRANT_PERMISSION':
-				/* These are meant to be handled by plugn.js */
-				return false;
-
-			default:
-				BACKGROUND_TERMINAL.warn(`Unknown event [${ request.type }]`);
-				return false;
-		}
-	} catch (error) {
-		return callback(String(error));
-=======
 	if(request.type) {
 		try {
 			switch(request.type) {
@@ -1180,7 +984,6 @@ browser.runtime.onMessage.addListener((request = {}, sender, callback) => {
 		}
 	} else {
 		return false;
->>>>>>> Stashed changes
 	}
 });
 

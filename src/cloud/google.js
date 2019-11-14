@@ -11,31 +11,27 @@ let script = {
 		let type = script.getType();
 
 		if(type == 'movie') {
-			let _type = $('.kno-ecr-pt + *').first; // in case a tv show is incorrectly identified
+			let _type = $('[href*="imdb.com/title/tt"]:not([class])').first; // in case a tv show is incorrectly identified
 
 			if(_type) {
 				type = _type.textContent;
 
-				type = /\b(tv|show|series)\b/i.test(type)? 'show': /\b(movie|film|cinema|(?:\d+h\s+)?\d+m)\b/i.test(type)? 'movie': 'error';
-				_year = (type == 'show'? $('.kno-fv').first || _year: _year) || { textContent: '' };
+				type = /\b(tv|show|series)\b/i.test(type)? 'show': /* /\b(movie|film|cinema|(?:\d+h\s+)?\d+m)\b/i.test(type)? 'movie': 'error' */ 'movie';
+				_year = (type == 'show'? $('#wp-tabs-container [data-attrid="subtitle"i] span').first || _year: _year) || { textContent: '' };
 			}
 
-			_title = $('.kno-ecr-pt').first;
-			_year  = $('.kno-fb-ctx:not([data-local-attribute]) span').first;
+			_title = $('#wp-tabs-container [data-attrid="title"i] span').first;
+			_year  = $('#wp-tabs-container [data-attrid="subtitle"i] span').first;
 			_image = $('#media_result_group img').first;
 		} else if(type == 'show') {
 			_title = $(SHOW).first.querySelector('*');
 			_year = { textContent: '' };
 			_image = { src: '' };
-		} else if(type == 'error') {
-			return null;
+		} else if(type === 'error') {
+			return -1;
 		}
 
-<<<<<<< Updated upstream
-		(_year.textContent + '').replace(/(\d{4})/);
-=======
 		(_year.textContent + '').replace(/(\d{4})/, '');
->>>>>>> Stashed changes
 
 		let year  = +R.$1,
 			title = _title.textContent.replace((type == 'movie'? /^(.+)$/: /(.+)(?:(?:\:\s*series\s+info|\-\s*(?:all\s+episodes|season)).+)$/i), '$1').trim(),
@@ -49,7 +45,7 @@ let script = {
 	},
 
 	"getIMDbID": () => {
-		let link = $('a._hvg[href*="imdb.com/title/tt"]').first;
+		let link = $('[href*="imdb.com/title/tt"]:not([class])').first;
 
 		if(link)
 			return link.href.replace(/.*(tt\d+).*/, '$1');
