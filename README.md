@@ -1,5 +1,3 @@
-**We're currently in the process of making a v4 release which will contain the features listed below. The currently available version on the Chrome and Firefox webstore won't contain these features!**
-
 # Web to Plex ![Icon](src/img/48.png)
 
 ![Examples](example.png)
@@ -133,6 +131,8 @@ The sites used as search engines (IMDb, TMDb, and TVDb) will automatically creat
 + Before using the [extension](chrome://extensions), you must configure the settings
 
 ## Issues & Contributions
+
+[![DeepScan grade](https://deepscan.io/api/teams/5912/projects/7762/branches/83413/badge/grade.svg)](https://deepscan.io/dashboard#view=project&tid=5912&pid=7762&bid=83413)
 
 If you have any problem with the extension, please don't hesitate to [submit an issue](https://github.com/SpaceK33z/web-to-plex/issues/new/choose).
 
