@@ -1,5 +1,5 @@
 let script = {
-	"url": "*://*.imdb.com/(title|list)/(tt|ls)\\d+/",
+	"url": "*://*.imdb.com/(title|list)/(tt|ls)\\d+/(#*|?*)?$",
 
 	"ready": () => !$('#servertime').empty,
 

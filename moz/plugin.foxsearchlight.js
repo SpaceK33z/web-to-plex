@@ -1,19 +1,19 @@
 let plugin = {
 	"url": "*://*.foxsearchlight.com/(?!films|search|$)",
 
-	"ready": () => !$('.poster').empty,
+	"ready": () => (getComputedStyle($('.pace').first).opacity == '0'),
 
 	"timeout": 5000,
 
 	"init": (ready) => {
 		let _title, _year, _image, R = RegExp;
 
-		if(TRIES >= 3)
-			return -1;
-
 		let title = $('.lockout h1').first,
 			year  = $('.lockout h3').first,
 			image = $('.poster img').first;
+
+		if(!title)
+			return -1;
 
 		title = title.textContent.trim();
 		image = image.src;

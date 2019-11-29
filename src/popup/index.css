@@ -4,7 +4,7 @@ html, body {
 }
 
 body {
-    background: url(../img/noise.png), #3f4245 !important;
+    background: url(../img/noise.png) fixed, url(../img/background.png) no-repeat fixed center/cover, #3f4245 !important;
     color: #333 !important;
     font-family: Open Sans Regular, Helvetica Neue, Helvetica, Arial, sans-serif, system;
     font-size: 1.25em !important;

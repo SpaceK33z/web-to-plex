@@ -435,6 +435,10 @@ function traverse(element, until, siblings = false) {
 	return element;
 }
 
+function LoadingAnimation(state = false) {
+	$('display').setAttribute('loading', state);
+}
+
 function load(name) {
 	return JSON.parse(localStorage.getItem(btoa(name)));
 }
@@ -476,7 +480,7 @@ function tryPlexLogin(username, password) {
 	.then(response => response.json());
 }
 
-function performPlexLogin() {
+function performPlexLogin({ event }) {
 	let u = $('#plex_username').value,
 		p = $('#plex_password').value,
 		s = $('#plex_test_status');
@@ -484,9 +488,12 @@ function performPlexLogin() {
 	s.title = '';
 	__servers__.innerHTML = '';
 	__save__.disabled = true;
+	LoadingAnimation(true);
 
 	tryPlexLogin(u, p)
 		.then(response => {
+			LoadingAnimation();
+
 			if(response.error)
 				return s.title = 'Invalid login information', null;
 
@@ -495,12 +502,13 @@ function performPlexLogin() {
 
 				ClientID = t.value = t.textContent = response.user.authToken;
 
-				return performPlexTest();
+				return performPlexTest({});
 			}
 		});
+
 }
 
-function performPlexTest(ServerID) {
+function performPlexTest({ ServerID, event }) {
 	let plexToken = $('#plex_token').value,
 		teststatus = $('#plex_test_status'),
 		inusestatus = [...$('[in-use="plex_token"]', true)];
@@ -508,9 +516,12 @@ function performPlexTest(ServerID) {
 	__save__.disabled = true;
 	__servers__.innerHTML = '';
 	teststatus.textContent = '?';
+	LoadingAnimation(true);
 
-	getServers(plexToken).then(servers => {
-		PlexServers = servers || [];
+	getServers(plexToken).then((servers = []) => {
+		LoadingAnimation();
+
+		PlexServers = servers;
 		teststatus.textContent = '!';
 		inusestatus.map(e => e.setAttribute('in-use', false));
 
@@ -578,7 +589,7 @@ function getOptionValues() {
 	return options;
 }
 
-function performOmbiLogin() {
+function performOmbiLogin({ event }) {
 	let l = $('#ombi_url').value,
 		a = $('#ombi_api').value,
 		s = $('#plex_test_status'),
@@ -590,6 +601,7 @@ function performOmbiLogin() {
 	s.title = '';
 	__servers__.innerHTML = '';
 	__save__.disabled = true;
+	LoadingAnimation(true);
 
 	let APIURL = `${ l }api/v1/`,
 		headers = { headers: { apikey: a, accept: 'application/json' } };
@@ -632,6 +644,7 @@ function performOmbiLogin() {
 					fetch(`${ APIURL }Settings/CouchPotato`, headers)
 						.then( data => data.json() )
 						.then( json => {
+							LoadingAnimation();
 							if(!json || (!json.enabled && !json.enable)) return;
 
 							let k = $('[data-option="couchpotatoToken"]'),
@@ -648,6 +661,7 @@ function performOmbiLogin() {
 					fetch(`${ APIURL }Settings/radarr`, headers)
 						.then( data => data.json() )
 						.then( json => {
+							LoadingAnimation();
 							if(!json || (!json.enabled && !json.enable)) return;
 
 							let k = $('[data-option="radarrToken"]'),
@@ -672,6 +686,7 @@ function performOmbiLogin() {
 					fetch(`${ APIURL }Settings/sonarr`, headers)
 						.then( data => data.json() )
 						.then( json => {
+							LoadingAnimation();
 							if(!json || (!json.enabled && !json.enable)) return;
 
 							let k = $('[data-option="sonarrToken"]'),
@@ -702,7 +717,7 @@ function performOmbiLogin() {
 		.catch( error => { new Notification('error', error); throw error } );
 }
 
-function performOmbiTest(refreshing = false) {
+function performOmbiTest({ refreshing = false, event }) {
 	let options = getOptionValues(),
 		teststatus = $('#ombi_test_status'),
 		path = $('[data-option="ombiURLRoot"]'),
@@ -712,44 +727,52 @@ function performOmbiTest(refreshing = false) {
 
 	teststatus.textContent = '?';
 	options.ombiURLRoot = url = path.value = options.ombiURLRoot.replace(/^(\:\d+)/, 'localhost$1').replace(/^(?!^http(s)?:)/, 'http$1://').replace(/\/+$/, '');
+	LoadingAnimation(true);
 
 	let Get = () => {
-		fetch(`${ url }/api/v1/Request/movie`)
-			.then(r => r.json())
-			.thne(json => {
-				json.map(item => {
-					__caught.imdb.push(item.imdbId);
-					__caught.tmdb.push(item.theMovieDbId);
+		try {
+			fetch(`${ url }/api/v1/Request/movie`)
+				.then(r => r.json())
+				.thne(json => {
+					json.map(item => {
+						__caught.imdb.push(item.imdbId);
+						__caught.tmdb.push(item.theMovieDbId);
+					});
 				});
-			});
 
-		fetch(`${ url }/api/v1/Request/tv`)
-			.then(r => r.json())
-			.thne(json => {
-				json.map(item => {
-					__caught.imdb.push(item.imdbId);
-					__caught.tvdb.push(item.tvDbId);
+			fetch(`${ url }/api/v1/Request/tv`)
+				.then(r => r.json())
+				.thne(json => {
+					json.map(item => {
+						__caught.imdb.push(item.imdbId);
+						__caught.tvdb.push(item.tvDbId);
+					});
 				});
-			});
 
-		fetch(`${ url }/api/v1/Status`, headers)
-			.then( response => response.text() )
-			.then( status => {
-				if (!status || !status.length) throw new Error('Unable to communicate with Ombi');
+			fetch(`${ url }/api/v1/Status`, headers)
+				.then( response => response.text() )
+				.then( status => {
+					LoadingAnimation();
+					if (!status || !status.length) throw new Error('Unable to communicate with Ombi');
 
-				if ((status = +status) >= 200 && status < 400) {
-					teststatus.textContent = '!';
-					enabled.checked = teststatus.classList = true;
-					enabled.parentElement.removeAttribute('disabled');
-				} else {
-					teststatus.textContent = '!';
-					enabled.checked = teststatus.classList = false;
-					enabled.parentElement.setAttribute('disabled');
+					if ((status = +status) >= 200 && status < 400) {
+						teststatus.textContent = '!';
+						enabled.checked = teststatus.classList = true;
+						enabled.parentElement.removeAttribute('disabled');
+					} else {
+						teststatus.textContent = '!';
+						enabled.checked = teststatus.classList = false;
+						enabled.parentElement.setAttribute('disabled');
 
-					throw new Error(`Ombi error [${ status }]`);
-				}
-			} )
-			.catch( error => { new Notification('error', error) } );
+						throw new Error(`Ombi error [${ status }]`);
+					}
+				} )
+				.catch( error => { new Notification('error', error) } );
+		} catch(error) {
+			LoadingAnimation();
+
+			throw error;
+		}
 	}
 
 	if(refreshing)
@@ -783,7 +806,7 @@ function getWatcher(options, api = "getconfig") {
 		});
 }
 
-function performWatcherTest(QualityProfileID = 'Default', refreshing = false) {
+function performWatcherTest({ QualityProfileID = 'Default', refreshing = false, event }) {
 	let options = getOptionValues(),
 		teststatus = $('#watcher_test_status'),
 		path = $('[data-option="watcherURLRoot"]'),
@@ -796,59 +819,67 @@ function performWatcherTest(QualityProfileID = 'Default', refreshing = false) {
 	teststatus.textContent = '?';
 	storagepath.value = '[Empty]';
 	options.watcherURLRoot = url = path.value = options.watcherURLRoot.replace(/^(\:\d+)/, 'localhost$1').replace(/^(?!^http(s)?:)/, 'http$1://').replace(/\/+$/, '');
+	LoadingAnimation(true);
 
 	let Get = () => {
-		getWatcher(options, 'liststatus').then(list => {
-			list.map(item => {
-				__caught.imdb.push(item.movies.imdbid);
-				__caught.tmdb.push(item.movies.tmdbid);
+		try {
+			getWatcher(options, 'liststatus').then(list => {
+				list.map(item => {
+					__caught.imdb.push(item.movies.imdbid);
+					__caught.tmdb.push(item.movies.tmdbid);
+				});
 			});
-		});
 
-		getWatcher(options, 'getconfig').then(configuration => {
-			if(!configuration || !configuration.response) return new Notification('error', 'Failed to get Watcher configuration');
+			getWatcher(options, 'getconfig').then(configuration => {
+				LoadingAnimation();
+				if(!configuration || !configuration.response) return new Notification('error', 'Failed to get Watcher configuration');
 
-			let names = configuration.config.Quality.Profiles,
-				path = configuration.config.Postprocessing.moverpath,
-				syntax = path.replace(/\/([\w\s\/\\\{\}]+)$/, '$1'),
-				profiles = [];
+				let names = configuration.config.Quality.Profiles,
+					path = configuration.config.Postprocessing.moverpath,
+					syntax = path.replace(/\/([\w\s\/\\\{\}]+)$/, '$1'),
+					profiles = [];
 
-			path = path.replace(syntax, '');
+				path = path.replace(syntax, '');
 
-			for(let name in names)
-				profiles.push({
-					id: name,
-					name
+				for(let name in names)
+					profiles.push({
+						id: name,
+						name
+					});
+
+				teststatus.textContent = '!';
+				teststatus.classList = enabled.checked = !!profiles.length;
+
+				if(!profiles.length)
+					return teststatus.title = 'Failed to communicate with Watcher';
+				enabled.parentElement.removeAttribute('disabled');
+
+				let qualities = [];
+				profiles.forEach(profile => {
+					let option = document.createElement('option');
+					let { id, name } = profile;
+
+					option.value = id;
+					option.textContent = name;
+					qualities.push({ id, name });
+					quality.appendChild(option);
 				});
 
-			teststatus.textContent = '!';
-			teststatus.classList = enabled.checked = !!profiles.length;
+				$('[data-option="watcherQualities"i]').value = JSON.stringify(qualities);
 
-			if(!profiles.length)
-				return teststatus.title = 'Failed to communicate with Watcher';
-			enabled.parentElement.removeAttribute('disabled');
+				// Because the <select> was reset, the original value is lost.
+				if(QualityProfileID)
+					quality.value = QualityProfileID;
 
-			let qualities = [];
-			profiles.forEach(profile => {
-				let option = document.createElement('option');
-				let { id, name } = profile;
+				storagepath.value = path || '[Default Location]';
 
-				option.value = id;
-				option.textContent = name;
-				qualities.push({ id, name });
-				quality.appendChild(option);
+				$('[data-option="watcherStoragePaths"i]').value = JSON.stringify(path || { path: '[Default Location]', id: 0 });
 			});
+		} catch(error) {
+			LoadingAnimation();
 
-			$('[data-option="watcherQualities"i]').value = JSON.stringify(qualities);
-
-			// Because the <select> was reset, the original value is lost.
-			if(QualityProfileID)
-				quality.value = QualityProfileID;
-
-			storagepath.value = path || '[Default Location]';
-
-			$('[data-option="watcherStoragePaths"i]').value = JSON.stringify(path || { path: '[Default Location]', id: 0 });
-		});
+			throw error;
+		}
 	}
 
 	if(refreshing)
@@ -882,7 +913,7 @@ function getRadarr(options, api = "profile") {
 		});
 }
 
-function performRadarrTest(QualityProfileID, StoragePath, refreshing = false) {
+function performRadarrTest({ QualityProfileID, StoragePath, refreshing = false, event }) {
 	let options = getOptionValues(),
 		teststatus = $('#radarr_test_status'),
 		path = $('[data-option="radarrURLRoot"]'),
@@ -895,60 +926,68 @@ function performRadarrTest(QualityProfileID, StoragePath, refreshing = false) {
 	teststatus.textContent = '?';
 	storagepath.textContent = '';
 	options.radarrURLRoot = url = path.value = options.radarrURLRoot.replace(/^(\:\d+)/, 'localhost$1').replace(/^(?!^http(s)?:)/, 'http$1://').replace(/\/+$/, '');
+	LoadingAnimation(true);
 
 	let Get = () => {
-		getRadarr(options, 'movie').then(movies => {
-			movies.map(movie => {
-				__caught.imdb.push(movie.imdbId);
-				__caught.tmdb.push(movie.tmdbId);
-			});
-		});
-
-		getRadarr(options, 'profile').then(profiles => {
-			if(!profiles) return new Notification('error', 'Failed to get Radarr configuration');
-
-			teststatus.textContent = '!';
-			teststatus.classList = enabled.checked = !!profiles.length;
-
-			if(!profiles.length)
-				return teststatus.title = 'Failed to communicate with Radarr';
-			enabled.parentElement.removeAttribute('disabled');
-
-			let qualities = [];
-			profiles.forEach(profile => {
-				let option = document.createElement('option');
-				let { id, name } = profile;
-
-				option.value = id;
-				option.textContent = name;
-				qualities.push({ id, name });
-				quality.appendChild(option);
+		try {
+			getRadarr(options, 'movie').then(movies => {
+				movies.map(movie => {
+					__caught.imdb.push(movie.imdbId);
+					__caught.tmdb.push(movie.tmdbId);
+				});
 			});
 
-			$('[data-option="radarrQualities"i]').value = JSON.stringify(qualities);
+			getRadarr(options, 'profile').then(profiles => {
+				LoadingAnimation();
+				if(!profiles) return new Notification('error', 'Failed to get Radarr configuration');
 
-			// Because the <select> was reset, the original value is lost.
-			if(QualityProfileID)
-				$('[data-option="__radarrQuality"i]').value = quality.value = QualityProfileID;
-		});
+				teststatus.textContent = '!';
+				teststatus.classList = enabled.checked = !!profiles.length;
 
-		let StoragePaths = [];
-		getRadarr(options, 'rootfolder').then(storagepaths => {
-			storagepaths.forEach(path => {
-				let option = document.createElement('option');
+				if(!profiles.length)
+					return teststatus.title = 'Failed to communicate with Radarr';
+				enabled.parentElement.removeAttribute('disabled');
 
-				StoragePaths.push((option.value = option.textContent = path.path).replace(/\\/g, '/'));
-				storagepath.appendChild(option);
+				let qualities = [];
+				profiles.forEach(profile => {
+					let option = document.createElement('option');
+					let { id, name } = profile;
+
+					option.value = id;
+					option.textContent = name;
+					qualities.push({ id, name });
+					quality.appendChild(option);
+				});
+
+				$('[data-option="radarrQualities"i]').value = JSON.stringify(qualities);
+
+				// Because the <select> was reset, the original value is lost.
+				if(QualityProfileID)
+					$('[data-option="__radarrQuality"i]').value = quality.value = QualityProfileID;
 			});
 
-			$('[data-option="radarrStoragePaths"i]').value = JSON.stringify(storagepaths);
+			let StoragePaths = [];
+			getRadarr(options, 'rootfolder').then(storagepaths => {
+				storagepaths.forEach(path => {
+					let option = document.createElement('option');
 
-			// Because the <select> was reset, the original value is lost.
-			if(StoragePath) {
-				storagepath.value = StoragePath;
-				$('[data-option="__radarrStoragePath"i]').value = StoragePaths.indexOf(StoragePath.replace(/\\/g, '/')) + 1;
-			}
-		});
+					StoragePaths.push((option.value = option.textContent = path.path).replace(/\\/g, '/'));
+					storagepath.appendChild(option);
+				});
+
+				$('[data-option="radarrStoragePaths"i]').value = JSON.stringify(storagepaths);
+
+				// Because the <select> was reset, the original value is lost.
+				if(StoragePath) {
+					storagepath.value = StoragePath;
+					$('[data-option="__radarrStoragePath"i]').value = StoragePaths.indexOf(StoragePath.replace(/\\/g, '/')) + 1;
+				}
+			});
+		} catch(error) {
+			LoadingAnimation();
+
+			throw error;
+		}
 	};
 
 	if(refreshing)
@@ -982,7 +1021,7 @@ function getSonarr(options, api = "profile") {
 		});
 }
 
-function performSonarrTest(QualityProfileID, StoragePath, refreshing = false) {
+function performSonarrTest({ QualityProfileID, StoragePath, refreshing = false, event }) {
 	let options = getOptionValues(),
 		teststatus = $('#sonarr_test_status'),
 		path = $('[data-option="sonarrURLRoot"]'),
@@ -995,59 +1034,67 @@ function performSonarrTest(QualityProfileID, StoragePath, refreshing = false) {
 	teststatus.textContent = '?';
 	storagepath.textContent = '';
 	options.sonarrURLRoot = url = path.value = options.sonarrURLRoot.replace(/^(\:\d+)/, 'localhost$1').replace(/^(?!^http(s)?:)/, 'http$1://').replace(/\/+$/, '');
+	LoadingAnimation(true);
 
 	let Get = () => {
-		getSonarr(options, 'series').then(shows => {
-			shows.map(show => {
-				__caught.tvdb.push(show.tvdbId);
-			});
-		});
-
-		getSonarr(options, 'profile').then(profiles => {
-			if(!profiles) return new Notification('error', 'Failed to get Sonarr configuration');
-
-			teststatus.textContent = '!';
-			teststatus.classList = enabled.checked = !!profiles.length;
-
-			if(!profiles.length)
-				return teststatus.title = 'Failed to communicate with Sonarr';
-			enabled.parentElement.removeAttribute('disabled');
-
-			let qualities = [];
-			profiles.forEach(profile => {
-				let option = document.createElement('option');
-				let { id, name } = profile;
-
-				option.value = id;
-				option.textContent = name;
-				qualities.push({ id, name });
-				quality.appendChild(option);
+		try {
+			getSonarr(options, 'series').then(shows => {
+				shows.map(show => {
+					__caught.tvdb.push(show.tvdbId);
+				});
 			});
 
-			$('[data-option="sonarrQualities"i]').value = JSON.stringify(qualities);
+			getSonarr(options, 'profile').then(profiles => {
+				LoadingAnimation();
+				if(!profiles) return new Notification('error', 'Failed to get Sonarr configuration');
 
-			// Because the <select> was reset, the original value is lost.
-			if(QualityProfileID)
-				$('[data-option="__sonarrQuality"i]').value = quality.value = QualityProfileID;
-		});
+				teststatus.textContent = '!';
+				teststatus.classList = enabled.checked = !!profiles.length;
 
-		let StoragePaths = [];
-		getSonarr(options, 'rootfolder').then(storagepaths => {
-			storagepaths.forEach(path => {
-				let option = document.createElement('option');
+				if(!profiles.length)
+					return teststatus.title = 'Failed to communicate with Sonarr';
+				enabled.parentElement.removeAttribute('disabled');
 
-				StoragePaths.push((option.value = option.textContent = path.path).replace(/\\/g, '/'));
-				storagepath.appendChild(option);
+				let qualities = [];
+				profiles.forEach(profile => {
+					let option = document.createElement('option');
+					let { id, name } = profile;
+
+					option.value = id;
+					option.textContent = name;
+					qualities.push({ id, name });
+					quality.appendChild(option);
+				});
+
+				$('[data-option="sonarrQualities"i]').value = JSON.stringify(qualities);
+
+				// Because the <select> was reset, the original value is lost.
+				if(QualityProfileID)
+					$('[data-option="__sonarrQuality"i]').value = quality.value = QualityProfileID;
 			});
 
-			$('[data-option="sonarrStoragePaths"i]').value = JSON.stringify(storagepaths);
+			let StoragePaths = [];
+			getSonarr(options, 'rootfolder').then(storagepaths => {
+				storagepaths.forEach(path => {
+					let option = document.createElement('option');
 
-			// Because the <select> was reset, the original value is lost.
-			if(StoragePath) {
-				storagepath.value = StoragePath;
-				$('[data-option="__sonarrStoragePath"i]').value = StoragePaths.indexOf(StoragePath.replace(/\\/g, '/')) + 1;
-			}
-		});
+					StoragePaths.push((option.value = option.textContent = path.path).replace(/\\/g, '/'));
+					storagepath.appendChild(option);
+				});
+
+				$('[data-option="sonarrStoragePaths"i]').value = JSON.stringify(storagepaths);
+
+				// Because the <select> was reset, the original value is lost.
+				if(StoragePath) {
+					storagepath.value = StoragePath;
+					$('[data-option="__sonarrStoragePath"i]').value = StoragePaths.indexOf(StoragePath.replace(/\\/g, '/')) + 1;
+				}
+			});
+		} catch(error) {
+			LoadingAnimation();
+
+			throw error;
+		}
 	};
 
 	if(refreshing)
@@ -1081,7 +1128,7 @@ function getMedusa(options, api = 'config') {
 		});
 }
 
-function performMedusaTest(QualityProfileID, StoragePath, refreshing = false) {
+function performMedusaTest({ QualityProfileID, StoragePath, refreshing = false, event }) {
 	let options = getOptionValues(),
 		teststatus = $('#medusa_test_status'),
 		path = $('[data-option="medusaURLRoot"]'),
@@ -1094,68 +1141,76 @@ function performMedusaTest(QualityProfileID, StoragePath, refreshing = false) {
 	teststatus.textContent = '?';
 	storagepath.textContent = '';
 	options.medusaURLRoot = url = path.value = options.medusaURLRoot.replace(/^(\:\d+)/, 'localhost$1').replace(/^(?!^http(s)?:)/, 'http$1://').replace(/\/+$/, '');
+	LoadingAnimation(true);
 
 	let Get = () => {
-		getMedusa(options, 'series').then(shows => {
-			shows.map(show => {
-				__caught.imdb.push(show.id.imdb)
-				__caught.tvdb.push(show.id.tvdb);
-			});
-		});
-
-		getMedusa(options, 'config').then(configuration => {
-			if(!configuration) return new Notification('error', 'Failed to get Medusa configuration');
-
-			let { qualities } = configuration.consts,
-				profileType = $('[data-option="medusaQualityProfileType"i]').selectedIndex,
-				profiles = (profileType == 0? 'presets': profileType == 1? 'values': 'anySets');
-
-			profiles = qualities[profiles];
-
-			teststatus.textContent = '!';
-			teststatus.classList = enabled.checked = !!profiles.length;
-
-			if(!profiles.length)
-				return teststatus.title = 'Failed to communicate with Medusa';
-			enabled.parentElement.removeAttribute('disabled');
-
-			profiles.forEach(profile => {
-				let option = document.createElement('option');
-				let { value, name } = profile;
-
-				option.value = value;
-				option.textContent = name;
-				quality.appendChild(option);
+		try {
+			getMedusa(options, 'series').then(shows => {
+				shows.map(show => {
+					__caught.imdb.push(show.id.imdb)
+					__caught.tvdb.push(show.id.tvdb);
+				});
 			});
 
-			$('[data-option="medusaQualities"i]').value = JSON.stringify(profiles);
+			getMedusa(options, 'config').then(configuration => {
+				LoadingAnimation();
+				if(!configuration) return new Notification('error', 'Failed to get Medusa configuration');
 
-			// Because the <select> was reset, the original value is lost.
-			if(QualityProfileID)
-				$('[data-option="__medusaQuality"i]').value = quality.value = QualityProfileID;
-		});
+				let { qualities } = configuration.consts,
+					profileType = $('[data-option="medusaQualityProfileType"i]').selectedIndex,
+					profiles = (profileType == 0? 'presets': profileType == 1? 'values': 'anySets');
 
-		let StoragePaths = [];
-		getMedusa(options, 'config').then(configuration => {
-			let storagepaths = configuration.main.rootDirs.filter(d => d.length > 1);
+				profiles = qualities[profiles];
 
-			if(storagepaths.length < 1) return new Notification('error', 'Medusa has no usable storage paths');
+				teststatus.textContent = '!';
+				teststatus.classList = enabled.checked = !!profiles.length;
 
-			storagepaths.forEach(path => {
-				let option = document.createElement('option');
+				if(!profiles.length)
+					return teststatus.title = 'Failed to communicate with Medusa';
+				enabled.parentElement.removeAttribute('disabled');
 
-				StoragePaths.push((option.value = option.textContent = path).replace(/\\/g, '/').replace(/\/+$/, ''));
-				storagepath.appendChild(option);
+				profiles.forEach(profile => {
+					let option = document.createElement('option');
+					let { value, name } = profile;
+
+					option.value = value;
+					option.textContent = name;
+					quality.appendChild(option);
+				});
+
+				$('[data-option="medusaQualities"i]').value = JSON.stringify(profiles);
+
+				// Because the <select> was reset, the original value is lost.
+				if(QualityProfileID)
+					$('[data-option="__medusaQuality"i]').value = quality.value = QualityProfileID;
 			});
 
-			$('[data-option="medusaStoragePaths"i]').value = JSON.stringify(storagepaths.map(path => ({ path, id: path })));
+			let StoragePaths = [];
+			getMedusa(options, 'config').then(configuration => {
+				let storagepaths = configuration.main.rootDirs.filter(d => d.length > 1);
 
-			// Because the <select> was reset, the original value is lost.
-			if(StoragePath) {
-				$('[data-option="__medusaStoragePath"i]').value = StoragePath;
-				storagepath.selectedIndex = StoragePaths.indexOf(StoragePath.replace(/\\/g, '/').replace(/\/+$/, ''));
-			}
-		});
+				if(storagepaths.length < 1) return new Notification('error', 'Medusa has no usable storage paths');
+
+				storagepaths.forEach(path => {
+					let option = document.createElement('option');
+
+					StoragePaths.push((option.value = option.textContent = path).replace(/\\/g, '/').replace(/\/+$/, ''));
+					storagepath.appendChild(option);
+				});
+
+				$('[data-option="medusaStoragePaths"i]').value = JSON.stringify(storagepaths.map(path => ({ path, id: path })));
+
+				// Because the <select> was reset, the original value is lost.
+				if(StoragePath) {
+					$('[data-option="__medusaStoragePath"i]').value = StoragePath;
+					storagepath.selectedIndex = StoragePaths.indexOf(StoragePath.replace(/\\/g, '/').replace(/\/+$/, ''));
+				}
+			});
+		} catch(error) {
+			LoadingAnimation();
+
+			throw error;
+		}
 	};
 
 	if(refreshing)
@@ -1189,7 +1244,7 @@ function getSickBeard(options, api = 'sb') {
 		});
 }
 
-function performSickBeardTest(QualityProfileID, StoragePath, refreshing = false) {
+function performSickBeardTest({ QualityProfileID, StoragePath, refreshing = false, event }) {
 	let options = getOptionValues(),
 		teststatus = $('#sickBeard_test_status'),
 		path = $('[data-option="sickBeardURLRoot"]'),
@@ -1202,77 +1257,85 @@ function performSickBeardTest(QualityProfileID, StoragePath, refreshing = false)
 	teststatus.textContent = '?';
 	storagepath.textContent = '';
 	options.sickBeardURLRoot = url = path.value = options.sickBeardURLRoot.replace(/^(\:\d+)/, 'localhost$1').replace(/^(?!^http(s)?:)/, 'http$1://').replace(/\/+$/, '');
+	LoadingAnimation(true);
 
 	let Get = () => {
-		getSickBeard(options, 'shows').then(shows => {
-			let _shows = shows.data;
+		try {
+			getSickBeard(options, 'shows').then(shows => {
+				let _shows = shows.data;
 
-			shows = [];
+				shows = [];
 
-			for(let _show in _shows)
-				shows.push(_shows[_show]);
+				for(let _show in _shows)
+					shows.push(_shows[_show]);
 
-			shows.map(show => {
-				__caught.tvdb.push(show.tvdbid);
-			});
-		});
-
-		getSickBeard(options, 'sb.getdefaults').then(configuration => {
-			if(!configuration) return new Notification('error', 'Failed to get Sick Beard configuration');
-
-			let qualities = configuration.data,
-				profileType = $('[data-option="sickBeardQualityProfileType"i]').selectedIndex,
-				profiles = (profileType == 0? 'initial': 'archive');
-
-			profiles = qualities[profiles];
-
-			teststatus.textContent = '!';
-			teststatus.classList = enabled.checked = !!profiles.length;
-
-			if(!profiles.length)
-				return teststatus.title = 'Failed to communicate with Sick Beard';
-			enabled.parentElement.removeAttribute('disabled');
-
-			profiles = profiles.map((profile, index, array) => {
-				let option = document.createElement('option');
-				let name = profile;
-
-				option.value = option.textContent = name;
-				quality.appendChild(option);
-
-				return { id: name, name };
+				shows.map(show => {
+					__caught.tvdb.push(show.tvdbid);
+				});
 			});
 
-			$('[data-option="sickBeardQualities"i]').value = JSON.stringify(profiles);
+			getSickBeard(options, 'sb.getdefaults').then(configuration => {
+				LoadingAnimation();
+				if(!configuration) return new Notification('error', 'Failed to get Sick Beard configuration');
 
-			// Because the <select> was reset, the original value is lost.
-			if(QualityProfileID)
-				$('[data-option="__sickBeardQuality"i]').value = quality.value = QualityProfileID;
-		});
+				let qualities = configuration.data,
+					profileType = $('[data-option="sickBeardQualityProfileType"i]').selectedIndex,
+					profiles = (profileType == 0? 'initial': 'archive');
 
-		let StoragePaths = [];
-		getSickBeard(options, 'sb.getrootdirs').then(configuration => {
-			let storagepaths = configuration.data.filter(d => +d.valid > 0);
+				profiles = qualities[profiles];
 
-			if(storagepaths.length < 1) return new Notification('error', 'Sick Beard has no usable storage paths');
+				teststatus.textContent = '!';
+				teststatus.classList = enabled.checked = !!profiles.length;
 
-			storagepaths = storagepaths.map(path => {
-				let option = document.createElement('option');
+				if(!profiles.length)
+					return teststatus.title = 'Failed to communicate with Sick Beard';
+				enabled.parentElement.removeAttribute('disabled');
 
-				StoragePaths.push((path = option.value = option.textContent = path.location).replace(/\\/g, '/').replace(/\/+$/, ''));
-				storagepath.appendChild(option);
+				profiles = profiles.map((profile, index, array) => {
+					let option = document.createElement('option');
+					let name = profile;
 
-				return path;
+					option.value = option.textContent = name;
+					quality.appendChild(option);
+
+					return { id: name, name };
+				});
+
+				$('[data-option="sickBeardQualities"i]').value = JSON.stringify(profiles);
+
+				// Because the <select> was reset, the original value is lost.
+				if(QualityProfileID)
+					$('[data-option="__sickBeardQuality"i]').value = quality.value = QualityProfileID;
 			});
 
-			$('[data-option="sickBeardStoragePaths"i]').value = JSON.stringify(storagepaths.map((path, index, array) => ({ path, id: index })));
+			let StoragePaths = [];
+			getSickBeard(options, 'sb.getrootdirs').then(configuration => {
+				let storagepaths = configuration.data.filter(d => +d.valid > 0);
 
-			// Because the <select> was reset, the original value is lost.
-			if(StoragePath) {
-				$('[data-option="__sickBeardStoragePath"i]').value =
-				storagepath.selectedIndex = StoragePaths.indexOf(StoragePath.replace(/\\/g, '/').replace(/\/+$/, ''));
-			}
-		});
+				if(storagepaths.length < 1) return new Notification('error', 'Sick Beard has no usable storage paths');
+
+				storagepaths = storagepaths.map(path => {
+					let option = document.createElement('option');
+
+					StoragePaths.push((path = option.value = option.textContent = path.location).replace(/\\/g, '/').replace(/\/+$/, ''));
+					storagepath.appendChild(option);
+
+					return path;
+				});
+
+				$('[data-option="sickBeardStoragePaths"i]').value = JSON.stringify(storagepaths.map((path, index, array) => ({ path, id: index })));
+
+				// Because the <select> was reset, the original value is lost.
+				if(StoragePath) {
+					$('[data-option="__sickBeardStoragePath"i]').value =
+					storagepath.selectedIndex = StoragePaths.indexOf(StoragePath.replace(/\\/g, '/').replace(/\/+$/, ''));
+				}
+			});
+		} catch(error) {
+			LoadingAnimation();
+
+			throw error;
+		}
 	};
 
 	if(refreshing)
@@ -1435,6 +1498,7 @@ function saveOptions() {
 		new Notification('update', 'Saved', 1500);
 	}
 	new Notification('update', 'Saving...', 1500);
+	LoadingAnimation(true);
 
 	let data = {
 		...options,
@@ -1448,6 +1512,8 @@ function saveOptions() {
 	};
 
 	storage.set(data, () => {
+		LoadingAnimation();
+
 		if(chrome.runtime.lastError) {
 			new Notification('error', 'Error with saving: ' + chrome.runtime.lastError.message);
 			storage.set(data, OptionsSavedMessage);
@@ -1455,6 +1521,17 @@ function saveOptions() {
 			terminal.log('Saved Options: ', options);
 			OptionsSavedMessage();
 		}
+
+		browser.runtime.sendMessage({
+			type: 'UPDATE_CONFIGURATION',
+			options,
+		}).then(response => {
+			if(response === undefined) {
+				console.warn(`Update response (UPDATE_CONFIGURATION): Invalid response...`, { response, options });
+			} else {
+				console.log(`Update response (UPDATE_CONFIGURATION):`, { response, options });
+			}
+		});
 	});
 }
 
@@ -1565,7 +1642,11 @@ function saveOptionsWithoutPlex() {
 
 	let data = options;
 
+	LoadingAnimation(true);
+
 	storage.set(data, () => {
+		LoadingAnimation();
+
 		if(chrome.runtime.lastError) {
 			new Notification('error', 'Error with saving: ' + chrome.runtime.lastError.message);
 			storage.set(data, OptionsSavedMessage);
@@ -1573,6 +1654,17 @@ function saveOptionsWithoutPlex() {
 			terminal.log('Saved Options: ', options);
 			OptionsSavedMessage();
 		}
+
+		browser.runtime.sendMessage({
+			type: 'UPDATE_CONFIGURATION',
+			options,
+		}).then(response => {
+			if(response === undefined) {
+				console.warn(`Update response (UPDATE_CONFIGURATION): Invalid response...`, { response, options });
+			} else {
+				console.log(`Update response (UPDATE_CONFIGURATION):`, { response, options });
+			}
+		});
 	});
 }
 
@@ -1633,20 +1725,22 @@ function restoreOptions(OPTIONS) {
 			}
 		});
 
+		let refreshing = true;
+
 		if(items.plexToken)
-			performPlexTest(items.servers? items.servers[0].id: null);
+			performPlexTest({ ServerID: items.servers? items.servers[0].id: null });
 		if(items.watcherURLRoot)
-			performWatcherTest(items.watcherQualityProfileId, true);
+			performWatcherTest({ QualityProfileID: items.watcherQualityProfileId, refreshing });
 		if(items.ombiURLRoot)
-			performOmbiTest(true);
+			performOmbiTest({ refreshing });
 		if(items.medusaURLRoot)
-			performMedusaTest(items.medusaQualityProfileId, items.medusaStoragePath, true);
+			performMedusaTest({ QualityProfileID: items.medusaQualityProfileId, StoragePath: items.medusaStoragePath, refreshing });
 		if(items.radarrURLRoot)
-			performRadarrTest(items.radarrQualityProfileId, items.radarrStoragePath, true);
+			performRadarrTest({ QualityProfileID: items.radarrQualityProfileId, StoragePath: items.radarrStoragePath, refreshing });
 		if(items.sonarrURLRoot)
-			performSonarrTest(items.sonarrQualityProfileId, items.sonarrStoragePath, true);
+			performSonarrTest({ QualityProfileID: items.sonarrQualityProfileId, StoragePath: items.sonarrStoragePath, refreshing });
 		if(items.sickBeardURLRoot)
-			performSickBeardTest(items.sickBeardQualityProfileId, items.sickBeardStoragePath, true);
+			performSickBeardTest({ QualityProfileID: items.sickBeardQualityProfileId, StoragePath: items.sickBeardStoragePath, refreshing });
 		if(items.couchpotatoURLRoot)
 			enableCouchPotato();
 
@@ -1974,20 +2068,20 @@ addListener($('#plex_test'), 'click', event => {
 		ou = $('#ombi_url').value,
 		oa = $('#ombi_api').value;
 
-	if(pt)
-		performPlexTest(ServerID);
-	else if(pu && pp)
-		performPlexLogin();
-	else if(ou && oa)
-		performOmbiLogin();
-});
-$('#watcher_test', true).forEach(element => addListener(element, 'click', event => performWatcherTest()));
-$('#radarr_test', true).forEach(element => addListener(element, 'click', event => performRadarrTest()));
-$('#sonarr_test', true).forEach(element => addListener(element, 'click', event => performSonarrTest()));
-$('#medusa_test', true).forEach(element => addListener(element, 'click', event => performMedusaTest()));
-$('#ombi_test', true).forEach(element => addListener(element, 'click', event => performOmbiTest()));
-$('#sickBeard_test', true).forEach(element => addListener(element, 'click', event => performSickBeardTest()));
-$('#enable-couchpotato', true).forEach(element => addListener(element, 'click', event => enableCouchPotato()));
+		if(pt)
+			performPlexTest({ ServerID, event });
+		else if(pu && pp)
+			performPlexLogin({ event });
+		else if(ou && oa)
+			performOmbiLogin({ event });
+	});
+	$('#watcher_test', true).forEach(element => addListener(element, 'click', event => performWatcherTest({ event })));
+	$('#radarr_test', true).forEach(element => addListener(element, 'click', event => performRadarrTest({ event })));
+	$('#sonarr_test', true).forEach(element => addListener(element, 'click', event => performSonarrTest({ event })));
+	$('#medusa_test', true).forEach(element => addListener(element, 'click', event => performMedusaTest({ event })));
+	$('#ombi_test', true).forEach(element => addListener(element, 'click', event => performOmbiTest({ event })));
+	$('#sickBeard_test', true).forEach(element => addListener(element, 'click', event => performSickBeardTest({ event })));
+	$('#enable-couchpotato', true).forEach(element => addListener(element, 'click', event => enableCouchPotato({ event })));
 
 /* INPUT | Get the JSON data */
 addListener($('#json_get'), 'click', event => {
@@ -2045,11 +2139,16 @@ $('[type="range"]', true)
 $('.checkbox', true)
 	.forEach((element, index, array) => {
 		addListener(element, 'click', event => {
-			let self = traverse(path(event), element => !!~[...element.classList].indexOf('checkbox'), true);
+			let self = traverse(path(event), element => (element.type == 'checkbox'), true);
 
 			if('disabled' in self.attributes)
 				return event.preventDefault(true);
 			/* Stop the event from further processing */
+
+			if(self.checked)
+				self.setAttribute('checked', self.checked = false);
+			else
+				self.setAttribute('checked', self.checked = true);;
 		});
 	});
 
@@ -2066,21 +2165,26 @@ $('.test', true)
 		});
 	});
 
-$('[id^="theme:"i]', true)
+$('[data-option^="theme:"i]', true)
 	.forEach((element, index, array) => {
 		addListener(element, 'click', async event => {
-			let self = traverse(event.target, element => /^theme:/i.test(element.id)),
+			let self = traverse(event.target, element => /^theme:/i.test(element.getAttribute('data-option'))),
 				R = RegExp;
 
 			let [a, b] = self.getAttribute('theme').split(/\s*:\s*/).filter(v => v),
-				value = `${self.id.replace(/^theme:/i, '')}-${b}`;
+				value = `${self.getAttribute('data-option').replace(/^theme:/i, '')}-${b}`;
 
-			if(/^(checkbox)$/i.test(self.type) && (self.checked + '') == a)
+			if(/^(get|read|for)$/i.test(a))
+				__theme.push(`${ value }=${ self.value }`)
+			else if(/^(checkbox)$/i.test(self.type) && (self.checked + '') == a)
 				__theme.push(value);
 			else if(/^(text|input|button|\B)$/i.test(self.type) && R(self.value + '', 'i').test(a))
 				__theme.push(value);
 			else
 				__theme = __theme.filter(v => v != value);
+
+			/* Get rid of repeats */
+			// __theme = __theme.join('\u0000').replace(/([\w\-]+\=)([^\u0000]+?)\u0000\1[^\u0000]+?/g, ($0, $1, $2, $$, $_) => $1 + $2);
 		});
 	});
 
@@ -2146,6 +2250,59 @@ $('.bar > article > details', true)
 				open(self);
 			}
 		})
+	});
+
+$('[href^="#!/"]', true)
+	.forEach(element => {
+		let path = element.getAttribute('href').toLowerCase().split('/'),
+			root = path[1],
+			file = path.slice(2, path.length).join('/'),
+			windows = false,
+			apple = false,
+			linux = false,
+			{ platform } = navigator;
+
+		if(/^win(\d+|ce|dows)$/i.test(platform))
+			windows = true;
+		else if(/^(i(?:phone|p[ao]d)(?: simulator)?|mac(?:intosh|intel|ppc|68k)|pike)/i.test(platform))
+			apple = true;
+		else if(/^((?:free|open)bsd|linux)/i.test(platform))
+			linux = true;
+
+		let uri = '#';
+
+		switch(root) {
+			// Native URIs
+			case 'native':
+				switch(file) {
+					case 'settings/network/proxy':
+						uri =
+							windows?
+								'ms-settings:network-proxy':
+							apple?
+								'#':
+							linux?
+								'#':
+							'#';
+						break;
+
+					default:
+						uri = '#';
+						break;
+				}
+				break;
+
+			// Other URIs
+			// ...
+		}
+
+		element.setAttribute('href', `#!/${ btoa(uri).replace(/=+$/, '') }`);
+		element.onclick = event => {
+			let self = traverse(event.target, element => /^#!\//.test(element.getAttribute('href'))),
+				href = self.getAttribute('href').replace(/^#!\//, '');
+
+			open(atob(href));
+		};
 	});
 
 // CORS exception: SecurityError

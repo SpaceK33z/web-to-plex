@@ -551,10 +551,16 @@
 						Where should the button be?
 						<br>
 						<span class="checkbox" prompt-size="large" prompt-yes="&#8672;" prompt-no="&#8674;">
-							<!-- When true (checked), will be accessed in CSS (/sites/...) as "button-location-right { ... }" -->
-							<input id="theme:button-location" theme="true:right" type="checkbox" />
+							<!-- When true (checked), will be accessed in CSS (/sites/theme.css) as ".button-location-right { ... }" -->
+							<input data-option="theme:button-location" theme="true:right" type="checkbox" />
 							<label for="theme:button-location"></label>
 						</span>
+					</section>
+					<section>
+						How transparent should the button be when hidden?
+						<br>
+		                <input data-option="theme:button-opacity" theme="for:hidden" type="range" min="0" max="10" step="5" value="10" symbol="%" />
+		                <output type="text" value="10%"></output>
 					</section>
 				</details>
 			</article>
@@ -591,6 +597,8 @@
 						</h3>
 						<div>
 							If enabled, all insecure (HTTP) requests will be through an <a href="https://en.wikipedia.org/wiki/Proxy_server" target="_blank">HTTPS proxy</a>.
+							<br>
+							Open your <a href="#!/native/settings/network/proxy">proxy settings</a>.
 						</div>
 					</section>
 

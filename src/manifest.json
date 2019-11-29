@@ -6,12 +6,13 @@
 	"homepage_url": "https://github.com/SpaceK33z/web-to-plex/",
 
 	"manifest_version": 2,
-	"version": "4.1.0.12",
+	"version": "4.1.0.14",
 // Firefox Support =>
 //	"applications": {
 //		"gecko": {
 //			"id": "{05243336-ce19-46df-95af-680070c96134}",
 //			"strict_min_version": "57.0"
+//			"update_url": "https://ephellon.github.com/web.to.plex/update.json"
 //		}
 //	},
 
@@ -60,6 +61,16 @@
 		{
 			"matches": ["*://app.plex.tv/desktop#!/server/*/details?*"],
 			"js": ["download/plex.js"],
+			"all_frames": true
+		},
+		{
+			"matches": ["*://*.gounlimited.to/embed-*"],
+			"js": ["download/gounlimited.js"],
+			"all_frames": true
+		},
+		{
+			"matches": ["*://*.fembed.com/v/*"],
+			"js": ["download/fembed.js"],
 			"all_frames": true
 		},
 

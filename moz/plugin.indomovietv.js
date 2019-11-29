@@ -51,7 +51,7 @@ top.addEventListener('message', request => {
 		request = request.data;
 
 		if(request)
-			if(request.from == 'oload' || request.found == true)
+			if(request.from || request.found)
 				OLOAD_EVENTS.forEach(timeout => clearTimeout(timeout));
 	} catch(error) {
 		throw error;

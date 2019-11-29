@@ -8,14 +8,15 @@ let plugin = {
 		let specific = /\/\/(\w{2})\./.test(location.origin);
 
 		let title = (
-				specific ?
-					document.queryBy('[itemprop="name"]').first.textContent:
+				specific?
+					document.queryBy('h1[itemprop="name"]').first.textContent:
 				document.queryBy('main > h1').first.textContent
-			)
-			.trim(),
+			).trim(),
+
 			year = +(document.queryBy('div.clear > p.flat')
 				.first.textContent.trim()
 				.replace(/[^]*?(\d{4})[^]*/, '$1')),
+
 			IMDbID = document.queryBy('[href*="/title/tt"]')
 				.first.href.replace(/[^]*(tt\d+)[^]*/, '$1');
 
@@ -23,7 +24,7 @@ let plugin = {
 			type: 'show',
 			title,
 			year,
-			IMDbID
+			IMDbID,
 		};
 	},
 };

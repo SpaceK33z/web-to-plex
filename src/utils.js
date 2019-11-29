@@ -26,6 +26,7 @@ let configuration, init, Update;
 		'nil':				extURL('img/null.png'),
 		'icon_16':			extURL('img/16.png'),
 		'icon_48':			extURL('img/48.png'),
+		'background': 		extURL('img/background.png'),
 		'hide_icon_16':		extURL('img/hide.16.png'),
 		'hide_icon_48':		extURL('img/hide.48.png'),
 		'show_icon_16':		extURL('img/show.16.png'),
@@ -786,7 +787,7 @@ let configuration, init, Update;
 
 					/* Don't expose the user's authentication information to sites */
 					for(let key in options)
-						if(/username|password|token|api|server|url|storage|cache/i.test(key))
+						if(/username|password|token|api|server|url|storage|cache|proxy|client|builtin|plugin|qualit/i.test(key))
 							if(ALLOWED && RegExp(PERMISS.join('|'),'i').test(key))
 								configuration[key] = options[key];
 							else
@@ -1923,13 +1924,26 @@ let configuration, init, Update;
 			return firstButton;
 
 		let ThemeClasses = JSON.parse(__CONFIG__.__theme),
-			HeaderClasses = [];
+			HeaderClasses = [],
+			ParsedAttributes = {};
 
 		// Theme(s)
 		if(!ThemeClasses.length)
 			ThemeClasses = '';
 		else
 			ThemeClasses = '.' + ThemeClasses.join('.');
+
+		ThemeClasses = ThemeClasses.split('.').filter(v => {
+			let R = RegExp;
+
+			if(/([^=]+?)=([^.]+?)/.test(v)) {
+				ParsedAttributes[R.$1] = R.$2;
+
+				return false;
+			}
+
+			return true;
+		}).join('.');
 
 		// Header(s)
 		for(let header in headers)
@@ -1944,92 +1958,93 @@ let configuration, init, Update;
 		// <button>
 		let button =
 			furnish(`button.show.closed.floating.web-to-plex-button${HeaderClasses}${ThemeClasses}`, {
-					onmouseenter: event => {
-						let self = event.target;
+				...ParsedAttributes,
+				onmouseenter: event => {
+					let self = event.target;
 
-						self.classList.remove('closed');
-						self.classList.add('open', 'animate');
-					},
-					onmouseleave: event => {
-						let self = event.target;
-
-						self.classList.remove('open', 'animate');
-						self.classList.add('closed');
-					},
-					style: `background-image: url(${ IMG_URL.noise_background })`
+					self.classList.remove('closed');
+					self.classList.add('open', 'animate');
 				},
-				// <ul>
-				furnish('ul', {},
-					// <li>
-					furnish('li#wtp-list-name.list-name', {},
-						furnish('a.list-action', { tooltip: 'Web to Plex' }, furnish(`img[alt=Web to Plex]`, { src: IMG_URL.icon_48 }))
-					),
+				onmouseleave: event => {
+					let self = event.target;
 
-					furnish('li#wtp-plexit.list-item', {
-						tooltip: 'Open Plex It!',
-						onmouseup: event => {
-							let self = event.target, parent = button;
+					self.classList.remove('open', 'animate');
+					self.classList.add('closed');
+				},
+				style: `background-image: url(${ IMG_URL.noise_background }), url(${ IMG_URL.background }); background-size: auto, cover;`
+			},
+			// <ul>
+			furnish('ul', {},
+				// <li>
+				furnish('li#wtp-list-name.list-name', {},
+					furnish('a.list-action', { tooltip: 'Web to Plex' }, furnish(`img[alt=Web to Plex]`, { src: IMG_URL.icon_48 }))
+				),
 
-							(d=>{let s=d.createElement('script'),h=d.querySelector('head');s.type='text/javascript';s.src='//ephellon.github.io/plex.it.js';h.appendChild(s)})(document);
+				furnish('li#wtp-plexit.list-item', {
+					tooltip: 'Open Plex It!',
+					onmouseup: event => {
+						let self = event.target, parent = button;
+
+						(d=>{let s=d.createElement('script'),h=d.querySelector('head');s.type='text/javascript';s.src='//ephellon.github.io/plex.it.js';h.appendChild(s)})(document);
+					}
+				},
+				furnish('img[alt=Favorite]', { src: IMG_URL.plexit_icon_48, onmouseup: event => event.target.parentElement.click() }) // <img/>
+				),
+
+				furnish('li#wtp-hide.list-item', {
+					tooltip: 'Hide Web to Plex',
+					onmouseup: event => {
+						let self = $('#wtp-hide').first, state = self.getAttribute('state') || 'show';
+
+						button.classList.remove(state);
+
+						self.setAttribute('tooltip', state.toCaps() + ' Web to Plex');
+
+						let img = self.querySelector('img');
+
+						img && (img.src = state == 'show'? IMG_URL.show_icon_48: IMG_URL.hide_icon_48);
+
+						if(state == 'show') {
+							state = 'hide';
+						} else {
+							state = 'show';
 						}
-					},
-					furnish('img[alt=Favorite]', { src: IMG_URL.plexit_icon_48, onmouseup: event => event.target.parentElement.click() }) // <img/>
-					),
 
-					furnish('li#wtp-hide.list-item', {
-						tooltip: 'Hide Web to Plex',
-						onmouseup: event => {
-							let self = $('#wtp-hide').first, state = self.getAttribute('state') || 'show';
+						button.classList.add(state);
+						self.setAttribute('state', state);
+					}
+				},
+				furnish('img[alt=Hide]', { src: IMG_URL.hide_icon_48, onmouseup: event => event.target.parentElement.click() }) // <img/>
+				),
 
-							button.classList.remove(state);
+				furnish('li#wtp-refresh.list-item', {
+					tooltip: 'Reload Web to Plex',
+					onmouseup: event => {
+						let self = event.target, parent = button;
 
-							self.setAttribute('tooltip', state.toCaps() + ' Web to Plex');
+						if(init instanceof Function)
+							button.setAttribute('class', 'closed floating web-to-plex-button restarting'), button.onmouseenter = button.onmouseleave = null, button.querySelector('.list-action').setAttribute('tooltip', 'Restarting...'), setTimeout(() => (init && !RUNNING? (init(), RUNNING = true): RUNNING = false), 500);
+						else
+							new Notification('warning', "Couldn't reload. Please refresh the page.");
+					}
+				},
+				furnish('img[alt=Reload]', { src: IMG_URL.reload_icon_48, onmouseup: event => event.target.parentElement.click() }) // <img/>
+				),
 
-							let img = self.querySelector('img');
+				furnish('li#wtp-options.list-item', {
+					tooltip: 'Open settings',
+					onmouseup: event => {
+						let self = event.target, parent = button;
 
-							img && (img.src = state == 'show'? IMG_URL.show_icon_48: IMG_URL.hide_icon_48);
-
-							if(state == 'show') {
-								state = 'hide';
-							} else {
-								state = 'show';
-							}
-
-							button.classList.add(state);
-							self.setAttribute('state', state);
-						}
-					},
-					furnish('img[alt=Hide]', { src: IMG_URL.hide_icon_48, onmouseup: event => event.target.parentElement.click() }) // <img/>
-					),
-
-					furnish('li#wtp-refresh.list-item', {
-						tooltip: 'Reload Web to Plex',
-						onmouseup: event => {
-							let self = event.target, parent = button;
-
-							if(init instanceof Function)
-								button.setAttribute('class', 'closed floating web-to-plex-button restarting'), button.onmouseenter = button.onmouseleave = null, button.querySelector('.list-action').setAttribute('tooltip', 'Restarting...'), setTimeout(() => (init && !RUNNING? (init(), RUNNING = true): RUNNING = false), 500);
-							else
-								new Notification('warning', "Couldn't reload. Please refresh the page.");
-						}
-					},
-					furnish('img[alt=Reload]', { src: IMG_URL.reload_icon_48, onmouseup: event => event.target.parentElement.click() }) // <img/>
-					),
-
-					furnish('li#wtp-options.list-item', {
-						tooltip: 'Open settings',
-						onmouseup: event => {
-							let self = event.target, parent = button;
-
-							return Options();
-						}
-					},
-					furnish('img[alt=Settings]', { src: IMG_URL.settings_icon_48, onmouseup: event => event.target.parentElement.click() }) // <img/>
-					)
-					// </li>
+						return Options();
+					}
+				},
+				furnish('img[alt=Settings]', { src: IMG_URL.settings_icon_48, onmouseup: event => event.target.parentElement.click() }) // <img/>
 				)
-				// </ul>
-			);
+				// </li>
+			)
+			// </ul>
+		);
 		// </button>
 
 		document.body.appendChild(button);
@@ -2162,7 +2177,9 @@ let configuration, init, Update;
 					/* Vumoo & GoStream */
 					case 'plex':
 					case 'oload':
+					case 'fembed':
 					case 'consistent':
+					case 'gounlimited':
 						let href = options.href, path = '';
 
 						if(__CONFIG__.usingOmbi) {
@@ -2294,7 +2311,7 @@ let configuration, init, Update;
 
 		query.running = true;
 
-		new Notification('info', `Processing ${ length } item${ 's'[+(length === 1)] || '' }...`);
+		new Notification('info', `Processing ${ length } item${ ['s',''][+(length === 1)] }...`);
 
 		for(let index = 0, option, opt; index < length; index++) {
 			let { IMDbID, TMDbID, TVDbID } = (option = await options[index]);
@@ -2315,8 +2332,8 @@ let configuration, init, Update;
 										// ignore found items, we only want new items
 									} else {
 										let available = (__CONFIG__.usingOmbi || __CONFIG__.usingWatcher || __CONFIG__.usingRadarr || __CONFIG__.usingSonarr || __CONFIG__.usingMedusa || __CONFIG__.usingSickBeard || __CONFIG__.usingCouchPotato),
-											action = (available ? 'downloader' : 'notfound'),
-											title = available ?
+											action = (available? 'downloader': 'notfound'),
+											title = available?
 												'Not on Plex (download available)':
 											'Not on Plex (download not available)';
 
@@ -2492,7 +2509,6 @@ let configuration, init, Update;
 
 		switch(request.type) {
 			case 'POPULATE':
-
 				if(data instanceof Array) {
 					for(let index = 0, length = data.length, item; index < length; index++)
 						if(!(item = data[index]) || !item.type)

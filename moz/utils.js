@@ -26,6 +26,7 @@ let configuration, init, Update;
 		'nil':              extURL('null.png'),
 		'icon_16':          extURL('16.png'),
 		'icon_48':          extURL('48.png'),
+		'background': 		extURL('background.png'),
 		'hide_icon_16':     extURL('hide.16.png'),
 		'hide_icon_48':     extURL('hide.48.png'),
 		'show_icon_16':     extURL('show.16.png'),
@@ -788,7 +789,7 @@ let configuration, init, Update;
 
 					/* Don't expose the user's authentication information to sites */
 					for(let key in options)
-						if(/username|password|token|api|server|url|storage|cache/i.test(key))
+						if(/username|password|token|api|server|url|storage|cache|proxy|client|builtin|plugin|qualit/i.test(key))
 							if(ALLOWED && RegExp(PERMISS.join('|'),'i').test(key))
 								configuration[key] = options[key];
 							else
@@ -1962,28 +1963,42 @@ let configuration, init, Update;
 		else if(persistent && firstButton !== null && firstButton !== undefined)
 			return firstButton;
 
-		let ThemeClasses = JSON.parse(__CONFIG__.__theme),
-			HeaderClasses = [];
+			let ThemeClasses = JSON.parse(__CONFIG__.__theme),
+				HeaderClasses = [],
+				ParsedAttributes = {};
 
-		// Theme(s)
-		if(!ThemeClasses.length)
-			ThemeClasses = '';
-		else
-			ThemeClasses = '.' + ThemeClasses.join('.');
+			// Theme(s)
+			if(!ThemeClasses.length)
+				ThemeClasses = '';
+			else
+				ThemeClasses = '.' + ThemeClasses.join('.');
 
-		// Header(s)
-		for(let header in headers)
-			if(headers[header])
-				HeaderClasses.push( header );
+			ThemeClasses = ThemeClasses.split('.').filter(v => {
+				let R = RegExp;
 
-		if(!HeaderClasses.length)
-			HeaderClasses = '';
-		else
-			HeaderClasses = '.' + HeaderClasses.join('.');
+				if(/([^=]+?)=([^.]+?)/.test(v)) {
+					ParsedAttributes[R.$1] = R.$2;
 
-		// <button>
-		let button =
-			furnish(`button.show.closed.floating.web-to-plex-button${HeaderClasses}${ThemeClasses}`, {
+					return false;
+				}
+
+				return true;
+			}).join('.');
+
+			// Header(s)
+			for(let header in headers)
+				if(headers[header])
+					HeaderClasses.push( header );
+
+			if(!HeaderClasses.length)
+				HeaderClasses = '';
+			else
+				HeaderClasses = '.' + HeaderClasses.join('.');
+
+			// <button>
+			let button =
+				furnish(`button.show.closed.floating.web-to-plex-button${HeaderClasses}${ThemeClasses}`, {
+					...ParsedAttributes,
 					onmouseenter: event => {
 						let self = event.target;
 
@@ -1996,7 +2011,7 @@ let configuration, init, Update;
 						self.classList.remove('open', 'animate');
 						self.classList.add('closed');
 					},
-					style: `background-image: url(${ IMG_URL.noise_background })`
+					style: `background-image: url(${ IMG_URL.noise_background }), url(${ IMG_URL.background }); background-size: auto, cover;`
 				},
 				// <ul>
 				furnish('ul', {},
@@ -2070,7 +2085,7 @@ let configuration, init, Update;
 				)
 				// </ul>
 			);
-		// </button>
+			// </button>
 
 		document.body.appendChild(button);
 
@@ -2202,7 +2217,9 @@ let configuration, init, Update;
 					/* Vumoo & GoStream */
 					case 'plex':
 					case 'oload':
+					case 'fembed':
 					case 'consistent':
+					case 'gounlimited':
 						let href = options.href, path = '';
 
 						if(__CONFIG__.usingOmbi) {

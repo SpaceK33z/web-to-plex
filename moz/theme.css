@@ -5,6 +5,11 @@
 
 // The main button (container)
 BUTTON  .web-to-plex-button.<floating>.<hide|show>.<open|closed>
+    <floating>  if the button is "floating" above elements
+    <hide>      the buttons is hidden (by user interaction)
+    <show>      the button is shown (by user interaction)
+    <open>      the button is fully open (elliptical)
+    <closed>    the button is closed (circular)
 
     // (Container) Holds the LIs that perform the various actions
    UL
@@ -32,7 +37,21 @@ BUTTON  .web-to-plex-button.<floating>.<hide|show>.<open|closed>
             IMG // Gear icon
 */
 
+/* Button location */
 .web-to-plex-button.button-location-right {
     left: unset !important;
     right: 5px !important;
+}
+
+/* Button opacity - when hidden, and closed */
+.web-to-plex-button.hide.closed[button-opacity-hidden="0"] {
+    opacity: 0.00 !important;
+}
+
+.web-to-plex-button.hide.closed[button-opacity-hidden="5"] {
+    opacity: 0.05 !important;
+}
+
+.web-to-plex-button.hide.closed[button-opacity-hidden="10"] {
+    opacity: 0.10 !important;
 }

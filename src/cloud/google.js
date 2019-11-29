@@ -20,9 +20,9 @@ let script = {
 				_year = (type == 'show'? $('#wp-tabs-container [data-attrid="subtitle"i] span').first || _year: _year) || { textContent: '' };
 			}
 
-			_title = $('#wp-tabs-container [data-attrid="title"i] span').first;
-			_year  = $('#wp-tabs-container [data-attrid="subtitle"i] span').first;
-			_image = $('#media_result_group img').first;
+			_title = $('#wp-tabs-container [data-attrid="title"i] span, [data-local-attribute], [role="heading"i] > div > a').first;
+			_year  = $('#wp-tabs-container [data-attrid="subtitle"i] span, [role="heading"i] > div:last-child').first;
+			_image = $('#media_result_group img, [data-attrid="image"i] img').first;
 		} else if(type == 'show') {
 			_title = $(SHOW).first.querySelector('*');
 			_year = { textContent: '' };
