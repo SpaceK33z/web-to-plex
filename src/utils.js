@@ -1601,7 +1601,7 @@ let configuration, init, Update;
 					UTILS_TERMINAL.LOG('Successfully pushed', options);
 					new Notification('update', `Added "${ options.title }" to Ombi`, 7000, () => window.open(__CONFIG__.ombiURL, '_blank'));
 				} else {
-					new Notification('warning', `Could not add "${ options.title }" to Ombi: Unknown Error`) ||
+					new Notification('warning', `Could not add "${ options.title }" to Ombi: Unknown Error`);
 					(!response.silent && UTILS_TERMINAL.error('Error adding to Ombi: ' + String(response)));
 				}
 			}
@@ -1683,7 +1683,7 @@ let configuration, init, Update;
 					UTILS_TERMINAL.LOG('Successfully pushed', options);
 					new Notification('update', `Added "${ options.title }" to Watcher`, 7000, () => window.open(`${__CONFIG__.watcherURL}library/status${TMDbID? `#${title}-${TMDbID}`: '' }`, '_blank'));
 				} else {
-					new Notification('warning', `Could not add "${ options.title }" to Watcher: Unknown Error`) ||
+					new Notification('warning', `Could not add "${ options.title }" to Watcher: Unknown Error`);
 					(!response.silent && UTILS_TERMINAL.error('Error adding to Watcher: ' + String(response)));
 				}
 			}
@@ -1740,7 +1740,7 @@ let configuration, init, Update;
 					UTILS_TERMINAL.LOG('Successfully pushed', options);
 					new Notification('update', `Added "${ options.title }" to Radarr`, 7000, () => window.open(`${__CONFIG__.radarrURL}${TMDbID? `movies/${title}-${TMDbID}`: '' }`, '_blank'));
 				} else {
-					new Notification('warning', `Could not add "${ options.title }" to Radarr: Unknown Error`) ||
+					new Notification('warning', `Could not add "${ options.title }" to Radarr: Unknown Error`);
 					(!response.silent && UTILS_TERMINAL.error('Error adding to Radarr: ' + String(response)));
 				}
 			}
@@ -1795,7 +1795,7 @@ let configuration, init, Update;
 					UTILS_TERMINAL.LOG('Successfully pushed', options);
 					new Notification('update', `Added "${ options.title }" to Sonarr`, 7000, () => window.open(`${__CONFIG__.sonarrURL}series/${title}`, '_blank'));
 				} else {
-					new Notification('warning', `Could not add "${ options.title }" to Sonarr: Unknown Error`) ||
+					new Notification('warning', `Could not add "${ options.title }" to Sonarr: Unknown Error`);
 					(!response.silent && UTILS_TERMINAL.error('Error adding to Sonarr: ' + String(response)));
 				}
 			}
@@ -1851,7 +1851,7 @@ let configuration, init, Update;
 					UTILS_TERMINAL.LOG('Successfully pushed', options);
 					new Notification('update', `Added "${ options.title }" to Medusa`, 7000, () => window.open(`${__CONFIG__.medusaURL}home/displayShow?indexername=tvdb&seriesid=${options.TVDbID}`, '_blank'));
 				} else {
-					new Notification('warning', `Could not add "${ options.title }" to Medusa: Unknown Error`) ||
+					new Notification('warning', `Could not add "${ options.title }" to Medusa: Unknown Error`);
 					(!response.silent && UTILS_TERMINAL.error('Error adding to Medusa: ' + String(response)));
 				}
 			}
@@ -1907,7 +1907,7 @@ let configuration, init, Update;
 					UTILS_TERMINAL.LOG('Successfully pushed', options);
 					new Notification('update', `Added "${ options.title }" to Sick Beard`, 7000, () => window.open(`${__CONFIG__.sickBeardURL}home/displayShow?show=${ TVDbID }`, '_blank'));
 				} else {
-					new Notification('warning', `Could not add "${ options.title }" to Sick Beard: Unknown Error`) ||
+					new Notification('warning', `Could not add "${ options.title }" to Sick Beard: Unknown Error`);
 					(!response.silent && UTILS_TERMINAL.error('Error adding to Sick Beard: ' + String(response)));
 				}
 			}
@@ -2314,7 +2314,7 @@ let configuration, init, Update;
 
 		query.running = true;
 
-		new Notification('info', `Processing ${ length } item${ ['s',''][+(length === 1)] }...`);
+		new Notification('info', `Processing ${ length } item${ 's'[+(length === 1)] || '' }...`);
 
 		for(let index = 0, option, opt; index < length; index++) {
 			let { IMDbID, TMDbID, TVDbID } = (option = await options[index]);

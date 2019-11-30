@@ -534,7 +534,7 @@ function addMedusa(request, sendResponse) {
 			return fetch(`${ request.url }`, debug.requestHeaders = {
 				method: 'POST',
 				mode: cors(request.url),
-				body: JSON.stringify({ id: { tvdb: request.tvdbId } }),
+				body: JSON.stringify({ id: { tvdb: id } }),
 				headers
 			});
 		})

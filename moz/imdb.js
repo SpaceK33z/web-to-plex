@@ -28,7 +28,7 @@ let script = {
 				country = reldate.textContent.replace(/[^]+\((\w+)\)[^]*?$/, '$1');
 				year = +script.clean(year.textContent);
 				image = (image || {}).src;
-				options = { type, title, alttitle, year, image };
+				options = { type, title, alttitle, year, image, IMDbID };
 				break;
 
 			case 'show':
@@ -46,7 +46,7 @@ let script = {
 				country = reldate.textContent.replace(/[^]+\((\w+)\)[^]*?$/, '$1');
 				year = parseInt(regdate[1]);
 				image = (image || {}).src;
-				options = { type, title, alttitle, year, image };
+				options = { type, title, alttitle, year, image, IMDbID };
 				break;
 
 			case 'list':

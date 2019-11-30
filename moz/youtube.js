@@ -64,7 +64,7 @@ let script = {
 
 			title = title.replace(R(`\\s*(\\(\\s*)?${ year }\\s*(\\))?`), '');
 
-			options = { type, title, year };
+			options = { type, title, year, image };
 		} else if(type == 'list') {
 			let title = $('#title').first,
 				year  = $('#stats *').child(2),

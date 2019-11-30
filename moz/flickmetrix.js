@@ -50,7 +50,7 @@ let script = {
 				image  = _image.src,
 				IMDbID = script.getIMDbID(element);
 
-			films.push({ type, title, year, iamge, IMDbID });
+			films.push({ type, title, year, image, IMDbID });
 		});
 
 		if(!films.length)

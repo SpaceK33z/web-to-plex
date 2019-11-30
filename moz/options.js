@@ -2130,7 +2130,7 @@ addListener($('#erase_cache'), 'click', event => {
 				storage.remove(item);
 	});
 
-	saveOptions(event);
+	saveOptions();
 });
 
 $('#version')
