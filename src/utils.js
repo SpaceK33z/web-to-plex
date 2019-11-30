@@ -1209,7 +1209,7 @@ let configuration, init, Update;
 			for(index = 0, found = false, $data, lastscore = 0; (title && year) && index < json.length && !found; rerun |= 0b0100, index++) {
 				$data = json[index];
 
-				let altt = $data.alternativeTitles,
+				let altt = ($data || {}).alternativeTitles,
 					$alt = (altt && altt.length? altt.filter(v => t(v) == t(title))[0]: null);
 
 				// Managers
@@ -1272,7 +1272,7 @@ let configuration, init, Update;
 			for(index = 0; title && index < json.length && (!found || lastscore > 0); rerun |= 0b0100, index++) {
 				$data = json[index];
 
-				let altt = $data.alternativeTitles,
+				let altt = ($data || {}).alternativeTitles,
 					$alt = (altt && altt.length? altt.filter(v => c(v) == c(title)): null);
 
 				// Managers
@@ -1351,7 +1351,7 @@ let configuration, init, Update;
 			for(index = 0; __CONFIG__.UseLoose && title && index < json.length && (!found || lastscore > 0); rerun |= 0b0010, index++) {
 				$data = json[index];
 
-				let altt = $data.alternativeTitles,
+				let altt = ($data || {}).alternativeTitles,
 					$alt = (altt && altt.length? altt.filter(v => R(v, title)): null);
 
 				// Managers
