@@ -1,7 +1,7 @@
 let script = {
 	"url": "*://*.flickmetrix.com/(watchlist|seen|favourites|trash|share|\\?)?",
 
-	"ready": () => $('#loadingOverlay > *').empty,
+	"ready": () => $('#loadingOverlay > *').empty || getComputedStyle($('#loadingOverlay').first).display === 'none',
 
 	"init": (ready) => {
 		let _title, _year, _image, R = RegExp;
@@ -11,16 +11,16 @@ let script = {
 
 		let element = $('#singleFilm'), type = 'movie';
 
-		_title  = $('.title', film).first;
-		_year   = $('.title + *', film).first;
-		_image  = $('img', film).first;
+		_title  = $('.title').first;
+		_year   = $('.title + *').first;
+		_image  = $('img').first;
 
 		let title  = _title.textContent.trim(),
 			year   = +_year.textContent.replace(/^\(|\)$/g, '').trim(),
 			image  = _image.src,
 			IMDbID = script.getIMDbID(element);
 
-		return { type, title, year, image };
+		return { type, title, year, image, IMDbID };
 	},
 
 	"getIMDbID": (element) => {
@@ -50,7 +50,7 @@ let script = {
 				image  = _image.src,
 				IMDbID = script.getIMDbID(element);
 
-			films.push({ type, title, year, IMDbID });
+			films.push({ type, title, year, iamge, IMDbID });
 		});
 
 		if(!films.length)

@@ -41,7 +41,7 @@ let script = {
 				break;
 		}
 
-		return { type, title, year, image };
+		return { type, title, year, image, IMDbID };
 	},
 
 	"getType": () => {

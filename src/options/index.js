@@ -1560,7 +1560,7 @@ function saveOptionsWithoutPlex() {
 		m, M = 'Medusa',
 		i, I = 'Sick Beard';
 
-	let who = () => (r? R: s? S: w? W: c? C: o? O: m? M: 'manager');
+	let who = () => (r? R: s? S: w? W: c? C: o? O: m? M: i? I: 'manager');
 
 	// Instead of having the user be so wordy, complete the URL ourselves here
 	if((r = !options.radarrURLRoot && options.radarrToken) || (s = !options.sonarrURLRoot && options.sonarrToken) || (w = !options.watcherURLRoot && options.watcherToken) || (o = !options.ombiURLRoot && options.ombiToken) || (m = !options.medusaURLRoot && options.medusaToken) || (i = !options.sickBeardURLRoot && options.sickBeardToken)) {
@@ -2149,9 +2149,12 @@ $('[type="range"]', true)
 $('.checkbox', true)
 	.forEach((element, index, array) => {
 		addListener(element, 'click', event => {
-			let self = traverse(path(event), element => (element.type == 'checkbox'), true);
+			let self = traverse(path(event), element => (element && element.type == 'checkbox'), true);
 
-			if('disabled' in self.attributes)
+			if(!self)
+				return;
+
+			if('disabled' in self.attributes || traverse(self, element => (element && 'disabled' in element.attributes), true))
 				return event.preventDefault(true);
 			/* Stop the event from further processing */
 
@@ -2169,7 +2172,7 @@ $('.test', true)
 
 			let self = traverse(event.target, element => !!~[...element.classList].indexOf('test'));
 
-			await saveOptions(event);
+			await saveOptions();
 
 			open(self.href, self.target);
 		});

@@ -17,7 +17,6 @@ let script = {
 				type = _type.textContent;
 
 				type = /\b(tv|show|series)\b/i.test(type)? 'show': /* /\b(movie|film|cinema|(?:\d+h\s+)?\d+m)\b/i.test(type)? 'movie': 'error' */ 'movie';
-				_year = (type == 'show'? $('#wp-tabs-container [data-attrid="subtitle"i] span').first || _year: _year) || { textContent: '' };
 			}
 
 			_title = $('#wp-tabs-container [data-attrid="title"i] span, [data-local-attribute], [role="heading"i] > div > a').first;
