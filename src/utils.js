@@ -1231,7 +1231,7 @@ let configuration, init, Update;
 						found;
 				}
 				//api.tvmaze.com/
-				else if(('externals' in ($data = $data.show || $data) || 'show' in $data) && $data.premiered)
+				else if($data && ('externals' in ($data = $data.show || $data) || 'show' in $data) && $data.premiered)
 					found = (iid == $data.externals.imdb || t($data.name) == t(title) && year == $data.premiered.slice(0, 4))?
 						$data:
 					found;
@@ -1294,7 +1294,7 @@ let configuration, init, Update;
 						found;
 				}
 				//api.tvmaze.com/
-				else if('externals' in ($data = $data.show || $data) || 'show' in $data)
+				else if($data && ('externals' in ($data = $data.show || $data) || 'show' in $data))
 					found =
 						// ignore language barriers
 						(c($data.name) == c(title))?
@@ -1373,7 +1373,7 @@ let configuration, init, Update;
 						found;
 				}
 				//api.tvmaze.com/
-				else if('externals' in ($data = $data.show || $data) || 'show' in $data)
+				else if($data && ('externals' in ($data = $data.show || $data) || 'show' in $data))
 					found =
 						// ignore language barriers
 						(R($data.name, title) || UTILS_TERMINAL.LOG('Matching:', [$data.name, title], R($data.name, title)))?
@@ -1602,7 +1602,7 @@ let configuration, init, Update;
 					new Notification('update', `Added "${ options.title }" to Ombi`, 7000, () => window.open(__CONFIG__.ombiURL, '_blank'));
 				} else {
 					new Notification('warning', `Could not add "${ options.title }" to Ombi: Unknown Error`);
-					(!response.silent && UTILS_TERMINAL.error('Error adding to Ombi: ' + String(response)));
+					(!(response && response.silent) && UTILS_TERMINAL.error('Error adding to Ombi: ' + String(response)));
 				}
 			}
 		);
@@ -1684,7 +1684,7 @@ let configuration, init, Update;
 					new Notification('update', `Added "${ options.title }" to Watcher`, 7000, () => window.open(`${__CONFIG__.watcherURL}library/status${TMDbID? `#${title}-${TMDbID}`: '' }`, '_blank'));
 				} else {
 					new Notification('warning', `Could not add "${ options.title }" to Watcher: Unknown Error`);
-					(!response.silent && UTILS_TERMINAL.error('Error adding to Watcher: ' + String(response)));
+					(!(response && response.silent) && UTILS_TERMINAL.error('Error adding to Watcher: ' + String(response)));
 				}
 			}
 		);
@@ -1741,7 +1741,7 @@ let configuration, init, Update;
 					new Notification('update', `Added "${ options.title }" to Radarr`, 7000, () => window.open(`${__CONFIG__.radarrURL}${TMDbID? `movies/${title}-${TMDbID}`: '' }`, '_blank'));
 				} else {
 					new Notification('warning', `Could not add "${ options.title }" to Radarr: Unknown Error`);
-					(!response.silent && UTILS_TERMINAL.error('Error adding to Radarr: ' + String(response)));
+					(!(response && response.silent) && UTILS_TERMINAL.error('Error adding to Radarr: ' + String(response)));
 				}
 			}
 		);
@@ -1796,7 +1796,7 @@ let configuration, init, Update;
 					new Notification('update', `Added "${ options.title }" to Sonarr`, 7000, () => window.open(`${__CONFIG__.sonarrURL}series/${title}`, '_blank'));
 				} else {
 					new Notification('warning', `Could not add "${ options.title }" to Sonarr: Unknown Error`);
-					(!response.silent && UTILS_TERMINAL.error('Error adding to Sonarr: ' + String(response)));
+					(!(response && response.silent) && UTILS_TERMINAL.error('Error adding to Sonarr: ' + String(response)));
 				}
 			}
 		);
@@ -1852,7 +1852,7 @@ let configuration, init, Update;
 					new Notification('update', `Added "${ options.title }" to Medusa`, 7000, () => window.open(`${__CONFIG__.medusaURL}home/displayShow?indexername=tvdb&seriesid=${options.TVDbID}`, '_blank'));
 				} else {
 					new Notification('warning', `Could not add "${ options.title }" to Medusa: Unknown Error`);
-					(!response.silent && UTILS_TERMINAL.error('Error adding to Medusa: ' + String(response)));
+					(!(response && response.silent) && UTILS_TERMINAL.error('Error adding to Medusa: ' + String(response)));
 				}
 			}
 		);
@@ -1908,7 +1908,7 @@ let configuration, init, Update;
 					new Notification('update', `Added "${ options.title }" to Sick Beard`, 7000, () => window.open(`${__CONFIG__.sickBeardURL}home/displayShow?show=${ TVDbID }`, '_blank'));
 				} else {
 					new Notification('warning', `Could not add "${ options.title }" to Sick Beard: Unknown Error`);
-					(!response.silent && UTILS_TERMINAL.error('Error adding to Sick Beard: ' + String(response)));
+					(!(response && response.silent) && UTILS_TERMINAL.error('Error adding to Sick Beard: ' + String(response)));
 				}
 			}
 		);
