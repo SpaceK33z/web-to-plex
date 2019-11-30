@@ -1,12 +1,12 @@
 {
-//	"update_url": "https://ephellon.github.com/web.to.plex/update.xml",
+//	"update_url": "https://ephellon.github.com/web.to.plex/update.json",
 
 	"name": "Web to Plex",
 	"description": "Adds a button on various movie & TV show sites to open the item in Plex, or send to your designated NZB manager for download.",
 	"homepage_url": "https://github.com/SpaceK33z/web-to-plex/",
 
 	"manifest_version": 2,
-	"version": "4.1.0.14",
+	"version": "4.1.0.15",
 // Firefox Support =>
 	"applications": {
 		"gecko": {

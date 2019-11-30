@@ -332,7 +332,7 @@
 					</section>
 					<hr><br>
 					<section>
-						<a class="button test" target="_blank" href="https://ephellon.github.io/web.to.plex/test/">try out couchpotato</a>
+						<a class="button test" target="_blank" href="https://ephellon.github.io/web.to.plex/test/#movie">try out couchpotato</a>
 					</section>
 		        </details>
 
@@ -597,8 +597,6 @@
 						</h3>
 						<div>
 							If enabled, all insecure (HTTP) requests will be through an <a href="https://en.wikipedia.org/wiki/Proxy_server" target="_blank">HTTPS proxy</a>.
-							<br>
-							Open your <a href="#!/native/settings/network/proxy">proxy settings</a>.
 						</div>
 					</section>
 
@@ -623,6 +621,15 @@
 						<textarea type="text" data-option="ProxyHeaders" placeholder="Enter the Proxy headers" code></textarea>
 						<div>
 							If your proxy requires <a href="https://github.com/SpaceK33z/web-to-plex/wiki/Settings#connection-settings--proxy-settings" target="_blank">special headers</a>, enter that information in here.
+						</div>
+					</section>
+
+					<section>
+						<h3>Native Proxy Settings</h3>
+						<div>
+							<a href="#!/native/settings/network/proxy">
+								<button>Open your computer's proxy settings</button>
+							</a>
 						</div>
 					</section>
 				</details>
@@ -911,6 +918,8 @@
 	</div>
 
     <footer id="version"></footer>
+
+	<iframe id="native-frame" name="native-frame" style="display: none !important"></iframe>
 
 	<script src="lodash.min.js"></script>
 	<script src="xml.js"></script>

@@ -1,10 +1,12 @@
 /* Themes and other stylings for Web to Plex */
 /* Button Layout (Reference)
 
-// <value> - an optional attribute value
+// <value> - an optional value
+// `value` - an evaluated (calculated) value
+// A|B|... - A OR B OR ...
 
 // The main button (container)
-BUTTON  .web-to-plex-button.<floating>.<hide|show>.<open|closed>
+BUTTON  [style].web-to-plex-button.<floating>.<hide|show>.<open|closed>
     <floating>  if the button is "floating" above elements
     <hide>      the buttons is hidden (by user interaction)
     <show>      the button is shown (by user interaction)
@@ -12,29 +14,39 @@ BUTTON  .web-to-plex-button.<floating>.<hide|show>.<open|closed>
     <closed>    the button is closed (circular)
 
     // (Container) Holds the LIs that perform the various actions
-   UL
+    UL
+
+        // The ripple effect (colored indicator)
+        ::before
 
         // The Web to Plex (logo) button
-        LI  #wtp-list-name.list-name
+        LI  [tooltip]#wtp-list-name.list-name
             // The actionable anchor
-            A   .list-action
-               IMG // Web to Plex logo
+            A  [tooltip][href][`id`].list-action
+               IMG  [src=/img/48.png] // Web to Plex logo
 
         // The Plex It! button
-        LI  #wtp-plexit.list-item
-            IMG // Alarm bell
+        LI  [tooltip]#wtp-plexit.list-item
+            IMG [src=/img/plexit.48.png] // Alarm bell
+
+        // The Add to Plex It! button (normally hidden, until Plex It! is visible)
+        LI  [tooltip][data]#plexit.list-item
+            DIV [tooltip][style][draggable=true]
 
         // The hide button
-        LI  #wtp-hide.list-item
-            IMG // Eye icon
+        LI  [tooltip]#wtp-hide.list-item
+            IMG [src=/img/hide.48.png] // Eye icon
 
         // The refresh button
-        LI  #wtp-refresh.list-item
-            IMG // Refresh
+        LI  [tooltip]#wtp-refresh.list-item
+            IMG [src=/img/reload.48.png] // Refresh
 
         // The settings button
-        LI  #wtp-options.list-item
-            IMG // Gear icon
+        LI  [tooltip]#wtp-options.list-item
+            IMG [src=/img/settings.48.png] // Gear icon
+
+        // The small, circular, colored indicator
+        ::after
 */
 
 /* Button location */

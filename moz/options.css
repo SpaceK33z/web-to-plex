@@ -1,5 +1,5 @@
 * {
-    outline: none !important;
+    outline: #0000 !important;
 }
 
 html, body {
@@ -211,6 +211,15 @@ em {
     color: #cc7b19 !important;
 }
 
+strike, st, k {
+    text-decoration: line-through !important;
+}
+
+[href="#!/NaCl+Iw"], [href="#!/NaCl+Iw"] * {
+    cursor: not-allowed !important;
+    opacity: 0.5 !important;
+}
+
 select {
     margin-left: 10px !important;
     font-size: 16px !important;
@@ -260,7 +269,6 @@ article {
 summary, option {
     color: #999;
     cursor: pointer;
-    list-style: none !important;
 
     margin-bottom: 12px !important;
     margin-top: 0 !important;
@@ -303,35 +311,21 @@ details:last-child > summary {
     margin-bottom: 0 !important;
 }
 
-.bar > article > details:not([open]) > summary {
-    list-style: disc;
-}
-
-.bar > article > details[open] > summary {
-    list-style: disc;
+.bar > article > details > summary {
+    display: list-item;
+    list-style-type: disc;
 }
 
 .bar > article > details[open] > *:not(summary) {
     display: none !important;
 }
 
-.bar > article > details > summary::-webkit-details-marker {
-    display: none;
-}
-
-.bar > article > details > summary::before {
-    content: '\00b7';
+.bar > article > details > summary::marker {
     color: #0000;
-    font-size: 40px;
-
-    position: fixed;
-    margin-left: -12px;
-    margin-top: -20px;
-    /* Firefox calls for -12px? */
 }
 
-.bar > article > details[open] > summary::before {
-    color: inherit;
+.bar > article > details[open] > summary::marker {
+    color: inherit !important;
 }
 
 #save {
@@ -494,7 +488,7 @@ input[type="range"] {
     -webkit-appearance: none;
 
     background: #0004;
-    outline: none;
+    outline: #0000;
 
     height: 5px !important;
     width: 83% !important;

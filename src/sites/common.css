@@ -391,7 +391,7 @@
 }
 
 .floating.web-to-plex-button:focus {
-    outline: none !important;
+    outline: #0000 !important;
 }
 
 .web-to-plex-button.wtp--download::after, .web-to-plex-button.wtp--download::before {

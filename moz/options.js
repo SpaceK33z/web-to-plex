@@ -189,6 +189,9 @@ const storage = (chrome.storage.sync || chrome.storage.local),
 			'plugin_snagfilms',
 			'plugin_freemoviescinema',
 			'plugin_foxsearchlight',
+
+			// Theme Settings
+			...(() => [...$('[data-option^="theme:"i]', true)].map(e => e.getAttribute('data-option')))()
 		];
 
 let PlexServers = [],
@@ -1353,10 +1356,17 @@ function enableCouchPotato() {
 }
 
 function HandleProxySettings(data) {
+	let { UseProxy, ProxyURL, ProxyHeaders } = data,
+		R = RegExp;
+
+	/* "All" secure URI schemes */
+	if(!/^(aaas|https|msrps|sftp|smtp|shttp|sips|ssh|wss)\:\/\//i.test(ProxyURL))
+		throw Notification('error', `Insecure URI scheme '${ R.$1 }' detected. Please use a secure scheme.`);
+
 	return {
-		enabled: data.UseProxy,
-		url: data.ProxyURL,
-		headers: data.ProxyHeaders,
+		enabled: UseProxy,
+		url: ProxyURL,
+		headers: ProxyHeaders,
 	};
 }
 
@@ -2068,20 +2078,20 @@ addListener($('#plex_test'), 'click', event => {
 		ou = $('#ombi_url').value,
 		oa = $('#ombi_api').value;
 
-		if(pt)
-			performPlexTest({ ServerID, event });
-		else if(pu && pp)
-			performPlexLogin({ event });
-		else if(ou && oa)
-			performOmbiLogin({ event });
-	});
-	$('#watcher_test', true).forEach(element => addListener(element, 'click', event => performWatcherTest({ event })));
-	$('#radarr_test', true).forEach(element => addListener(element, 'click', event => performRadarrTest({ event })));
-	$('#sonarr_test', true).forEach(element => addListener(element, 'click', event => performSonarrTest({ event })));
-	$('#medusa_test', true).forEach(element => addListener(element, 'click', event => performMedusaTest({ event })));
-	$('#ombi_test', true).forEach(element => addListener(element, 'click', event => performOmbiTest({ event })));
-	$('#sickBeard_test', true).forEach(element => addListener(element, 'click', event => performSickBeardTest({ event })));
-	$('#enable-couchpotato', true).forEach(element => addListener(element, 'click', event => enableCouchPotato({ event })));
+	if(pt)
+		performPlexTest({ ServerID, event });
+	else if(pu && pp)
+		performPlexLogin({ event });
+	else if(ou && oa)
+		performOmbiLogin({ event });
+});
+$('#watcher_test', true).forEach(element => addListener(element, 'click', event => performWatcherTest({ event })));
+$('#radarr_test', true).forEach(element => addListener(element, 'click', event => performRadarrTest({ event })));
+$('#sonarr_test', true).forEach(element => addListener(element, 'click', event => performSonarrTest({ event })));
+$('#medusa_test', true).forEach(element => addListener(element, 'click', event => performMedusaTest({ event })));
+$('#ombi_test', true).forEach(element => addListener(element, 'click', event => performOmbiTest({ event })));
+$('#sickBeard_test', true).forEach(element => addListener(element, 'click', event => performSickBeardTest({ event })));
+$('#enable-couchpotato', true).forEach(element => addListener(element, 'click', event => enableCouchPotato({ event })));
 
 /* INPUT | Get the JSON data */
 addListener($('#json_get'), 'click', event => {
@@ -2296,12 +2306,15 @@ $('[href^="#!/"]', true)
 			// ...
 		}
 
-		element.setAttribute('href', `#!/${ btoa(uri).replace(/=+$/, '') }`);
+		element.setAttribute('href', `#!/NaCl+${ btoa(uri).replace(/=+$/, '') }`);
 		element.onclick = event => {
-			let self = traverse(event.target, element => /^#!\//.test(element.getAttribute('href'))),
-				href = self.getAttribute('href').replace(/^#!\//, '');
+			let self = traverse(event.target, element => /^#!\/NaCl\+/.test(element.getAttribute('href'))),
+				href = self.getAttribute('href').replace(/^#!\/NaCl\+/, '');
 
-			open(atob(href));
+			// chrome - runs fine with `_self`
+			// firefox - kills options page, use `_blank`
+			// compromise - use an iframe...
+			open(atob(href), 'native-frame');
 		};
 	});
 

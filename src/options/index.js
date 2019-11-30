@@ -2306,12 +2306,15 @@ $('[href^="#!/"]', true)
 			// ...
 		}
 
-		element.setAttribute('href', `#!/${ btoa(uri).replace(/=+$/, '') }`);
+		element.setAttribute('href', `#!/NaCl+${ btoa(uri).replace(/=+$/, '') }`);
 		element.onclick = event => {
-			let self = traverse(event.target, element => /^#!\//.test(element.getAttribute('href'))),
-				href = self.getAttribute('href').replace(/^#!\//, '');
+			let self = traverse(event.target, element => /^#!\/NaCl\+/.test(element.getAttribute('href'))),
+				href = self.getAttribute('href').replace(/^#!\/NaCl\+/, '');
 
-			open(atob(href));
+			// chrome - runs fine with `_self`
+			// firefox - kills options page, use `_blank`
+			// compromise - use an iframe...
+			open(atob(href), 'native-frame');
 		};
 	});
 

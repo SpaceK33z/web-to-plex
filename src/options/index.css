@@ -211,6 +211,15 @@ em {
     color: #cc7b19 !important;
 }
 
+strike, st, k {
+    text-decoration: line-through !important;
+}
+
+[href="#!/NaCl+Iw"], [href="#!/NaCl+Iw"] * {
+    cursor: not-allowed !important;
+    opacity: 0.5 !important;
+}
+
 select {
     margin-left: 10px !important;
     font-size: 16px !important;
@@ -260,7 +269,6 @@ article {
 summary, option {
     color: #999;
     cursor: pointer;
-    list-style: none !important;
 
     margin-bottom: 12px !important;
     margin-top: 0 !important;
@@ -304,7 +312,7 @@ details:last-child > summary {
 }
 
 .bar > article > details:not([open]) > summary {
-    list-style: disc;
+    list-style: none;
 }
 
 .bar > article > details[open] > summary {
@@ -327,7 +335,6 @@ details:last-child > summary {
     position: fixed;
     margin-left: -12px;
     margin-top: -20px;
-    /* Firefox calls for -12px? */
 }
 
 .bar > article > details[open] > summary::before {
