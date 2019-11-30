@@ -60,13 +60,11 @@ let script = {
 			year  = (year)?
 				+year.textContent.replace(/[^]*(?:release|air) date\s+(?:(?:\d+\/\d+\/)?(\d{2,4}))[^]*/i, ($0, $1, $$, $_) => +$1 < 1000? 2000 + +$1: $1):
 			YEAR;
-			image = (image)?
-				image.src:
-			null;
+			image = image.src;
 
 			title = title.replace(R(`\\s*(\\(\\s*)?${ year }\\s*(\\))?`), '');
 
-			options = { type, title, year };
+			options = { type, title, year, image };
 		} else if(type == 'list') {
 			let title = $('#title').first,
 				year  = $('#stats *').child(2),

@@ -551,10 +551,16 @@
 						Where should the button be?
 						<br>
 						<span class="checkbox" prompt-size="large" prompt-yes="&#8672;" prompt-no="&#8674;">
-							<!-- When true (checked), will be accessed in CSS (/sites/...) as "button-location-right { ... }" -->
-							<input id="theme:button-location" theme="true:right" type="checkbox" />
+							<!-- When true (checked), will be accessed in CSS (/sites/theme.css) as ".button-location-right { ... }" -->
+							<input data-option="theme:button-location" theme="true:right" type="checkbox" />
 							<label for="theme:button-location"></label>
 						</span>
+					</section>
+					<section>
+						How transparent should the button be when hidden?
+						<br>
+		                <input data-option="theme:button-opacity" theme="for:hidden" type="range" min="0" max="10" step="5" value="10" symbol="%" />
+		                <output type="text" value="10%"></output>
 					</section>
 				</details>
 			</article>
@@ -615,6 +621,15 @@
 						<textarea type="text" data-option="ProxyHeaders" placeholder="Enter the Proxy headers" code></textarea>
 						<div>
 							If your proxy requires <a href="https://github.com/SpaceK33z/web-to-plex/wiki/Settings#connection-settings--proxy-settings" target="_blank">special headers</a>, enter that information in here.
+						</div>
+					</section>
+
+					<section>
+						<h3>Native Proxy Settings</h3>
+						<div>
+							<a href="#!/native/settings/network/proxy">
+								<button>Open your computer's proxy settings</button>
+							</a>
 						</div>
 					</section>
 				</details>
@@ -903,6 +918,8 @@
 	</div>
 
     <footer id="version"></footer>
+
+	<iframe id="native-frame" name="native-frame" style="display: none !important"></iframe>
 
 	<script src="lodash.min.js"></script>
 	<script src="xml.js"></script>
