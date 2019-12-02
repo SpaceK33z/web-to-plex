@@ -1,12 +1,12 @@
 {
-//	"update_url": "https://ephellon.github.com/web.to.plex/update.xml",
+//	"update_url": "https://ephellon.github.com/web.to.plex/update.json",
 
 	"name": "Web to Plex",
 	"description": "Adds a button on various movie & TV show sites to open the item in Plex, or send to your designated NZB manager for download.",
 	"homepage_url": "https://github.com/SpaceK33z/web-to-plex/",
 
 	"manifest_version": 2,
-	"version": "4.1.0.12",
+	"version": "4.1.0.21",
 // Firefox Support =>
 	"applications": {
 		"gecko": {
@@ -51,17 +51,27 @@
 				"*://*.openload.name/*", "*://*.oload.name/*",
 				"*://*.openload.global/*", "*://*.oload.global/*"
 			],
-			"js": ["oload.js"],
+			"js": ["@.oload.js"],
 			"all_frames": true
 		},
 		{
 			"matches": ["*://*.consistent.stream/titles/*", "*://*.consistent.stream/watch/*"],
-			"js": ["consistent.js"],
+			"js": ["@.consistent.js"],
 			"all_frames": true
 		},
 		{
 			"matches": ["*://app.plex.tv/desktop#!/server/*/details?*"],
-			"js": ["plxdwnld.js"],
+			"js": ["@.plex.js"],
+			"all_frames": true
+		},
+		{
+			"matches": ["*://*.gounlimited.to/embed-*"],
+			"js": ["@.gounlimited.js"],
+			"all_frames": true
+		},
+		{
+			"matches": ["*://*.fembed.com/v/*"],
+			"js": ["@.fembed.js"],
 			"all_frames": true
 		},
 

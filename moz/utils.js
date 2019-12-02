@@ -26,6 +26,7 @@ let configuration, init, Update;
 		'nil':              extURL('null.png'),
 		'icon_16':          extURL('16.png'),
 		'icon_48':          extURL('48.png'),
+		'background': 		extURL('background.png'),
 		'hide_icon_16':     extURL('hide.16.png'),
 		'hide_icon_48':     extURL('hide.48.png'),
 		'show_icon_16':     extURL('show.16.png'),
@@ -267,7 +268,7 @@ let configuration, init, Update;
 					};
 
 					prompt = furnish('div.web-to-plex-prompt', {},
-						furnish('div.web-to-plex-prompt-body', {},
+						furnish('div.web-to-plex-prompt-body', { style: `background-image: url(${ IMG_URL.noise_background }), url(${ IMG_URL.background }); background-size: auto, cover;` },
 							// The prompt's title
 							furnish('h1.web-to-plex-prompt-header', {}, 'Approve ' + array.length + (array.length == 1? ' item': ' items')),
 
@@ -380,7 +381,7 @@ let configuration, init, Update;
 					};
 
 					prompt = furnish('div.web-to-plex-prompt', {},
-						furnish('div.web-to-plex-prompt-body', {},
+						furnish('div.web-to-plex-prompt-body', { style: `background-image: url(${ IMG_URL.noise_background }), url(${ IMG_URL.background }); background-size: auto, cover;` },
 							// The prompt's title
 							furnish('h1.web-to-plex-prompt-header', {}, 'Approve ' + array.length + (array.length == 1? ' item': ' items')),
 
@@ -455,7 +456,7 @@ let configuration, init, Update;
 					type = /(movie|film|cinema)/i.test(type)?'movie':'show';
 
 					prompt = furnish('div.web-to-plex-prompt', {},
-						furnish('div.web-to-plex-prompt-body', {},
+						furnish('div.web-to-plex-prompt-body', { style: `background-image: url(${ IMG_URL.noise_background }), url(${ IMG_URL.background }); background-size: auto, cover;` },
 							// The prompt's title
 							furnish('h1.web-to-plex-prompt-header', { innerHTML: `${ title }${ year? ` (${ year })`: '' } <em>\u2014 ${ type }</em>` }),
 
@@ -525,7 +526,7 @@ let configuration, init, Update;
 					};
 
 					prompt = furnish('div.web-to-plex-prompt', {},
-						furnish('div.web-to-plex-prompt-body', {},
+						furnish('div.web-to-plex-prompt-body', { style: `background-image: url(${ IMG_URL.noise_background }), url(${ IMG_URL.background }); background-size: auto, cover;` },
 							// The prompt's title
 							furnish('h1.web-to-plex-prompt-header', { innerHTML: `${ alias || name } (${ location.host }) would like:` }),
 
@@ -788,7 +789,7 @@ let configuration, init, Update;
 
 					/* Don't expose the user's authentication information to sites */
 					for(let key in options)
-						if(/username|password|token|api|server|url|storage|cache/i.test(key))
+						if(/username|password|token|api|server|url|storage|cache|proxy|client|builtin|plugin|qualit/i.test(key))
 							if(ALLOWED && RegExp(PERMISS.join('|'),'i').test(key))
 								configuration[key] = options[key];
 							else
@@ -1080,20 +1081,20 @@ let configuration, init, Update;
 
 		/* the rest of this function is a beautiful mess that will need to be dealt with later... but it works */
 		let url =
-			(manable && title && __CONFIG__.usingOmbi)?
+			(manable && title && __CONFIG__.usingOmbi && __CONFIG__.ombiURLRoot)?
 				`${ __CONFIG__.ombiURLRoot }api/v1/Search/${ (rqut == 'imdb' || rqut == 'tmdb' || apit == 'movie')? 'movie': 'tv' }/${ plus(title, '%20') }/?apikey=${ api.ombi }`:
 			(manable && (__CONFIG__.usingRadarr || __CONFIG__.usingSonarr || __CONFIG__.usingMedusa /*|| __CONFIG__.usingSickBeard*/))?
-				(__CONFIG__.usingRadarr && (rqut == 'imdb' || rqut == 'tmdb'))?
+				(__CONFIG__.usingRadarr && (rqut == 'imdb' || rqut == 'tmdb') && __CONFIG__.radarrURLRoot)?
 					(mid)?
 						`${ __CONFIG__.radarrURLRoot }api/movie/lookup/tmdb?tmdbId=${ mid }&apikey=${ __CONFIG__.radarrToken }`:
 					(iid)?
 						`${ __CONFIG__.radarrURLRoot }api/movie/lookup/imdb?imdbId=${ iid }&apikey=${ __CONFIG__.radarrToken }`:
 					`${ __CONFIG__.radarrURLRoot }api/movie/lookup?term=${ plus(title, '%20') }&apikey=${ __CONFIG__.radarrToken }`:
-				(__CONFIG__.usingSonarr)?
+				(__CONFIG__.usingSonarr && __CONFIG__.sonarrURLRoot)?
 					(tid)?
 						`${ __CONFIG__.sonarrURLRoot }api/series/lookup?term=tvdb:${ tid }&apikey=${ __CONFIG__.sonarrToken }`:
 					`${ __CONFIG__.sonarrURLRoot }api/series/lookup?term=${ plus(title, '%20') }&apikey=${ __CONFIG__.sonarrToken }`:
-				(__CONFIG__.usingMedusa)?
+				(__CONFIG__.usingMedusa && __CONFIG__.medusaURLRoot)?
 					(tid)?
 						`${ __CONFIG__.medusaURLRoot }api/v2/series/tvdb${ tid }?detailed=true&api_key=${ __CONFIG__.medusaToken }`:
 					`${ __CONFIG__.medusaURLRoot }api/v2/internal/searchIndexersForShowName?query=${ plus(title) }&indexerId=0&api_key=${ __CONFIG__.medusaToken }`:
@@ -1210,11 +1211,11 @@ let configuration, init, Update;
 			for(index = 0, found = false, $data, lastscore = 0; (title && year) && index < json.length && !found; rerun |= 0b0100, index++) {
 				$data = json[index];
 
-				let altt = $data.alternativeTitles,
+				let altt = ($data || {}).alternativeTitles,
 					$alt = (altt && altt.length? altt.filter(v => t(v) == t(title))[0]: null);
 
 				// Managers
-				if(manable)
+				if(manable) {
 					// Medusa
 					if(__CONFIG__.usingMedusa && $data instanceof Array)
 						found = ((t($data[4]) == t(title) || $alt) && +year == +$data[5].slice(0, 4))?
@@ -1230,8 +1231,9 @@ let configuration, init, Update;
 						found = ((t($data.name) == t(title) || $alt) && +year == parseInt($data.first_aired))?
 							$alt || $data:
 						found;
+				}
 				//api.tvmaze.com/
-				else if(('externals' in ($data = $data.show || $data) || 'show' in $data) && $data.premiered)
+				else if($data && ('externals' in ($data = $data.show || $data) || 'show' in $data) && $data.premiered)
 					found = (iid == $data.externals.imdb || t($data.name) == t(title) && year == $data.premiered.slice(0, 4))?
 						$data:
 					found;
@@ -1272,11 +1274,11 @@ let configuration, init, Update;
 			for(index = 0; title && index < json.length && (!found || lastscore > 0); rerun |= 0b0100, index++) {
 				$data = json[index];
 
-				let altt = $data.alternativeTitles,
+				let altt = ($data || {}).alternativeTitles,
 					$alt = (altt && altt.length? altt.filter(v => c(v) == c(title)): null);
 
 				// Managers
-				if(manable)
+				if(manable) {
 					// Medusa
 					if(__CONFIG__.usingMedusa && $data instanceof Array)
 						found = (c($data[4]) == c(title) || $alt)?
@@ -1292,8 +1294,9 @@ let configuration, init, Update;
 						found = (c($data.name) == c(title) || $alt)?
 							$alt || $data:
 						found;
+				}
 				//api.tvmaze.com/
-				else if('externals' in ($data = $data.show || $data) || 'show' in $data)
+				else if($data && ('externals' in ($data = $data.show || $data) || 'show' in $data))
 					found =
 						// ignore language barriers
 						(c($data.name) == c(title))?
@@ -1350,11 +1353,11 @@ let configuration, init, Update;
 			for(index = 0; __CONFIG__.UseLoose && title && index < json.length && (!found || lastscore > 0); rerun |= 0b0010, index++) {
 				$data = json[index];
 
-				let altt = $data.alternativeTitles,
+				let altt = ($data || {}).alternativeTitles,
 					$alt = (altt && altt.length? altt.filter(v => R(v, title)): null);
 
 				// Managers
-				if(manable)
+				if(manable) {
 					// Medusa
 					if(__CONFIG__.usingMedusa && $data instanceof Array)
 						found = (R($data[4], title) || $alt)?
@@ -1370,8 +1373,9 @@ let configuration, init, Update;
 						found = (R($data.name, title) || $alt)?
 							$alt || $data:
 						found;
+				}
 				//api.tvmaze.com/
-				else if('externals' in ($data = $data.show || $data) || 'show' in $data)
+				else if($data && ('externals' in ($data = $data.show || $data) || 'show' in $data))
 					found =
 						// ignore language barriers
 						(R($data.name, title) || UTILS_TERMINAL.log('Matching:', [$data.name, title], R($data.name, title)))?
@@ -1381,7 +1385,7 @@ let configuration, init, Update;
 							(lastscore = $data.score, $data):
 						found;
 				//api.themoviedb.org/ \local
-				else if('movie_results' in $data || 'tv_results' in $data)
+				else if($data && ('movie_results' in $data || 'tv_results' in $data))
 					found = (DATA => {
 						let i, f, o, l;
 
@@ -1394,12 +1398,12 @@ let configuration, init, Update;
 						return f? o: f;
 					})($data);
 				//api.themoviedb.org/ \remote
-				else if('original_name' in $data || 'original_title' in $data)
+				else if($data && ('original_name' in $data || 'original_title' in $data))
 					found = (R($data.original_name, title) || R($data.original_title, title) || R($data.name, title))?
 						$data:
 					found;
 				//theimdbapi.org/
-				else if(en.test($data.language))
+				else if($data && en.test($data.language))
 					found = (R($data.title, title))?
 						$data:
 					found;
@@ -1540,11 +1544,11 @@ let configuration, init, Update;
 		}).then(response => {
 			let movieExists = response.success;
 			if(response.error) {
-				return new Notification(
+				new Notification(
 					'warning',
 					'CouchPotato request failed (see your console)'
-				) ||
-				(!response.silent && UTILS_TERMINAL.warn('Error viewing CouchPotato: ' + String(response.error)));
+				);
+				return (!response.silent && UTILS_TERMINAL.warn('Error viewing CouchPotato: ' + String(response.error)));
 			}
 			if(!movieExists) {
 				__Request_CouchPotato__(options);
@@ -1591,8 +1595,8 @@ let configuration, init, Update;
 			UTILS_TERMINAL.log('Pushing to Ombi', response);
 
 			if(response && response.error) {
-				return new Notification('warning', `Could not add "${ options.title }" to Ombi: ${ response.error }`) ||
-					(!response.silent && UTILS_TERMINAL.warn('Error adding to Ombi: ' + String(response.error), response.location, response.debug));
+				new Notification('warning', `Could not add "${ options.title }" to Ombi: ${ response.error }`);
+				return (!response.silent && UTILS_TERMINAL.warn('Error adding to Ombi: ' + String(response.error), response.location, response.debug));
 			} else if(response === true || (response && response.success)) {
 				let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-{2,}/g, '-').toLowerCase(),
 					{ IMDbID, TMDbID, TVDbID } = options;
@@ -1602,8 +1606,8 @@ let configuration, init, Update;
 				UTILS_TERMINAL.LOG('Successfully pushed', options);
 				new Notification('update', `Added "${ options.title }" to Ombi`, 7000, () => window.open(__CONFIG__.ombiURL, '_blank'));
 			} else {
-				new Notification('warning', `Could not add "${ options.title }" to Ombi: Unknown Error`) ||
-				(!response.silent && UTILS_TERMINAL.warn('Error adding to Ombi: ' + String(response)));
+				new Notification('warning', `Could not add "${ options.title }" to Ombi: Unknown Error`);
+				(!(response && response.silent) && UTILS_TERMINAL.warn('Error adding to Ombi: ' + String(response)));
 			}
 		}, error => {
 			new Notification(
@@ -1630,11 +1634,11 @@ let configuration, init, Update;
 			UTILS_TERMINAL.log('Pushing to CouchPotato', response);
 
 			if(response.error) {
-				return new Notification(
+				new Notification(
 					'warning',
 					`Could not add "${ options.title }" to CouchPotato (see your console)`
-				) ||
-				(!response.silent && UTILS_TERMINAL.warn('Error adding to CouchPotato: ' + String(response.error), response.location, response.debug));
+				);
+				return (!response.silent && UTILS_TERMINAL.warn('Error adding to CouchPotato: ' + String(response.error), response.location, response.debug));
 			}
 			if(response.success) {
 				let { IMDbID, TMDbID, TVDbID } = options;
@@ -1681,8 +1685,8 @@ let configuration, init, Update;
 			UTILS_TERMINAL.log('Pushing to Watcher', response);
 
 			if(response && response.error) {
-				return new Notification('warning', `Could not add "${ options.title }" to Watcher: ${ response.error }`) ||
-					(!response.silent && UTILS_TERMINAL.warn('Error adding to Watcher: ' + String(response.error), response.location, response.debug));
+				new Notification('warning', `Could not add "${ options.title }" to Watcher: ${ response.error }`);
+				return (!response.silent && UTILS_TERMINAL.warn('Error adding to Watcher: ' + String(response.error), response.location, response.debug));
 			} else if(response && (response.success || (response.response + "") == "true")) {
 				let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-{2,}/g, '-').toLowerCase(),
 					TMDbID = options.TMDbID || response.tmdbId,
@@ -1693,8 +1697,8 @@ let configuration, init, Update;
 				UTILS_TERMINAL.LOG('Successfully pushed', options);
 				new Notification('update', `Added "${ options.title }" to Watcher`, 7000, () => window.open(`${__CONFIG__.watcherURL}library/status${TMDbID? `#${title}-${TMDbID}`: '' }`, '_blank'));
 			} else {
-				new Notification('warning', `Could not add "${ options.title }" to Watcher: Unknown Error`) ||
-				(!response.silent && UTILS_TERMINAL.warn('Error adding to Watcher: ' + String(response)));
+				new Notification('warning', `Could not add "${ options.title }" to Watcher: Unknown Error`);
+				(!(response && response.silent) && UTILS_TERMINAL.warn('Error adding to Watcher: ' + String(response)));
 			}
 		}, error => {
 			new Notification(
@@ -1743,8 +1747,8 @@ let configuration, init, Update;
 			UTILS_TERMINAL.log('Pushing to Radarr', response);
 
 			if(response && response.error) {
-				return new Notification('warning', `Could not add "${ options.title }" to Radarr: ${ response.error }`) ||
-					(!response.silent && UTILS_TERMINAL.warn('Error adding to Radarr: ' + String(response.error), response.location, response.debug));
+				new Notification('warning', `Could not add "${ options.title }" to Radarr: ${ response.error }`);
+				return (!response.silent && UTILS_TERMINAL.warn('Error adding to Radarr: ' + String(response.error), response.location, response.debug));
 			} else if(response === true || (response && response.success)) {
 				let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-{2,}/g, '-').toLowerCase(),
 					TMDbID = options.TMDbID || response.tmdbId,
@@ -1755,8 +1759,8 @@ let configuration, init, Update;
 				UTILS_TERMINAL.LOG('Successfully pushed', options);
 				new Notification('update', `Added "${ options.title }" to Radarr`, 7000, () => window.open(`${__CONFIG__.radarrURL}${TMDbID? `movies/${title}-${TMDbID}`: '' }`, '_blank'));
 			} else {
-				new Notification('warning', `Could not add "${ options.title }" to Radarr: Unknown Error [${ String(response) }]`) ||
-				(!response.silent && UTILS_TERMINAL.warn('Error adding to Radarr: ' + String(response)));
+				new Notification('warning', `Could not add "${ options.title }" to Radarr: Unknown Error [${ String(response) }]`);
+				(!(response && response.silent) && UTILS_TERMINAL.warn('Error adding to Radarr: ' + String(response)));
 			}
 		}, error => {
 			new Notification(
@@ -1804,8 +1808,8 @@ let configuration, init, Update;
 			UTILS_TERMINAL.log('Pushing to Sonarr', response);
 
 			if(response && response.error) {
-				return new Notification('warning', `Could not add "${ options.title }" to Sonarr: ${ response.error }`) ||
-					(!response.silent && UTILS_TERMINAL.warn('Error adding to Sonarr: ' + String(response.error), response.location, response.debug));
+				new Notification('warning', `Could not add "${ options.title }" to Sonarr: ${ response.error }`);
+				return (!response.silent && UTILS_TERMINAL.warn('Error adding to Sonarr: ' + String(response.error), response.location, response.debug));
 			} else if(response === true || (response && response.success)) {
 				let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-{2,}/g, '-').toLowerCase(),
 					TVDbID = options.TVDbID || response.tvdbId;
@@ -1815,8 +1819,8 @@ let configuration, init, Update;
 				UTILS_TERMINAL.LOG('Successfully pushed', options);
 				new Notification('update', `Added "${ options.title }" to Sonarr`, 7000, () => window.open(`${__CONFIG__.sonarrURL}series/${title}`, '_blank'));
 			} else {
-				new Notification('warning', `Could not add "${ options.title }" to Sonarr: Unknown Error`) ||
-				(!response.silent && UTILS_TERMINAL.warn('Error adding to Sonarr: ' + String(response)));
+				new Notification('warning', `Could not add "${ options.title }" to Sonarr: Unknown Error`);
+				(!(response && response.silent) && UTILS_TERMINAL.warn('Error adding to Sonarr: ' + String(response)));
 			}
 		}, error => {
 			new Notification(
@@ -1865,8 +1869,8 @@ let configuration, init, Update;
 			UTILS_TERMINAL.log('Pushing to Medusa', response);
 
 			if(response && response.error) {
-				return new Notification('warning', `Could not add "${ options.title }" to Medusa: ${ response.error }`) ||
-					(!response.silent && UTILS_TERMINAL.warn('Error adding to Medusa: ' + String(response.error), response.location, response.debug));
+				new Notification('warning', `Could not add "${ options.title }" to Medusa: ${ response.error }`);
+				return (!response.silent && UTILS_TERMINAL.warn('Error adding to Medusa: ' + String(response.error), response.location, response.debug));
 			} else if(response === true || (response && response.success)) {
 				let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-{2,}/g, '-').toLowerCase(),
 					TVDbID = options.TVDbID || response.tvdbId;
@@ -1876,8 +1880,8 @@ let configuration, init, Update;
 				UTILS_TERMINAL.LOG('Successfully pushed', options);
 				new Notification('update', `Added "${ options.title }" to Medusa`, 7000, () => window.open(`${__CONFIG__.medusaURL}home/displayShow?indexername=tvdb&seriesid=${options.TVDbID}`, '_blank'));
 			} else {
-				new Notification('warning', `Could not add "${ options.title }" to Medusa: Unknown Error`) ||
-				(!response.silent && UTILS_TERMINAL.warn('Error adding to Medusa: ' + String(response)));
+				new Notification('warning', `Could not add "${ options.title }" to Medusa: Unknown Error`);
+				(!(response && response.silent) && UTILS_TERMINAL.warn('Error adding to Medusa: ' + String(response)));
 			}
 		}, error => {
 			new Notification(
@@ -1926,8 +1930,8 @@ let configuration, init, Update;
 			UTILS_TERMINAL.log('Pushing to Sick Beard', response);
 
 			if(response && response.error) {
-				return new Notification('warning', `Could not add "${ options.title }" to Sick Beard: ${ response.error }`) ||
-					(!response.silent && UTILS_TERMINAL.warn('Error adding to Sick Beard: ' + String(response.error), response.location, response.debug));
+				new Notification('warning', `Could not add "${ options.title }" to Sick Beard: ${ response.error }`);
+				return (!response.silent && UTILS_TERMINAL.warn('Error adding to Sick Beard: ' + String(response.error), response.location, response.debug));
 			} else if(response === true || (response && response.success)) {
 				let title = options.title.replace(/\&/g, 'and').replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-{2,}/g, '-').toLowerCase(),
 					TVDbID = options.TVDbID || response.tvdbId;
@@ -1937,8 +1941,8 @@ let configuration, init, Update;
 				UTILS_TERMINAL.LOG('Successfully pushed', options);
 				new Notification('update', `Added "${ options.title }" to Sick Beard`, 7000, () => window.open(`${__CONFIG__.sickBeardURL}home/displayShow?show=${ TVDbID }`, '_blank'));
 			} else {
-				new Notification('warning', `Could not add "${ options.title }" to Sick Beard: Unknown Error`) ||
-				(!response.silent && UTILS_TERMINAL.warn('Error adding to Sick Beard: ' + String(response)));
+				new Notification('warning', `Could not add "${ options.title }" to Sick Beard: Unknown Error`);
+				(!(response && response.silent) && UTILS_TERMINAL.warn('Error adding to Sick Beard: ' + String(response)));
 			}
 		}, error => {
 			new Notification(
@@ -1962,28 +1966,42 @@ let configuration, init, Update;
 		else if(persistent && firstButton !== null && firstButton !== undefined)
 			return firstButton;
 
-		let ThemeClasses = JSON.parse(__CONFIG__.__theme),
-			HeaderClasses = [];
+			let ThemeClasses = JSON.parse(__CONFIG__.__theme),
+				HeaderClasses = [],
+				ParsedAttributes = {};
 
-		// Theme(s)
-		if(!ThemeClasses.length)
-			ThemeClasses = '';
-		else
-			ThemeClasses = '.' + ThemeClasses.join('.');
+			// Theme(s)
+			if(!ThemeClasses.length)
+				ThemeClasses = '';
+			else
+				ThemeClasses = '.' + ThemeClasses.join('.');
 
-		// Header(s)
-		for(let header in headers)
-			if(headers[header])
-				HeaderClasses.push( header );
+			ThemeClasses = ThemeClasses.split('.').filter(v => {
+				let R = RegExp;
 
-		if(!HeaderClasses.length)
-			HeaderClasses = '';
-		else
-			HeaderClasses = '.' + HeaderClasses.join('.');
+				if(/([^=]+?)=([^.]+?)/.test(v)) {
+					ParsedAttributes[R.$1] = R.$2;
 
-		// <button>
-		let button =
-			furnish(`button.show.closed.floating.web-to-plex-button${HeaderClasses}${ThemeClasses}`, {
+					return false;
+				}
+
+				return true;
+			}).join('.');
+
+			// Header(s)
+			for(let header in headers)
+				if(headers[header])
+					HeaderClasses.push( header );
+
+			if(!HeaderClasses.length)
+				HeaderClasses = '';
+			else
+				HeaderClasses = '.' + HeaderClasses.join('.');
+
+			// <button>
+			let button =
+				furnish(`button.show.closed.floating.web-to-plex-button${HeaderClasses}${ThemeClasses}`, {
+					...ParsedAttributes,
 					onmouseenter: event => {
 						let self = event.target;
 
@@ -1996,7 +2014,7 @@ let configuration, init, Update;
 						self.classList.remove('open', 'animate');
 						self.classList.add('closed');
 					},
-					style: `background-image: url(${ IMG_URL.noise_background })`
+					style: `background-image: url(${ IMG_URL.noise_background }), url(${ IMG_URL.background }); background-size: auto, cover;`
 				},
 				// <ul>
 				furnish('ul', {},
@@ -2070,7 +2088,7 @@ let configuration, init, Update;
 				)
 				// </ul>
 			);
-		// </button>
+			// </button>
 
 		document.body.appendChild(button);
 
@@ -2202,7 +2220,9 @@ let configuration, init, Update;
 					/* Vumoo & GoStream */
 					case 'plex':
 					case 'oload':
+					case 'fembed':
 					case 'consistent':
+					case 'gounlimited':
 						let href = options.href, path = '';
 
 						if(__CONFIG__.usingOmbi) {

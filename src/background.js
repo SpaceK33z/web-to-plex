@@ -102,7 +102,6 @@ function ChangeStatus({ ITEM_ID, ITEM_TITLE, ITEM_TYPE, ID_PROVIDER, ITEM_YEAR, 
 	});
 }
 
-
 // get the saved options
 function getConfiguration() {
 	return new Promise((resolve, reject) => {
@@ -144,8 +143,6 @@ function getConfiguration() {
 // self explanatory, returns an object; sets the configuration variable
 function parseConfiguration() {
 	return getConfiguration().then(options => {
-		BACKGROUND_CONFIGURATION = options;
-
 		if((BACKGROUND_DEVELOPER = options.DeveloperMode) && !parseConfiguration.gotConfig) {
 			parseConfiguration.gotConfig = true;
 			BACKGROUND_TERMINAL =
@@ -160,9 +157,26 @@ function parseConfiguration() {
 	}, error => { throw error });
 }
 
-(async() => {
-	await parseConfiguration();
-})();
+function load(name, private) {
+	return JSON.parse((private && sessionStorage? sessionStorage: localStorage).getItem(btoa(name)));
+}
+
+function save(name, data, private) {
+	return (private && sessionStorage? sessionStorage: localStorage).setItem(btoa(name), JSON.stringify(data));
+}
+
+async function UpdateConfiguration(force_update = false) {
+	let configuration = load('configuration');
+
+	if(force_update || configuration === null || configuration === undefined)
+		BACKGROUND_CONFIGURATION = await parseConfiguration();
+	else
+		BACKGROUND_CONFIGURATION = configuration;
+
+	save('configuration', BACKGROUND_CONFIGURATION);
+};
+
+UpdateConfiguration();
 
 /** CouchPotato - Movies **/
 // At this point you might want to think, WHY would you want to do
@@ -444,7 +458,7 @@ function Push_Medusa(request, sendResponse) {
 			return fetch(`${ request.url }`, debug.requestHeaders = {
 				method: 'POST',
 				mode: cors(request.url),
-				body: JSON.stringify({ id: { tvdb: request.tvdbId } }),
+				body: JSON.stringify({ id: { tvdb: id } }),
 				headers
 			});
 		})
@@ -518,7 +532,7 @@ function addMedusa(request, sendResponse) {
 			return fetch(`${ request.url }`, debug.requestHeaders = {
 				method: 'POST',
 				mode: cors(request.url),
-				body: JSON.stringify({ id: { tvdb: request.tvdbId } }),
+				body: JSON.stringify({ id: { tvdb: id } }),
 				headers
 			});
 		})
@@ -959,6 +973,10 @@ chrome.runtime.onMessage.addListener((request = {}, sender, callback) => {
 							saveAs: true
 						});
 					});
+					break;
+
+				case 'UPDATE_CONFIGURATION':
+					UpdateConfiguration(true);
 					break;
 
 				case 'PLUGIN':

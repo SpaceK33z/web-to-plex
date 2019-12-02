@@ -121,11 +121,15 @@ The sites used as search engines (IMDb, TMDb, and TVDb) will automatically creat
 
 ## Installing Web to Plex
 
-**Download on [Chrome Webstore](https://chrome.google.com/webstore/detail/movieo-to-plex/kmcinnefmnkfnmnmijfmbiaflncfifcn).**
+### Install the extension (Store)
 
-**Download on [FireFox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/web-to-plex/).**
+<a href="https://chrome.google.com/webstore/detail/movieo-to-plex/kmcinnefmnkfnmnmijfmbiaflncfifcn"><img alt="Get it for Chrome" src="badge.chrome.png" /></a>
+<a href="https://addons.mozilla.org/en-US/firefox/addon/web-to-plex/"><img alt="Get it for Firefox" src="badge.firefox.png" /></a>
 
-**Download the source code for [Google Chrome/Opera](src.zip), or [Firefox](moz.zip).**
+### Install the source code (ZIP)
+
+<a href="src.zip"><img alt="Get it for Chrome" src="source.chrome.png" /></a>
+<a href="moz.zip"><img alt="Get it for Firefox" src="source.firefox.png" /></a>
 
 ## Requirements
 
@@ -145,3 +149,10 @@ The sites used as search engines (IMDb, TMDb, and TVDb) will automatically creat
 If you have any problem with the extension, please don't hesitate to [submit an issue](https://github.com/SpaceK33z/web-to-plex/issues/new/choose).
 
 All contributions are welcome.
+
+----
+
+*Google Chrome is a trademark of Google Inc. Use of this trademark is subject to Google Permissions.*
+*Firefox is a trademark of Mozilla Org. Use of this trademark is subject to Mozilla Permissions.*
+*Safari is a trademark of Apple Inc. Use of this trademark is subject to Apple Permissions.*
+*Plex is a trademark of Plex Inc. Use of this trademark is subject to Plex Permissions.*

@@ -68,7 +68,7 @@ async function GetAuthorization(name) {
 		permissions = await Load(`get/${ name }`),
 		Ausername, Apassword, Atoken,
 		Aapi, Aserver, Aurl, Astorage,
-		Acache;
+		Acache, Anormie, Aquality;
 
 		if(!permissions)
 			return {};
@@ -80,16 +80,20 @@ async function GetAuthorization(name) {
 				Apassword = true;
 			else if(/^(tokens?)$/i.test(permission))
 				Atoken = true;
-			else if(/^(api)$/i.test(permission))
+			else if(/^(api|client(?:id)?)$/i.test(permission))
 				Aapi = true;
 			else if(/^(servers?)$/i.test(permission))
 				Aserver = true;
-			else if(/^(url(?:root)?)$/i.test(permission))
+			else if(/^(url(?:root)?|proxy)$/i.test(permission))
 				Aurl = true;
 			else if(/^(storage)$/i.test(permission))
 				Astorage = true;
 			else if(/^(cache)$/i.test(permission))
 				Acache = true;
+			else if(/^(builtin|plugin)$/i.test(permission))
+				Anormie = true;
+			else if(/^(qualit(?:y|ies))$/i.test(permission))
+				Aquality = true;
 		}
 
 		if(permissions.constructor === Array)
@@ -99,7 +103,7 @@ async function GetAuthorization(name) {
 			for(let permission in permissions)
 				WriteOff(permission);
 
-	return { authorized, Ausername, Apassword, Atoken, Aapi, Aserver, Aurl, Astorage, Acache };
+	return { authorized, Ausername, Apassword, Atoken, Aapi, Aserver, Aurl, Astorage, Acache, Anormie, Aquality };
 }
 
 // get the saved options
@@ -615,6 +619,7 @@ browser.runtime.onMessage.addListener(processMessage = async(request = {}, sende
 				case 'SEARCH_FOR':
 				case 'SAVE_AS':
 				case 'DOWNLOAD_FILE':
+				case 'UPDATE_CONFIGURATION':
 					/* Meant to be handled by background.js */
 					break;
 

@@ -6,7 +6,7 @@
 	"homepage_url": "https://github.com/SpaceK33z/web-to-plex/",
 
 	"manifest_version": 2,
-	"version": "4.1.0.12",
+	"version": "4.1.0.21",
 // Firefox Support =>
 //	"applications": {
 //		"gecko": {
@@ -61,6 +61,16 @@
 		{
 			"matches": ["*://app.plex.tv/desktop#!/server/*/details?*"],
 			"js": ["download/plex.js"],
+			"all_frames": true
+		},
+		{
+			"matches": ["*://*.gounlimited.to/embed-*"],
+			"js": ["download/gounlimited.js"],
+			"all_frames": true
+		},
+		{
+			"matches": ["*://*.fembed.com/v/*"],
+			"js": ["download/fembed.js"],
 			"all_frames": true
 		},
 
