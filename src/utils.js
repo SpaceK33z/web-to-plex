@@ -1401,7 +1401,7 @@ let configuration, init, Update;
 						$data:
 					found;
 				//theimdbapi.org/
-				else if(en.test($data.language))
+				else if($data && en.test($data.language))
 					found = (R($data.title, title))?
 						$data:
 					found;
