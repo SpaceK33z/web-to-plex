@@ -4,7 +4,7 @@
 let plugin = {
 	"url": "*://*.myshows.me/view/\\d+/*",
 
-	"init": () => {
+	"init": (ready) => {
 		let specific = /\/\/(\w{2})\./.test(location.origin);
 
 		let title = (
