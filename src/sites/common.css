@@ -184,11 +184,14 @@
 }
 
 .web-to-plex-prompt-header {
-	text-align: left !important;
 	border-bottom-color: #222 !important;
 	border-bottom-width: 1px !important;
 	border-top-left-radius: 3px !important;
 	border-top-right-radius: 3px !important;
+    overflow: hidden;
+    text-align: left !important;
+    text-overflow: ellpsis;
+    white-space: nowrap;
 
 	top: 0 !important;
 }
@@ -242,8 +245,8 @@
 	width: 30px !important;
 
 	float: right !important;
-	margin-right: -9px !important;
-	margin-top: -42px !important;
+	margin-right: -2% !important;
+	margin-top: -8% !important;
 	padding: 0 !important;
 }
 
