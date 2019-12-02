@@ -149,7 +149,7 @@
 }
 
 .web-to-plex-prompt-body {
-	background: #282828 !important;
+	background: #282828;
 	box-shadow: 0 5px 15px #0008 !important;
 	display: block !important;
 
@@ -164,7 +164,7 @@
 }
 
 .web-to-plex-prompt-header, .web-to-plex-prompt-footer {
-	background: #323232 !important;
+	background: #32323240 !important;
 	border: 1px solid #0000 !important;
 	box-sizing: border-box !important;
 	color: #eee !important;
@@ -206,7 +206,7 @@
 }
 
 .web-to-plex-prompt-option {
-	background: #323232 !important;
+	background: #32323240 !important;
 	border: 1px solid #202020 !important;
 	border-radius: 3px !important;
 	color: #999 !important;

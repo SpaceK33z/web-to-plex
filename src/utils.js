@@ -267,7 +267,7 @@ let configuration, init, Update;
 					};
 
 					prompt = furnish('div.web-to-plex-prompt', {},
-						furnish('div.web-to-plex-prompt-body', {},
+						furnish('div.web-to-plex-prompt-body', { style: `background-image: url(${ IMG_URL.noise_background }), url(${ IMG_URL.background }); background-size: auto, cover;` },
 							// The prompt's title
 							furnish('h1.web-to-plex-prompt-header', {}, 'Approve ' + array.length + (array.length == 1? ' item': ' items')),
 
@@ -380,7 +380,7 @@ let configuration, init, Update;
 					};
 
 					prompt = furnish('div.web-to-plex-prompt', {},
-						furnish('div.web-to-plex-prompt-body', {},
+						furnish('div.web-to-plex-prompt-body', { style: `background-image: url(${ IMG_URL.noise_background }), url(${ IMG_URL.background }); background-size: auto, cover;` },
 							// The prompt's title
 							furnish('h1.web-to-plex-prompt-header', {}, 'Approve ' + array.length + (array.length == 1? ' item': ' items')),
 
@@ -455,7 +455,7 @@ let configuration, init, Update;
 					type = /(movie|film|cinema)/i.test(type)?'movie':'show';
 
 					prompt = furnish('div.web-to-plex-prompt', {},
-						furnish('div.web-to-plex-prompt-body', {},
+						furnish('div.web-to-plex-prompt-body', { style: `background-image: url(${ IMG_URL.noise_background }), url(${ IMG_URL.background }); background-size: auto, cover;` },
 							// The prompt's title
 							furnish('h1.web-to-plex-prompt-header', { innerHTML: `${ title }${ year? ` (${ year })`: '' } <em>\u2014 ${ type }</em>` }),
 
@@ -525,7 +525,7 @@ let configuration, init, Update;
 					};
 
 					prompt = furnish('div.web-to-plex-prompt', {},
-						furnish('div.web-to-plex-prompt-body', {},
+						furnish('div.web-to-plex-prompt-body', { style: `background-image: url(${ IMG_URL.noise_background }), url(${ IMG_URL.background }); background-size: auto, cover;` },
 							// The prompt's title
 							furnish('h1.web-to-plex-prompt-header', { innerHTML: `${ alias || name } (${ location.host }) would like:` }),
 
@@ -1383,7 +1383,7 @@ let configuration, init, Update;
 							(lastscore = $data.score, $data):
 						found;
 				//api.themoviedb.org/ \local
-				else if('movie_results' in $data || 'tv_results' in $data)
+				else if($data && ('movie_results' in $data || 'tv_results' in $data))
 					found = (DATA => {
 						let i, f, o, l;
 
@@ -1396,7 +1396,7 @@ let configuration, init, Update;
 						return f? o: f;
 					})($data);
 				//api.themoviedb.org/ \remote
-				else if('original_name' in $data || 'original_title' in $data)
+				else if($data && ('original_name' in $data || 'original_title' in $data))
 					found = (R($data.original_name, title) || R($data.original_title, title) || R($data.name, title))?
 						$data:
 					found;
