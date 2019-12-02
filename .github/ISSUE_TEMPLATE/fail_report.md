@@ -28,9 +28,9 @@ Use the [fail locator](https://github.com/SpaceK33z/web-to-plex/wiki/Fail-Locati
 If applicable, add screenshots to help explain your problem.
 
 **Extension Information**
- - Version: [e.g. 3.4, 4.0]
- - Source: [e.g. store, GitHub]
- - Browser: [e.g. chrome, firefox]
+ - Version: 4.1.0.XXXX
+ - Source: store/GitHub
+ - Browser: `chrome` `firefox`
 
 **Additional comments**
 Add any other comments about the problem here, such as how often the issue occurs, any new changes, etc.
