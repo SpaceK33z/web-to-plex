@@ -139,7 +139,7 @@ The sites used as search engines (IMDb, TMDb, and TVDb) will automatically creat
 
 ## Issues & Contributions
 
-[![DeepScan grade](https://deepscan.io/api/teams/5912/projects/7762/branches/83438/badge/grade.svg)](https://deepscan.io/dashboard#view=project&tid=5912&pid=7762&bid=83438)
+[![DeepScan grade](https://deepscan.io/api/teams/5912/projects/7762/branches/83413/badge/grade.svg)](https://deepscan.io/dashboard#view=project&tid=5912&pid=7762&bid=83413)
 
 <!--
     master:         83413
