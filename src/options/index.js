@@ -118,6 +118,7 @@ const storage = (chrome.storage.sync || chrome.storage.local),
 			// Advance Settings
 			'OMDbAPI',
 			'TMDbAPI',
+			'UseLZW',
 			'DeveloperMode',
 
 			// Hidden values
@@ -442,12 +443,29 @@ function LoadingAnimation(state = false) {
 	$('display').setAttribute('loading', state);
 }
 
-function load(name) {
-	return JSON.parse(localStorage.getItem(btoa(name)));
+function load(name, decompress_data = false) {
+	let options = JSON.stringify(getOptionValues()),
+		data;
+
+	name = btoa(name);
+	data = localStorage.getItem(name);
+
+	if(decompress_data)
+		data = decompress(data);
+
+	return JSON.parse(data);
 }
 
-function save(name, data) {
-	return localStorage.setItem(btoa(name), JSON.stringify(data));
+function save(name, data, compress_data = false) {
+	let options = JSON.stringify(getOptionValues());
+
+	name = btoa(name);
+	data = JSON.stringify(data);
+
+	if(compress_data)
+		data = compress(data);
+
+	return localStorage.setItem(name, data);
 }
 
 function getServers(plexToken) {
@@ -461,9 +479,14 @@ function getServers(plexToken) {
 		let data = parseXML(xml);
 
 		if(/^\s*Invalid/i.test(data))
-			return null;
+			throw data;
 
 		return data.Device.filter(device => !!~device.provides.split(',').indexOf('server'));
+	})
+	.catch(error => {
+		new Notification('error', `Unable to connect to Plex: "${ error }"`, 7000);
+
+		throw error;
 	});
 }
 
@@ -568,26 +591,29 @@ function getPlexConnections(server) {
 function getOptionValues() {
 	let options = {};
 
-	for(let key in __caught)
-		__caught[key] = __caught[key].filter(id => id).slice(0, 100);
-
-	__theme = __theme.filter(v => v);
-
-	$('[data-option="__caught"i]').value = JSON.stringify(__caught);
-	$('[data-option="__theme"i]').value = JSON.stringify(__theme);
-
 	__options__.forEach(option => {
-		let element = $(
-			`[data-option="${ option }"]`
-		);
+		let element = $(`[data-option="${ option }"]`);
 
 		if(element) {
 			if(element.type == 'checkbox')
-				options[option] = element.checked || element.getAttribute('save') == "true";
+				options[option] = element.checked;
 			else
 				options[option] = element.value;
 		}
 	});
+
+	let COM = options.UseLZW;
+
+	for(let key in __caught)
+		__caught[key] = __caught[key].filter(id => id).slice(0, (COM? 200: 100)).sort();
+
+	__theme = __theme.filter(v => v);
+
+	let _c = JSON.stringify(__caught),
+		_t = JSON.stringify(__theme);
+
+	$('[data-option="__caught"i]').value = options.__caught = (COM? compress(_c): _c);
+	$('[data-option="__theme"i]').value = options.__theme = (COM? compress(_t): _t);
 
 	return options;
 }
@@ -1715,13 +1741,13 @@ function restoreOptions(OPTIONS) {
 			if(!el) return;
 
 			if(el.type == 'checkbox')
-				el.setAttribute('checked', el.checked = (typeof items[option] == 'boolean'? items[option]: el.getAttribute('checked') == 'true'));
+				el.checked = items[option];
 			else
 				el.value = items[option] || '';
 
 			if(el.value !== '' && !el.disabled) {
 				if(el.type == 'checkbox')
-					el.setAttribute('save', el.checked == 'true');
+					el.setAttribute('save', el.checked);
 				else if(el.type == 'range')
 					el.setAttribute('save', el.value),
 					el.oninput({ target: el });
@@ -1782,12 +1808,15 @@ function restoreOptions(OPTIONS) {
 	}
 
 	setTimeout(() => {
-		$('.checkbox:not([disabled]) input', true)
+		$('.checkbox:not([disabled]) input:not([disabled])', true)
 			.forEach((element, index, array) => {
 				let options = getOptionValues(),
-					using   = element.getAttribute('checked');
+					name = element.getAttribute('data-option');
 
-				element.checked = using === 'true';
+				if(!name || options[name] === undefined || options[name] === null)
+					return;
+
+				element.checked = options[name];
 			})
 	}, 250);
 }
@@ -1904,7 +1933,7 @@ for(let index = 0, length = builtin_array.length; builtinElement && index < leng
 `
 <h3>${ title }</h3>
 <div class="checkbox">
-	<input id="${ name }" type="checkbox" data-option="${ name }" pid="${ r }" js="${ js }">
+	<input id="${ name }" type="checkbox" data-option="${ name }" pid="${ r }" js="${ js }" checked>
 	<label for="${ name }"></label>
 </div>
 <div>
@@ -2148,7 +2177,7 @@ $('[type="range"]', true)
 
 $('.checkbox', true)
 	.forEach((element, index, array) => {
-		addListener(element, 'click', event => {
+		addListener(element, 'mouseup', event => {
 			let self = traverse(path(event), element => (element && element.type == 'checkbox'), true);
 
 			if(!self)
@@ -2158,10 +2187,29 @@ $('.checkbox', true)
 				return event.preventDefault(true);
 			/* Stop the event from further processing */
 
-			if(self.checked)
-				self.setAttribute('checked', self.checked = false);
-			else
-				self.setAttribute('checked', self.checked = true);;
+			/* Handle special checkboxes */
+			switch(self.id.toLowerCase()) {
+				/* Update the database when the option is toggled */
+				case 'use-lzw':
+					if(!self.checked)
+						new Notification('update', 'Compressing data...', 3000);
+					else
+						new Notification('update', 'Decompressing data...', 3000);
+
+					let options = getOptionValues();
+
+					for(let name in options)
+						if(/^__/.test(name)) {
+							if(!self.checked)
+								options[name] = compress(options[name]);
+							else
+								options[name] = decompress(options[name]);
+						}
+					break;
+
+				default:
+					break;
+			}
 		});
 	});
 
@@ -2178,10 +2226,10 @@ $('.test', true)
 		});
 	});
 
-$('[data-option^="theme:"i]', true)
+$('[data-option^="theme:"i], [data-option^="theme:"i] + label', true)
 	.forEach((element, index, array) => {
-		addListener(element, 'click', async event => {
-			let self = traverse(event.target, element => /^theme:/i.test(element.getAttribute('data-option'))),
+		addListener(element, 'mouseup', async event => {
+			let self = traverse(event.target, element => /^theme:/i.test(element.getAttribute('data-option')), true),
 				R = RegExp;
 
 			let [a, b] = self.getAttribute('theme').split(/\s*:\s*/).filter(v => v),
@@ -2189,7 +2237,8 @@ $('[data-option^="theme:"i]', true)
 
 			if(/^(get|read|for)$/i.test(a))
 				__theme.push(`${ value }=${ self.value }`)
-			else if(/^(checkbox)$/i.test(self.type) && (self.checked + '') == a)
+			else if(/^(checkbox)$/i.test(self.type) && (self.checked + '') != a)
+			// backwards; fires late
 				__theme.push(value);
 			else if(/^(text|input|button|\B)$/i.test(self.type) && R(self.value + '', 'i').test(a))
 				__theme.push(value);
@@ -2339,6 +2388,78 @@ if(hash.length > 1)
 			terminal.log(`Unknown event "${ hash }"`);
 			break;
 	};
+
+/* LZW Compression Algorithm */
+function compress(string = '') {
+	let printable = "\b\t\n\v\f\r !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~",
+		library = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+
+	let dictionary = {},
+		phrases    = (string + ''),
+		phrase     = phrases[0],
+		medium     = [],
+		output     = [],
+		index      = 255,
+		character;
+
+	if(!string.length)
+		return '';
+
+	let at = (w = phrase, p = printable, d = dictionary) =>
+		(w.length > 1)?
+			d[`@${ w }`]:
+		w.charCodeAt(0);
+
+	for(let i = 1, l = phrases.length, c, d; i < l; i++)
+		if(dictionary[`@${ phrase }${ character = phrases[i] }`] !== undefined) {
+			phrase += character;
+		} else {
+			medium.push(at(phrase));
+			dictionary[`@${ phrase }${ character }`] = index++;
+			phrase = character;
+		}
+	medium.push(at(phrase));
+
+	for(let i = 0, l = medium.length, d = printable.charCodeAt(printable.length - 1); i < l; i++)
+		output.push(String.fromCharCode(medium[i]));
+
+	return output.join('');
+}
+
+/* LZW Decompression Algorithm */
+function decompress(string = '') {
+	let printable = "\b\t\n\v\f\r !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~",
+		library = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+
+	let dictionary = {},
+		phrases    = (string + ''),
+		character  = phrases[0],
+		word       = {
+			now:  '',
+			last: character,
+		},
+		output     = [character],
+		index      = 255;
+
+	if(!string.length)
+		return '';
+
+	for(let i = 1, l = phrases.length, code, pass; i < l; i++) {
+		code = phrases.charCodeAt(i);
+
+		if(code < 255)
+			word.now = phrases[i];
+		else if((word.now = dictionary[`@${ code }`]) === undefined)
+			word.now = word.last + character;
+
+		output.push(word.now);
+		character = word.now[0];
+		dictionary[`@${ index++ }`] = word.last + character;
+		word.last = word.now;
+	}
+
+	return output.join('');
+}
 
 String.prototype.toCaps = String.prototype.toCaps || function toCaps(all) {
 	/** Titling Caplitalization

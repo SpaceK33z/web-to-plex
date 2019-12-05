@@ -70,7 +70,7 @@
 		                <br>
 		                <h3><em>Fill in Manager Settings with Ombi?</em></h3>
 		                <div class="checkbox" prompt="y/n">
-		                    <input id="use-ombi" type="checkbox" data-option="UseOmbi" checked="true"/>
+		                    <input id="use-ombi" type="checkbox" data-option="UseOmbi" checked/>
 		                    <label for="use-ombi"></label>
 		                </div>
 		                <div>
@@ -109,7 +109,7 @@
 
 		    <article>
 		        <details id="ombi">
-		            <summary>Ombi (Movies/TV Shows) <span class="checkbox" disabled prompt-yes="use" prompt-no="skip"><input id="using-ombi" type="checkbox" data-option="usingOmbi" checked="false" /><label for="using-ombi"></label></span></summary>
+		            <summary>Ombi (Movies/TV Shows) <span class="checkbox" disabled prompt-yes="use" prompt-no="skip"><input id="using-ombi" type="checkbox" data-option="usingOmbi"/><label for="using-ombi"></label></span></summary>
 
 		            <h2>Connection Settings</h2>
 		            <section>
@@ -157,7 +157,7 @@
 				<hr>
 
 		        <details id="watcher">
-		            <summary>Watcher (Movies) <span class="checkbox" disabled prompt-yes="use" prompt-no="skip"><input id="using-watcher" type="checkbox" data-option="usingWatcher" checked="false" /><label for="using-watcher"></label></span></summary>
+		            <summary>Watcher (Movies) <span class="checkbox" disabled prompt-yes="use" prompt-no="skip"><input id="using-watcher" type="checkbox" data-option="usingWatcher"/><label for="using-watcher"></label></span></summary>
 
 		            <h2>Connection Settings</h2>
 		            <section>
@@ -217,7 +217,7 @@
 		        </details>
 
 		        <details id="radarr">
-		            <summary>Radarr (Movies) <span class="checkbox" disabled prompt-yes="use" prompt-no="skip"><input id="using-radarr" type="checkbox" data-option="usingRadarr" checked="false" /><label for="using-radarr"></label></span></summary>
+		            <summary>Radarr (Movies) <span class="checkbox" disabled prompt-yes="use" prompt-no="skip"><input id="using-radarr" type="checkbox" data-option="usingRadarr"/><label for="using-radarr"></label></span></summary>
 
 		            <h2>Connection Settings</h2>
 		            <section>
@@ -279,7 +279,7 @@
 		        </details>
 
 				<details id="couchpotato">
-		            <summary>CouchPotato (Movies) <span class="checkbox" disabled prompt-yes="use" prompt-no="skip"><input id="use-couchpotato" type="checkbox" data-option="usingCouchPotato" checked="false" /><label for="use-couchpotato"></label></span></summary>
+		            <summary>CouchPotato (Movies) <span class="checkbox" disabled prompt-yes="use" prompt-no="skip"><input id="use-couchpotato" type="checkbox" data-option="usingCouchPotato"/><label for="use-couchpotato"></label></span></summary>
 
 		            <h2>Connection Settings</h2>
 		            <section>
@@ -339,7 +339,7 @@
 				<hr>
 
 				<details id="medusa">
-				    <summary>Medusa (TV Shows) <span class="checkbox" disabled prompt-yes="use" prompt-no="skip"><input id="using-medusa" type="checkbox" data-option="usingMedusa" checked="false" /><label for="using-medusa"></label></span></summary>
+				    <summary>Medusa (TV Shows) <span class="checkbox" disabled prompt-yes="use" prompt-no="skip"><input id="using-medusa" type="checkbox" data-option="usingMedusa"/><label for="using-medusa"></label></span></summary>
 
 				    <h2>Connection Settings</h2>
 				    <section>
@@ -406,7 +406,7 @@
 				</details>
 
 		        <details id="sonarr">
-		            <summary>Sonarr (TV Shows) <span class="checkbox" disabled prompt-yes="use" prompt-no="skip"><input id="using-sonarr" type="checkbox" data-option="usingSonarr" checked="false" /><label for="using-sonarr"></label></span></summary>
+		            <summary>Sonarr (TV Shows) <span class="checkbox" disabled prompt-yes="use" prompt-no="skip"><input id="using-sonarr" type="checkbox" data-option="usingSonarr"/><label for="using-sonarr"></label></span></summary>
 
 		            <h2>Connection Settings</h2>
 		            <section>
@@ -468,7 +468,7 @@
 		        </details>
 
 				<details id="sickBeard">
-				    <summary>Sick Beard (TV Shows) <span class="checkbox" disabled prompt-yes="use" prompt-no="skip"><input id="using-sickBeard" type="checkbox" data-option="usingSickBeard" checked="false" /><label for="using-sickBeard"></label></span></summary>
+				    <summary>Sick Beard (TV Shows) <span class="checkbox" disabled prompt-yes="use" prompt-no="skip"><input id="using-sickBeard" type="checkbox" data-option="usingSickBeard"/><label for="using-sickBeard"></label></span></summary>
 
 				    <h2>Connection Settings</h2>
 				    <section>
@@ -552,14 +552,14 @@
 						<br>
 						<span class="checkbox" prompt-size="large" prompt-yes="&#8672;" prompt-no="&#8674;">
 							<!-- When true (checked), will be accessed in CSS (/sites/theme.css) as ".button-location-right { ... }" -->
-							<input data-option="theme:button-location" theme="true:right" type="checkbox" />
+							<input data-option="theme:button-location" theme="true:right" type="checkbox"/>
 							<label for="theme:button-location"></label>
 						</span>
 					</section>
 					<section>
 						How transparent should the button be when hidden?
 						<br>
-		                <input data-option="theme:button-opacity" theme="for:hidden" type="range" min="0" max="10" step="5" value="10" symbol="%" />
+		                <input data-option="theme:button-opacity" theme="for:hidden" type="range" min="0" max="10" step="5" value="10" symbol="%"/>
 		                <output type="text" value="10%"></output>
 					</section>
 				</details>
@@ -642,7 +642,7 @@
 						<h3>
 							Auto Grab
 							<span class="checkbox" prompt-yes="all" prompt-no="ask">
-			                    <input id="use-autograb" type="checkbox" data-option="UseAutoGrab" checked="false" />
+			                    <input id="use-autograb" type="checkbox" data-option="UseAutoGrab"/>
 			                    <label for="use-autograb"></label>
 			                </span>
 						</h3>
@@ -665,7 +665,7 @@
 						<h3>
 							Prompt for Save Location
 							<span class="checkbox" prompt="y/n">
-			                    <input id="prompt-location" type="checkbox" data-option="PromptLocation" checked="false" />
+			                    <input id="prompt-location" type="checkbox" data-option="PromptLocation"/>
 			                    <label for="prompt-location"></label>
 			                </span>
 						</h3>
@@ -680,7 +680,7 @@
 						<h3>
 							Prompt for Quality
 							<span class="checkbox" prompt="y/n">
-			                    <input id="prompt-quality" type="checkbox" data-option="PromptQuality" checked="false" />
+			                    <input id="prompt-quality" type="checkbox" data-option="PromptQuality"/>
 			                    <label for="prompt-quality"></label>
 			                </span>
 						</h3>
@@ -699,7 +699,7 @@
 					<h3>
 						Ignore Found Items
 			            <span class="checkbox" prompt="y/n">
-			                <input id="notify-new-only" type="checkbox" data-option="NotifyNewOnly" checked="false" />
+			                <input id="notify-new-only" type="checkbox" data-option="NotifyNewOnly"/>
 			                <label for="notify-new-only"></label>
 			            </span>
 					</h3>
@@ -710,7 +710,7 @@
 					<h3>
 						Ignore Repetitive Notifications
 			            <span class="checkbox" prompt="y/n">
-			                <input id="notify-only-once" type="checkbox" data-option="NotifyOnlyOnce" checked="false" />
+			                <input id="notify-only-once" type="checkbox" data-option="NotifyOnlyOnce"/>
 			                <label for="notify-only-once"></label>
 			            </span>
 					</h3>
@@ -727,13 +727,13 @@
 		                <h3>
 							Loose Searching
 							<span class="checkbox">
-			                    <input id="use-loose" type="checkbox" data-option="UseLoose" checked="true"/>
+			                    <input id="use-loose" type="checkbox" data-option="UseLoose" checked/>
 			                    <label for="use-loose"></label>
 			                </span>
 						</h3>
 		                <label>Searching Sensitivity</label>
 		                <br>
-		                <input type="range" data-option="UseLooseScore" min="0" max="100" step="5" value="40" symbol="%" />
+		                <input type="range" data-option="UseLooseScore" min="0" max="100" step="5" value="40" symbol="%"/>
 		                <output type="text" value="40%"></output>
 		                <div>
 		                    Allows the extension to search for non-English titles using pattern matching (as a last resort).
@@ -779,9 +779,20 @@
 		            </section>
 					<hr>
 		            <h2>Data Handling</h2>
+					<section>
+						<h3 x-mode>Data Compression</h3>
+						<div class="checkbox">
+							<input id="use-lzw" type="checkbox" data-option="UseLZW"/>
+							<label for="use-lzw"></label>
+						</div>
+						<div>
+							<em>WARNING</em>: may cause data loss.<br>
+							Enabling this option with compress your cached search data using the <a href="https://wikipedia.org/wiki/Lempel%E2%80%93Ziv%E2%80%93Welch" target="_blank">LZW Compression Algorithm</a>.
+						</div>
+					</section>
 		            <section>
 		                <h3>Configuration Data (Copy/Paste)</h3>
-		                <input id="json_data" type="text" placeholder="Enter your configuration data">
+		                <input id="json_data" type="text" placeholder="Enter your configuration data"/>
 		                <div>
 		                    Use this for testing purposes only, as it may contain saved usernames and/or passwords.
 		                </div>
@@ -811,10 +822,10 @@
 			                    <label for="extension-branch-type"></label>
 			                </span>
 						</h3>
-						<label>
+						<div>
 							<em>WARNING</em>: may cause data loss.<br>
 							Enables developer (debugging) mode, showing advance errors and logging to the console when possible.
-						</label>
+						</div>
 					</section>
 		        </details>
 		    </article>
@@ -894,27 +905,27 @@
 	</section>
 
 	<div class="hide">
-		<input data-option="watcherQualities" value />
-		<input data-option="radarrQualities" value />
-		<input data-option="sonarrQualities" value />
-		<input data-option="medusaQualities" value />
-		<input data-option="sickBeardQualities" value />
-		<input data-option="watcherStoragePaths" value />
-		<input data-option="radarrStoragePaths" value />
-		<input data-option="sonarrStoragePaths" value />
-		<input data-option="medusaStoragePaths" value />
-		<input data-option="sickBeardStoragePaths" value />
-		<input data-option="__radarrQuality" value />
-		<input data-option="__sonarrQuality" value />
-		<input data-option="__medusaQuality" value />
-		<input data-option="__sickBeardQuality" value />
-		<input data-option="__radarrStoragePath" value />
-		<input data-option="__sonarrStoragePath" value />
-		<input data-option="__medusaStoragePath" value />
-		<input data-option="__sickBeardStoragePath" value />
-		<input data-option="__domains" value />
-		<input data-option="__caught" value />
-		<input data-option="__theme" value />
+		<input data-option="watcherQualities" value/>
+		<input data-option="radarrQualities" value/>
+		<input data-option="sonarrQualities" value/>
+		<input data-option="medusaQualities" value/>
+		<input data-option="sickBeardQualities" value/>
+		<input data-option="watcherStoragePaths" value/>
+		<input data-option="radarrStoragePaths" value/>
+		<input data-option="sonarrStoragePaths" value/>
+		<input data-option="medusaStoragePaths" value/>
+		<input data-option="sickBeardStoragePaths" value/>
+		<input data-option="__radarrQuality" value/>
+		<input data-option="__sonarrQuality" value/>
+		<input data-option="__medusaQuality" value/>
+		<input data-option="__sickBeardQuality" value/>
+		<input data-option="__radarrStoragePath" value/>
+		<input data-option="__sonarrStoragePath" value/>
+		<input data-option="__medusaStoragePath" value/>
+		<input data-option="__sickBeardStoragePath" value/>
+		<input data-option="__domains" value/>
+		<input data-option="__caught" value/>
+		<input data-option="__theme" value/>
 	</div>
 
     <footer id="version"></footer>

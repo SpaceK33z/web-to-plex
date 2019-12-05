@@ -14,7 +14,7 @@ let configuration, init, Update;
 		RUNNING  = false,
 	// Other items
 	/* Items that the user has already asked for */
-		CAUGHT;
+		CAUGHT, COMPRESS;
 
 	// simple helpers
 	let extURL = url => browser.runtime.getURL(url),
@@ -191,6 +191,30 @@ let configuration, init, Update;
 			let prompt, remove,
 				array = (options instanceof Array? options: [].slice.call(options)),
 				data = [...array],
+				manager = {
+					movie: (
+						__CONFIG__.usingOmbi?
+							'Ombi':
+						__CONFIG__.usingRadarr?
+							'Radarr':
+						__CONFIG__.usingWatcher?
+							'Watcher':
+						__CONFIG__.usingCouchPotato?
+							'CouchPotato':
+						'???'
+					),
+					show: (
+						__CONFIG__.usingOmbi?
+							'Ombi':
+						__CONFIG__.usingSonarr?
+							'Sonarr':
+						__CONFIG__.usingSickBeard?
+							'SickBeard':
+						__CONFIG__.usingMedusa?
+							'Medusa':
+						'???'
+					)
+				},
 				profiles = {
 					movie: JSON.parse(
 						__CONFIG__.usingRadarr?
@@ -242,12 +266,50 @@ let configuration, init, Update;
 							{ quality: __CONFIG__.__sickBeardQuality, location: __CONFIG__.__sickBeardStoragePath }:
 						{}
 					)
-				};
+				},
+				slugs = {
+					movie: (
+						__CONFIG__.usingOmbi?
+							`${ __CONFIG__.ombiURL }`:
+						__CONFIG__.usingRadarr?
+							`${__CONFIG__.radarrURL}movies/%title%-%TMDbID%`:
+						__CONFIG__.usingWatcher?
+							`${__CONFIG__.watcherURL}library/status#%title%-%TMDbID%`:
+						__CONFIG__.usingCouchPotato?
+							`${ __CONFIG__.couchpotatoURL }`:
+						'#'
+					),
+					show: (
+						__CONFIG__.usingOmbi?
+							`${ __CONFIG__.ombiURL }`:
+						__CONFIG__.usingSonarr?
+							`${__CONFIG__.sonarrURL}series/%title%`:
+						__CONFIG__.usingSickBeard?
+							`${__CONFIG__.sickBeardURL}home/displayShow?show=%TVDbID%`:
+						__CONFIG__.usingMedusa?
+							`${__CONFIG__.medusaURL}home/displayShow?indexername=tvdb&seriesid=%TVDbID%`:
+						'#'
+					)
+				},
+				slugify = type => slugs[type].replace(
+					/%([\w\-]+)%/gi, ($0, $1, $$, $_) => (typeof options[$1] != 'string')?
+						options[$1]:
+					options[$1]
+						.replace(/\&/g, 'and')
+						.replace(/\s+/g, '-')
+						.replace(/[^\w\-]+/g, '')
+						.replace(/\-{2,}/g, '-')
+						.toLowerCase()
+				);
 
 			let preX = document.queryBy('.web-to-plex-prompt').first;
 
 			if(preX)
 				return /* Ignore while another prompt is open, prevents double prompts */;
+
+				options.imdb = options.IMDbID;
+				options.tmdb = options.TMDbID;
+				options.tvdb = options.TVDbID;
 
 			switch(prompt_type) {
 				/* Allows the user to add and remove items from a list */
@@ -480,7 +542,8 @@ let configuration, init, Update;
 							furnish('div.web-to-plex-prompt-footer', {},
 								furnish('button.web-to-plex-prompt-decline', { onmouseup: event => { remove(true); callback([]) }, title: 'Close' }, '\u2718'),
 								furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { remove(true); new Prompt(prompt_type, options, callback, container) }, title: 'Reset' }, '\u21BA'),
-								furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { remove(true); callback(options) }, title: 'Continue' }, '\u2714')
+								furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { remove(true); callback(options) }, title: 'Continue' }, '\u2714'),
+								furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { let self = event.target; open(self.getAttribute('href'), '_blank') }, href: slugify(type), title: `Open on ${ manager[type] }` }, manager[type])
 							)
 						)
 					);
@@ -801,24 +864,29 @@ let configuration, init, Update;
 							/* Simple copy */
 							configuration[key] = options[key];
 
-					CAUGHT = JSON.parse(options.__caught);
+					COMPRESS = options.UseLZW;
+					CAUGHT = options.__caught;
+					CAUGHT = JSON.parse(COMPRESS? decompress(CAUGHT): CAUGHT);
 					CAUGHT.bump = async(ids) => {
 						bumping:
 						for(let id in ids) {
-							let ID = id.toLowerCase().slice(0, 4);
+							let ID = id.toLowerCase().slice(0, 4),
+								MAX = (COMPRESS? 200: 100);
 
 							if(!!~CAUGHT[ID].indexOf(ids[id]))
 								continue bumping;
 
-							if(CAUGHT[ID].length >= 100)
-								CAUGHT[ID].splice(0, 1 + (CAUGHT[ID].length - 100));
+							if(CAUGHT[ID].length >= MAX)
+								CAUGHT[ID].splice(0, 1 + (CAUGHT[ID].length - MAX));
 
 							CAUGHT[ID].push(ids[id]);
 							CAUGHT[ID].filter(v => typeof v == 'number'? v: null);
-							CAUGHT[ID] = CAUGHT[ID].slice(0, 100);
+							CAUGHT[ID] = CAUGHT[ID].slice(0, MAX);
 						}
 
 						let __caught = JSON.stringify(CAUGHT);
+
+						__caught = (COMPRESS? compress(__caught): __caught);
 
 						await UTILS_STORAGE.set({ __caught }, () => configuration.__caught = __caught);
 					};
@@ -1914,6 +1982,10 @@ let configuration, init, Update;
 
 		new Notification('info', `Sending "${ options.title }" to Sick Beard`, 3000);
 
+		COMPRESS = options.UseLZW;
+		CAUGHT = __CONFIG__.__caught;
+		CAUGHT = JSON.parse(COMPRESS? decompress(CAUGHT): CAUGHT);
+
 		browser.runtime.sendMessage({
 			type: 'PUSH_SICKBEARD',
 			url: `${ __CONFIG__.sickBeardURL }api/${ __CONFIG__.sickBeardToken }/`,
@@ -1924,7 +1996,7 @@ let configuration, init, Update;
 			title: options.title,
 			year: options.year,
 			tvdbId: options.TVDbID,
-			exists: !!~JSON.parse(__CONFIG__.__caught).tvdb.indexOf(options.TVDbID),
+			exists: !!~CAUGHT.tvdb.indexOf(options.TVDbID),
 			...PromptValues
 		}).then(response => {
 			UTILS_TERMINAL.log('Pushing to Sick Beard', response);
@@ -1966,7 +2038,9 @@ let configuration, init, Update;
 		else if(persistent && firstButton !== null && firstButton !== undefined)
 			return firstButton;
 
-			let ThemeClasses = JSON.parse(__CONFIG__.__theme),
+			let { __theme } = __CONFIG__;
+
+			let ThemeClasses = JSON.parse(COMPRESS? decompress(__theme): __theme),
 				HeaderClasses = [],
 				ParsedAttributes = {};
 
@@ -2678,6 +2752,73 @@ let configuration, init, Update;
 })(new Date);
 
 /* Helpers */
+
+/* LZW Compression Algorithm */
+function compress(string = '') {
+	let printable = "\b\t\n\v\f\r !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~",
+		library = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+
+	let dictionary = {},
+		phrases    = (string + ''),
+		phrase     = phrases[0],
+		medium     = [],
+		output     = [],
+		index      = 255,
+		character;
+
+	let at = (w = phrase, p = printable, d = dictionary) =>
+		(w.length > 1)?
+			d[`@${ w }`]:
+		w.charCodeAt(0);
+
+	for(let i = 1, l = phrases.length, c, d; i < l; i++)
+		if(dictionary[`@${ phrase }${ character = phrases[i] }`] !== undefined) {
+			phrase += character;
+		} else {
+			medium.push(at(phrase));
+			dictionary[`@${ phrase }${ character }`] = index++;
+			phrase = character;
+		}
+	medium.push(at(phrase));
+
+	for(let i = 0, l = medium.length, d = printable.charCodeAt(printable.length - 1); i < l; i++)
+		output.push(String.fromCharCode(medium[i]));
+
+	return output.join('');
+}
+
+/* LZW Decompression Algorithm */
+function decompress(string = '') {
+	let printable = "\b\t\n\v\f\r !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~",
+		library = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+
+	let dictionary = {},
+		phrases    = (string + ''),
+		character  = phrases[0],
+		word       = {
+			now:  '',
+			last: character,
+		},
+		output     = [character],
+		index      = 255;
+
+	for(let i = 1, l = phrases.length, code, pass; i < l; i++) {
+		code = phrases.charCodeAt(i);
+
+		if(code < 255)
+			word.now = phrases[i];
+		else if((word.now = dictionary[`@${ code }`]) === undefined)
+			word.now = word.last + character;
+
+		output.push(word.now);
+		character = word.now[0];
+		dictionary[`@${ index++ }`] = word.last + character;
+		word.last = word.now;
+	}
+
+	return output.join('');
+}
+
 
 function wait(on, then) {
 	if(on && ((on instanceof Function && on()) || true))
