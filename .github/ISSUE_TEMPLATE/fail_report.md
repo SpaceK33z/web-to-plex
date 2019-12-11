@@ -28,8 +28,8 @@ Use the [fail locator](https://github.com/SpaceK33z/web-to-plex/wiki/Fail-Locati
 If applicable, add screenshots to help explain your problem.
 
 **Extension Information**
- - Version: 4.1.0.XXXX
- - Source: store/GitHub
+ - Version: `4.XXXX.YYYY.ZZZZ`
+ - Source: `store` `GitHub`
  - Browser: `chrome` `firefox`
 
 **Additional comments**
