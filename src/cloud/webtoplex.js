@@ -41,7 +41,7 @@ let script = {
 	"getID": (provider) => $(`#${provider}`).first.textContent,
 };
 
-(() => {
+setTimeout(() => {
 	let login = /\blogin\b/.test(location.pathname),
 		apikey = $('#apikey').first;
 
@@ -54,4 +54,4 @@ let script = {
 		return -1;
 		// don't run on the login page
 	}
-})();
+}, 100);

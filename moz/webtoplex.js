@@ -12,7 +12,7 @@ let script = {
 	// (detail|buy) - match one of the items
 
 	// optional
-	"ready": () => configuration && location.search && location.search.length > 1 && $('#tmdb').first.textContent,
+	"ready": () => location.search && location.search.length > 1 && $('#tmdb').first.textContent,
 
 	// optional
 	"timeout": 5000, // if the script fails to complete, retry after ... milliseconds
@@ -41,7 +41,7 @@ let script = {
 	"getID": (provider) => $(`#${provider}`).first.textContent,
 };
 
-(() => {
+setTimeout(() => {
 	let login = /\blogin\b/.test(location.pathname),
 		apikey = $('#apikey').first;
 
@@ -54,4 +54,4 @@ let script = {
 		return -1;
 		// don't run on the login page
 	}
-})();
+}, 100);
