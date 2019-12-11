@@ -34,6 +34,6 @@ let script = {
 		return { type, title, year, image };
 	},
 
-	// optional | functioanlity only
+	// optional | functionality only
 	"getType": () => 'movie' || 'show',
 };

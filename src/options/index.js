@@ -1386,7 +1386,7 @@ function HandleProxySettings(data) {
 		R = RegExp;
 
 	/* "All" secure URI schemes */
-	if(!/^(aaas|https|msrps|sftp|smtp|shttp|sips|ssh|wss)\:\/\//i.test(ProxyURL))
+	if(UseProxy && ProxyURL && !/^(aaas|https|msrps|sftp|smtp|shttp|sips|ssh|wss)\:\/\//i.test(ProxyURL))
 		throw new Notification('error', `Insecure URI scheme '${ R.$1 }' detected. Please use a secure scheme.`);
 
 	return {
@@ -1957,7 +1957,7 @@ for(let index = 0, length = builtin_array.length; builtinElement && index < leng
 `
 <h3>${ title }</h3>
 <div class="checkbox">
-	<input id="${ name }" type="checkbox" data-option="${ name }" bid="${ r }" js="${ js }">
+	<input id="${ name }" type="checkbox" data-option="${ name }" bid="${ r }" js="${ js }" checked>
 	<label for="${ name }"></label>
 </div>
 <div>
