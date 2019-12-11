@@ -275,6 +275,11 @@ summary, option {
     padding-left: 0;
 }
 
+[x-mode]:after, [beta]:after {
+    content: ' (Experimental Feature)';
+    color: #fff;
+}
+
 #sidebar summary {
     margin-left: -50px;
     padding-left: 50px;
