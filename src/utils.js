@@ -2708,9 +2708,6 @@ let configuration, init, Update;
 
 /* LZW Compression Algorithm */
 function compress(string = '') {
-	let printable = "\b\t\n\v\f\r !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~",
-		library = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
-
 	let dictionary = {},
 		phrases    = (string + ''),
 		phrase     = phrases[0],
@@ -2719,12 +2716,12 @@ function compress(string = '') {
 		index      = 255,
 		character;
 
-	let at = (w = phrase, p = printable, d = dictionary) =>
+	let at = (w = phrase, d = dictionary) =>
 		(w.length > 1)?
 			d[`@${ w }`]:
 		w.charCodeAt(0);
 
-	for(let i = 1, l = phrases.length, c, d; i < l; i++)
+	for(let i = 1, l = phrases.length; i < l; i++)
 		if(dictionary[`@${ phrase }${ character = phrases[i] }`] !== undefined) {
 			phrase += character;
 		} else {
@@ -2734,7 +2731,7 @@ function compress(string = '') {
 		}
 	medium.push(at(phrase));
 
-	for(let i = 0, l = medium.length, d = printable.charCodeAt(printable.length - 1); i < l; i++)
+	for(let i = 0, l = medium.length; i < l; i++)
 		output.push(String.fromCharCode(medium[i]));
 
 	return output.join('');
@@ -2742,9 +2739,6 @@ function compress(string = '') {
 
 /* LZW Decompression Algorithm */
 function decompress(string = '') {
-	let printable = "\b\t\n\v\f\r !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~",
-		library = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
-
 	let dictionary = {},
 		phrases    = (string + ''),
 		character  = phrases[0],
@@ -2755,7 +2749,7 @@ function decompress(string = '') {
 		output     = [character],
 		index      = 255;
 
-	for(let i = 1, l = phrases.length, code, pass; i < l; i++) {
+	for(let i = 1, l = phrases.length, code; i < l; i++) {
 		code = phrases.charCodeAt(i);
 
 		if(code < 255)
