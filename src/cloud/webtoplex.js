@@ -35,7 +35,7 @@ let script = {
 		return { type, title, year, image, IMDbID, TMDbID };
 	},
 
-	// optional | functioanlity only
+	// optional | functionality only
 	"getType": () => ($('#info').first.getAttribute('type') == 'movie'? 'movie': 'show'),
 
 	"getID": (provider) => $(`#${provider}`).first.textContent,
