@@ -340,7 +340,7 @@
     width: 180px !important;
 
     transition: all 0.3s ease !important;
-    transition: opacity 1s ese !important;
+    transition: opacity 1s ease !important;
 }
 
 .web-to-plex-button.hide {

@@ -68,7 +68,7 @@ let script = {
 
 		title = title.textContent.trim().replace(/\s*\((\d{4})\)/, '');
 		year  = +RegExp.$1;
-		image = image.getAttribute('data-src');
+		image = image.dataset.src;
 
 		return { type, title, year, image };
 	},
