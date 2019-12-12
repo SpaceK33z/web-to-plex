@@ -15,6 +15,7 @@ if(chrome.runtime.lastError)
 // FireFox doesn't support sync storage.
 const storage = (chrome.storage.sync || chrome.storage.local),
 		$ = (selector, all) => (all? document.querySelectorAll(selector): document.querySelector(selector)),
+		$$ = (selector, all) => (all? [...$('display').querySelectorAll(selector)]: $('display').querySelector(selector)),
 		__servers__ = $('[data-option="preferredServer"]'),
 		__sickBeard_qualityProfile__  = $(`[data-option="sickBeardQualityProfileId"]`),
 		__sickBeard_storagePath__     = $(`[data-option="sickBeardStoragePath"]`),
@@ -191,7 +192,7 @@ const storage = (chrome.storage.sync || chrome.storage.local),
 			'plugin_foxsearchlight',
 
 			// Theme Settings
-			...(() => [...$('[data-option^="theme:"i]', true)].map(e => e.getAttribute('data-option')))()
+			...(() => [...$('[data-option^="theme:"i]', true)].map(e => e.dataset.option))()
 		];
 
 let PlexServers = [],
@@ -729,7 +730,7 @@ function performOmbiTest({ refreshing = false, event }) {
 		path = $('[data-option="ombiURLRoot"]'),
 		url,
 		headers = { headers: { apikey: options.ombiToken, accept: 'text/html' } },
-		enabled = $('#using-ombi');
+		enabled = refreshing? $('#using-ombi'): $$('#using-ombi');
 
 	teststatus.textContent = '?';
 	options.ombiURLRoot = url = path.value = options.ombiURLRoot.replace(/^(\:\d+)/, 'localhost$1').replace(/^(?!^http(s)?:)/, 'http$1://').replace(/\/+$/, '');
@@ -819,7 +820,7 @@ function performWatcherTest({ QualityProfileID = 'Default', refreshing = false, 
 		storagepath = __watcher_storagePath__,
 		quality = __watcher_qualityProfile__,
 		url,
-		enabled = $('#using-watcher');
+		enabled = refreshing? $('#using-watcher'): $$('#using-watcher');
 
 	quality.innerHTML = '';
 	teststatus.textContent = '?';
@@ -926,7 +927,7 @@ function performRadarrTest({ QualityProfileID, StoragePath, refreshing = false, 
 		storagepath = __radarr_storagePath__,
 		quality = __radarr_qualityProfile__,
 		url,
-		enabled = $('#using-radarr');
+		enabled = refreshing? $('#using-radarr'): $$('#using-radarr');
 
 	quality.innerHTML = '';
 	teststatus.textContent = '?';
@@ -952,6 +953,7 @@ function performRadarrTest({ QualityProfileID, StoragePath, refreshing = false, 
 
 				if(!profiles.length)
 					return teststatus.title = 'Failed to communicate with Radarr';
+				console.log('Enabling...', enabled, enabled.parentElement);
 				enabled.parentElement.removeAttribute('disabled');
 
 				let qualities = [];
@@ -1034,7 +1036,7 @@ function performSonarrTest({ QualityProfileID, StoragePath, refreshing = false, 
 		storagepath = __sonarr_storagePath__,
 		quality = __sonarr_qualityProfile__,
 		url,
-		enabled = $('#using-sonarr');
+		enabled = refreshing? $('#using-sonarr'): $$('#using-sonarr');
 
 	quality.innerHTML = '';
 	teststatus.textContent = '?';
@@ -1141,7 +1143,7 @@ function performMedusaTest({ QualityProfileID, StoragePath, refreshing = false, 
 		storagepath = __medusa_storagePath__,
 		quality = __medusa_qualityProfile__,
 		url,
-		enabled = $('#using-medusa');
+		enabled = refreshing? $('#using-medusa'): $$('#using-medusa');
 
 	quality.innerHTML = '';
 	teststatus.textContent = '?';
@@ -1257,7 +1259,7 @@ function performSickBeardTest({ QualityProfileID, StoragePath, refreshing = fals
 		storagepath = __sickBeard_storagePath__,
 		quality = __sickBeard_qualityProfile__,
 		url,
-		enabled = $('#using-sickBeard');
+		enabled = refreshing? $('#using-sickBeard'): $$('#using-sickBeard');
 
 	quality.innerHTML = '';
 	teststatus.textContent = '?';
@@ -1788,7 +1790,7 @@ function restoreOptions(OPTIONS) {
 		$('.checkbox:not([disabled]) input:not([disabled])', true)
 			.forEach((element, index, array) => {
 				let options = getOptionValues(),
-					name = element.getAttribute('data-option');
+					name = element.dataset.option;
 
 				if(!name || options[name] === undefined || options[name] === null)
 					return;
@@ -2077,7 +2079,7 @@ let empty = () => {};
 document.addEventListener('DOMContentLoaded', restoreOptions);
 __save__.addEventListener('click', saveOptions);
 
-addListener($('#plex_test'), 'click', event => {
+addListener($('#plex_test'), 'mouseup', event => {
 	let pt = $('#plex_token').value,
 		pu = $('#plex_username').value,
 		pp = $('#plex_password').value,
@@ -2091,16 +2093,16 @@ addListener($('#plex_test'), 'click', event => {
 	else if(ou && oa)
 		performOmbiLogin({ event });
 });
-$('#watcher_test', true).forEach(element => addListener(element, 'click', event => performWatcherTest({ event })));
-$('#radarr_test', true).forEach(element => addListener(element, 'click', event => performRadarrTest({ event })));
-$('#sonarr_test', true).forEach(element => addListener(element, 'click', event => performSonarrTest({ event })));
-$('#medusa_test', true).forEach(element => addListener(element, 'click', event => performMedusaTest({ event })));
-$('#ombi_test', true).forEach(element => addListener(element, 'click', event => performOmbiTest({ event })));
-$('#sickBeard_test', true).forEach(element => addListener(element, 'click', event => performSickBeardTest({ event })));
-$('#enable-couchpotato', true).forEach(element => addListener(element, 'click', event => enableCouchPotato({ event })));
+$('#watcher_test', true).forEach(element => addListener(element, 'mouseup', event => performWatcherTest({ event })));
+$('#radarr_test', true).forEach(element => addListener(element, 'mouseup', event => performRadarrTest({ event })));
+$('#sonarr_test', true).forEach(element => addListener(element, 'mouseup', event => performSonarrTest({ event })));
+$('#medusa_test', true).forEach(element => addListener(element, 'mouseup', event => performMedusaTest({ event })));
+$('#ombi_test', true).forEach(element => addListener(element, 'mouseup', event => performOmbiTest({ event })));
+$('#sickBeard_test', true).forEach(element => addListener(element, 'mouseup', event => performSickBeardTest({ event })));
+$('#enable-couchpotato', true).forEach(element => addListener(element, 'mouseup', event => enableCouchPotato({ event })));
 
 /* INPUT | Get the JSON data */
-addListener($('#json_get'), 'click', event => {
+addListener($('#json_get'), 'mouseup', event => {
 	let data_container = $('#json_data'),
 		data = atob((data_container.value || data_container.textContent).replace(/\s*\[.+\]\s*/, ''));
 
@@ -2116,7 +2118,7 @@ addListener($('#json_get'), 'click', event => {
 });
 
 /* OUTPUT | Set the JSON data */
-addListener($('#json_set'), 'click', event => {
+addListener($('#json_set'), 'mouseup', event => {
 	let data_container = $('#json_data'),
 		data = getOptionValues();
 
@@ -2126,7 +2128,7 @@ addListener($('#json_set'), 'click', event => {
 });
 
 /* Erase Cached Searches */
-addListener($('#erase_cache'), 'click', event => {
+addListener($('#erase_cache'), 'mouseup', event => {
 	let options = JSON.stringify(getOptionValues());
 
 	new Notification('info', 'Clearing...', 3000);
@@ -2187,12 +2189,15 @@ $('.checkbox', true)
 				default:
 					break;
 			}
+
+			if(/(^theme:|using)/i.test(self.dataset.option))
+				self.checked = !self.checked;
 		});
 	});
 
 $('.test', true)
 	.forEach((element, index, array) => {
-		addListener(element, 'click', async event => {
+		addListener(element, 'mouseup', async event => {
 			event.preventDefault(true);
 
 			let self = traverse(event.target, element => !!~[...element.classList].indexOf('text'));
@@ -2206,11 +2211,11 @@ $('.test', true)
 $('[data-option^="theme:"i], [data-option^="theme:"i] + label', true)
 	.forEach((element, index, array) => {
 		addListener(element, 'mouseup', async event => {
-			let self = traverse(event.target, element => /^theme:/i.test(element.getAttribute('data-option')), true),
+			let self = traverse(event.target, element => /^theme:/i.test(element.dataset.option), true),
 				R = RegExp;
 
 			let [a, b] = self.getAttribute('theme').split(/\s*:\s*/).filter(v => v),
-				value = `${self.getAttribute('data-option').replace(/^theme:/i, '')}-${b}`;
+				value = `${self.dataset.option.replace(/^theme:/i, '')}-${b}`;
 
 			if(/^(get|read|for)$/i.test(a))
 				__theme.push(`${ value }=${ self.value }`)

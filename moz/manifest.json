@@ -1,19 +1,14 @@
 {
-//	"update_url": "https://ephellon.github.com/web.to.plex/update.json",
-
 	"name": "Web to Plex",
 	"description": "Adds a button on various movie & TV show sites to open the item in Plex, or send to your designated NZB manager for download.",
 	"homepage_url": "https://github.com/SpaceK33z/web-to-plex/",
 
 	"manifest_version": 2,
-	"version": "4.1.1.1",
-// Firefox Support =>
-	"applications": {
+	"version": "4.1.1.4",
+	"browser_specific_settings": {
 		"gecko": {
-			"id": "minkcbos@gmail.com",
-				//"{05243336-ce19-46df-95af-680070c96134}",
-			"strict_min_version": "57.0",
-			"update_url": "https://ephellon.github.com/web.to.plex/update.json"
+			"id": "mink.cbos@gmail.com",
+			"strict_min_version": "57.0"
 		}
 	},
 
@@ -29,7 +24,6 @@
 	"content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
 
 	"content_scripts": [
-		// Allows media downloads
 		{
 			"matches": [
 				"*://*.openload.co/*", "*://*.oload.co/*",
@@ -75,13 +69,11 @@
 			"all_frames": true
 		},
 
-		// Testing purposes only
 		{
 			"matches": ["*://ephellon.github.io/web.to.plex/test/*"],
 			"js": ["utils.js", "__test__.js"]
 		},
 
-		// The sites
 		{
 			"matches": ["*://*.movieo.me/*"],
 			"js": ["history-hack.js", "utils.js", "movieo$.js"]
@@ -184,8 +176,6 @@
 		"persistent": true
 	},
 
-	// Disable/Comment "options_page" to enable FF support
-	//"options_page": "options.html",
 	"options_ui": {
 		"page": "options.html",
 		"open_in_tab": true
