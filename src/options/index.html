@@ -548,7 +548,16 @@
 
 					<h2>The Button</h2>
 					<section>
-						Where should the button be?
+						What shape should the button be?
+						<br>
+						<span class="checkbox" prompt-size="large" prompt-yes="&#9723;" prompt-no="&#9675;">
+							<!-- When true (checked), will be accessed in CSS (/sites/theme.css) as ".button-shape-box { ... }" -->
+							<input data-option="theme:button-shape" theme="true:box" type="checkbox"/>
+							<label for="theme:button-shape"></label>
+						</span>
+					</section>
+					<section>
+						Where should the button be (<span orange>&#9711;</span> only)?
 						<br>
 						<span class="checkbox" prompt-size="large" prompt-yes="&#8672;" prompt-no="&#8674;">
 							<!-- When true (checked), will be accessed in CSS (/sites/theme.css) as ".button-location-right { ... }" -->
