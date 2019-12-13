@@ -2190,7 +2190,8 @@ $('.checkbox', true)
 					break;
 			}
 
-			self.checked = !self.checked;
+			if(/(^theme:|using)/i.test(self.dataset.option))
+				self.checked = !self.checked;
 		});
 	});
 
