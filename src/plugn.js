@@ -238,6 +238,10 @@ function RandomName(length = 16, symbol = '') {
 	return values.join(symbol).replace(/^[^a-z]+/i, '');
 };
 
+function TLDHost(host) {
+	return host.replace(/^(ww\w+|\w{2})\./, '');
+}
+
 async function prepare({ code, alias, type, allowed, url }) {
 
 	let DATE = (new Date),
@@ -250,7 +254,7 @@ async function prepare({ code, alias, type, allowed, url }) {
 		Type = type.replace(/^\w/, ($0, $$, $_) => $0.toUpperCase());
 
 	let org = url.origin,
-		ali = url.host.replace(/^(ww\w+\.|\w{2}\.)/i, '');
+		ali = TLDHost(url.host);
 
 	let { authorized, ...A } = await GetAuthorization(alias);
 
@@ -450,7 +454,7 @@ let tabchange = async tabs => {
 
 	url  = new URL(url);
 	org  = url.origin;
-	ali  = url.host.replace(/^(ww\w+\.|\w{2}\.)/i, '');
+	ali  = TLDHost(url.host);
 	type = (load(`builtin:${ ali }`) + '') == 'true'? 'script': 'plugin';
 	js   = load(`${ type }:${ ali }`);
 	code = cache[ali];
