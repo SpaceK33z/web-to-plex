@@ -650,6 +650,10 @@ let configuration, init, Update;
 		document.body.append(frame);
 	}
 
+	function TLDHost(host) {
+		return host.replace(/^(ww\w+|\w{2})\./, '');
+	}
+
 	// Send an update query to background.js
 	Update = (type, options = {}, postToo) => {
 		if(configuration)
@@ -1044,7 +1048,7 @@ let configuration, init, Update;
 		};
 
 	if(configuration) {
-		let host = location.host.replace(/^(ww\w+\.)/, ''),
+		let host = TLDHost(location.host),
 			doms = configuration.__domains.split(',');
 
 		if(!~doms.indexOf(host))
@@ -1098,7 +1102,9 @@ let configuration, init, Update;
 			tid  = TVDbID  || null, // TVDbID
 			rqut = apit, // request type: tmdb, imdb, or tvdb
 			manable = __CONFIG__.ManagerSearch && !(rerun & 0b1000), // is the user's "Manager Searches" option enabled?
-			UTF_16 = /[^0\u0020-\u007e, 1\u00a1\u00bf-\u00ff, 2\u0100-\u017f, 3\u0180-\u024f, 4\u0300-\u036f, 5\u0370-\u03ff, 6\u0400-\u04ff, 7\u0500-\u052f, 8\u20a0-\u20bf]+/g;
+			UTF_16 = /[^0\u0020-\u007e, 1\u00a1\u00bf-\u00ff, 2\u0100-\u017f, 3\u0180-\u024f, 4\u0300-\u036f, 5\u0370-\u03ff, 6\u0400-\u04ff, 7\u0500-\u052f, 8\u20a0-\u20bf]+/g,
+			MV = /^(movies?|films?|cinemas?)$/i.test(apit),
+			TV = /^(tv[\s\-]*(?:shows?|series)?)$/i.test(apit);
 
 		type = type || null;
 		meta = { ...meta, mode: 'cors' };
@@ -1150,9 +1156,9 @@ let configuration, init, Update;
 		/* the rest of this function is a beautiful mess that will need to be dealt with later... but it works */
 		let url =
 			(manable && title && __CONFIG__.usingOmbi && __CONFIG__.ombiURLRoot)?
-				`${ __CONFIG__.ombiURLRoot }api/v1/Search/${ (rqut == 'imdb' || rqut == 'tmdb' || apit == 'movie')? 'movie': 'tv' }/${ plus(title, '%20') }/?apikey=${ api.ombi }`:
+				`${ __CONFIG__.ombiURLRoot }api/v1/Search/${ (/^[it]mdb$/i.test(rqut) || MV)? 'movie': 'tv' }/${ plus(title, '%20') }/?apikey=${ api.ombi }`:
 			(manable && (__CONFIG__.usingRadarr || __CONFIG__.usingSonarr || __CONFIG__.usingMedusa /*|| __CONFIG__.usingSickBeard*/))?
-				(__CONFIG__.usingRadarr && (rqut == 'imdb' || rqut == 'tmdb') && __CONFIG__.radarrURLRoot)?
+				(__CONFIG__.usingRadarr && /^[it]mdb$/i.test(rqut) && __CONFIG__.radarrURLRoot)?
 					(mid)?
 						`${ __CONFIG__.radarrURLRoot }api/movie/lookup/tmdb?tmdbId=${ mid }&apikey=${ __CONFIG__.radarrToken }`:
 					(iid)?
@@ -1168,9 +1174,9 @@ let configuration, init, Update;
 					`${ __CONFIG__.medusaURLRoot }api/v2/internal/searchIndexersForShowName?query=${ plus(title) }&indexerId=0&api_key=${ __CONFIG__.medusaToken }`:
 				/* TODO: find a way to get CORS to work on Sick Beard URLs (localhost) */
 				// (__CONFIG__.usingSickBeard)?
-				//     (tid)?
-				//         `${ __CONFIG__.sickBeardURLRoot }api/${ __CONFIG__.sickBeardToken }/?cmd=sb.searchtvdb&tvdbid=${ tid }`:
-				//     `${ __CONFIG__.sickBeardURLRoot }api/${ __CONFIG__.sickBeardToken }/?cmd=sb.searchtvdb&name=${ encodeURIComponent(title) }`:
+				//	 (tid)?
+				//		 `${ __CONFIG__.sickBeardURLRoot }api/${ __CONFIG__.sickBeardToken }/?cmd=sb.searchtvdb&tvdbid=${ tid }`:
+				//	 `${ __CONFIG__.sickBeardURLRoot }api/${ __CONFIG__.sickBeardToken }/?cmd=sb.searchtvdb&name=${ encodeURIComponent(title) }`:
 				null:
 			(rqut == 'imdb' || (rqut == '*' && !iid && title) || (rqut == 'tvdb' && !iid && title && !(rerun & 0b1000)) && (rerun |= 0b1000))?
 				(iid)?
@@ -1178,12 +1184,12 @@ let configuration, init, Update;
 				(year)?
 					`https://www.omdbapi.com/?t=${ plus(title) }&y=${ year }&apikey=${ api.omdb }`:
 				`https://www.omdbapi.com/?t=${ plus(title) }&apikey=${ api.omdb }`:
-			(rqut == 'tmdb' || (rqut == '*' && !mid && title && year) || apit == 'movie')?
+			(rqut == 'tmdb' || (rqut == '*' && !mid && title && year) || MV)?
 				(apit && apid)?
-					`https://api.themoviedb.org/3/${ apit }/${ apid }?api_key=${ api.tmdb }`:
+					`https://api.themoviedb.org/3/${ MV? 'movie': 'tv' }/${ apid }?api_key=${ api.tmdb }`:
 				(iid || mid || tid)?
 					`https://api.themoviedb.org/3/find/${ iid || mid || tid }?api_key=${ api.tmdb }&external_source=${ iid? 'imdb': mid? 'tmdb': 'tvdb' }_id`:
-				`https://api.themoviedb.org/3/search/${ apit }?api_key=${ api.tmdb }&query=${ encodeURI(title) }${ year? '&year=' + year: '' }`:
+				`https://api.themoviedb.org/3/search/${ MV? 'movie': 'tv' }?api_key=${ api.tmdb }&query=${ encodeURI(title) }${ year? '&year=' + year: '' }`:
 			(rqut == 'tvdb' || (rqut == '*' && !tid && title) || (apid == tid))?
 				(tid)?
 					`https://api.tvmaze.com/shows/?thetvdb=${ tid }`:
@@ -1192,7 +1198,7 @@ let configuration, init, Update;
 				`https://api.tvmaze.com/search/shows?q=${ encodeURI(title) }`:
 			(title)?
 				(apit && year)?
-					`https://www.theimdbapi.org/api/find/${ apit }?title=${ encodeURI(title) }&year=${ year }`:
+					`https://www.theimdbapi.org/api/find/${ MV? 'movie': 'show' }?title=${ encodeURI(title) }&year=${ year }`:
 				`https://www.theimdbapi.org/api/find/movie?title=${ encodeURI(title) }${ year? '&year=' + year: '' }`:
 			null;
 

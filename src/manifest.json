@@ -6,15 +6,7 @@
 	"homepage_url": "https://github.com/SpaceK33z/web-to-plex/",
 
 	"manifest_version": 2,
-	"version": "4.1.1.4",
-// Firefox Support =>
-//	"applications": {
-//		"gecko": {
-//			"id": "{05243336-ce19-46df-95af-680070c96134}",
-//			"strict_min_version": "57.0"
-//			"update_url": "https://ephellon.github.com/web.to.plex/update.json"
-//		}
-//	},
+	"version": "4.1.1.6",
 
 	"icons": {
 		"16":  "img/16.png",
@@ -214,7 +206,6 @@
 		"persistent": true
 	},
 
-	// Disable/Comment "options_page" to enable FF support
 	"options_page": "options/index.html",
 	"options_ui": {
 		"page": "options/index.html",
