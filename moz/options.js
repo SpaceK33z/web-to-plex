@@ -396,6 +396,10 @@ class Prompt {
 	}
 }
 
+function TLDHost(host) {
+	return host.replace(/^(ww\w+|\w{2})\./, '');
+}
+
 function addListener(element, eventName, callback = event => {}) {
 	eventName = eventName.replace(/^(on)?/, 'on');
 	callback = callback.toString().replace(/;+$/g, '');
@@ -1903,7 +1907,7 @@ for(let index = 0, length = builtin_array.length; builtinElement && index < leng
 				url   = new URL(builtin[i]),
 				js    = name.replace(/^builtin_/i, ''),
 				o     = url.origin,
-				r     = url.host.replace(/^(ww\w+\.)/, '');
+				r     = TLDHost(url.host);
 
 			builtin_sites[r] = o;
 
@@ -1928,7 +1932,7 @@ for(let index = 0, length = builtin_array.length; builtinElement && index < leng
 			url   = new URL(builtins[title]),
 			js    = name.replace(/^builtin_/i, ''),
 			o     = url.origin,
-			r     = url.host.replace(/^(ww\w+\.)/, '');
+			r     = TLDHost(url.host);
 
 		builtin_sites[r] = o;
 
@@ -2006,7 +2010,7 @@ for(let index = 0, length = plugin_array.length; pluginElement && index < length
 				url   = new URL(plugin[i]),
 				js    = name.replace(/^plugin_/i, ''),
 				o     = url.origin,
-				r     = url.host.replace(/^(ww\w+\.)/, '');
+				r     = TLDHost(url.host);
 
 			plugin_sites[r] = o;
 
@@ -2031,7 +2035,7 @@ for(let index = 0, length = plugin_array.length; pluginElement && index < length
 			url   = new URL(plugins[title]),
 			js    = name.replace(/^plugin_/i, ''),
 			o     = url.origin,
-			r     = url.host.replace(/^(ww\w+\.)/, '');
+			r     = TLDHost(url.host);
 
 		plugin_sites[r] = o;
 
