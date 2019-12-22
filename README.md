@@ -1,3 +1,5 @@
+> **We're currently in the process of making a v4 release which will contain the features listed below. The currently available version on the Chrome and Firefox webstore won't contain these features!**
+
 # Web to Plex ![Icon](src/img/48.png)
 
 ![Examples](example.png)
