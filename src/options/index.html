@@ -37,11 +37,11 @@
 
 			<article>
 		        <details>
-		            <summary>Login <span in-use="plex_token"></span></summary>
+		            <summary>Login <span using="plex" special></span></summary>
 
 		            <h2>Login Settings</h2>
 		            <details>
-		                <summary>Use your Plex token <span in-use="plex_token"></span></summary>
+		                <summary>Use your Plex token <span using="plex"></span></summary>
 		                <input type="text" id="plex_token" data-option="plexToken" placeholder="Enter your Plex token"/>
 		                <div>
 		                    How to find your <a href="https://support.plex.tv/hc/en-us/articles/204059436-Finding-your-account-token-X-Plex-Token" title="How to find your token?" target="_blank">Plex token</a>.
@@ -109,7 +109,11 @@
 
 		    <article>
 		        <details id="ombi">
-		            <summary>Ombi (Movies/TV Shows) <span class="checkbox" disabled prompt-yes="use" prompt-no="skip"><input id="using-ombi" type="checkbox" data-option="usingOmbi"/><label for="using-ombi"></label></span></summary>
+		            <summary>
+						Ombi (Movies/TV Shows)
+						<span class="checkbox" disabled prompt-yes="use" prompt-no="skip"><input id="using-ombi" type="checkbox" data-option="usingOmbi"/><label for="using-ombi"></label></span>
+						<span using="ombi"></span>
+					</summary>
 
 		            <h2>Connection Settings</h2>
 		            <section>
@@ -150,14 +154,18 @@
 		            </section>
 					<hr><br>
 					<section>
-						<a class="button test" target="_blank" href="https://ephellon.github.io/web.to.plex/test/">try out ombi</a>
+						<button class="test" target="_blank" href="https://ephellon.github.io/web.to.plex/?movie=492">try out ombi</button>
 					</section>
 		        </details>
 
 				<hr>
 
 		        <details id="watcher">
-		            <summary>Watcher (Movies) <span class="checkbox" disabled prompt-yes="use" prompt-no="skip"><input id="using-watcher" type="checkbox" data-option="usingWatcher"/><label for="using-watcher"></label></span></summary>
+		            <summary>
+						Watcher (Movies)
+						<span class="checkbox" disabled prompt-yes="use" prompt-no="skip"><input id="using-watcher" type="checkbox" data-option="usingWatcher"/><label for="using-watcher"></label></span>
+						<span using="watcher"></span>
+					</summary>
 
 		            <h2>Connection Settings</h2>
 		            <section>
@@ -212,12 +220,16 @@
 		            </section>
 					<hr><br>
 					<section>
-						<a class="button test" target="_blank" href="https://ephellon.github.io/web.to.plex/test/#movie">try out watcher</a>
+						<button class="test" target="_blank" href="https://ephellon.github.io/web.to.plex/?movie=492">try out watcher</button>
 					</section>
 		        </details>
 
 		        <details id="radarr">
-		            <summary>Radarr (Movies) <span class="checkbox" disabled prompt-yes="use" prompt-no="skip"><input id="using-radarr" type="checkbox" data-option="usingRadarr"/><label for="using-radarr"></label></span></summary>
+		            <summary>
+						Radarr (Movies)
+						<span class="checkbox" disabled prompt-yes="use" prompt-no="skip"><input id="using-radarr" type="checkbox" data-option="usingRadarr"/><label for="using-radarr"></label></span>
+						<span using="radarr"></span>
+					</summary>
 
 		            <h2>Connection Settings</h2>
 		            <section>
@@ -274,12 +286,16 @@
 		            </section>
 					<hr><br>
 					<section>
-						<a class="button test" target="_blank" href="https://ephellon.github.io/web.to.plex/test/#movie">try out radarr</a>
+						<button class="test" target="_blank" href="https://ephellon.github.io/web.to.plex/?movie=492">try out radarr</button>
 					</section>
 		        </details>
 
 				<details id="couchpotato">
-		            <summary>CouchPotato (Movies) <span class="checkbox" disabled prompt-yes="use" prompt-no="skip"><input id="use-couchpotato" type="checkbox" data-option="usingCouchPotato"/><label for="use-couchpotato"></label></span></summary>
+		            <summary>
+						CouchPotato (Movies)
+						<span class="checkbox" disabled prompt-yes="use" prompt-no="skip"><input id="use-couchpotato" type="checkbox" data-option="usingCouchPotato"/><label for="use-couchpotato"></label></span>
+						<span using="couchpotato"></span>
+					</summary>
 
 		            <h2>Connection Settings</h2>
 		            <section>
@@ -332,14 +348,18 @@
 					</section>
 					<hr><br>
 					<section>
-						<a class="button test" target="_blank" href="https://ephellon.github.io/web.to.plex/test/#movie">try out couchpotato</a>
+						<button class="test" target="_blank" href="https://ephellon.github.io/web.to.plex/?movie=492">try out couchpotato</button>
 					</section>
 		        </details>
 
 				<hr>
 
 				<details id="medusa">
-				    <summary>Medusa (TV Shows) <span class="checkbox" disabled prompt-yes="use" prompt-no="skip"><input id="using-medusa" type="checkbox" data-option="usingMedusa"/><label for="using-medusa"></label></span></summary>
+				    <summary>
+						Medusa (TV Shows)
+						<span class="checkbox" disabled prompt-yes="use" prompt-no="skip"><input id="using-medusa" type="checkbox" data-option="usingMedusa"/><label for="using-medusa"></label></span>
+						<span using="medusa"></span>
+					</summary>
 
 				    <h2>Connection Settings</h2>
 				    <section>
@@ -401,12 +421,16 @@
 		            </section>
 					<hr><br>
 					<section>
-						<a class="button test" target="_blank" href="https://ephellon.github.io/web.to.plex/test/#tv-show">try out medusa</a>
+						<button class="test" target="_blank" href="https://ephellon.github.io/web.to.plex/?tv=86831">try out medusa</button>
 					</section>
 				</details>
 
 		        <details id="sonarr">
-		            <summary>Sonarr (TV Shows) <span class="checkbox" disabled prompt-yes="use" prompt-no="skip"><input id="using-sonarr" type="checkbox" data-option="usingSonarr"/><label for="using-sonarr"></label></span></summary>
+		            <summary>
+						Sonarr (TV Shows)
+						<span class="checkbox" disabled prompt-yes="use" prompt-no="skip"><input id="using-sonarr" type="checkbox" data-option="usingSonarr"/><label for="using-sonarr"></label></span>
+						<span using="sonarr"></span>
+					</summary>
 
 		            <h2>Connection Settings</h2>
 		            <section>
@@ -463,12 +487,16 @@
 		            </section>
 					<hr><br>
 					<section>
-						<a class="button test" target="_blank" href="https://ephellon.github.io/web.to.plex/test/#tv-show">try out sonarr</a>
+						<button class="test" target="_blank" href="https://ephellon.github.io/web.to.plex/?tv=86831">try out sonarr</button>
 					</section>
 		        </details>
 
 				<details id="sickBeard">
-				    <summary>Sick Beard (TV Shows) <span class="checkbox" disabled prompt-yes="use" prompt-no="skip"><input id="using-sickBeard" type="checkbox" data-option="usingSickBeard"/><label for="using-sickBeard"></label></span></summary>
+				    <summary>
+						Sick Beard (TV Shows)
+						<span class="checkbox" disabled prompt-yes="use" prompt-no="skip"><input id="using-sickBeard" type="checkbox" data-option="usingSickBeard"/><label for="using-sickBeard"></label></span>
+						<span using="sickbeard"></span>
+					</summary>
 
 				    <h2>Connection Settings</h2>
 				    <section>
@@ -534,7 +562,7 @@
 				    </section>
 				    <hr><br>
 				    <section>
-				        <a class="button test" target="_blank" href="https://ephellon.github.io/web.to.plex/test/#tv-show">try out Sick Beard</a>
+				        <button class="test" target="_blank" href="https://ephellon.github.io/web.to.plex/?tv=86831">try out Sick Beard</button>
 				    </section>
 				</details>
 		    </article>
@@ -576,7 +604,9 @@
 
 			<article>
 				<details>
-					<summary>Site Settings</summary>
+					<summary>Site Settings
+						<span counter-for="sites">...</span>
+					</summary>
 
 		            <h2>Experimental Sites</h2>
 		            <section id="plugins">
@@ -593,7 +623,9 @@
 
 			<article>
 				<details>
-					<summary>Connection Settings</summary>
+					<summary>Connection Settings
+						<span using="always-secure" special></span>
+					</summary>
 
 					<h2>Proxy Settings</h2>
 					<section>
@@ -611,7 +643,7 @@
 
 					<section>
 						<h3>Proxy URL &amp; Syntax</h3>
-						<input type="text" data-option="ProxyURL" placeholder="Enter the Proxy URL and syntax">
+						<input type="text" code data-option="ProxyURL" placeholder="Enter the Proxy URL and syntax">
 						<div>
 							Please provide the URL of your proxy.
 							<br>
@@ -627,7 +659,7 @@
 
 					<section>
 						<h3>Proxy Headers</h3>
-						<textarea type="text" data-option="ProxyHeaders" placeholder="Enter the Proxy headers" code></textarea>
+						<textarea type="text" code data-option="ProxyHeaders" placeholder="Enter the Proxy headers"></textarea>
 						<div>
 							If your proxy requires <a href="https://github.com/SpaceK33z/web-to-plex/wiki/Settings#connection-settings--proxy-settings" target="_blank">special headers</a>, enter that information in here.
 						</div>
@@ -769,7 +801,9 @@
 
 		    <article>
 		        <details>
-		            <summary>Advance Settings</summary>
+		            <summary>Advance Settings
+						<span counter-for="devmode" special>BETA</span>
+					</summary>
 		            <h2>API Keys</h2>
 		            <section>
 		                <label>OMDb</label>
@@ -802,7 +836,7 @@
 					<hr>
 		            <section>
 		                <h3>Configuration Data (Copy/Paste)</h3>
-		                <input id="json_data" type="text" placeholder="Enter your configuration data"/>
+		                <input id="json_data" type="text" code placeholder="Enter your configuration data"/>
 		                <div>
 		                    Use this for testing purposes only, as it may contain saved usernames and/or passwords.
 		                </div>
@@ -910,9 +944,9 @@
 
 	<display></display>
 
-	<section id="footer">
-		<!-- footer  -->
-	</section>
+	<footer>
+		<!-- footer -->
+	</footer>
 
 	<div class="hide">
 		<input data-option="watcherQualities" value/>
@@ -938,12 +972,13 @@
 		<input data-option="__theme" value/>
 	</div>
 
-    <footer id="version"></footer>
+    <a id="version" code href="https://github.com/SpaceK33z/web-to-plex/releases" target="_blank">...</a>
 
 	<iframe id="native-frame" name="native-frame" style="display: none !important"></iframe>
 
 	<script src="lodash.min.js"></script>
 	<script src="xml.js"></script>
+	<script src="compare.js"></script>
 	<script src="index.js"></script>
 </body>
 </html>

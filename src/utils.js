@@ -669,7 +669,7 @@ let configuration, init, Update;
 			} catch(error) {
 				console.warn(`Update failed... "${ error }" Attempting to save configuration...`);
 
-				return sFrame(extURL(`options/index.html#save`), {
+				return sFrame(extURL(`options/index.html#!/~save`), {
 					success: async event => {
 						let self = event.target;
 
@@ -2872,6 +2872,19 @@ String.prototype.toCaps = String.prototype.toCaps || function toCaps(all) {
 		.replace(cam_exceptions, ($0, $1, $$, $_) => $1[0].toUpperCase() + $1.slice(1, $1.length).toLowerCase() + '.');
 
 	return string;
+};
+
+Object.filter = Object.filter || function filter(object, prejudice) {
+	if(!prejudice)
+		return object;
+
+	let results = {};
+
+	for(let key in object)
+		if(prejudice(key, object[key]))
+			results[key] = object[key];
+
+	return results;
 };
 
 (function(parent) {
