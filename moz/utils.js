@@ -2922,6 +2922,19 @@ String.prototype.toCaps = String.prototype.toCaps || function toCaps(all) {
 	return string;
 };
 
+Object.filter = Object.filter || function filter(object, prejudice) {
+	if(!prejudice)
+		return object;
+
+	let results = {};
+
+	for(let key in object)
+		if(prejudice(key, object[key]))
+			results[key] = object[key];
+
+	return results;
+};
+
 (function(parent) {
 /* SortBy.js */
 /** Usage + Example

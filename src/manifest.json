@@ -6,7 +6,7 @@
 	"homepage_url": "https://github.com/SpaceK33z/web-to-plex/",
 
 	"manifest_version": 2,
-	"version": "4.1.1.6",
+	"version": "4.1.1.7",
 
 	"icons": {
 		"16":  "img/16.png",
@@ -64,13 +64,6 @@
 			"matches": ["*://*.fembed.com/v/*"],
 			"js": ["download/fembed.js"],
 			"all_frames": true
-		},
-
-		// Testing purposes only
-		{
-			"matches": ["*://ephellon.github.io/web.to.plex/test/*"],
-			"js": ["utils.js", "sites/__test__.js"],
-			"css": ["sites/common.css", "sites/theme.css"]
 		},
 
 		// The sites

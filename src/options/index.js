@@ -542,11 +542,12 @@ function performPlexLogin({ event }) {
 function performPlexTest({ ServerID, event }) {
 	let plexToken = $('#plex_token').value,
 		teststatus = $('#plex_test_status'),
-		inusestatus = [...$('[in-use="plex_token"]', true)];
+		inusestatus = [...$('[using="plex"]', true)];
 
 	__save__.disabled = true;
 	__servers__.innerHTML = '';
 	teststatus.textContent = '?';
+	inusestatus.map(e => e.setAttribute('in-use', false));
 	LoadingAnimation(true);
 
 	getServers(plexToken).then((servers = []) => {
@@ -757,10 +758,12 @@ function performOmbiTest({ refreshing = false, event }) {
 		path = $('[data-option="ombiURLRoot"]'),
 		url,
 		headers = { headers: { apikey: options.ombiToken, accept: 'text/html' } },
-		enabled = refreshing? $('#using-ombi'): $$('#using-ombi');
+		enabled = refreshing? $('#using-ombi'): $$('#using-ombi'),
+		inusestatus = [...$('[using="ombi"]', true)];
 
 	teststatus.textContent = '?';
 	options.ombiURLRoot = url = path.value = options.ombiURLRoot.replace(/^(\:\d+)/, 'localhost$1').replace(/^(?!^http(s)?:)/, 'http$1://').replace(/\/+$/, '');
+	inusestatus.map(e => e.setAttribute('in-use', false));
 	LoadingAnimation(true);
 
 	let Get = () => {
@@ -793,10 +796,12 @@ function performOmbiTest({ refreshing = false, event }) {
 						teststatus.textContent = '!';
 						enabled.checked = teststatus.classList = true;
 						enabled.parentElement.removeAttribute('disabled');
+						inusestatus.map(e => e.setAttribute('in-use', true));
 					} else {
 						teststatus.textContent = '!';
 						enabled.checked = teststatus.classList = false;
 						enabled.parentElement.setAttribute('disabled');
+						inusestatus.map(e => e.setAttribute('in-use', false));
 
 						throw new Error(`Ombi error [${ status }]`);
 					}
@@ -847,12 +852,14 @@ function performWatcherTest({ QualityProfileID = 'Default', refreshing = false, 
 		storagepath = __watcher_storagePath__,
 		quality = __watcher_qualityProfile__,
 		url,
-		enabled = refreshing? $('#using-watcher'): $$('#using-watcher');
+		enabled = refreshing? $('#using-watcher'): $$('#using-watcher'),
+		inusestatus = [...$('[using="watcher"]', true)];
 
 	quality.innerHTML = '';
 	teststatus.textContent = '?';
 	storagepath.value = '[Empty]';
 	options.watcherURLRoot = url = path.value = options.watcherURLRoot.replace(/^(\:\d+)/, 'localhost$1').replace(/^(?!^http(s)?:)/, 'http$1://').replace(/\/+$/, '');
+	inusestatus.map(e => e.setAttribute('in-use', false));
 	LoadingAnimation(true);
 
 	let Get = () => {
@@ -883,6 +890,7 @@ function performWatcherTest({ QualityProfileID = 'Default', refreshing = false, 
 
 				teststatus.textContent = '!';
 				teststatus.classList = enabled.checked = !!profiles.length;
+				inusestatus.map(e => e.setAttribute('in-use', enabled.checked));
 
 				if(!profiles.length)
 					return teststatus.title = 'Failed to communicate with Watcher';
@@ -954,12 +962,14 @@ function performRadarrTest({ QualityProfileID, StoragePath, refreshing = false, 
 		storagepath = __radarr_storagePath__,
 		quality = __radarr_qualityProfile__,
 		url,
-		enabled = refreshing? $('#using-radarr'): $$('#using-radarr');
+		enabled = refreshing? $('#using-radarr'): $$('#using-radarr'),
+		inusestatus = [...$('[using="radarr"]', true)];
 
 	quality.innerHTML = '';
 	teststatus.textContent = '?';
 	storagepath.textContent = '';
 	options.radarrURLRoot = url = path.value = options.radarrURLRoot.replace(/^(\:\d+)/, 'localhost$1').replace(/^(?!^http(s)?:)/, 'http$1://').replace(/\/+$/, '');
+	inusestatus.map(e => e.setAttribute('in-use', false));
 	LoadingAnimation(true);
 
 	let Get = () => {
@@ -977,6 +987,7 @@ function performRadarrTest({ QualityProfileID, StoragePath, refreshing = false, 
 
 				teststatus.textContent = '!';
 				teststatus.classList = enabled.checked = !!profiles.length;
+				inusestatus.map(e => e.setAttribute('in-use', enabled.checked));
 
 				if(!profiles.length)
 					return teststatus.title = 'Failed to communicate with Radarr';
@@ -1062,12 +1073,14 @@ function performSonarrTest({ QualityProfileID, StoragePath, refreshing = false, 
 		storagepath = __sonarr_storagePath__,
 		quality = __sonarr_qualityProfile__,
 		url,
-		enabled = refreshing? $('#using-sonarr'): $$('#using-sonarr');
+		enabled = refreshing? $('#using-sonarr'): $$('#using-sonarr'),
+		inusestatus = [...$('[using="sonarr"]', true)];
 
 	quality.innerHTML = '';
 	teststatus.textContent = '?';
 	storagepath.textContent = '';
 	options.sonarrURLRoot = url = path.value = options.sonarrURLRoot.replace(/^(\:\d+)/, 'localhost$1').replace(/^(?!^http(s)?:)/, 'http$1://').replace(/\/+$/, '');
+	inusestatus.map(e => e.setAttribute('in-use', false));
 	LoadingAnimation(true);
 
 	let Get = () => {
@@ -1084,6 +1097,7 @@ function performSonarrTest({ QualityProfileID, StoragePath, refreshing = false, 
 
 				teststatus.textContent = '!';
 				teststatus.classList = enabled.checked = !!profiles.length;
+				inusestatus.map(e => e.setAttribute('in-use', enabled.checked));
 
 				if(!profiles.length)
 					return teststatus.title = 'Failed to communicate with Sonarr';
@@ -1169,12 +1183,14 @@ function performMedusaTest({ QualityProfileID, StoragePath, refreshing = false, 
 		storagepath = __medusa_storagePath__,
 		quality = __medusa_qualityProfile__,
 		url,
-		enabled = refreshing? $('#using-medusa'): $$('#using-medusa');
+		enabled = refreshing? $('#using-medusa'): $$('#using-medusa'),
+		inusestatus = [...$('[using="medusa"]', true)];
 
 	quality.innerHTML = '';
 	teststatus.textContent = '?';
 	storagepath.textContent = '';
 	options.medusaURLRoot = url = path.value = options.medusaURLRoot.replace(/^(\:\d+)/, 'localhost$1').replace(/^(?!^http(s)?:)/, 'http$1://').replace(/\/+$/, '');
+	inusestatus.map(e => e.setAttribute('in-use', false));
 	LoadingAnimation(true);
 
 	let Get = () => {
@@ -1198,6 +1214,7 @@ function performMedusaTest({ QualityProfileID, StoragePath, refreshing = false, 
 
 				teststatus.textContent = '!';
 				teststatus.classList = enabled.checked = !!profiles.length;
+				inusestatus.map(e => e.setAttribute('in-use', enabled.checked));
 
 				if(!profiles.length)
 					return teststatus.title = 'Failed to communicate with Medusa';
@@ -1285,12 +1302,14 @@ function performSickBeardTest({ QualityProfileID, StoragePath, refreshing = fals
 		storagepath = __sickBeard_storagePath__,
 		quality = __sickBeard_qualityProfile__,
 		url,
-		enabled = refreshing? $('#using-sickBeard'): $$('#using-sickBeard');
+		enabled = refreshing? $('#using-sickBeard'): $$('#using-sickBeard'),
+		inusestatus = [...$('[using="sickbeard"]', true)];
 
 	quality.innerHTML = '';
 	teststatus.textContent = '?';
 	storagepath.textContent = '';
 	options.sickBeardURLRoot = url = path.value = options.sickBeardURLRoot.replace(/^(\:\d+)/, 'localhost$1').replace(/^(?!^http(s)?:)/, 'http$1://').replace(/\/+$/, '');
+	inusestatus.map(e => e.setAttribute('in-use', false));
 	LoadingAnimation(true);
 
 	let Get = () => {
@@ -1320,6 +1339,7 @@ function performSickBeardTest({ QualityProfileID, StoragePath, refreshing = fals
 
 				teststatus.textContent = '!';
 				teststatus.classList = enabled.checked = !!profiles.length;
+				inusestatus = [...$('[using="sickbeard"]', true)];
 
 				if(!profiles.length)
 					return teststatus.title = 'Failed to communicate with Sick Beard';
@@ -1383,6 +1403,9 @@ function performSickBeardTest({ QualityProfileID, StoragePath, refreshing = fals
 }
 
 function enableCouchPotato() {
+	let inusestatus = [...$('[using="couchpotato"]', true)];
+
+	inusestatus.map(e => e.setAttribute('in-use', true));
 	$('#use-couchpotato').parentElement.removeAttribute('disabled');
 }
 
@@ -1997,6 +2020,8 @@ $('[id^="builtin_"]', true)
 			save(`script:${ bid }`, null);
 		}
 
+		Recall.CountEnabledSites();
+
 		save(`builtin:${ bid }`, true);
 	})
 );
@@ -2096,6 +2121,8 @@ $('[id^="plugin_"]', true)
 			save(`script:${ pid }`, null);
 		}
 
+		Recall.CountEnabledSites();
+
 		save(`builtin:${ pid }`, false);
 	})
 );
@@ -2167,9 +2194,6 @@ addListener($('#erase_cache'), 'mouseup', event => {
 	saveOptions();
 });
 
-$('#version')
-	.innerHTML = `Version ${ manifest.version }`;
-
 $('[type="range"]', true)
 	.forEach((element, index, array) => {
 		let sibling = element.nextElementSibling,
@@ -2183,10 +2207,8 @@ $('[type="range"]', true)
 $('.checkbox', true)
 	.forEach((element, index, array) => {
 		addListener(element, 'mouseup', event => {
-			let self = traverse(path(event), element => (element && element.type == 'checkbox'), true);
-
-			if(!self)
-				return;
+			let self = traverse(path(event), element => (element && element.type == 'checkbox'), true),
+				isChecked = e => e.setAttribute('in-use', !self.checked);
 
 			if('disabled' in self.attributes || traverse(self, element => (element && 'disabled' in element.attributes), true))
 				return event.preventDefault(true);
@@ -2212,7 +2234,18 @@ $('.checkbox', true)
 						}
 					break;
 
+				case 'extension-branch-type':
+					[...$('[counter-for="devmode"]', true)].map(isChecked);
+					Recall.ToggleDeveloprBadge(!self.checked);
+					break;
+
 				default:
+					let R = RegExp;
+
+					if(/^using-([\w\-]+)/.test(self.id))
+						$(`[using="${ R.$1 }"i]`, true).map(isChecked);
+					else if(/^use/i.test(self.dataset.option))
+						$(`[using="${ self.id }"i]`, true).map(isChecked);
 					break;
 			}
 
@@ -2224,13 +2257,11 @@ $('.checkbox', true)
 $('.test', true)
 	.forEach((element, index, array) => {
 		addListener(element, 'mouseup', async event => {
-			event.preventDefault(true);
-
 			let self = traverse(event.target, element => !!~[...element.classList].indexOf('test'));
 
-			await saveOptions();
+			// await saveOptions();
 
-			open(self.href, self.target);
+			open(self.getAttribute('href'), self.getAttribute('target'));
 		});
 	});
 
@@ -2295,7 +2326,7 @@ let hold = document.createElement('summary'),
 
 $('.bar > article > details', true)
 	.forEach((element, index, array) => {
-		element.addEventListener('mouseup', event => {
+		addListener(element, 'mouseup', event => {
 			let self = path(event).filter(e => /^details$/i.test(e.tagName))[0],
 				head = path(event).filter(e => /\bbar\b/i.test(e.classList))[0].querySelector('header'),
 				open = e => {try {e.setAttribute('open', true);} catch(r) {/* not actually an error */}},
@@ -2314,9 +2345,29 @@ $('.bar > article > details', true)
 				disp.setAttribute('_sub-title_', hold.innerText);
 				disp.value = uuid(self);
 
+				let checked = {};
+
+				[...self.children].forEach(child => {
+					let input = child.querySelector('.checkbox input');
+
+					if(!input)
+						return;
+
+					checked[uuid(child)] = input.checked;
+				});
+
 				swap(self, disp, hold);
 
-				$('.bar > article > details[open]', true).forEach(e => e.removeAttribute('open'));
+				[...self.children].forEach(child => {
+					let input = child.querySelector('.checkbox input');
+
+					if(!input)
+						return;
+
+					input.checked = checked[uuid(child)];
+				});
+
+				[...$('.bar > article > details[open]', true)].forEach(e => e.removeAttribute('open'));
 				open(self);
 			}
 		})
@@ -2383,8 +2434,12 @@ $('[href^="#!/"]', true)
 let { hash } = window.location;
 
 if(hash.length > 1)
-	switch(hash = hash.slice(1, hash.length).toLowerCase()) {
-		case 'save':
+	switch(hash = hash.replace(/^#!\//, '').toLowerCase()) {
+		/* #!/~COMMAND[:PARAMETER|PARAMETER...]
+		 * #!/~save
+		 * #!/~clear:all
+		 */
+		case '~save':
 			setTimeout(async() => {
 				await saveOptions();
 
@@ -2392,10 +2447,130 @@ if(hash.length > 1)
 			}, 1000);
 			break;
 
+		/* #!/SETTING[/SUB-SETTING]
+		 * #!/radarr
+		 * #!/advance-settings/api-keys
+		 */
+		case '':
+			break;
+
 		default:
 			terminal.log(`Unknown event "${ hash }"`);
 			break;
 	};
+
+/* Functions that require some time */
+let Recall = {
+	'@auto': {}, // run at 100ms, and be recallable
+	'@0sec': {}, // run at 1ms
+	'@1sec': {}, // run at 1000ms
+};
+
+/* Counting sites that are in use */
+Recall['@auto'].CountEnabledSites = () =>
+	[...$('[counter-for="sites"i]', true)].map(e => {
+		let b = $('[id^="builtin_"]', true),
+			p = $('[id^="plugin_"]', true),
+			b_all = b.length,
+			p_all = p.length,
+			o = Object.filter(getOptionValues(), k => /^(built|plug)in_/i.test(k)),
+			bo = Object.filter(o, k => /^built/i.test(k)),
+			b_on = (Object.values(bo).filter(v => v === true)).length,
+			po = Object.filter(o, k => /^plug/i.test(k)),
+			p_on = (Object.values(po).filter(v => v === true)).length;
+
+		e.innerHTML = `${ (b_on + p_on) }/${ (b_all + p_all) }`
+	});
+
+/* Setting the DEV badge */
+Recall['@auto'].ToggleDeveloprBadge = (state = null) =>
+	[...$('[counter-for="devmode"i]', true)].map(e => {
+		if(state === null)
+			state = getOptionValues().DeveloperMode;
+
+		console.log(state);
+
+		if(state)
+			return e.style.display = 'inline-block';
+		e.style.display = 'none';
+	});
+
+/* Set the version and color */
+Recall['@0sec'].SetVersionInfo = async() => {
+	let DM = getOptionValues().DeveloperMode;
+
+	function useVer(version) {
+		let remote = version.tag_name.slice(1, version.tag_name.length),
+			local = manifest.version,
+			verEl = $('#version'),
+			status;
+
+		switch(compareVer(remote, local)) {
+			case 0:
+				status = 'same';
+				verEl.setAttribute('title', `The installed version is the most recent. No update required`);
+				break;
+
+			case -1:
+				status = 'high';
+				verEl.setAttribute('title', `The installed version is ahead of GitHub. No update required`);
+				break;
+
+			case 1:
+				status = 'low';
+				verEl.href += (DM? '': '/latest');
+				verEl.setAttribute('title', `The installed version is behind GitHub. Update available`);
+				break;
+		}
+
+		verEl.innerHTML = `v${ manifest.version }`;
+		verEl.setAttribute('status', status);
+	}
+
+	if(DM)
+		await fetch('https://api.github.com/repos/SpaceK33z/web-to-plex/releases')
+			.then(response => response.json())
+			.then(versions => useVer(versions[0]));
+	else
+		await fetch('https://api.github.com/repos/SpaceK33z/web-to-plex/releases/latest')
+			.then(response => response.json())
+			.then(version => useVer(version));
+};
+
+for(let func in Recall) {
+	if(/^@/.test(func)) {
+		let f;
+
+		switch(func) {
+			case '@auto':
+				for(let fn in Recall[func]) {
+					f = Recall[func][fn];
+
+					Recall[fn] = f;
+					setTimeout(f, 100);
+				}
+				break;
+
+			case '@0sec':
+				for(let fn in Recall[func]) {
+					f = Recall[func][fn];
+
+					setTimeout(f, 1);
+				}
+				break;
+
+			case '@1sec':
+				for(let fn in Recall[func]) {
+					f = Recall[func][fn];
+
+					setTimeout(f, 1000);
+				}
+				break;
+		}
+	} else {
+		/* Do nothing... */
+	}
+}
 
 /* LZW Compression Algorithm */
 function compress(string = '') {
@@ -2497,6 +2672,19 @@ String.prototype.toCaps = String.prototype.toCaps || function toCaps(all) {
 		.replace(cam_exceptions, ($0, $1, $$, $_) => $1[0].toUpperCase() + $1.slice(1, $1.length).toLowerCase() + '.');
 
 	return string;
+};
+
+Object.filter = Object.filter || function filter(object, prejudice) {
+	if(!prejudice)
+		return object;
+
+	let results = {};
+
+	for(let key in object)
+		if(prejudice(key, object[key]))
+			results[key] = object[key];
+
+	return results;
 };
 
 function path(element) {
