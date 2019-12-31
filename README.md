@@ -67,7 +67,7 @@ The sites used as search engines (IMDb, TMDb, and TVDb) will automatically creat
 
 1.  [Movieo](http://movieo.me/)
 2.  [IMDb](http://imdb.com/)
-3.  [Trakt.tv](https://trakt.tv/)
+3.  [Trakt](https://trakt.tv/)
 4.  [Letterboxd](https://letterboxd.com/)
 5.  [GoStream](https://gostream.site/)<sup>1</sup>
 6.  [TV Maze](http://www.tvmaze.com/)
@@ -105,6 +105,9 @@ The sites used as search engines (IMDb, TMDb, and TVDb) will automatically creat
 38. [Free Movies Cinema](https://freemoviescinema.com/)<sup>6</sup>
 39. [SnagFilms](https://snagfilms.com/)<sup>6</sup>
 40. [Fox Searchlight](http://foxsearchlight.com/)<sup>6</sup>
+41. [Verizon](https://tv.verizon.com/)<sup>5</sup>
+42. [Tubi](https://tubitv.com/)
+43. [Plex](https://app.plex.tv/)
 
 </details>
 
@@ -123,13 +126,15 @@ The sites used as search engines (IMDb, TMDb, and TVDb) will automatically creat
 
 ### Install the extension (Store)
 
-<a href="https://chrome.google.com/webstore/detail/movieo-to-plex/kmcinnefmnkfnmnmijfmbiaflncfifcn"><img alt="Get it for Chrome" src="badge.chrome.png" /></a>
-<a href="https://addons.mozilla.org/en-US/firefox/addon/web-to-plex/"><img alt="Get it for Firefox" src="badge.firefox.png" /></a>
+<a href="https://chrome.google.com/webstore/detail/movieo-to-plex/kmcinnefmnkfnmnmijfmbiaflncfifcn"><img alt="Get it for Chrome" src="badge.crx.png" /></a>
+<a href="https://addons.mozilla.org/en-US/firefox/addon/web-to-plex/"><img alt="Get it for Firefox" src="badge.moz.png" /></a>
+<a href="https://microsoftedge.microsoft.com/addons/detail/njkjmenckbpknhnepepbiikcjeboooon"><img alt="Get it for Edge" src="badge.win.png" /></a>
 
 ### Install the source code (ZIP)
 
-<a href="src.zip"><img alt="Get it for Chrome" src="source.chrome.png" /></a>
-<a href="moz.zip"><img alt="Get it for Firefox" src="source.firefox.png" /></a>
+<a href="src.zip"><img alt="Get it for Chrome" src="badge.src.crx.png" /></a>
+<a href="moz.zip"><img alt="Get it for Firefox" src="badge.src.moz.png" /></a>
+<a href="win.zip"><img alt="Get it for Edge" src="badge.src.win.png" /></a>
 
 ## Requirements
 

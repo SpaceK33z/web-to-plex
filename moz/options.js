@@ -541,12 +541,13 @@ function performPlexTest({ ServerID, event }) {
 		__save__.disabled = false;
 		teststatus.classList = true;
 
-		(servers = [{ sourceTitle: 'GitHub', clientIdentifier: '', name: 'No Plex Server' }, ...servers]).forEach(server => {
+		(servers = [{ sourceTitle: 'GitHub', clientIdentifier: '', name: 'No Server', notice: 'This will not connect to any Plex servers' }, ...servers]).forEach(server => {
 			let $option = document.createElement('option'),
 				source = server.sourceTitle;
 
 			$option.value = server.clientIdentifier;
 			$option.textContent = `${ server.name }${ source ? ` \u2014 ${ source }` : '' }`;
+			$option.title = server.notice || (source? `"${ server.sourceTitle }" owns this server`: '');
 			__servers__.appendChild($option);
 		});
 
