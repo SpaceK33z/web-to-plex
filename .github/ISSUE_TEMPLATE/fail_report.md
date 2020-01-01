@@ -2,7 +2,7 @@
 name: Fail report
 about: Used for major errors that make the extension unusable.
 title: 'Issue: [Everything Broke]'
-labels: bug, enhancement, help wanted
+labels: bug, enhancement, help-wanted
 assignees: Ephellon
 
 ---
@@ -30,7 +30,7 @@ If applicable, add screenshots to help explain your problem.
 **Extension Information**
  - Version: `4.XXXX.YYYY.ZZZZ`
  - Source: `store` `GitHub`
- - Browser: `chrome` `firefox`
+ - Browser: `chrome` `firefox` `edge`
 
 **Additional comments**
 Add any other comments about the problem here, such as how often the issue occurs, any new changes, etc.
