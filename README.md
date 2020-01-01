@@ -126,8 +126,8 @@ The sites used as search engines (IMDb, TMDb, and TVDb) will automatically creat
 
 ### Install the extension (Store)
 
-<a href="https://chrome.google.com/webstore/detail/movieo-to-plex/kmcinnefmnkfnmnmijfmbiaflncfifcn"><img alt="Get it for Chrome" src="badge.crx.png" /></a>
-<a href="https://addons.mozilla.org/en-US/firefox/addon/web-to-plex/"><img alt="Get it for Firefox" src="badge.moz.png" /></a>
+<a href="https://chrome.google.com/webstore/detail/web-to-plex/cbpdknicmfolbdpakjihphblioajkcfl"><img alt="Get it for Chrome" src="badge.crx.png" /></a>
+<a href="https://addons.mozilla.org/en-US/firefox/addon/web-2-plex/"><img alt="Get it for Firefox" src="badge.moz.png" /></a>
 <a href="https://microsoftedge.microsoft.com/addons/detail/njkjmenckbpknhnepepbiikcjeboooon"><img alt="Get it for Edge" src="badge.win.png" /></a>
 
 ### Install the source code (ZIP)

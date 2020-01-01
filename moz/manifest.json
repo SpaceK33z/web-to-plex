@@ -24,7 +24,6 @@
 	"content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
 
 	"content_scripts": [
-		// Allow media downloads
 		{
 			"matches": [
 				"*://*.openload.co/*", "*://*.oload.co/*",
@@ -70,7 +69,6 @@
 			"all_frames": true
 		},
 
-		// The sites
 		{
 			"matches": ["*://*.movieo.me/*"],
 			"js": ["history-hack.js", "utils.js", "movieo$.js"]
