@@ -330,7 +330,7 @@
 		            </section>
 
 		            <section>
-		                <div>This information will be used for <a href="https://wikipedia.org/wiki/Basic_access_authentication" target="_blank">Basic Access Authentication</a> only. This will allow the extension to ask Couchpotato for your list of videos, or to add to your list of videos.</div>
+		                <div>This information will be used for <a href="https://wikipedia.org/wiki/Basic_access_authentication" target="_blank">Basic Access Authentication</a> only. This will allow the extension to ask Couchpotato for your list of films, or to add to your list of films.</div>
 		            </section>
 			<!--
 		            <section>
@@ -413,7 +413,6 @@
 							<option>User Defined</option>
 							<option>Any Defined Type</option>
 						</select>
-						<hr/>
 		                <label>Quality Profile</label>
 		                <select data-option="medusaQualityProfileId">
 		                    <option value="">Press "Test [?]" first</option>
@@ -551,7 +550,6 @@
 							<option>Initial</option>
 				            <option>Archive</option>
 				        </select>
-				        <hr/>
 				        <label>Quality Profile</label>
 				        <select data-option="sickBeardQualityProfileId">
 				            <option value="">Press "Test [?]" first</option>
@@ -575,17 +573,19 @@
 					<summary>Theme Settings</summary>
 
 					<h2>The Button</h2>
+					<!--
 					<section>
 						What shape should the button be?
 						<br>
 						<span class="checkbox" prompt-size="large" prompt-yes="&#9723;" prompt-no="&#9675;">
-							<!-- When true (checked), will be accessed in CSS (/sites/theme.css) as ".button-shape-box { ... }" -->
+							<!-- When true (checked), will be accessed in CSS (/sites/theme.css) as ".button-shape-box { ... }" --/>
 							<input data-option="theme:button-shape" theme="true:box" type="checkbox"/>
 							<label for="theme:button-shape"></label>
 						</span>
 					</section>
+					-->
 					<section>
-						Where should the button be (<span orange>&#9711;</span> only)?
+						Which direction should the button open (<span orange>&#9711;</span> only)?
 						<br>
 						<span class="checkbox" prompt-size="large" prompt-yes="&#8672;" prompt-no="&#8674;">
 							<!-- When true (checked), will be accessed in CSS (/sites/theme.css) as ".button-location-right { ... }" -->
@@ -608,13 +608,16 @@
 						<span counter-for="sites">...</span>
 					</summary>
 
-		            <h2>Experimental Sites</h2>
+					<strong class="h2">Experimental Sites</strong>
+					<div class="checkbox" blue><input id="all-plugin" type="checkbox"/><label for="all-plugin"></label></div>
+					<hr>
 		            <section id="plugins">
 		                <!-- Filled in via the options.js script -->
 		            </section>
 					<hr>
-
-		            <h2>Default Sites</h2>
+					<strong class="h2">Default Sites</strong>
+					<div class="checkbox" blue><input id="all-builtin" type="checkbox"/><label for="all-builtin"></label></div>
+					<hr>
 		            <section id="builtin">
 		                <!-- Filled in via the options.js script -->
 		            </section>
@@ -830,16 +833,18 @@
 						</div>
 						<div>
 							<em>WARNING</em>: may cause data loss.<br>
-							Enabling this option will compress your cached search data using the <a href="https://wikipedia.org/wiki/Lempel%E2%80%93Ziv%E2%80%93Welch" target="_blank">LZW Compression Algorithm</a>.
+							Enabling this option will compress your cached search data using the <a href="https://wikipedia.org/wiki/Burrows%E2%80%93Wheeler_transform" target="_blank">BWT (transform)</a> and <a href="https://wikipedia.org/wiki/Lempel%E2%80%93Ziv%E2%80%93Welch" target="_blank">LZW Compression Algorithm</a>.
 						</div>
 					</section>
 					<hr>
 		            <section>
 		                <h3>Configuration Data (Copy/Paste)</h3>
 		                <input id="json_data" type="text" code placeholder="Enter your configuration data"/>
-		                <div>
-		                    Use this for testing purposes only, as it may contain saved usernames and/or passwords.
-		                </div>
+						<div>
+ 						   Use this for testing purposes only, as it may contain saved usernames and/or passwords.
+ 						   <br>
+ 						   You cannot use this feature with <strong>Data Compression</strong> enabled.
+ 					   </div>
 		                <br>
 		                <button type="button" id="json_set">Generate Data</button>
 		                <button type="button" id="json_get">Restore Data</button>

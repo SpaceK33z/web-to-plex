@@ -104,6 +104,30 @@ article {
     z-index: 3;
 }
 
+.h1 {
+    font-size: 300%;
+}
+
+.h2 {
+    font-size: 200%;
+}
+
+.h3 {
+    font-size: 150%;
+}
+
+.h4 {
+    font-size: 100%;
+}
+
+.h5 {
+    font-size: 75%;
+}
+
+.h6 {
+    font-size: 50%;
+}
+
 section {
     display: block !important;
     margin-bottom: 20px;
@@ -524,12 +548,25 @@ span.checkbox {
     opacity: 0.25;
 }
 
-[white] {
+[white], .checkbox[white]::before {
     color: #fff !important;
 }
+.checkbox[white] input:checked + label {
+    background: #fff !important;
+}
 
-[orange] {
+[orange], .checkbox[orange]::before {
     color: #cc7b19 !important;
+}
+.checkbox[orange] input:checked + label {
+    background: #cc7b19 !important;
+}
+
+[blue], .checkbox[blue]::before {
+    color: #197bcc !important;
+}
+.checkbox[blue] input:checked + label {
+    background: #197bcc !important;
 }
 
 input[type="range"] {

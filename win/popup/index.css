@@ -1,0 +1,311 @@
+html, body {
+    height: 625px !important;
+    width: 625px !important;
+}
+
+body {
+    background: url(../img/noise.png) fixed, url(../img/background.png) no-repeat fixed center/cover, #3f4245 !important;
+    color: #333 !important;
+    font-family: Open Sans Regular, Helvetica Neue, Helvetica, Arial, sans-serif, system;
+    font-size: 1.25em !important;
+    flex-grow: 1 !important;
+    padding: 1px !important;
+    overflow: hidden !important;
+    position: absolute !important;
+}
+
+a {
+    text-decoration: none !important;
+    cursor: pointer !important;
+    margin: 0 !important;
+}
+
+img {
+    vertical-align: middle !important;
+    padding: 0 1em !important;
+}
+
+label {
+    color: #eee !important;
+    cursor: inherit !important;
+    font-weight: 400 !important;
+    display: inline-block !important;
+    margin-bottom: 5px;
+    display: block !important;
+    position: relative !important;
+/*
+    height: 165px !important;
+    width: 170px !important;
+*/
+}
+
+table, footer {
+    height: 35% !important;
+    width: 100% !important;
+    font-size: 1em !important;
+    overflow: auto !important;
+    color: #fff !important;
+    font-weight: 400 !important;
+    padding-bottom: 1em !important;
+}
+
+tr, footer > * {
+    box-shadow: none !important;
+    height: calc(33% - 25px);
+    width: calc(100% - 25px);
+    padding: 0 !important;
+}
+
+td, footer > * > * {
+    padding: 15px !important;
+    line-height: 1.33 !important;
+    border-radius: 3px;
+    cursor: pointer !important;
+    text-transform: uppercase;
+    border: 0;
+    background: rgba(255, 255, 255, 0.3);
+    margin-bottom: 0;
+    vertical-align: middle;
+    white-space: nowrap;
+    user-select: none;
+    height: calc(100% - 30px);
+    width: calc(100% - 30px);
+    transition: box-shadow 0.5s !important;
+    display: table-cell !important;
+}
+
+#movieo:hover {
+    box-shadow: 0 10px 128px inset #5DBCD4;
+}
+
+#imdb:hover {
+    box-shadow: 0 10px 128px inset #E0AB00;
+}
+
+#trakt:hover {
+    box-shadow: 0 10px 128px inset #ED2224;
+}
+
+#letterboxd:hover {
+    box-shadow: 0 10px 128px inset #66CC33;
+}
+
+#flenix:hover {
+    box-shadow: 0 10px 128px inset #EC164F;
+}
+
+#tv-maze:hover {
+    box-shadow: 0 10px 128px inset #6EC4BA;
+}
+
+#tvdb:hover {
+    box-shadow: 0 10px 128px inset #1C7E3E;
+}
+
+#tmdb:hover {
+    box-shadow: 0 10px 128px inset #01D277;
+}
+
+#vrv:hover {
+    box-shadow: 0 10px 128px inset #FFDD00;
+}
+
+#hulu:hover {
+    box-shadow: 0 10px 128px inset #66AA33;
+}
+
+#netflix:hover {
+    box-shadow: 0 10px 128px inset #E50914;
+}
+
+#google:hover {
+    box-shadow: 0 10px 128px inset #EEEEEE;
+}
+
+#itunes:hover {
+    box-shadow: 0 10px 128px inset #EEEEEE;
+}
+
+#metacritic:hover {
+    box-shadow: 0 10px 128px inset #001B36;
+}
+
+#fandango:hover {
+    box-shadow: 0 10px 128px inset #FF7300;
+}
+
+#amazon:hover {
+    box-shadow: 0 10px 128px inset #FF9900;
+}
+
+#vudu:hover {
+    box-shadow: 0 10px 128px inset #027FC5;
+}
+
+#verizon:hover {
+    box-shadow: 0 10px 128px inset #E10000;
+}
+
+#couch-potato:hover {
+    box-shadow: 0 10px 128px inset #ECB501;
+}
+
+#rotten-tomatoes:hover {
+    box-shadow: 0 10px 128px inset #FA3008;
+}
+
+#showrss:hover {
+    box-shadow: 0 10px 128px inset #6A8592;
+}
+
+#vumoo:hover {
+    box-shadow: 0 10px 128px inset #DD1B2F;
+}
+
+#shana-project:hover {
+    box-shadow: 0 10px 128px inset #FF0000;
+}
+
+#youtube:hover {
+    box-shadow: 0 10px 128px inset #FF0000;
+}
+
+#flickmetrix:hover {
+    box-shadow: 0 10px 128px inset #7A314E;
+}
+
+#justwatch:hover {
+    box-shadow: 0 10px 128px inset #0E202C;
+}
+
+#moviemeter:hover {
+    box-shadow: 0 10px 128px inset #000000;
+}
+
+#allocine:hover {
+    box-shadow: 0 10px 128px inset #222222;
+}
+
+#gostream:hover {
+    box-shadow: 0 10px 128px inset #028CC9;
+}
+
+#tubi:hover {
+    box-shadow: 0 10px 128px inset #26262D;
+}
+
+#webtoplex:hover {
+    box-shadow: 0 10px 128px inset #CC7B19;
+}
+
+#local-plex:hover {
+    box-shadow: 0 10px 128px inset #F9BD03;
+}
+
+#local-watcher:hover {
+    box-shadow: 0 10px 128px inset #EA554E;
+}
+
+#local-radarr:hover {
+    box-shadow: 0 10px 128px inset #FFC230;
+}
+
+#local-sonarr:hover {
+    box-shadow: 0 10px 128px inset #36C6F4;
+}
+
+#local-couchpotato:hover {
+    box-shadow: 0 10px 128px inset #D20000;
+}
+
+#local-ombi:hover {
+    box-shadow: 0 10px 128px inset #E48F34;
+}
+
+#local-medusa:hover {
+    box-shadow: 0 10px 128px inset #26B043;
+}
+
+#local-sickBeard:hover {
+    box-shadow: 0 10px 128px inset #296737;
+}
+
+[save-file]:after, [cost-cash-low]:after, [cost-cash-med]:after, [cost-cash-hig]:after {
+    content: "____";
+    color: transparent;
+    float: right;
+    width: 3em;
+    height: 3em;
+    margin-top: -8.5em;
+    margin-right: -1em;
+}
+
+[pop-ups] label:after {
+    content: " \1F92C";
+    float: right;
+}
+
+[local] label:after {
+    content: " \1F5A5";
+    float: right;
+}
+
+[is-slow] label:after {
+    content: " \23f3";
+    float: right;
+}
+
+[is-shy] label:after, [is-dead] label:after {
+    content: " \1f910";
+    float: right;
+}
+
+[save-file]:after {
+    background: url("../img/48.png") no-repeat center;
+}
+
+[not-safe] label:after {
+    content: " \1F527";
+    float: right;
+}
+
+/* $1 - $10 */
+[cost-cash-low]:after {
+    background: url("../img/$48.png") no-repeat center;
+}
+
+/* $11 - $30 */
+[cost-cash-med]:after {
+    background: url("../img/$$48.png") no-repeat center;
+}
+
+/* $31+ */
+[cost-cash-hig]:after {
+    background: url("../img/$$$48.png") no-repeat center;
+}
+
+[disabled], [disabled]:hover {
+/*            box-shadow: 0 10px 128px inset #000 !important;*/
+    opacity: 0.5 !important;
+}
+
+[disabled] label:after {
+    content: " \23f3" !important;
+    float: right;
+}
+
+*::-webkit-scrollbar {
+    width: 10px;
+}
+
+*::-webkit-scrollbar-thumb {
+    min-height: 50px;
+    background: rgba(255, 255, 255, 0.15);
+    border: 2px solid rgba(0, 0, 0, 0);
+    border-radius: 8px;
+    background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-track {
+    background: url(../img/noise.png) repeat, #3f4245 !important;
+}
