@@ -1,8 +1,8 @@
-> **We're currently in the process of making a v4 release which will contain the features listed below. The currently available version on the Chrome and Firefox webstore won't contain these features!**
-
 # Web to Plex ![Icon](src/img/48.png)
 
 ![Examples](example.png)
+
+## **All `v3.4` and below versions will need to be updated manually and are *not* backwards compatible.**
 
 This browser extension searches your [Plex Media Server (PMS)](https://www.plex.tv/downloads/) for matching media on sites like [IMDb](https://imdb.com), letting you immediately open the movie or TV show in Plex, if it is available. If the item isn't found on your PMS, then a download button is added instead.
 
