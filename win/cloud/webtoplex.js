@@ -1,5 +1,5 @@
 // optional
-// "Web to Plex" requires: api, token
+// "Web to Plex" requires: token
 // 'Friendly Name' requires permissions...
 
 let script = {
