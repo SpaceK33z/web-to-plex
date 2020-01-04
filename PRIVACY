@@ -1,0 +1,8 @@
+Privacy Policy
+==============
+
+Credentials: The extension saves your credentials locally and may request other permissions (e.g. allowing a website to use a credential) using a secondary prompt. Your credentials will only be used to perform API requests to the requested service respectively (Plex, CouchPotato, Medusa, Ombi, Radarr, Sonarr, and/or Watcher). These credentials will never be shared with outside sources without express permission (i.e. a prompt will appear).
+
+Sharing: To find out if the media is already available on Plex (or other services), the extension may send the title and year, and/or any IDs provided to the service.
+
+Usage/Stats: The extension will not collect any information about your usage.

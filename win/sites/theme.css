@@ -1,0 +1,69 @@
+/* Themes and other stylings for Web to Plex */
+/* Button Layout (Reference)
+
+// <value> - an optional value
+// `value` - an evaluated (calculated) value
+// A|B|... - A OR B OR ...
+
+// The main button (container)
+BUTTON  [style].web-to-plex-button.<floating>.<hide|show>.<open|closed>
+    <floating>  if the button is "floating" above elements
+    <hide>      the buttons is hidden (by user interaction)
+    <show>      the button is shown (by user interaction)
+    <open>      the button is fully open (elliptical)
+    <closed>    the button is closed (circular)
+
+    // (Container) Holds the LIs that perform the various actions
+    UL
+
+        // The ripple effect (colored indicator)
+        ::before
+
+        // The Web to Plex (logo) button
+        LI  [tooltip]#wtp-list-name.list-name
+            // The actionable anchor
+            A  [tooltip][href][`id`].list-action
+               IMG  [src=/img/48.png] // Web to Plex logo
+
+        // The Plex It! button
+        LI  [tooltip]#wtp-plexit.list-item
+            IMG [src=/img/plexit.48.png] // Alarm bell
+
+        // The Add to Plex It! button (normally hidden, until Plex It! is visible)
+        LI  [tooltip][data]#plexit.list-item
+            DIV [tooltip][style][draggable=true]
+
+        // The hide button
+        LI  [tooltip]#wtp-hide.list-item
+            IMG [src=/img/hide.48.png] // Eye icon
+
+        // The refresh button
+        LI  [tooltip]#wtp-refresh.list-item
+            IMG [src=/img/reload.48.png] // Refresh
+
+        // The settings button
+        LI  [tooltip]#wtp-options.list-item
+            IMG [src=/img/settings.48.png] // Gear icon
+
+        // The small, circular, colored indicator
+        ::after
+*/
+
+/* Button location */
+.web-to-plex-button.button-location-right {
+    left: unset !important;
+    right: 5px !important;
+}
+
+/* Button opacity - when hidden, and closed */
+.web-to-plex-button.hide.closed[button-opacity-hidden="0"] {
+    opacity: 0.00 !important;
+}
+
+.web-to-plex-button.hide.closed[button-opacity-hidden="5"] {
+    opacity: 0.05 !important;
+}
+
+.web-to-plex-button.hide.closed[button-opacity-hidden="10"] {
+    opacity: 0.10 !important;
+}

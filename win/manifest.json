@@ -1,0 +1,225 @@
+{
+	"name": "Web to Plex",
+	"description": "Adds a button on various movie & TV show sites to open the item in Plex, or send to your designated NZB manager for download.",
+	"homepage_url": "https://github.com/SpaceK33z/web-to-plex/",
+
+	"manifest_version": 2,
+	"version": "4.1.1.8",
+
+	"icons": {
+		"16":  "img/16.png",
+		"32":  "img/32.png",
+		"48":  "img/48.png",
+		"96":  "img/96.png",
+		"128": "img/128.png",
+		"256": "img/256.png"
+	},
+
+	"content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
+
+	"content_scripts": [
+		// Allows media downloads
+		{
+			"matches": [
+				"*://*.openload.co/*", "*://*.oload.co/*",
+				"*://*.openload.com/*", "*://*.oload.com/*",
+				"*://*.openload.fun/*", "*://*.oload.fun/*",
+				"*://*.openload.biz/*", "*://*.oload.biz/*",
+				"*://*.openload.vip/*", "*://*.oload.vip/*",
+				"*://*.openload.club/*", "*://*.oload.club/*",
+				"*://*.openload.io/*", "*://*.oload.io/*",
+				"*://*.openload.xyz/*", "*://*.oload.xyz/*",
+				"*://*.openload.cc/*", "*://*.oload.cc/*",
+				"*://*.openload.to/*", "*://*.oload.to/*",
+				"*://*.openload.is/*", "*://*.oload.is/*",
+				"*://*.openload.gg/*", "*://*.oload.gg/*",
+				"*://*.openload.tv/*", "*://*.oload.tv/*",
+				"*://*.openload.fm/*", "*://*.oload.fm/*",
+				"*://*.openload.cx/*", "*://*.oload.cx/*",
+				"*://*.openload.ac/*", "*://*.oload.ac/*",
+				"*://*.openload.name/*", "*://*.oload.name/*",
+				"*://*.openload.global/*", "*://*.oload.global/*"
+			],
+			"js": ["download/oload.js"],
+			"all_frames": true
+		},
+		{
+			"matches": ["*://*.consistent.stream/titles/*", "*://*.consistent.stream/watch/*"],
+			"js": ["download/consistent.js"],
+			"all_frames": true
+		},
+		{
+			"matches": ["*://app.plex.tv/desktop#!/server/*/details?*"],
+			"js": ["download/plex.js"],
+			"all_frames": true
+		},
+		{
+			"matches": ["*://*.gounlimited.to/embed-*"],
+			"js": ["download/gounlimited.js"],
+			"all_frames": true
+		},
+		{
+			"matches": ["*://*.fembed.com/v/*"],
+			"js": ["download/fembed.js"],
+			"all_frames": true
+		},
+
+		// The sites
+		{
+			"matches": ["*://*.movieo.me/*"],
+			"js": ["history-hack.js", "utils.js", "sites/movieo/index.js"],
+			"css": ["sites/movieo/index.css"]
+		},{
+			"matches": ["*://*.imdb.com/*"],
+			"js": ["utils.js", "sites/imdb/index.js"],
+			"css": ["sites/imdb/index.css"]
+		},{
+			"matches": ["*://*.trakt.tv/*"],
+			"js": ["history-hack.js", "utils.js", "sites/trakt/index.js"],
+			"css": ["sites/trakt/index.css"]
+		},{
+			"matches": ["*://*.letterboxd.com/*"],
+			"js": ["utils.js", "sites/letterboxd/index.js"],
+			"css": ["sites/letterboxd/index.css"]
+		},{
+			"matches": ["*://*.tvmaze.com/shows/*"],
+			"js": ["utils.js", "sites/tvmaze/index.js"],
+			"css": ["sites/tvmaze/index.css"]
+		},{
+			"matches": ["*://*.thetvdb.com/series/*"],
+			"js": ["utils.js", "sites/tvdb/index.js"],
+			"css": ["sites/tvdb/index.css"]
+		},{
+			"matches": ["*://*.themoviedb.org/movie/*", "*://*.themoviedb.org/tv/*"],
+			"js": ["utils.js", "sites/tmdb/index.js"],
+			"css": ["sites/tmdb/index.css"]
+		},{
+			"matches": ["*://*.vrv.co/*"],
+			"js": ["utils.js", "sites/vrv/index.js"],
+			"css": ["sites/vrv/index.css"]
+		},{
+			"matches": ["*://*.hulu.com/*"],
+			"js": ["utils.js", "sites/hulu/index.js"],
+			"css": ["sites/hulu/index.css"]
+		},{
+			"matches": ["*://play.google.com/store/*"],
+			"js": ["utils.js", "sites/google/play.js"],
+			"css": ["sites/google/index.css"]
+		},{
+			"matches": ["*://itunes.apple.com/*"],
+			"js": ["utils.js", "sites/itunes/index.js"],
+			"css": ["sites/itunes/index.css"]
+		},{
+			"matches": ["*://*.metacritic.com/*"],
+			"js": ["utils.js", "sites/metacritic/index.js"],
+			"css": ["sites/metacritic/index.css"]
+		},{
+			"matches": ["*://*.fandango.com/*"],
+			"js": ["utils.js", "sites/fandango/index.js"],
+			"css": ["sites/fandango/index.css"]
+		},{
+			"matches": ["*://*.amazon.com/*"],
+			"js": ["utils.js", "sites/amazon/index.js"],
+			"css": ["sites/amazon/index.css"]
+		},{
+			"matches": ["*://*.vudu.com/*"],
+			"js": ["utils.js", "sites/vudu/index.js"],
+			"css": ["sites/vudu/index.css"]
+		},{
+			"matches": ["*://*.verizon.com/*"],
+			"js": ["utils.js", "sites/verizon/index.js"],
+			"css": ["sites/verizon/index.css"]
+		},{
+			"matches": ["*://*.couchpotato.life/*/*"],
+			"js": ["utils.js", "sites/couchpotato/index.js"],
+			"css": ["sites/couchpotato/index.css"]
+		},{
+			"matches": ["*://*.rottentomatoes.com/*/*"],
+			"js": ["utils.js", "sites/rottentomatoes/index.js"],
+			"css": ["sites/rottentomatoes/index.css"]
+		},{
+			"matches": ["*://*.netflix.com/watch/*"],
+			"js": ["utils.js", "sites/netflix/index.js"],
+			"css": ["sites/netflix/index.css"]
+		},{
+			"matches": ["*://*.vumoo.to/*"],
+			"js": ["utils.js", "sites/vumoo/index.js"],
+			"css": ["sites/vumoo/index.css"]
+		},{
+			"matches": ["*://www.google.com/*"],
+			"js": ["utils.js", "sites/google/index.js"],
+			"css": ["sites/google/index.css"]
+		},{
+			"matches": ["*://www.youtube.com/*"],
+			"js": ["utils.js", "sites/youtube/index.js"],
+			"css": ["sites/youtube/index.css"]
+		},{
+			"matches": ["*://*.flickmetrix.com/*"],
+			"js": ["utils.js", "sites/flickmetrix/index.js"],
+			"css": ["sites/flickmetrix/index.css"]
+		},{
+			"matches": ["*://*.justwatch.com/*"],
+			"js": ["utils.js", "sites/justwatch/index.js"],
+			"css": ["sites/justwatch/index.css"]
+		},{
+			"matches": ["*://*.moviemeter.nl/*"],
+			"js": ["utils.js", "sites/moviemeter/index.js"],
+			"css": ["sites/moviemeter/index.css"]
+		},{
+			"matches": ["*://*.allocine.fr/*"],
+			"js": ["utils.js", "sites/allocine/index.js"],
+			"css": ["sites/allocine/index.css"]
+		},{
+			"matches": ["*://*.gostream.site/*"],
+			"js": ["utils.js", "sites/gostream/index.js"],
+			"css": ["sites/gostream/index.css"]
+		},{
+			"matches": ["*://*.tubitv.com/*"],
+			"js": ["utils.js", "sites/tubi/index.js"],
+			"css": ["sites/tubi/index.css"]
+		},{
+			"matches": ["*://ephellon.github.io/web.to.plex/?*", "*://ephellon.github.io/web.to.plex/index.html?*", "*://ephellon.github.io/web.to.plex/login.html?*"],
+			"js": ["utils.js", "sites/webtoplex/index.js"],
+			"css": ["sites/webtoplex/index.css"]
+		},{
+			"matches": ["*://app.plex.tv/desktop/*"],
+			"js": ["utils.js", "sites/plex/index.js"],
+			"css": ["sites/plex/index.css"]
+		},{
+			"matches": ["*://*/*"],
+			"js": ["utils.js", "sites/common.js"],
+			"css": ["sites/common.css", "sites/theme.css"]
+		}
+	],
+
+	"background": {
+		"scripts": ["background.js", "plugn.js"],
+		"persistent": true
+	},
+
+	"options_page": "options/index.html",
+	"options_ui": {
+		"page": "options/index.html",
+		"open_in_tab": true
+	},
+
+	"browser_action": {
+		"default_icon": {
+			"16": "img/16.png",
+			"32": "img/32.png",
+			"48": "img/48.png",
+			"96": "img/96.png"
+		},
+		"default_title": "Web to Plex",
+		"default_popup": "popup/index.html"
+	},
+
+	"permissions": [
+		"tabs",
+		"storage",
+		"downloads",
+		"contextMenus",
+		"<all_urls>"
+	],
+	"web_accessible_resources": ["img/*", "options/*"]
+}

@@ -870,7 +870,7 @@ let configuration, init, Update;
 
 					COMPRESS = options.UseLZW;
 					CAUGHT = options.__caught;
-					CAUGHT = JSON.parse(COMPRESS? decompress(CAUGHT): CAUGHT);
+					CAUGHT = JSON.parse(COMPRESS? iBWT(decompress(CAUGHT)): CAUGHT);
 					CAUGHT.bump = async(ids) => {
 						bumping:
 						for(let id in ids) {
@@ -890,7 +890,7 @@ let configuration, init, Update;
 
 						let __caught = JSON.stringify(CAUGHT);
 
-						__caught = (COMPRESS? compress(__caught): __caught);
+						__caught = (COMPRESS? compress(BWT(__caught)): __caught);
 
 						await UTILS_STORAGE.set({ __caught }, () => configuration.__caught = __caught);
 					};
@@ -1990,7 +1990,7 @@ let configuration, init, Update;
 
 		COMPRESS = options.UseLZW;
 		CAUGHT = __CONFIG__.__caught;
-		CAUGHT = JSON.parse(COMPRESS? decompress(CAUGHT): CAUGHT);
+		CAUGHT = JSON.parse(COMPRESS? iBWT(decompress(CAUGHT)): CAUGHT);
 
 		browser.runtime.sendMessage({
 			type: 'PUSH_SICKBEARD',
@@ -2046,7 +2046,7 @@ let configuration, init, Update;
 
 			let { __theme } = __CONFIG__;
 
-			let ThemeClasses = JSON.parse(COMPRESS? decompress(__theme): __theme),
+			let ThemeClasses = JSON.parse(COMPRESS? iBWT(decompress(__theme)): __theme),
 				HeaderClasses = [],
 				ParsedAttributes = {};
 
@@ -2758,6 +2758,57 @@ let configuration, init, Update;
 })(new Date);
 
 /* Helpers */
+/* BWT Sorting Algorithm */
+function BWT(string = '') {
+    if(/^[\x32]*$/.test(string))
+        return '';
+
+    let _a = `\u0001${ string }`,
+        _b = `\u0001${ string }\u0001${ string }`,
+        p_ = [];
+
+    for(let i = 0; i < _a.length; i++)
+        p_.push(_b.slice(i, _a.length + i));
+
+    p_ = p_.sort();
+
+    return p_.map(P => P.slice(-1)[0]).join('');
+}
+
+/* BWT Desorting Algorithm */
+function iBWT(string = '') {
+    if(/^[\x32]*$/.test(string))
+        return '';
+
+    let a = string.split('');
+
+    let O = q => {
+        let x = 0;
+        for(let i = 0; i < a.length; i++)
+            if(a[i] < q)
+                x++;
+        return x;
+    };
+
+    let C = (n, q) => {
+        let x = 0;
+        for(let i = 0; i < n; i++)
+            if(a[i] === q)
+                x++;
+        return x;
+    };
+
+    let b = 0,
+        c = '',
+        d = a.length + 1;
+
+    while(a[b] !== '\u0001' && d--) {
+        c = a[b] + c;
+        b = O(a[b]) + C(b, a[b]);
+    }
+
+    return c;
+}
 
 /* LZW Compression Algorithm */
 function compress(string = '') {

@@ -14,8 +14,8 @@ if(chrome.runtime.lastError)
 
 // FireFox doesn't support sync storage.
 const storage = (chrome.storage.sync || chrome.storage.local),
-		$ = (selector, all) => (all? document.querySelectorAll(selector): document.querySelector(selector)),
-		$$ = (selector, all) => (all? [...$('display').querySelectorAll(selector)]: $('display').querySelector(selector)),
+		$ = top.$ = (selector, all) => (all? [...document.querySelectorAll(selector)]: document.querySelector(selector)),
+		$$ = top.$$ = (selector, all) => (all? [...$('display').querySelectorAll(selector)]: $('display').querySelector(selector)),
 		__servers__ = $('[data-option="preferredServer"]'),
 		__sickBeard_qualityProfile__  = $(`[data-option="sickBeardQualityProfileId"]`),
 		__sickBeard_storagePath__     = $(`[data-option="sickBeardStoragePath"]`),
@@ -447,12 +447,29 @@ function LoadingAnimation(state = false) {
 	$('display').setAttribute('loading', state);
 }
 
-function load(name) {
-	return JSON.parse(localStorage.getItem(btoa(name)));
+function load(name, decompress_data = false) {
+	let options = JSON.stringify(getOptionValues()),
+		data;
+
+	name = btoa(name);
+	data = localStorage.getItem(name);
+
+	if(decompress_data)
+		data = iBWT(decompress(data));
+
+	return JSON.parse(data);
 }
 
-function save(name, data) {
-	return localStorage.setItem(btoa(name), JSON.stringify(data));
+function save(name, data, compress_data = false) {
+	let options = JSON.stringify(getOptionValues());
+
+	name = btoa(name);
+	data = JSON.stringify(data);
+
+	if(compress_data)
+		data = compress(BWT(data));
+
+	return localStorage.setItem(name, data);
 }
 
 function getServers(plexToken) {
@@ -541,12 +558,13 @@ function performPlexTest({ ServerID, event }) {
 		__save__.disabled = false;
 		teststatus.classList = true;
 
-		(servers = [{ sourceTitle: 'GitHub', clientIdentifier: '', name: 'No Plex Server' }, ...servers]).forEach(server => {
+		(servers = [{ sourceTitle: 'GitHub', clientIdentifier: '', name: 'No Server', notice: 'This will not connect to any Plex servers' }, ...servers]).forEach(server => {
 			let $option = document.createElement('option'),
 				source = server.sourceTitle;
 
 			$option.value = server.clientIdentifier;
 			$option.textContent = `${ server.name }${ source ? ` \u2014 ${ source }` : '' }`;
+			$option.title = server.notice || (source? `"${ server.sourceTitle }" owns this server`: '');
 			__servers__.appendChild($option);
 		});
 
@@ -595,8 +613,8 @@ function getOptionValues() {
 	let _c = JSON.stringify(__caught),
 		_t = JSON.stringify(__theme);
 
-	$('[data-option="__caught"i]').value = options.__caught = (COM? compress(_c): _c);
-	$('[data-option="__theme"i]').value = options.__theme = (COM? compress(_t): _t);
+	$('[data-option="__caught"i]').value = options.__caught = (COM? compress(BWT(_c)): _c);
+	$('[data-option="__theme"i]').value = options.__theme = (COM? compress(BWT(_t)): _t);
 
 	return options;
 }
@@ -2003,6 +2021,16 @@ $('[id^="builtin_"]', true)
 	})
 );
 
+addListener($('#all-builtin'), 'click', event => {
+	let self = traverse(event.target, element => element == $('#all-builtin'), true),
+		checked = self.checked;
+
+	$(`[id^="builtin"]${ checked? ':not(:checked)': ':checked' }`, true)
+		.forEach(element => element.checked = checked);
+
+	Recall.CountEnabledSites();
+});
+
 // Plugins and their links
 let plugins = {
 	'Indomovie': ['https://indomovietv.club/', 'https://indomovietv.org/', 'https://indomovietv.net/'],
@@ -2103,6 +2131,16 @@ $('[id^="plugin_"]', true)
 		save(`builtin:${ pid }`, false);
 	})
 );
+
+addListener($('#all-plugin'), 'click', event => {
+	let self = traverse(event.target, element => element == $('#all-plugin'), true),
+		checked = self.checked;
+
+	$(`[id^="plugin"]${ checked? ':not(:checked)': ':checked' }`, true)
+		.forEach(element => element.checked = checked);
+
+	Recall.CountEnabledSites();
+});
 
 let empty = () => {};
 
@@ -2211,9 +2249,9 @@ $('.checkbox', true)
 					for(let name in options)
 						if(/^__/.test(name)) {
 							if(!self.checked)
-								options[name] = compress(options[name]);
+								options[name] = compress(BWT(options[name]));
 							else
-								options[name] = decompress(options[name]);
+								options[name] = iBWT(decompress(options[name]));
 						}
 					break;
 
@@ -2452,17 +2490,15 @@ let Recall = {
 /* Counting sites that are in use */
 Recall['@auto'].CountEnabledSites = () =>
 	[...$('[counter-for="sites"i]', true)].map(e => {
-		let b = $('[id^="builtin_"]', true),
-			p = $('[id^="plugin_"]', true),
-			b_all = b.length,
-			p_all = p.length,
-			o = Object.filter(getOptionValues(), k => /^(built|plug)in_/i.test(k)),
-			bo = Object.filter(o, k => /^built/i.test(k)),
-			b_on = (Object.values(bo).filter(v => v === true)).length,
-			po = Object.filter(o, k => /^plug/i.test(k)),
-			p_on = (Object.values(po).filter(v => v === true)).length;
+		let b_all = $('[id^="builtin_"]', true),
+			p_all = $('[id^="plugin_"]', true),
+			b_on = b_all.filter(e => e.checked).length,
+			p_on = p_all.filter(e => e.checked).length;
 
-		e.innerHTML = `${ (b_on + p_on) }/${ (b_all + p_all) }`
+		e.innerHTML = `${ (b_on + p_on) }/${ (b_all.length + p_all.length) }`
+
+		$('#all-builtin').checked = b_all.length == b_on;
+		$('#all-plugin').checked = p_all.length == p_on;
 	});
 
 /* Setting the DEV badge */
@@ -2551,6 +2587,58 @@ for(let func in Recall) {
 	} else {
 		/* Do nothing... */
 	}
+}
+
+/* BWT Sorting Algorithm */
+function BWT(string = '') {
+    if(/^[\x32]*$/.test(string))
+        return '';
+
+    let _a = `\u0001${ string }`,
+        _b = `\u0001${ string }\u0001${ string }`,
+        p_ = [];
+
+    for(let i = 0; i < _a.length; i++)
+        p_.push(_b.slice(i, _a.length + i));
+
+    p_ = p_.sort();
+
+    return p_.map(P => P.slice(-1)[0]).join('');
+}
+
+/* BWT Desorting Algorithm */
+function iBWT(string = '') {
+    if(/^[\x32]*$/.test(string))
+        return '';
+
+    let a = string.split('');
+
+    let O = q => {
+        let x = 0;
+        for(let i = 0; i < a.length; i++)
+            if(a[i] < q)
+                x++;
+        return x;
+    };
+
+    let C = (n, q) => {
+        let x = 0;
+        for(let i = 0; i < n; i++)
+            if(a[i] === q)
+                x++;
+        return x;
+    };
+
+    let b = 0,
+        c = '',
+        d = a.length + 1;
+
+    while(a[b] !== '\u0001' && d--) {
+        c = a[b] + c;
+        b = O(a[b]) + C(b, a[b]);
+    }
+
+    return c;
 }
 
 /* LZW Compression Algorithm */
