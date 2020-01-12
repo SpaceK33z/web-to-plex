@@ -2562,7 +2562,7 @@ let configuration, init, Update;
 						UTILS_TERMINAL.error(`Failed to get "${ option.title }" (Error #${ ++fail })`)
 					}
 				}
-				NOTIFIED.info = false;
+				NOTIFIED = false;
 
 				if(fail)
 					new Notification('error', `Failed to grab ${ fail } item${fail==1?'':'s'}`);
@@ -2675,7 +2675,7 @@ let configuration, init, Update;
 
 						});
 				}
-				NOTIFIED.info = false;
+				NOTIFIED = false;
 
 				element.setAttribute(hov, `Add "${ nice_title }" | ${ty}`);
 				element.style.removeProperty('display');
