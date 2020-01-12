@@ -160,4 +160,5 @@ All contributions are welcome.
 *Google Chrome is a trademark of Google Inc. Use of this trademark is subject to Google Permissions.*
 *Firefox is a trademark of Mozilla Org. Use of this trademark is subject to Mozilla Permissions.*
 *Safari is a trademark of Apple Inc. Use of this trademark is subject to Apple Permissions.*
+*Edge is a trademark of Microsoft Inc. Use of this trademark is subject to Microsoft Permissions.*
 *Plex is a trademark of Plex Inc. Use of this trademark is subject to Plex Permissions.*

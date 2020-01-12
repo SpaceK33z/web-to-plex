@@ -1,5 +1,5 @@
 /* plugn.js (Plugin) - Web to Plex */
-/* global chrome */
+/* global browser */
 
 let PLUGN_DEVELOPER = false;
 
@@ -341,7 +341,7 @@ return (
 
 console.log('[${ name.replace(/^(top\.)?(\w{7}).*$/i, '$1$2') }]', ${ name });
 
-top.onlocationchange = (event) => chrome.runtime.sendMessage({ type: '$INIT$', options: { ${ type }: '${ alias }' } });
+top.onlocationchange = (event) => browser.runtime.sendMessage({ type: '$INIT$', options: { ${ type }: '${ alias }' } });
 
 ;${ name };`
 }
@@ -451,13 +451,13 @@ let tabchange = async tabs => {
 
 	if(
 		!url
-		|| /^(?:chrome|debugger|view-source)/i.test(url)
+		|| /^(?:about|debugger|view-source)/i.test(url)
 		// || (!!~running.indexOf(id) && !!~running.indexOf(instance))
 	)
 		return /*
 			Stop if:
 				a) There isn't a url
-				b) The url is a chrome url
+				b) The url is an about url
 				c) The tab AND instance are accounted for
 		*/;
 
@@ -515,13 +515,13 @@ browser.runtime.onMessage.addListener(processMessage = async(request = {}, sende
 
 	if(
 		!url
-		|| /^(?:chrome|debugger|view-source)/i.test(url)
+		|| /^(?:about|debugger|view-source)/i.test(url)
 		// || (!!~running.indexOf(id) && !!~running.indexOf(instance))
 	)
 		return callback(null) /*
 			Stop if:
 				a) There isn't a url
-				b) The url is a chrome url
+				b) The url is an about url
 				c) The tab AND instance are accounted for
 		*/;
 

@@ -193,8 +193,14 @@ button, input[type="button"i], .button {
     transition: all 0.1s;
 }
 
-button:hover, input[type="button"i]:hover, .button:hover {
+button:hover, input[type="button"i]:hover, .button:hover, .checkbox input:checked + label:hover, input[type="range"]::-webkit-slider-thumb:hover {
     background: #e59029 !important;
+    transition: all 0.1s;
+}
+
+.checkbox input:not(:checked) + label:hover {
+    background: #999;
+    transition: all 0.1s;
 }
 
 [id$="_test"] {
@@ -554,9 +560,12 @@ span.checkbox {
 }
 
 [white], .checkbox[white]::before {
-    color: #fff !important;
+    color: #ddd !important;
 }
 .checkbox[white] input:checked + label {
+    background: #ddd !important;
+}
+.checkbox[white] input:checked + label:hover {
     background: #fff !important;
 }
 
@@ -566,12 +575,18 @@ span.checkbox {
 .checkbox[orange] input:checked + label {
     background: #cc7b19 !important;
 }
+.checkbox[orange] input:checked + label:hover {
+    background: #e59029 !important;
+}
 
 [blue], .checkbox[blue]::before {
     color: #197bcc !important;
 }
 .checkbox[blue] input:checked + label {
     background: #197bcc !important;
+}
+.checkbox[blue] input:checked + label:hover {
+    background: #2094f5 !important;
 }
 
 input[type="range"] {
@@ -629,7 +644,7 @@ input[type="range"]::-webkit-slider-thumb {
     color: #909090EE !important;
 }
 
-[code], code {
+code, [code], [type^="code"i] {
     background: #222 !important;
     border-radius: 3px !important;
     box-shadow: none !important;
@@ -637,9 +652,38 @@ input[type="range"]::-webkit-slider-thumb {
     font-family: "System, Monospace, Menlo, Arial", Consolas, "Liberation Mono", Menlo, Courier, monospace !important;
     font-size: 12px !important;
     line-height: 18px !important;
+    white-space: pre;
 
     margin: 0 !important;
     padding: 0.2em 0.4em !important;
+}
+
+code[contenteditable="true"], [code][contenteditable="true"], [type^="code"i][contenteditable="true"] {
+    height: 12em;
+    width: 50em;
+}
+
+code code, code [code], code [type^="code"i],
+[code] code, [code] [code], [code] [type^="code"i],
+[type^="code"] code, [type^="code"] [code], [type^="code"] [type^="code"i]
+{
+    padding: 0 !important;
+}
+
+code[var], [code][var], [type^="code"i][var] {
+    color: #ae94c0 !important;
+}
+
+code[val], [code][val], [type^="code"i][val] {
+    color: #b5bc67 !important;
+}
+
+code[num], [code][num], [type^="code"i][num] {
+    color: #dd925f !important;
+}
+
+code[new], [code][new], [type^="code"i][new] {
+    color: #efc371 !important;
 }
 
 #version {

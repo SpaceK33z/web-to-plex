@@ -236,7 +236,7 @@
     margin: inherit !important;
 }
 
-.web-to-plex-prompt-option.mutable > .remove {
+.web-to-plex-prompt-option.mutable > .remove, .web-to-plex-prompt-option.mutable > .choose {
 	background: #ffffff40 !important;
 	border-radius: 3px !important;
 	transition: all 0.1s !important;
@@ -250,12 +250,20 @@
 	padding: 0 !important;
 }
 
-.web-to-plex-prompt-option.mutable > .remove:hover {
+.web-to-plex-prompt-option.mutable > .remove:hover, .web-to-plex-prompt-option.mutable > .choose:hover {
 	background: #ffffff4d !important;
 }
 
 .web-to-plex-prompt-option.mutable > .remove::after {
 	content: '\00d7' !important;
+}
+
+.web-to-plex-prompt-option.mutable > .choose::after {
+	content: '\2218' !important;
+}
+
+.web-to-plex-prompt-option.mutable:first-child:last-child > .choose, .web-to-plex-prompt-option.mutable.chosen > .choose {
+    background: #80F08088 !important;
 }
 
 .web-to-plex-prompt-option.mutable > .quality {

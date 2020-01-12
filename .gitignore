@@ -1,4 +1,8 @@
-node_modules/
+.editorconfig
+.eslintrc
 pkg*.zip
+*.example
+*.lock
 build/
-env
+node_modules/
+*-beta/
