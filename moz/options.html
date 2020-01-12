@@ -662,9 +662,16 @@
 
 					<section>
 						<h3>Proxy Headers</h3>
-						<textarea type="text" code data-option="ProxyHeaders" placeholder="Enter the Proxy headers"></textarea>
+						<div type="code-editable" contenteditable="true" data-option="ProxyHeaders" placeholder="Enter the Proxy headers"></div>
 						<div>
 							If your proxy requires <a href="https://github.com/SpaceK33z/web-to-plex/wiki/Settings#connection-settings--proxy-settings" target="_blank">special headers</a>, enter that information in here.
+							<br>
+							<ul>
+								<li><code>@{raw-url}</code> <em>OR</em> <code>@{url}</code> &mdash; the raw, uneditied URL</li>
+								<li><code>@{enc-url}</code> <em>OR</em> <code>@{encode-url}</code> &mdash; an encoded URL</li>
+								<li><code>@{b64-url}</code> <em>OR</em> <code>@{base64-url}</code> &mdash; a Base-64 encoded URL</li>
+								<li><code>@object.property</code> &mdash; a computed value (such as <code>@location.href</code>)</li>
+							</ul>
 						</div>
 					</section>
 
@@ -799,6 +806,20 @@
 		                    Currently supports: Medusa, Ombi, Radarr, and Sonarr.
 		                </div>
 		            </section>
+					<hr>
+					<section>
+						<h3>
+							ID Fetching Mode
+							<span class="checkbox" prompt-yes="all" prompt-no="min">
+								<input id="use-low-cache" type="checkbox" data-option="UseLowCache"/>
+								<label for="use-low-cache"></label>
+							</span>
+						</h3>
+						<ul>
+							<li><em>MIN</em>: when a page is loaded, the extension will keep a small number of IDs on hand to speed up the process of finding media</li>
+							<li><em>ALL</em>: when a page is loaded, the extension will ask for every single ID from your Manager(s)</li>
+						</ul>
+					</section>
 				</details>
 			</article>
 
@@ -886,9 +907,9 @@
 		            <h2>External Links</h2>
 		            <section>
 		                <label>Web to Plex Links</label>
-		                <ul>
-		                    <li>Browse the <a href="https://github.com/SpaceK33z/web-to-plex/wiki" target="_blank">Web to Plex Wiki</a> for help setting up.</li>
-		                    <li><a href="https://github.com/SpaceK33z/web-to-plex/issues" target="_blank">Browse issues</a> if you're having trouble.</li>
+						<ul>
+		                    <li>Browse the <a href="https://github.com/SpaceK33z/web-to-plex/wiki" target="_blank">Web to Plex Wiki</a> for help setting up</li>
+		                    <li><a href="https://github.com/SpaceK33z/web-to-plex/issues" target="_blank">Browse issues</a> if you're having trouble</li>
 		                </ul>
 		            </section>
 

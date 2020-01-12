@@ -115,6 +115,7 @@ const storage = (chrome.storage.sync || chrome.storage.local),
 			'UseLoose',
 			'UseLooseScore',
 			'ManagerSearch',
+			'UseLowCache',
 
 			// Advance Settings
 			'OMDbAPI',
@@ -456,7 +457,7 @@ function load(name, decompress_data = false) {
 	data = localStorage.getItem(name);
 
 	if(decompress_data)
-		data = iBWT(decompress(data));
+		data = iBWT(unzip(decompress(data)));
 
 	return JSON.parse(data);
 }
@@ -468,7 +469,7 @@ function save(name, data, compress_data = false) {
 	data = JSON.stringify(data);
 
 	if(compress_data)
-		data = compress(BWT(data));
+		data = compress(zip(BWT(data)));
 
 	return localStorage.setItem(name, data);
 }
@@ -619,8 +620,8 @@ function getOptionValues() {
 	let _c = JSON.stringify(__caught),
 		_t = JSON.stringify(__theme);
 
-	$('[data-option="__caught"i]').value = options.__caught = (COM? compress(BWT(_c)): _c);
-	$('[data-option="__theme"i]').value = options.__theme = (COM? compress(BWT(_t)): _t);
+	$('[data-option="__caught"i]').value = options.__caught = (COM? compress(zip(BWT(_c))): _c);
+	$('[data-option="__theme"i]').value = options.__theme = (COM? compress(zip(BWT(_t))): _t);
 
 	return options;
 }
@@ -771,7 +772,7 @@ function performOmbiTest({ refreshing = false, event }) {
 		try {
 			fetch(`${ url }/api/v1/Request/movie`)
 				.then(r => r.json())
-				.thne(json => {
+				.then(json => {
 					json.map(item => {
 						__caught.imdb.push(item.imdbId);
 						__caught.tmdb.push(item.theMovieDbId);
@@ -780,7 +781,7 @@ function performOmbiTest({ refreshing = false, event }) {
 
 			fetch(`${ url }/api/v1/Request/tv`)
 				.then(r => r.json())
-				.thne(json => {
+				.then(json => {
 					json.map(item => {
 						__caught.imdb.push(item.imdbId);
 						__caught.tvdb.push(item.tvDbId);
@@ -1416,7 +1417,7 @@ function HandleProxySettings(data) {
 
 	/* "All" secure URI schemes */
 	if(UseProxy && ProxyURL && !/^(aaas|https|msrps|sftp|smtp|shttp|sips|ssh|wss)\:\/\//i.test(ProxyURL))
-		throw new Notification('error', `Insecure URI scheme '${ R.$1 }' detected. Please use a secure scheme.`);
+		throw new Notification('error', `Insecure URI scheme '${ ProxyURL.replace(/^(\w*?)(?:\:\/\/)/, '$1') }' detected. Please use a secure scheme.`);
 
 	return {
 		enabled: UseProxy,
@@ -1782,6 +1783,8 @@ function restoreOptions(OPTIONS) {
 					el.oninput({ target: el });
 				else if(/password$/i.test(option))
 					el.setAttribute('type', el.type = 'password');
+				else if(/^code-/.test(el.getAttribute('type')))
+					el.innerHTML = el.value;
 				else
 					el.placeholder = `Last save: ${ el.value }`,
 					el.title = `Double-click to restore value ("${ el.value }")`,
@@ -2249,9 +2252,9 @@ $('.checkbox', true)
 					for(let name in options)
 						if(/^__/.test(name)) {
 							if(!self.checked)
-								options[name] = compress(BWT(options[name]));
+								options[name] = compress(zip(BWT(options[name])));
 							else
-								options[name] = iBWT(decompress(options[name]));
+								options[name] = iBWT(unzip(decompress(options[name])));
 						}
 					break;
 
@@ -2589,6 +2592,26 @@ for(let func in Recall) {
 	}
 }
 
+function xip(string) {
+	return compress(zip(BWT(string)));
+}
+
+function unxip(string) {
+	return iBWT(unzip(decompress(string)));
+}
+
+/* Zipping Algorithm */
+function zip(string = '') {
+	return string.replace(/(\w)(\1{4,})/g, ($0, $1, $2, $$, $_) => $1 + `{${$2.length.toString(36)}}`);
+}
+
+/* Un-Zipping Algorithm */
+function unzip(string = '') {
+	let from36 = (n, x = 0) => n.split('').reverse().map((v, i) => x += '0123456789abcdefghijklmnopqrstuvwxyz'.indexOf(v) * 36**i)[-1] || x;
+
+	return string.replace(/(\w)\{([a-z\d]+)\}/gi, ($0, $1, $2, $$, $_) => $1.repeat(from36($2) + 1));
+}
+
 /* BWT Sorting Algorithm */
 function BWT(string = '') {
     if(/^[\x32]*$/.test(string))
@@ -2776,3 +2799,127 @@ function path(element) {
 		element = element.parentElement;
 	}
 };
+
+/* CodePen.io @brianmearns - https://codepen.io/brianmearns/pen/YVjZWw */
+$('[type^="code"][contenteditable]', true).forEach(editor => {
+	addListener(editor, 'keyup', event => updateEditor(event.target, event.keyCode));
+	addListener(editor, 'mouseup', event => updateEditor(event.target));
+
+	updateEditor(editor);
+});
+
+function updateEditor(editor, key) {
+	let selection = window.getSelection(),
+		text = getText(editor),
+		content = text.map(({ text }) => text).join('') + (key == 13? '\f': '');
+
+	let index = {
+		anchor: null,
+		focus: null,
+		current: 0,
+	};
+
+	text.forEach(({ text, node }) => {
+		if(node == selection.anchorNode)
+			index.anchor = index.current + selection.anchorOffset;
+		if(node == selection.focusNode)
+			index.focus = index.current + selection.focusOffset;
+
+		index.current += text.length;
+	});
+
+	editor.innerHTML = compileText(content, key);
+	editor.value = content.replace(/[\f\u21b5\u200c]+/g, '\n').replace(/\n+$/g, '');
+	restoreSelection(index, editor, key);
+}
+
+function getText(element) {
+	let text = [];
+
+	[...element.childNodes].forEach(node => {
+		switch(node.nodeType) {
+			case Node.TEXT_NODE:
+				text.push({ text: node.nodeValue, node });
+				break;
+
+			case Node.ELEMENT_NODE:
+				text.splice(text.length, 0, ...( getText(node) ));
+				break;
+
+			default:
+				throw `Unexpected node ${ node.nodeType }`;
+				break;
+		}
+	});
+
+	return text;
+}
+
+function compileText(text, key) {
+	let R = RegExp;
+
+	text = text
+	    .replace(/&([^#\w])?/g, '&amp;$1')
+	    .replace(/</g, '&lt;')
+	    .replace(/>/g, '&gt;')
+		.replace(/^[ \t]*([^\=\s]+)[ \t]*=[ \t]*((["'`])(?:[^\\\3]*|\\.)\3|[^\f\n\r\v\u21b5\u200c]*)/gm,
+			($0, $1, $2, $3, $$, $_) => `<code new>${ $1 }</code>=<code val>${ $2 }</code>`
+		)
+		.replace(/@\{(?:(b(?:ase-?)?64|enc(?:ode)?|(?:raw)?)-)?url\}/g,
+			($0, $1, $$, $_) => `<code var>@</code>{<code new>${ $1? $1 + '-': '' }url</code>}`
+		)
+		.replace(/@([\w\.]+)/g,
+			($0, $1, $$, $_) => `<code var>@</code>${ $1.split('.').map((v, i, a) => `<code ${ i? 'var': 'new' }>${ v }</code>`).join('.') }`
+		)
+		.replace(/\b(\d+)\b/g,
+			($0, $1, $$, $_) => `<code num>${ $1 }</code>`
+		)
+		.split(/\f/)
+		.join('\u21b5\n\u200c');
+
+	return text;
+}
+
+function restoreSelection({ anchor, focus }, editor, key) {
+	let selection = window.getSelection(),
+		texts = getText(editor),
+		nodes = { anchor: editor, focus: editor },
+		index = { anchor, focus, current: 0 };
+
+	texts.forEach(({ text, node }) => {
+		let start = index.current,
+			end = start + text.length;
+
+		if(key == 13) {
+			let { anchorNode, focusNode } = getSelection(editor),
+				{ length } = editor.childNodes;
+
+			nodes.anchor = anchorNode;
+			nodes.focus = focusNode;
+
+			if(start <= anchor && anchor <= end) {
+				nodes.anchor = node;
+				index.anchor = length;
+			}
+
+			if(start <= focus && focus <= end) {
+				nodes.focus = node;
+				index.focus = length;
+			}
+		} else {
+			if(start <= anchor && anchor <= end) {
+				nodes.anchor = node;
+				index.anchor = anchor - start;
+			}
+
+			if(start <= focus && focus <= end) {
+				nodes.focus = node;
+				index.focus = focus - start;
+			}
+		}
+
+		index.current += text.length;
+	});
+
+	selection.setBaseAndExtent(nodes.anchor, index.anchor, nodes.focus, index.focus);
+}

@@ -1,5 +1,5 @@
 let script = {
-	"url": "*://*.themoviedb.org/(movie|tv)/\\d+",
+	"url": "*://*.themoviedb.org/(movie|tv)/\\d+([\\w\\-]+)?$",
 
 	"init": (ready) => {
 		let _title, _year, _image, R = RegExp;
