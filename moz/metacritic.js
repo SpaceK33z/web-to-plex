@@ -1,6 +1,8 @@
 let script = {
 	"url": "*://*.metacritic.com/(movie|tv|list)/*",
 
+	"ready": () => !!top.AbsoluteReady,
+
 	"init": (ready) => {
 		let _title, _year, _image, R = RegExp;
 
@@ -47,3 +49,13 @@ let script = {
 		/* Targeted for v5/v6 */
 	},
 };
+
+if(!top.WaitingOnAbsoluteReady) {
+	top.addEventListener('load', event => {
+		top.AbsoluteReady = true;
+
+		$('.web-to-plex-button a.list-action').first.onclick = event => event;
+	});
+
+	top.WaitingOnAbsoluteReady = true;
+}

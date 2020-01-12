@@ -144,7 +144,7 @@ let configuration, init, Update;
 				throw 'No configuration saved...';
 			}
 
-			if(((state == 'error' || state == 'warning') && __CONFIG__.NotifyNewOnly && /\balready\s+(exists?|(been\s+)?added)\b/.test(text)) || (__CONFIG__.NotifyOnlyOnce && NOTIFIED && state === 'info'))
+			if(((state == 'error' || state == 'warning') && __CONFIG__.NotifyNewOnly && /\balready\s+(exists?|(been\s+)?added)\b/.test(text)) || (__CONFIG__.NotifyOnlyOnce && NOTIFIED && state == 'info'))
 				return /* Don't match /.../i as to not match item titles */;
 			NOTIFIED = true;
 
@@ -301,7 +301,8 @@ let configuration, init, Update;
 						.toLowerCase()
 				);
 
-			let preX = document.queryBy('.web-to-plex-prompt').first;
+			let preX = document.queryBy('.web-to-plex-prompt').first,
+				movie = /^(m(?:ovies?)?|f(?:ilms?)?|c(?:inemas?)?)?$/i;
 
 			if(preX)
 				return /* Ignore while another prompt is open, prevents double prompts */;
@@ -338,26 +339,28 @@ let configuration, init, Update;
 								...(ITEMS => {
 									let elements = [];
 
-									for(let index = 0, length = ITEMS.length, ITEM, P_QUA, P_LOC; index < length; index++) {
-										ITEM = ITEMS[index];
+									for(let index = 0, length = ITEMS.length, P_QUA, P_LOC; index < length; index++) {
+										let { title, year, type } = ITEMS[index];
+
+										type = movie.test(type.trim())? 'movie': 'show';
 
 										elements.push(
-											furnish('li.web-to-plex-prompt-option.mutable', { value: index, innerHTML: `<h2>${ index + 1 } \u00b7 ${ ITEM.title }${ ITEM.year? ` (${ ITEM.year })`: '' } <em>\u2014 ${ ITEM.type }</em></h2>` },
-												furnish('button.remove', { title: `Remove "${ ITEM.title }"`, onmouseup: event => { remove(event.target.parentElement); event.target.remove() } }),
+											furnish('li.web-to-plex-prompt-option.mutable', { value: index, innerHTML: `<h2>${ index + 1 }. ${ title }${ year? ` (${ year })`: '' } \u2014 ${ type }</h2>` },
+												furnish('button.remove', { title: `Remove "${ title }"`, onmouseup: event => { remove(event.target.parentElement); event.target.remove() } }),
 												(
 													__CONFIG__.PromptQuality?
-														P_QUA = furnish('select.quality', { index, onchange: event => data[event.target.getAttribute('index')].quality = event.target.value }, ...profiles[/(movie|film|cinema)/i.test(ITEM.type)?'movie':'show'].map(Q => furnish('option', { value: Q.id }, Q.name))):
+														P_QUA = furnish('select.quality', { index, onchange: event => data[event.target.getAttribute('index')].quality = event.target.value }, ...profiles[/(movie|film|cinema)/i.test(type)?'movie':'show'].map(Q => furnish('option', { value: Q.id }, Q.name))):
 													''
 												),(
 													__CONFIG__.PromptLocation?
-														P_LOC = furnish('select.location', { index, onchange: event => data[event.target.getAttribute('index')].location = event.target.value }, ...locations[/(movie|film|cinema)/i.test(ITEM.type)?'movie':'show'].map(Q => furnish('option', { value: Q.id }, Q.path))):
+														P_LOC = furnish('select.location', { index, onchange: event => data[event.target.getAttribute('index')].location = event.target.value }, ...locations[/(movie|film|cinema)/i.test(type)?'movie':'show'].map(Q => furnish('option', { value: Q.id }, Q.path))):
 													''
 												)
 											)
 										);
 
-										if(P_QUA) P_QUA.value = defaults[ITEM.type].quality;
-										if(P_LOC) P_LOC.value = defaults[ITEM.type].location;
+										if(P_QUA) P_QUA.value = defaults[type].quality;
+										if(P_LOC) P_LOC.value = defaults[type].location;
 
 										P_QUA = P_LOC = null;
 									}
@@ -381,9 +384,9 @@ let configuration, init, Update;
 										if(/^\s*((?:tt)?\d+)(?:\s+(\w+)|\s*)?$/i.test(value)) {
 											let APIID = R.$1,
 												type = R.$2 || (data.length? data[0].type: 'movie'),
-												APIType = movie.test(type)? /^tt/i.test(APIID)? 'imdb': 'tmdb': 'tvdb';
+												APIType = movie.test(type.trim())? /^tt/i.test(APIID)? 'imdb': 'tmdb': 'tvdb';
 
-											type = movie.test(type)? 'movie': 'show';
+											type = movie.test(type.trim())? 'movie': 'show';
 
 											Db = await Identify({ type, APIID, APIType });
 											IMDbID = Db.imdb;
@@ -398,7 +401,7 @@ let configuration, init, Update;
 											type  = R.$3 || (data.length? data[0].type: 'movie');
 
 											year = +year.replace(/\D/g, '').replace(/^\d{2}$/, '20$&');
-											type = movie.test(type)? 'movie': 'show';
+											type = movie.test(type.trim())? 'movie': 'show';
 
 											Db = await Identify({ type, title, year });
 											IMDbID = Db.imdb;
@@ -420,6 +423,131 @@ let configuration, init, Update;
 								furnish('button.web-to-plex-prompt-decline', { onmouseup: event => { remove(true); callback([]) }, title: 'Close' }, '\u2718'),
 								furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { remove(true); new Prompt(prompt_type, options, callback, container) }, title: 'Reset' }, '\u21BA'),
 								furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { remove(true); callback(data.filter(value => value !== null && value !== undefined)) }, title: 'Continue' }, '\u2714')
+							)
+						)
+					);
+					break;
+
+				/* Search for correct items */
+				case 'search':
+					let captured = { imdb: [], tmdb: [], tvdb: [] };
+
+					remove = (element) => {
+						let prompter = $('.web-to-plex-prompt').first,
+							header = $('.web-to-plex-prompt-header').first,
+							counter = $('.web-to-plex-prompt-options').first;
+
+						if(!element)
+							return;
+						else if(element === true)
+							return prompter.remove();
+						else
+							element.remove();
+
+						data.splice(+element.value, 1, null);
+						header.innerText = `Correction ready...`;
+					};
+
+					prompt = furnish('div.web-to-plex-prompt', {},
+						furnish('div.web-to-plex-prompt-body', { style: `background-image: url(${ IMG_URL.noise_background }), url(${ IMG_URL.background }); background-size: auto, cover;` },
+							// The prompt's title
+							furnish('h1.web-to-plex-prompt-header', {}, (array.length == 1? 'Correction ready...': `Choose a correction from ${array.length} items`)),
+
+							// The prompt's items
+							furnish('div.web-to-plex-prompt-options', {},
+								...(ITEMS => {
+									let elements = [];
+
+									for(let index = 0, length = ITEMS.length; index < length; index++) {
+										let { title, year, type, IMDbID, TMDbID, TVDbID } = ITEMS[index],
+											i = IMDbID,
+											t = TMDbID,
+											v = TVDbID,
+											s = 'style="text-decoration: none !important; color: #cc7b19 !important; font-style: italic !important;" target="_blank"';
+
+										type = movie.test(type.trim())? 'movie': 'show';
+
+										if(!!~captured.imdb.indexOf(i) || !!~captured.tmdb.indexOf(t) || !!~captured.tvdb.indexOf(v))
+											continue;
+										if(i)
+											captured.imdb.push(i);
+										if(t)
+											captured.tmdb.push(t);
+										if(v)
+											captured.tvdb.push(v);
+
+										elements.push(
+											furnish('li.web-to-plex-prompt-option.mutable', { value: index, innerHTML: `<h2>${ index + 1 }. ${ title }${ year? ` (${ year })`: '' } \u2014 ${ type }</h2> ${ i? `<a href="https://imdb.com/title/${i}/?ref=web_to_plex" ${s}>${i}</a>`: '/' } \u2014 ${ t? `<a href="https://themoviedb.org/${type=='show'?'tv':type}/${t}" ${s}>${t}</a>`: '/' } \u2014 ${ v? `<a href="https://thetvdb.com/series/${title.replace(/\s+/g,'-').replace(/&/g,'and').replace(/[^\w\-]+/g,'')}#${v}" ${s}>${v}</a>`: '/' }` },
+												furnish('button.choose', { title: `Use "${ title } (${ year })"`, onmouseup: event => {
+													let element = event.target.parentElement,
+														children = [...element.parentElement.children].filter(e => e != element);
+														children.forEach(child => {
+															remove(child);
+															element.parentElement.appendChild(child);
+														});
+													element.classList.add('chosen');
+												} })
+											)
+										);
+									}
+
+									return elements
+								})(array)
+							),
+
+							// The engagers
+							furnish('div.web-to-plex-prompt-footer', {},
+								furnish('input.web-to-plex-prompt-input[type=text]', { placeholder: 'Add an item (enter to add): Title (Year) Type / ID Type', title: 'Solo: A Star Wars Story (2018) movie / tt3778644 m', onkeydown: async event => {
+									if(event.keyCode == 13) {
+										let title, year, type, self = event.target, R = RegExp,
+											Db, IMDbID, TMDbID, TVDbID, value = self.value;
+
+										self.setAttribute('disabled', self.disabled = true);
+										self.value = `Searching for "${ value }"...`;
+										data = data.filter(v => v !== null && v !== undefined);
+
+										if(/^\s*((?:tt)?\d+)(?:\s+(\w+)|\s*)?$/i.test(value)) {
+											let APIID = R.$1,
+												type = R.$2 || (data.length? data[0].type: 'movie'),
+												APIType = movie.test(type.trim())? /^tt/i.test(APIID)? 'imdb': 'tmdb': 'tvdb';
+
+											type = movie.test(type.trim())? 'movie': 'show';
+
+											Db = await Identify({ type, APIID, APIType });
+											IMDbID = Db.imdb;
+											TMDbID = Db.tmdb;
+											TVDbID = Db.tvdb;
+
+											title = Db.title;
+											year = Db.year;
+										} else if(/^([^]+?)(\s*\(\d{2,4}\)|\s+\d{2,4})?(\s+[a-z\s\-]+)?$/.test(value)) {
+											title = R.$1;
+											year  = R.$2 || YEAR + '';
+											type  = R.$3 || (data.length? data[0].type: 'movie');
+
+											year = +year.replace(/\D/g, '').replace(/^\d{2}$/, '20$&');
+											type = movie.test(type.trim())? 'movie': 'show';
+
+											Db = await Identify({ type, title, year }, true);
+
+											remove(true, { type, title, year });
+											return new Prompt(prompt_type, Db, callback, container);
+										}
+
+										event.preventDefault();
+										if(type && title && !(/^(?:tt)?$/i.test(IMDbID || '') && /^0?$/.test(+TMDbID | 0) && /^0?$/.test(+TVDbID | 0))) {
+											remove(true);
+											new Prompt(prompt_type, [{ ...Db, type, IMDbID, TMDbID, TVDbID }, ...data], callback, container);
+										} else {
+											self.disabled = self.removeAttribute('disabled');
+											self.value = value;
+											new Notification('error', `Couldn't find "${ value }"`);
+										}
+									}
+								} }),
+								furnish('button.web-to-plex-prompt-decline', { onmouseup: event => { remove(true); prompt.done = true; callback([]) }, title: 'Close' }, '\u2718'),
+								furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { remove(true); prompt.done = false; new Prompt(prompt_type, options, callback, container) }, title: 'Reset' }, '\u21BA'),
+								furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { remove(true); prompt.done = true; callback(data.filter(value => value !== null && value !== undefined)) }, title: 'Continue' }, '\u2714')
 							)
 						)
 					);
@@ -451,26 +579,28 @@ let configuration, init, Update;
 								...(ITEMS => {
 									let elements = [];
 
-									for(let index = 0, length = ITEMS.length, ITEM, P_QUA, P_LOC; index < length; index++) {
-										ITEM = ITEMS[index];
+									for(let index = 0, length = ITEMS.length, P_QUA, P_LOC; index < length; index++) {
+										let { title, year, type } = ITEMS[index];
+
+										type = movie.test(type.trim())? 'movie': 'show';
 
 										elements.push(
-											furnish('li.web-to-plex-prompt-option.mutable', { value: index, innerHTML: `<h2>${ index + 1 } \u00b7 ${ ITEM.title }${ ITEM.year? ` (${ ITEM.year })`: '' } <em>\u2014 ${ ITEM.type }</em></h2>` },
-												furnish('button.remove', { title: `Remove "${ ITEM.title }"`, onmouseup: event => { remove(event.target.parentElement); event.target.remove() } }),
+											furnish('li.web-to-plex-prompt-option.mutable', { value: index, innerHTML: `<h2>${ index + 1 } \u00b7 ${ title }${ year? ` (${ year })`: '' } <em>\u2014 ${ type }</em></h2>` },
+												furnish('button.remove', { title: `Remove "${ title }"`, onmouseup: event => { remove(event.target.parentElement); event.target.remove() } }),
 												(
 													__CONFIG__.PromptQuality?
-														P_QUA = furnish('select.quality', { index, onchange: event => data[event.target.getAttribute('index')].quality = event.target.value }, ...profiles[/(movie|film|cinema)/i.test(ITEM.type)?'movie':'show'].map(Q => furnish('option', { value: Q.id }, Q.name))):
+														P_QUA = furnish('select.quality', { index, onchange: event => data[event.target.getAttribute('index')].quality = event.target.value }, ...profiles[/(movie|film|cinema)/i.test(type)?'movie':'show'].map(Q => furnish('option', { value: Q.id }, Q.name))):
 													''
 												),(
 													__CONFIG__.PromptLocation?
-														P_LOC = furnish('select.location', { index, onchange: event => data[event.target.getAttribute('index')].location = event.target.value }, ...locations[/(movie|film|cinema)/i.test(ITEM.type)?'movie':'show'].map(Q => furnish('option', { value: Q.id }, Q.path))):
+														P_LOC = furnish('select.location', { index, onchange: event => data[event.target.getAttribute('index')].location = event.target.value }, ...locations[/(movie|film|cinema)/i.test(type)?'movie':'show'].map(Q => furnish('option', { value: Q.id }, Q.path))):
 													''
 												)
 											)
 										);
 
-										if(P_QUA) P_QUA.value = defaults[ITEM.type].quality;
-										if(P_LOC) P_LOC.value = defaults[ITEM.type].location;
+										if(P_QUA) P_QUA.value = defaults[type].quality;
+										if(P_LOC) P_LOC.value = defaults[type].location;
 
 										P_QUA = P_LOC = null;
 									}
@@ -542,7 +672,11 @@ let configuration, init, Update;
 								furnish('button.web-to-plex-prompt-decline', { onmouseup: event => { remove(true); callback([]) }, title: 'Close' }, '\u2718'),
 								furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { remove(true); new Prompt(prompt_type, options, callback, container) }, title: 'Reset' }, '\u21BA'),
 								furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { remove(true); callback(options) }, title: 'Continue' }, '\u2714'),
-								furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { let self = event.target; open(self.getAttribute('href'), '_blank') }, href: slugify(type), title: `Open on ${ manager[type] }` }, manager[type])
+								(
+									(!__CONFIG__.UseLowCache || (__CONFIG__.UseLowCache && CAUGHT.has({ imdb: i, tmdb: t, tvdb: v })))?
+										furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { let self = event.target; open(self.getAttribute('href'), '_blank') }, href: slugify(type), title: `Open on ${ manager[type] }` }, manager[type]):
+									null
+								)
 							)
 						)
 					);
@@ -553,6 +687,7 @@ let configuration, init, Update;
 					P_QUA = P_LOC = null;
 					break;
 
+				/* Self explanatory: get permissions */
 				case 'permission':
 					let { permission, name, alias } = options;
 					let existing, permissions;
@@ -867,31 +1002,221 @@ let configuration, init, Update;
 							configuration[key] = options[key];
 
 					COMPRESS = options.UseLZW;
-					CAUGHT = options.__caught;
-					CAUGHT = JSON.parse(COMPRESS? iBWT(decompress(CAUGHT)): CAUGHT);
-					CAUGHT.bump = async(ids) => {
-						bumping:
-						for(let id in ids) {
-							let ID = id.toLowerCase().slice(0, 4),
-								MAX = (COMPRESS? 200: 100);
 
-							if(!!~CAUGHT[ID].indexOf(ids[id]))
-								continue bumping;
+					if(!(CAUGHT && CAUGHT.All_CAUGHT)) {
+						CAUGHT = options.__caught;
+						CAUGHT = JSON.parse(COMPRESS? iBWT(unzip(decompress(CAUGHT))): CAUGHT);
+						CAUGHT.NO_CACHE = { ...CAUGHT };
 
-							if(CAUGHT[ID].length >= MAX)
-								CAUGHT[ID].splice(0, 1 + (CAUGHT[ID].length - MAX));
+						CAUGHT.has = (ids) => {
+							for(let id in ids)
+								if(!!~CAUGHT[id].indexOf(ids[id]) || !!~CAUGHT.NO_CACHE[id].indexOf(ids[id]))
+									return true;
+							return false;
+						};
 
-							CAUGHT[ID].push(ids[id]);
-							CAUGHT[ID].filter(v => typeof v == 'number'? v: null);
-							CAUGHT[ID] = CAUGHT[ID].slice(0, MAX);
+						CAUGHT.bump = async(ids) => {
+							bumping:
+							for(let id in ids) {
+								let ID = id.toLowerCase().slice(0, 4),
+									MAX = (COMPRESS? 200: 100);
+
+								if(!!~CAUGHT[ID].indexOf(ids[id]))
+									continue bumping;
+
+								if(CAUGHT[ID].length >= MAX)
+									CAUGHT[ID].splice(0, 1 + (CAUGHT[ID].length - MAX));
+
+								CAUGHT[ID].push(ids[id]);
+								CAUGHT[ID].filter(v => typeof v == 'number'? v: null);
+								CAUGHT[ID] = CAUGHT[ID].slice(0, MAX);
+							}
+
+							let __caught = JSON.stringify(CAUGHT);
+
+							__caught = (COMPRESS? compress(zip(BWT(__caught))): __caught);
+
+							await UTILS_STORAGE.set({ __caught }, () => configuration.__caught = __caught);
+						};
+
+						CAUGHT.charge = async(ids) => {
+							charging:
+							for(let id in ids) {
+								let ID = id.toLowerCase().slice(0, 4);
+
+								if(!!~CAUGHT.NO_CACHE[ID].indexOf(ids[id]))
+									continue charging;
+
+								CAUGHT.NO_CACHE[ID].push(ids[id]);
+								CAUGHT.NO_CACHE[ID].filter(v => typeof v == 'number'? v: null);
+							}
+						};
+
+						if(options.UseLowCache) {
+						    /* Add IDs to CAUGHT without updating the cache */
+						    /* Movies/TV Shows */
+						    // Charge Ombi
+						    if(options.usingOmbi) {
+						        let url = options.ombiURLRoot;
+
+						        fetch(`${ url }/api/v1/Request/movie`)
+						            .then(r => r.json())
+						            .then(json => {
+						                json.map(item => {
+						                    CAUGHT.charge({
+						                        imdb: item.imdbId,
+						                        tmdb: item.theMovieDbId,
+						                    });
+						                });
+						            });
+
+						        fetch(`${ url }/api/v1/Request/tv`)
+						            .then(r => r.json())
+						            .then(json => {
+						                json.map(item => {
+						                    CAUGHT.charge({
+						                        imdb: item.imdbId,
+						                        tmdb: item.theMovieDbId,
+						                    });
+						                });
+						            });
+						    }
+
+						    /* Movies */
+						    // Charge Watcher
+						    if(options.usingWatcher) {
+						        let url = options.watcherURLRoot,
+						            token = options.watcherToken,
+						            quality = options.watcherQualityProfileId || 'Default',
+						            username = options.watcherBasicAuthUsername,
+						            password = options.watcherBasicAuthPassword;
+
+						        fetch(`${ url }/api/?apikey=${ token }&mode=liststatus&quality=${ quality }`, {
+						            headers: {
+						                'Accept': 'application/json',
+						                'Content-Type': 'application/json',
+						                'X-Api-Key': token,
+						                [username? 'Authorization': 'X-Authorization']: `Basic ${ btoa(`${ username }:${ password }`) }`,
+						            }
+						        })
+						            .then(r => r.json())
+						            .then(json => {
+						                json.map(item => {
+						                    CAUGHT.charge({
+						                        imdb: item.movies.imdbid,
+						                        tmdb: item.movies.tmdbid,
+						                    });
+						                });
+						            });
+						    }
+
+						    // Charge Radarr
+						    if(options.usingRadarr) {
+						        let url = options.radarrURLRoot,
+						            token = options.radarrToken,
+						            username = options.radarrBasicAuthUsername,
+						            password = options.radarrBasicAuthPassword;
+
+						        fetch(`${ url }/api/movie`, {
+						            headers: {
+						                'Accept': 'application/json',
+						                'Content-Type': 'application/json',
+						                'X-Api-Key': token,
+						                [username? 'Authorization': 'X-Authorization']: `Basic ${ btoa(`${ username }:${ password }`) }`,
+						            }
+						        })
+						            .then(r => r.json())
+						            .then(json => {
+
+						                json.map(item => {
+						                    CAUGHT.charge({
+						                        imdb: item.imdbId,
+						                        tmdb: item.tmdbId,
+						                    });
+						                });
+						            });
+						    }
+
+						    /* TV Shows */
+						    // Charge Sonarr
+						    if(options.usingSonarr) {
+						        let url = options.sonarrURLRoot,
+						            token = options.sonarrToken,
+						            username = options.sonarrBasicAuthUsername,
+						            password = options.sonarrBasicAuthPassword;
+
+						        fetch(`${ url }/api/series`, {
+						            headers: {
+						                'Accept': 'application/json',
+						                'Content-Type': 'application/json',
+						                'X-Api-Key': token,
+						                [username? 'Authorization': 'X-Authorization']: `Basic ${ btoa(`${ username }:${ password }`) }`,
+						            }
+						        })
+						            .then(r => r.json())
+						            .then(json => {
+						                json.map(item => {
+						                    CAUGHT.charge({
+						                        tvdb: item.tvdbId,
+						                    });
+						                });
+						            });
+						    }
+
+						    // Charge Medusa
+						    if(options.usingMedusa) {
+						        let url = options.medusaURLRoot,
+						            token = options.medusaToken,
+						            username = options.medusaBasicAuthUsername,
+						            password = options.medusaBasicAuthPassword;
+
+						        fetch(`${ url }/api/v2/series`, {
+						            headers: {
+						                'Accept': 'application/json',
+						                'Content-Type': 'application/json',
+						                'X-Api-Key': token,
+						                [username? 'Authorization': 'X-Authorization']: `Basic ${ btoa(`${ username }:${ password }`) }`,
+						            }
+						        })
+						            .then(r => r.json())
+						            .then(json => {
+						                json.map(item => {
+						                    CAUGHT.charge({
+						                        imdb: item.id.imdb,
+						                        tvdb: item.id.tvdb,
+						                    });
+						                });
+						            });
+						    }
+
+						    // Charge SickBeard
+						    if(options.usingSickBeard) {
+						        let url = options.sickBeardURLRoot,
+						            token = options.sickBeardToken,
+						            username = options.sickBeardBasicAuthUsername,
+						            password = options.sickBeardBasicAuthPassword;
+
+						        fetch(`${ url }/api/${ token }/?cmd=shows`, {
+						            headers: {
+						                'Accept': 'application/json',
+						                'Content-Type': 'application/json',
+						                'X-Api-Key': token,
+						                [username? 'Authorization': 'X-Authorization']: `Basic ${ btoa(`${ username }:${ password }`) }`,
+						            }
+						        })
+						            .then(r => r.json())
+						            .then(json => {
+						                Object.values(json.data).map(item => {
+						                    CAUGHT.charge({
+						                        tvdb: item.id.tvdbid,
+						                    });
+						                });
+						            });
+						    }
 						}
 
-						let __caught = JSON.stringify(CAUGHT);
-
-						__caught = (COMPRESS? compress(BWT(__caught)): __caught);
-
-						await UTILS_STORAGE.set({ __caught }, () => configuration.__caught = __caught);
-					};
+						CAUGHT.All_CAUGHT = true;
+					}
 
 					return __CONFIG__ = options;
 				},
@@ -1057,7 +1382,8 @@ let configuration, init, Update;
 
 	// parse the formatted headers and URL
 	function HandleProxyHeaders(Headers = "", URL = "") {
-		let headers = {};
+		let headers = {},
+			R = RegExp;
 
 		Headers.replace(/^[ \t]*([^\=\s]+)[ \t]*=[ \t]*((["'`])(?:[^\\\3]*|\\.)\3|[^\f\n\r\v]*)/gm, ($0, $1, $2, $3, $$, $_) => {
 			let string = !!$3;
@@ -1066,10 +1392,13 @@ let configuration, init, Update;
 				headers[$1] = $2.replace(RegExp(`^${ $3 }|${ $3 }$`, 'g'), '');
 			} else {
 				$2 = $2.replace(/@([\w\.]+)/g, (_0, _1, _$, __) => {
-					let path = _1.split('.'), property = top;
+					let property = top;
 
-					for(let index = 0, length = path.length; index < length; index++)
-						property = property[path[index]];
+					for(let path of _1.split('.'))
+						if(/^(\w+)\(\s*\)$/.test(path))
+							property = property[R.$1]();
+						else
+							property = property[path];
 
 					headers[$1] = property;
 				})
@@ -1084,7 +1413,7 @@ let configuration, init, Update;
 
 	// fetch/search for the item's media ID(s)
 	// rerun enum - [0bWXYZ] - [Tried Different URL | Tried Matching Title | Tried Loose Searching | Tried Rerunning Altogether]
-	async function Identify({ title, alttitle, year, type, IMDbID, TMDbID, TVDbID, APIType, APIID, meta, rerun }) {
+	async function Identify({ title, alttitle, year, type, IMDbID, TMDbID, TVDbID, APIType, APIID, meta, rerun }, ReturnAllResults = false) {
 		let json = {}, // returned object
 			data = {}, // mutated object
 			promise,   // query promise
@@ -1104,6 +1433,7 @@ let configuration, init, Update;
 			MV = /^(movies?|films?|cinemas?)$/i.test(apit),
 			TV = /^(tv[\s\-]*(?:shows?|series)?)$/i.test(apit);
 
+		iid = iid == 'tt'? null: iid;
 		type = type || null;
 		meta = { ...meta, mode: 'cors' };
 		rqut =
@@ -1153,52 +1483,52 @@ let configuration, init, Update;
 
 		/* the rest of this function is a beautiful mess that will need to be dealt with later... but it works */
 		let url =
-			(manable && title && __CONFIG__.usingOmbi && __CONFIG__.ombiURLRoot)?
-				`${ __CONFIG__.ombiURLRoot }api/v1/Search/${ (/^[it]mdb$/i.test(rqut) || MV)? 'movie': 'tv' }/${ plus(title, '%20') }/?apikey=${ api.ombi }`:
-			(manable && (__CONFIG__.usingRadarr || __CONFIG__.usingSonarr || __CONFIG__.usingMedusa /*|| __CONFIG__.usingSickBeard*/))?
-				(__CONFIG__.usingRadarr && /^[it]mdb$/i.test(rqut) && __CONFIG__.radarrURLRoot)?
-					(mid)?
-						`${ __CONFIG__.radarrURLRoot }api/movie/lookup/tmdb?tmdbId=${ mid }&apikey=${ __CONFIG__.radarrToken }`:
-					(iid)?
-						`${ __CONFIG__.radarrURLRoot }api/movie/lookup/imdb?imdbId=${ iid }&apikey=${ __CONFIG__.radarrToken }`:
-					`${ __CONFIG__.radarrURLRoot }api/movie/lookup?term=${ plus(title, '%20') }&apikey=${ __CONFIG__.radarrToken }`:
-				(__CONFIG__.usingSonarr && __CONFIG__.sonarrURLRoot)?
-					(tid)?
-						`${ __CONFIG__.sonarrURLRoot }api/series/lookup?term=tvdb:${ tid }&apikey=${ __CONFIG__.sonarrToken }`:
-					`${ __CONFIG__.sonarrURLRoot }api/series/lookup?term=${ plus(title, '%20') }&apikey=${ __CONFIG__.sonarrToken }`:
-				(__CONFIG__.usingMedusa && __CONFIG__.medusaURLRoot)?
-					(tid)?
-						`${ __CONFIG__.medusaURLRoot }api/v2/series/tvdb${ tid }?detailed=true&api_key=${ __CONFIG__.medusaToken }`:
-					`${ __CONFIG__.medusaURLRoot }api/v2/internal/searchIndexersForShowName?query=${ plus(title) }&indexerId=0&api_key=${ __CONFIG__.medusaToken }`:
-				/* TODO: find a way to get CORS to work on Sick Beard URLs (localhost) */
-				// (__CONFIG__.usingSickBeard)?
-				//	 (tid)?
-				//		 `${ __CONFIG__.sickBeardURLRoot }api/${ __CONFIG__.sickBeardToken }/?cmd=sb.searchtvdb&tvdbid=${ tid }`:
-				//	 `${ __CONFIG__.sickBeardURLRoot }api/${ __CONFIG__.sickBeardToken }/?cmd=sb.searchtvdb&name=${ encodeURIComponent(title) }`:
-				null:
-			(rqut == 'imdb' || (rqut == '*' && !iid && title) || (rqut == 'tvdb' && !iid && title && !(rerun & 0b1000)) && (rerun |= 0b1000))?
-				(iid)?
-					`https://www.omdbapi.com/?i=${ iid }&apikey=${ api.omdb }`:
-				(year)?
-					`https://www.omdbapi.com/?t=${ plus(title) }&y=${ year }&apikey=${ api.omdb }`:
-				`https://www.omdbapi.com/?t=${ plus(title) }&apikey=${ api.omdb }`:
-			(rqut == 'tmdb' || (rqut == '*' && !mid && title && year) || MV)?
-				(apit && apid)?
-					`https://api.themoviedb.org/3/${ MV? 'movie': 'tv' }/${ apid }?api_key=${ api.tmdb }`:
-				(iid || mid || tid)?
-					`https://api.themoviedb.org/3/find/${ iid || mid || tid }?api_key=${ api.tmdb }&external_source=${ iid? 'imdb': mid? 'tmdb': 'tvdb' }_id`:
-				`https://api.themoviedb.org/3/search/${ MV? 'movie': 'tv' }?api_key=${ api.tmdb }&query=${ encodeURI(title) }${ year? '&year=' + year: '' }`:
-			(rqut == 'tvdb' || (rqut == '*' && !tid && title) || (apid == tid))?
-				(tid)?
-					`https://api.tvmaze.com/shows/?thetvdb=${ tid }`:
-				(iid)?
-					`https://api.tvmaze.com/shows/?imdb=${ iid }`:
-				`https://api.tvmaze.com/search/shows?q=${ encodeURI(title) }`:
-			(title)?
-				(apit && year)?
-					`https://www.theimdbapi.org/api/find/${ MV? 'movie': 'show' }?title=${ encodeURI(title) }&year=${ year }`:
-				`https://www.theimdbapi.org/api/find/movie?title=${ encodeURI(title) }${ year? '&year=' + year: '' }`:
-			null;
+		    (manable && title && __CONFIG__.usingOmbi && __CONFIG__.ombiURLRoot)?
+		        `${ __CONFIG__.ombiURLRoot }api/v1/Search/${ (/^[it]mdb$/i.test(rqut) || MV)? 'movie': 'tv' }/${ plus(title, '%20') }/?apikey=${ api.ombi }`:
+		    (manable && (__CONFIG__.usingRadarr || __CONFIG__.usingSonarr || __CONFIG__.usingMedusa /*|| __CONFIG__.usingSickBeard*/))?
+		        (__CONFIG__.usingRadarr && /^[it]mdb$/i.test(rqut) && __CONFIG__.radarrURLRoot)?
+		            (mid)?
+		                `${ __CONFIG__.radarrURLRoot }api/movie/lookup/tmdb?tmdbId=${ mid }&apikey=${ __CONFIG__.radarrToken }`:
+		            (iid)?
+		                `${ __CONFIG__.radarrURLRoot }api/movie/lookup/imdb?imdbId=${ iid }&apikey=${ __CONFIG__.radarrToken }`:
+		            `${ __CONFIG__.radarrURLRoot }api/movie/lookup?term=${ plus(title, '%20') }&apikey=${ __CONFIG__.radarrToken }`:
+		        (__CONFIG__.usingSonarr && __CONFIG__.sonarrURLRoot)?
+		            (tid)?
+		                `${ __CONFIG__.sonarrURLRoot }api/series/lookup?term=tvdb:${ tid }&apikey=${ __CONFIG__.sonarrToken }`:
+		            `${ __CONFIG__.sonarrURLRoot }api/series/lookup?term=${ plus(title, '%20') }&apikey=${ __CONFIG__.sonarrToken }`:
+		        (__CONFIG__.usingMedusa && __CONFIG__.medusaURLRoot)?
+		            (tid)?
+		                `${ __CONFIG__.medusaURLRoot }api/v2/series/tvdb${ tid }?detailed=true&api_key=${ __CONFIG__.medusaToken }`:
+		            `${ __CONFIG__.medusaURLRoot }api/v2/internal/searchIndexersForShowName?query=${ plus(title) }&indexerId=0&api_key=${ __CONFIG__.medusaToken }`:
+		        /* TODO: find a way to get CORS to work on Sick Beard URLs (localhost) */
+		        // (__CONFIG__.usingSickBeard)?
+		        //	 (tid)?
+		        //		 `${ __CONFIG__.sickBeardURLRoot }api/${ __CONFIG__.sickBeardToken }/?cmd=sb.searchtvdb&tvdbid=${ tid }`:
+		        //	 `${ __CONFIG__.sickBeardURLRoot }api/${ __CONFIG__.sickBeardToken }/?cmd=sb.searchtvdb&name=${ encodeURIComponent(title) }`:
+		        null:
+		    (rqut == 'imdb' || (rqut == '*' && !iid && title) || (rqut == 'tvdb' && !iid && title && !(rerun & 0b1000)) && (rerun |= 0b1000))?
+		        (iid)?
+		            `https://www.omdbapi.com/?i=${ iid }&apikey=${ api.omdb }`:
+		        (year)?
+		            `https://www.omdbapi.com/?t=${ plus(title) }&y=${ year }&apikey=${ api.omdb }`:
+		        `https://www.omdbapi.com/?t=${ plus(title) }&apikey=${ api.omdb }`:
+		    (rqut == 'tmdb' || (rqut == '*' && !mid && title && year) || MV)?
+		        (apit && apid)?
+		            `https://api.themoviedb.org/3/${ MV? 'movie': 'tv' }/${ apid }?api_key=${ api.tmdb }`:
+		        (iid || mid || tid)?
+		            `https://api.themoviedb.org/3/find/${ iid || mid || tid }?api_key=${ api.tmdb }&external_source=${ iid? 'imdb': mid? 'tmdb': 'tvdb' }_id`:
+		        `https://api.themoviedb.org/3/search/${ MV? 'movie': 'tv' }?api_key=${ api.tmdb }&query=${ encodeURI(title) }${ year? '&year=' + year: '' }`:
+		    (rqut == 'tvdb' || (rqut == '*' && !tid && title) || (apid == tid))?
+		        (tid)?
+		            `https://api.tvmaze.com/shows/?thetvdb=${ tid }`:
+		        (iid)?
+		            `https://api.tvmaze.com/shows/?imdb=${ iid }`:
+		        `https://api.tvmaze.com/search/shows?q=${ encodeURI(title) }`:
+		    (title)?
+		        (apit && year)?
+		            `https://www.theimdbapi.org/api/find/${ MV? 'movie': 'show' }?title=${ encodeURI(title) }&year=${ year }`:
+		        `https://www.theimdbapi.org/api/find/movie?title=${ encodeURI(title) }${ year? '&year=' + year: '' }`:
+		    null;
 
 		if(url === null) return null;
 
@@ -1215,7 +1545,7 @@ let configuration, init, Update;
 			UTILS_TERMINAL.log({ proxy, url, headers });
 		}
 
-		UTILS_TERMINAL.LOG(`Searching for "${ title } (${ year })" in ${ type || apit }/${ rqut }${ proxy.enabled? '[PROXY]': '' } => ${ url }`, __CONFIG__);
+		UTILS_TERMINAL.LOG(`Searching for "${ title } (${ year })" in ${ type || apit }/${ rqut }${ proxy.enabled? '[PROXY]': '' } => ${ url }`);
 
 		await(proxy.enabled? fetch(url, { mode: "cors", headers }): fetch(url))
 			.then(response => response.text())
@@ -1483,6 +1813,19 @@ let configuration, init, Update;
 				UTILS_TERMINAL.LOG(`Loose Matching: ${ !!found }`, !!found? found: null);
 			}
 
+			if(ReturnAllResults) {
+				UTILS_TERMINAL.LOG(`Overriding results...`, { found, json });
+
+				return json.map(item => ({
+					type,
+					title: (item.title || item.name || item.Title || item.Name || item.original_title || item.original_name || item.show.name),
+					year: parseInt(item.year || item.Year || item.first_aired || item.first_aired_date || item.premiered || item.release_date),
+					IMDbID: (iid || item.imdbId || item.imdbID || item.imdb_id || item.imdb_id                      || ('externals' in item? item.externals.imdb: null)       ||   ''),
+					TMDbID: (mid || item.tmdbId || item.tmdbID || item.tmdb_id || item.id      || item.theMovieDbId || ('externals' in item? item.externals.themoviedb: null) ||    0),
+					TVDbID: (tid || item.tvdbId || item.tvdbID || item.tvdb_id || item.tvdb    || item.theTvDbId    || ('externals' in item? item.externals.thetvdb: null)    ||    0)
+				}));
+			}
+
 			json = found;
 		}
 
@@ -1584,8 +1927,9 @@ let configuration, init, Update;
 
 		UTILS_TERMINAL.LOG(`Best match: ${ url }`, { best, json });
 
-		if(best.data.imdb == ei && best.data.tmdb == 0 && best.data.tvdb == 0)
-			return UTILS_TERMINAL.ERROR(`No information was found for "${ title } (${ year })"`), {};
+		if(best.data.imdb == ei && best.data.tmdb == 0 && best.data.tvdb == 0) {
+			UTILS_TERMINAL.ERROR(`No information was found for "${ title } (${ year })"`);
+		}
 
 		save(savename, data); // e.g. "Coco (0)" on Netflix before correction / no repeat searches
 		save(savename = `${title} (${year}).${rqut}`.toLowerCase(), data); // e.g. "Coco (2017)" on Netflix after correction / no repeat searches
@@ -1955,7 +2299,7 @@ let configuration, init, Update;
 
 		COMPRESS = options.UseLZW;
 		CAUGHT = __CONFIG__.__caught;
-		CAUGHT = JSON.parse(COMPRESS? iBWT(decompress(CAUGHT)): CAUGHT);
+		CAUGHT = JSON.parse(COMPRESS? iBWT(unzip(decompress(CAUGHT))): CAUGHT);
 
 		chrome.runtime.sendMessage({
 				type: 'PUSH_SICKBEARD',
@@ -1967,7 +2311,7 @@ let configuration, init, Update;
 				title: options.title,
 				year: options.year,
 				tvdbId: options.TVDbID,
-				exists: !!~CAUGHT.tvdb.indexOf(options.TVDbID),
+				exists: CAUGHT.has({ tvdb: options.TVDbID }),
 				...PromptValues
 			},
 			response => {
@@ -2006,7 +2350,7 @@ let configuration, init, Update;
 
 		let { __theme } = __CONFIG__;
 
-		let ThemeClasses = JSON.parse(COMPRESS? iBWT(decompress(__theme)): __theme),
+		let ThemeClasses = JSON.parse(COMPRESS? iBWT(unzip(decompress(__theme))): __theme),
 			HeaderClasses = [],
 			ParsedAttributes = {};
 
@@ -2170,11 +2514,7 @@ let configuration, init, Update;
 					continue;
 
 				// Skip queued entries
-				if(
-					!!~CAUGHT.imdb.indexOf(option.IMDbID) ||
-					!!~CAUGHT.tmdb.indexOf(option.TMDbID) ||
-					!!~CAUGHT.tvdb.indexOf(option.TVDbID)
-				)
+				if(CAUGHT.has({ imdb: option.IMDbID, tmdb: option.TMDbID, tvdb: option.TVDbID }))
 					continue;
 
 				// the action should be an array
@@ -2231,7 +2571,7 @@ let configuration, init, Update;
 			button.setAttribute('saved_options', encode(JSON.stringify(saved_options)));
 			element.addEventListener('click', e => (AUTO_GRAB.ENABLED && AUTO_GRAB.LIMIT > options.length)? element.ON_CLICK(e): new Prompt('select', options, o => { button.setAttribute('saved_options', encode(JSON.stringify(o))); element.ON_CLICK(e) }));
 
-			element.setAttribute(hov, `Grab ${len} new item${s}: ${ t }`);
+			element.setAttribute(hov, `Grab ${ len } new item${ s }: ${ t }`);
 			button.classList.add(saved_options.length || len? 'wtp--download': 'wtp--error');
 		} else {
 		/* Handle a single item */
@@ -2351,9 +2691,31 @@ let configuration, init, Update;
 
 				button.classList.remove('wtp--found');
 				button.classList.add('wtp--error');
+
+				element.addEventListener('click', async event => {
+					UTILS_TERMINAL.LOG('Asking for corrections:', options);
+
+					let results = await Identify(options, true);
+
+					UTILS_TERMINAL.LOG('Did you mean:', results);
+
+					new Prompt('search', results, corrections => {
+						if(!corrections.length)
+							return;
+
+						let correction = corrections[0],
+							{ type, title, year } = correction;
+
+						UTILS_TERMINAL.LOG('Correction:', correction);
+
+						button.classList.remove('wtp--error');
+
+						UpdateButton(button, 'downloader', `Add "${ title }${( year? ` (${year})`: '' )}" | ${ type }`, correction);
+					});
+				});
 			}
 
-			if((action == 'downloader') && (!!~CAUGHT.imdb.indexOf(options.IMDbID) || !!~CAUGHT.tmdb.indexOf(options.TMDbID) || !!~CAUGHT.tvdb.indexOf(options.TVDbID))) {
+			if((action == 'downloader') && CAUGHT.has({ imdb: options.IMDbID, tmdb: options.TMDbID, tvdb: options.TVDbID })) {
 				element.setAttribute(hov, `Modify "${ nice_title }" | ${ty}`);
 
 				button.classList.remove('wtp--found');
@@ -2711,6 +3073,18 @@ let configuration, init, Update;
 })(new Date);
 
 /* Helpers */
+/* Zipping Algorithm */
+function zip(string = '') {
+	return string.replace(/(\w)(\1{4,})/g, ($0, $1, $2, $$, $_) => $1 + `{${$2.length.toString(36)}}`);
+}
+
+/* Un-Zipping Algorithm */
+function unzip(string = '') {
+	let from36 = (n, x = 0) => n.split('').reverse().map((v, i) => x += '0123456789abcdefghijklmnopqrstuvwxyz'.indexOf(v) * 36**i)[-1] || x;
+
+	return string.replace(/(\w)\{([a-z\d]+)\}/gi, ($0, $1, $2, $$, $_) => $1.repeat(from36($2) + 1));
+}
+
 /* BWT Sorting Algorithm */
 function BWT(string = '') {
     if(/^[\x32]*$/.test(string))

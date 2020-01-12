@@ -1,4 +1,4 @@
-/* global chrome */
+/* global browser */
 let BACKGROUND_DEVELOPER = false;
 
 let external = {},
@@ -144,19 +144,7 @@ function getConfiguration() {
 
 // self explanatory, returns an object; sets the configuration variable
 function parseConfiguration() {
-	return getConfiguration().then(options => {
-		if((BACKGROUND_DEVELOPER = options.DeveloperMode) && !parseConfiguration.gotConfig) {
-			parseConfiguration.gotConfig = true;
-			BACKGROUND_TERMINAL =
-				BACKGROUND_DEVELOPER?
-					console:
-				{ error: m => m, info: m => m, log: m => m, warn: m => m, group: m => m, groupEnd: m => m };
-
-			BACKGROUND_TERMINAL.warn(`BACKGROUND_DEVELOPER: ${BACKGROUND_DEVELOPER}`);
-		}
-
-		return options;
-	}, error => { throw error });
+	return getConfiguration().then(options => options, error => { throw error });
 }
 
 function load(name, private) {
@@ -174,6 +162,15 @@ async function UpdateConfiguration(force_update = false) {
 		BACKGROUND_CONFIGURATION = await parseConfiguration();
 	else
 		BACKGROUND_CONFIGURATION = configuration;
+
+	if(BACKGROUND_DEVELOPER = configuration.DeveloperMode) {
+		BACKGROUND_TERMINAL =
+			BACKGROUND_DEVELOPER?
+				console:
+			{ error: m => m, info: m => m, log: m => m, warn: m => m, group: m => m, groupEnd: m => m };
+
+		BACKGROUND_TERMINAL.warn(`BACKGROUND_DEVELOPER: ${BACKGROUND_DEVELOPER}`);
+	}
 
 	save('configuration', BACKGROUND_CONFIGURATION);
 };
@@ -764,14 +761,14 @@ function $Search_Plex(connection, headers, options) {
 		.then(response => response.json())
 		.then(data => {
 			let Hub = data.MediaContainer.Hub.find(hub => hub.type === type);
+			// type: actor album artist autotag collection director episode genre movie photo photoalbum place playlist shared show track
 
-			if(!Hub || !Hub.Metadata) {
+			if(!Hub || !Hub.Metadata)
 				return { found: false };
-			}
 
 			// We only want to search in Plex libraries with the type "Movie", i.e. not the type "Other Videos".
 			// Weirdly enough Plex doesn't seem to have an easy way to filter those libraries so we invent our own hack.
-			let movies = Hub.Metadata.filter(
+			let items = Hub.Metadata.filter(
 				meta =>
 					meta.Directory ||
 					meta.Genre ||
@@ -786,12 +783,11 @@ function $Search_Plex(connection, headers, options) {
 			// For examples, see Bone Tomahawk, The Big Short, The Hateful Eight.
 			// So we'll first try to find the movie with the given year, and then + 1 it.
 			// Added [strip] to prevent mix-ups, see: "Kingsman: The Golden Circle" v. "The Circle"
-			let media = movies.find(meta => ((meta.year == +options.year) && strip(meta.title) == strip(options.title))),
+			let media = items.find(meta => (((meta.year == +options.year) || (meta.year == +options.year + 1)) && strip(meta.title) == strip(options.title))),
 				key = null;
 
-			if(!media) {
-				media = movies.find(meta => ((meta.year == +options.year + 1) && strip(meta.title) == strip(options.title)));
-			}
+			if(!media && options.IMDbID)
+				media = items.find(meta => new RegExp('imdb://' + options.IMDbID, 'i').test(meta.guid));
 
 			key = !!media? media.key.replace('/children', ''): key;
 
