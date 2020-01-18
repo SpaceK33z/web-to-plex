@@ -1571,6 +1571,15 @@ function saveOptions() {
 		]
 	};
 
+	save('builtin', []);
+	save('plugin', []);
+	for(let option in options)
+		option.replace(/^(builtin|plugin)_(\w+)$/i, ($0, $1, $2, $$, $_) =>
+			(!$1)?
+				null:
+			save($1, [...(load($1) || []), `${ $2 }:${ options[option] }`])
+		);
+
 	storage.set(data, () => {
 		LoadingAnimation();
 
@@ -1640,7 +1649,7 @@ function saveOptionsWithoutPlex() {
 	}
 
 	// Still need to set this
-	options.plexURL = options.plexURLRoot = "https://ephellon.github.io/web.to.plex/no.server/";
+	options.plexURL = options.plexURLRoot = "https://webtoplex.github.io/web/no.server/";
 
 	options.ombiURLRoot = (options.ombiURLRoot || "")
 		.replace(/([^\\\/])$/, endingSlash)
@@ -1703,6 +1712,15 @@ function saveOptionsWithoutPlex() {
 	let data = options;
 
 	LoadingAnimation(true);
+
+	save('builtin', []);
+	save('plugin', []);
+	for(let option in options)
+		option.replace(/^(builtin|plugin)_(\w+)$/i, ($0, $1, $2, $$, $_) =>
+			(!$1)?
+				null:
+			save($1, [...(load($1) || []), `${ $2 }:${ options[option] }`])
+		);
 
 	storage.set(data, () => {
 		LoadingAnimation();
@@ -1929,7 +1947,7 @@ let builtins = {
 	"MovieMeter": "https://moviemeter.nl/",
 	"GoStream": "https://gostream.site/",
 	"Tubi": "https://tubitv.com/",
-	"Web to Plex": "https://ephellon.github.io/web.to.plex/",
+	"Web to Plex": ["https://webtoplex.github.io/web/", "https://ephellon.github.io/web.to.plex/"],
 	"Allocine": "https://allocine.fr/",
 	"Plex": "https://app.plex.tv/",
 

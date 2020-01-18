@@ -1,6 +1,7 @@
 .editorconfig
 .eslintrc
 pkg*.zip
+*-beta.zip
 *.example
 *.lock
 build/

@@ -1,13 +1,10 @@
 html, body {
     height: 625px !important;
     width: 625px !important;
-
-    scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.15) #3f4245;
 }
 
 body {
-    background: url(../img/noise.png) fixed, url(../img/background.png) no-repeat fixed center/cover, #3f4245 !important;
+    background: url(noise.png) fixed, url(background.png) no-repeat fixed center/cover, #3f4245 !important;
     color: #333 !important;
     font-family: Open Sans Regular, Helvetica Neue, Helvetica, Arial, sans-serif, system;
     font-size: 1.25em !important;
@@ -79,6 +76,10 @@ td, footer > * > * {
     display: table-cell !important;
 }
 
+tbody:not(:last-child) {
+    border-bottom: 1px solid #6668;
+}
+
 #movieo:hover {
     box-shadow: 0 10px 128px inset #5DBCD4;
 }
@@ -99,7 +100,7 @@ td, footer > * > * {
     box-shadow: 0 10px 128px inset #EC164F;
 }
 
-#tv-maze:hover {
+#tvmaze:hover {
     box-shadow: 0 10px 128px inset #6EC4BA;
 }
 
@@ -151,11 +152,11 @@ td, footer > * > * {
     box-shadow: 0 10px 128px inset #E10000;
 }
 
-#couch-potato:hover {
+#couchpotato:hover {
     box-shadow: 0 10px 128px inset #ECB501;
 }
 
-#rotten-tomatoes:hover {
+#rottentomatoes:hover {
     box-shadow: 0 10px 128px inset #FA3008;
 }
 
@@ -167,7 +168,7 @@ td, footer > * > * {
     box-shadow: 0 10px 128px inset #DD1B2F;
 }
 
-#shana-project:hover {
+#shanaproject:hover {
     box-shadow: 0 10px 128px inset #FF0000;
 }
 
@@ -203,7 +204,27 @@ td, footer > * > * {
     box-shadow: 0 10px 128px inset #CC7B19;
 }
 
-#local-plex:hover {
+#foxsearchlight:hover {
+    box-shadow: 0 10px 128px inset #F9C75D;
+}
+
+#go:hover {
+    box-shadow: 0 10px 128px inset #007AFF;
+}
+
+#kitsu:hover {
+    box-shadow: 0 10px 128px inset #F75136;
+}
+
+#myshows:hover {
+    box-shadow: 0 10px 128px inset #D20000;
+}
+
+#redbox:hover {
+    box-shadow: 0 10px 128px inset #CD1F54;
+}
+
+#local-plex:hover, #plex:hover {
     box-shadow: 0 10px 128px inset #F9BD03;
 }
 
@@ -295,24 +316,8 @@ td, footer > * > * {
 }
 
 [disabled] label:after {
-    content: " \23f3" !important;
+    content: " \274c" !important;
     float: right;
-}
-
-*::-webkit-scrollbar {
-    width: 10px;
-}
-
-*::-webkit-scrollbar-thumb {
-    min-height: 50px;
-    background: rgba(255, 255, 255, 0.15);
-    border: 2px solid rgba(0, 0, 0, 0);
-    border-radius: 8px;
-    background-clip: padding-box;
-}
-
-*::-webkit-scrollbar-track {
-    background: url(noise.png) repeat, #3f4245 !important;
 }
 
 *::-moz-scrollbar {

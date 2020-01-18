@@ -74,6 +74,10 @@ td, footer > * > * {
     display: table-cell !important;
 }
 
+tbody:not(:last-child) {
+    border-bottom: 1px solid #6668;
+}
+
 #movieo:hover {
     box-shadow: 0 10px 128px inset #5DBCD4;
 }
@@ -94,7 +98,7 @@ td, footer > * > * {
     box-shadow: 0 10px 128px inset #EC164F;
 }
 
-#tv-maze:hover {
+#tvmaze:hover {
     box-shadow: 0 10px 128px inset #6EC4BA;
 }
 
@@ -146,11 +150,11 @@ td, footer > * > * {
     box-shadow: 0 10px 128px inset #E10000;
 }
 
-#couch-potato:hover {
+#couchpotato:hover {
     box-shadow: 0 10px 128px inset #ECB501;
 }
 
-#rotten-tomatoes:hover {
+#rottentomatoes:hover {
     box-shadow: 0 10px 128px inset #FA3008;
 }
 
@@ -162,7 +166,7 @@ td, footer > * > * {
     box-shadow: 0 10px 128px inset #DD1B2F;
 }
 
-#shana-project:hover {
+#shanaproject:hover {
     box-shadow: 0 10px 128px inset #FF0000;
 }
 
@@ -198,7 +202,27 @@ td, footer > * > * {
     box-shadow: 0 10px 128px inset #CC7B19;
 }
 
-#local-plex:hover {
+#foxsearchlight:hover {
+    box-shadow: 0 10px 128px inset #F9C75D;
+}
+
+#go:hover {
+    box-shadow: 0 10px 128px inset #007AFF;
+}
+
+#kitsu:hover {
+    box-shadow: 0 10px 128px inset #F75136;
+}
+
+#myshows:hover {
+    box-shadow: 0 10px 128px inset #D20000;
+}
+
+#redbox:hover {
+    box-shadow: 0 10px 128px inset #CD1F54;
+}
+
+#local-plex:hover, #plex:hover {
     box-shadow: 0 10px 128px inset #F9BD03;
 }
 
@@ -290,7 +314,7 @@ td, footer > * > * {
 }
 
 [disabled] label:after {
-    content: " \23f3" !important;
+    content: " \274c" !important;
     float: right;
 }
 

@@ -486,7 +486,7 @@ let tabchange = async tabs => {
 		(type === 'script')?
 			browser.runtime.getURL(`${ js }.js`):
 		browser.runtime.getURL(`plugin.${ js }.js`):
-	`https://ephellon.github.io/web.to.plex/${ type }s/${ js }.js`;
+	`https://webtoplex.github.io/web/${ type }s/${ js }.js`;
 
 	await fetch(file, { mode: 'cors' })
 		.then(response => response.text())
@@ -543,7 +543,7 @@ browser.runtime.onMessage.addListener(processMessage = async(request = {}, sende
 			(_type === 'script')?
 				browser.runtime.getURL(`${ script }.js`):
 			browser.runtime.getURL(`plugin.${ plugin }.js`):
-		`https://ephellon.github.io/web.to.plex/${ _type }s/${ options[_type] }.js`;
+		`https://webtoplex.github.io/web/${ _type }s/${ options[_type] }.js`;
 
 		let { authorized, ...A } = await GetAuthorization(options[_type]);
 
@@ -603,6 +603,7 @@ browser.runtime.onMessage.addListener(processMessage = async(request = {}, sende
 
 				case 'FOUND':
 					FOUND[request.instance] = request.found;
+					// chrome.tabs.sendMessage(tab.id, { data: {}, instance, found: request.found, instance_type: type.toLowerCase(), type: 'POSTED' });
 					break;
 
 				case 'GRANT_PERMISSION':

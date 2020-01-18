@@ -1,0 +1,944 @@
+* {
+    outline: #0000 !important;
+}
+
+html, body {
+    height: 100%;
+}
+
+body {
+    background: url(noise.png) fixed, url(background.png) no-repeat fixed center/cover, #3f4245 !important;
+    color: #999 !important;
+    font-family: Open Sans Regular, Helvetica Neue, Helvetica, Arial, sans-serif, system;
+    flex-grow: 1;
+    overflow-x: hidden;
+    overflow-y: auto;
+
+    padding: 0;
+    position: absolute;
+    margin: 0;
+
+    height: 100%;
+    width: 100%;
+}
+
+display {
+    display: block;
+    font-size: 18px;
+    overflow-y: auto;
+
+    padding: 50px 50px 0 50px;
+    position: fixed;
+    top: 0;
+    left: 20%;
+
+    height: 90%;
+    width: calc(80% - 100px);
+}
+
+display:empty {
+    background: url(256.png) no-repeat fixed 60%;
+    /* todo: loading animation */
+}
+
+display[loading="true"i] * {
+    animation: fade 0.3s 1 ease-in-out;
+    opacity: 0.3;
+}
+
+display[loading="true"i]:after {
+    border: 2px solid #e5a00d;
+    border-left: 2px solid #0000;
+    border-radius: 50%;
+    color: #0000;
+    content: '----';
+    font-size: 8px;
+
+    animation: spin 1.1s infinite linear;
+
+    position: fixed;
+    margin: 0 auto 10px;
+    left: calc(50% + 24px);
+    top: calc(50% + 24px);
+
+    height: 12px;
+    width: 12px;
+}
+
+[_title_]:before {
+    color: #fff !important;
+    content: attr(_title_) "\00a0\2014\00a0" attr(_sub-title_);
+    border: 0;
+    border-bottom: 1px solid #6668;
+    display: block;
+    font-size: 1.5em;
+
+    width: 100%;
+}
+
+a {
+    color: #cc7b19 !important;
+    text-decoration: none !important;
+}
+
+[target="_blank"]:not(#version)::after {
+    content: " [\2197]";
+    font-size: 70%;
+
+    vertical-align: super;
+}
+
+hr {
+    border: 0;
+    border-top: 1px solid #6668;
+
+    margin: 6px 0;
+}
+
+hr:last-child {
+    display: none;
+}
+
+article {
+    z-index: 3;
+}
+
+.h1 {
+    font-size: 300%;
+}
+
+.h2 {
+    font-size: 200%;
+}
+
+.h3 {
+    font-size: 150%;
+}
+
+.h4 {
+    font-size: 100%;
+}
+
+.h5 {
+    font-size: 75%;
+}
+
+.h6 {
+    font-size: 50%;
+}
+
+section {
+    display: block !important;
+    margin-bottom: 20px;
+    box-sizing: border-box;
+}
+
+label {
+    color: #eee !important;
+    font-weight: 400 !important;
+    display: inline-block;
+    margin-bottom: 5px;
+}
+
+input[type="text"], input[type="password"], textarea, select {
+    width: 30vw !important;
+    line-height: 1.5em !important;
+    transition: background 0.2s;
+    display: block !important;
+    height: 38px !important;
+    padding: 6px 12px;
+    font-size: 16px !important;
+    color: #eee !important;
+    vertical-align: middle;
+    background: rgba(255, 255, 255, 0.25);
+    border: 3px solid rgba(0, 0, 0, 0);
+    border-radius: 3px;
+    font-family: inherit;
+    margin: 0;
+}
+
+textarea, select[multiple] {
+    height: 114px !important;
+}
+
+div:not(body > div) {
+    color: rgba(255, 255, 255, 0.45) !important;
+    display: block;
+    margin-top: 5px !important;
+    margin-bottom: 10px !important;
+    box-sizing: border-box;
+    font-size: 14px !important;
+    z-index: 18 !important;
+}
+
+button, input[type="button"i], .button {
+    padding: 10px 18px !important;
+    font-size: 16px !important;
+    line-height: 1.33 !important;
+    border-radius: 3px;
+    font-family: inherit;
+    text-transform: uppercase;
+    border: 0;
+    box-shadow: none !important;
+    position: relative;
+    overflow: hidden;
+    color: #fff !important;
+    background: #cc7b19 !important;
+    margin-bottom: 0;
+    font-weight: 400 !important;
+    vertical-align: middle;
+    cursor: pointer !important;
+    white-space: nowrap;
+    user-select: none;
+    transition: all 0.1s;
+}
+
+button:hover, input[type="button"i]:hover, .button:hover, .checkbox input:checked + label:hover, input[type="range"]::-webkit-slider-thumb:hover {
+    background: #e59029 !important;
+    transition: all 0.1s;
+}
+
+.checkbox input:not(:checked) + label:hover {
+    background: #999;
+    transition: all 0.1s;
+}
+
+[id$="_test"] {
+    background: #cc7b19 !important;
+    margin-bottom: 2px;
+    padding: 10px 8px 10px 10px !important;
+}
+
+[id$="_status"] {
+    padding: 0 6px !important;
+    font-size: 16px !important;
+    border-radius: 3px;
+    font-family: monospace, sans-serif, sans, arial;
+    border: 0;
+    box-shadow: none !important;
+    color: #fff !important;
+    background: #666 !important;
+    border-radius: 4px;
+}
+
+[id$="_status"].false {
+    background: #cc1b19 !important;
+}
+
+[id$="_status"].true {
+    background: #7bcc19 !important;
+}
+
+[id$="token"], [data-option$="Token"], [data-option$="API"] {
+    font-family: monospace, consolas, sans-serif, sans serif, sans, arial;
+}
+
+[id$="-token"i]:not(:placeholder-shown), [data-option$="-API"i]:not(:placeholder-shown) {
+    text-transform: uppercase;
+}
+
+em {
+    color: #cc7b19 !important;
+}
+
+strike, st, k {
+    text-decoration: line-through !important;
+}
+
+[href="#!/NaCl+Iw"], [href="#!/NaCl+Iw"] * {
+    cursor: not-allowed !important;
+    opacity: 0.5 !important;
+}
+
+select {
+    margin-left: 10px !important;
+    font-size: 16px !important;
+    line-height: inherit;
+    text-transform: none;
+}
+
+#sidebar {
+    background-color: rgba(0,0,0,.15);
+    display: flex;
+    flex: 0 0 240px;
+    flex-direction: column;
+    transform: translateZ(0);
+    overflow-y: auto;
+
+    height: 100%;
+    width: 20%;
+}
+
+header {
+    align-content: center;
+    color: hsla(0,0%,100%,.3);
+    font-family: Open Sans Bold,Helvetica Neue,Helvetica,Arial,sans-serif;
+    font-size: 14px;
+    line-height: 45px;
+    overflow: hidden !important;
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+    white-space: nowrap !important;
+
+    padding-left: 25px;
+
+    height: 45px;
+    min-width: 0;
+    max-width: 100%;
+
+}
+
+article {
+    color: #999;
+
+    position: relative !important;
+    padding: 5px !important;
+    padding-left: 50px !important;
+}
+
+summary, option {
+    color: #999;
+    cursor: pointer;
+
+    margin-bottom: 12px !important;
+    margin-top: 0 !important;
+    padding-left: 0;
+}
+
+[x-mode]:after, [beta]:after {
+    content: ' (Experimental Feature)';
+    color: #fff;
+}
+
+#sidebar summary {
+    font-size: 12px;
+
+    margin-left: -50px;
+    padding-left: 50px;
+}
+
+#sidebar summary:hover {
+    background: #ffffff14;
+    border: 0 solid #0000;
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+}
+
+#sidebar details[open] summary {
+    color: #cc7b19;
+}
+
+#sidebar .checkbox {
+    display: block;
+    transform: scale(0.75);
+}
+
+display > summary:first-child {
+    font-size: 1.5em;
+}
+
+display summary > .checkbox {
+    display: block;
+}
+
+select:not([multiple]) > option {
+    background: url(noise.png), #3f4245 !important;
+}
+
+details:last-child > summary {
+    margin-bottom: 0 !important;
+}
+
+.bar > article > details > summary {
+    display: list-item;
+    list-style-type: none;
+}
+
+.bar > article > details[open] > *:not(summary) {
+    display: none !important;
+}
+
+.bar > article > details > summary::-webkit-details-marker {
+    color: #0000;
+}
+
+.bar > article > details[open] > summary::before {
+    content: '\2022';
+    color: inherit !important;
+    font-size: 16px;
+
+    margin-left: 2px;
+    margin-top: -2px;
+    position: absolute;
+}
+
+#save {
+    margin: 6px 12px;
+}
+
+footer {
+    bottom: 0;
+    position: fixed;
+
+    width: 100%;
+}
+
+[using], [counter-for] {
+    color: #197bcc;
+}
+
+[using]::after {
+    content: '\2610';
+}
+
+[in-use="true"i]::after {
+    content: '\2611';
+}
+
+[special][using]:not([in-use="true"i]) {
+    color: #666;
+}
+
+[special][in-use="true"i], [special][counter-for] {
+    color: #cc7b19;
+}
+
+[counter-for] {
+    border: 1px solid #197bcc;
+
+    margin: 0;
+    padding: 0 3px;
+}
+
+[counter-for][in-use]::after {
+    content: '' !important;
+}
+
+[special][counter-for] {
+    border-color: #cc7b19;
+}
+
+#sidebar [counter-for] {
+    font-size: 10px;
+}
+
+[top] {
+    border-bottom-left-radius:  0 !important;
+    border-bottom-right-radius: 0 !important;
+}
+
+[bottom] {
+    border-top-left-radius:  0 !important;
+    border-top-right-radius: 0 !important;
+}
+
+[type="password"] ~ .hidden-help, .hide {
+    display: none;
+}
+
+.test {
+    background: #197bcc !important;
+    font-family: monospace;
+}
+
+.test:hover {
+    background: #298bdc !important;
+}
+
+#sidebar .checkbox:not([special]) {
+    display: none !important;
+}
+
+display summary [using]:not([special]) {
+    display: none !important;
+}
+
+/* bbodine @CodePen - https://codepen.io/bbodine1/pen/novBm */
+.checkbox {
+    width: 80px;
+    height: 26px;
+    background: #000;
+    margin: 15px 0;
+    position: relative;
+    border-radius: 50px;
+    box-shadow: inset 0px 1px 1px rgba(0, 0, 0, 0.5), 0px 1px 0px rgba(255, 255, 255, 0.2);
+}
+
+span.checkbox {
+    display: inline-block;
+
+    margin: 0;
+    vertical-align: text-bottom;
+}
+
+.checkbox::after {
+    content: 'OFF';
+    color: #666;
+    position: absolute;
+    right: 10px;
+    z-index: 0;
+    font: 12px/26px Arial, sans-serif;
+    font-weight: bold;
+    text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.15);
+}
+
+.checkbox::before {
+    content: 'ON';
+    color: #cc7b19;
+    position: absolute;
+    left: 10px;
+    z-index: 0;
+    font: 12px/26px Arial, sans-serif;
+    font-weight: bold;
+}
+
+.checkbox[prompt-yes]::before {
+    content: attr(prompt-yes);
+    text-transform: uppercase;
+}
+
+.checkbox[prompt-no]::after {
+    content: attr(prompt-no);
+    text-transform: uppercase;
+}
+
+.checkbox[prompt-size="large"i]::before, .checkbox[prompt-size="large"i]::after {
+    font-size: 30px !important;
+}
+
+.checkbox[prompt-size="medium"i]::before, .checkbox[prompt-size="medium"i]::after {
+    font-size: 21px !important;
+}
+
+.checkbox[prompt-size="normal"i]::before, .checkbox[prompt-size="normal"i]::after {
+    font-size: 12px !important;
+}
+
+.checkbox[prompt-size="small"i]::before, .checkbox[prompt-size="small"i]::after {
+    font-size: 6px !important;
+}
+
+.checkbox[prompt="y/n"i]::before {
+    content: 'YES';
+}
+
+.checkbox[prompt="y/n"i]::after {
+    content: 'NO';
+}
+
+.checkbox label {
+    display: block;
+    width: 34px;
+    height: 20px;
+    cursor: pointer;
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    z-index: 1;
+    background: #666;
+    border-radius: 50px;
+    transition: all 0.4s ease;
+    box-shadow: 0px 2px 5px 0px rgba(0, 0, 0, 0.3);
+}
+
+.checkbox input[type=checkbox] {
+    visibility: hidden;
+}
+
+.checkbox input[type=checkbox]:checked + label {
+    left: 43px;
+    background: #cc7b19;
+}
+
+.checkbox[disabled] {
+    opacity: 0.25 !important;
+}
+
+.checkbox[disabled] + [using] {
+    color: #666;
+    opacity: 0.25;
+}
+
+[white], .checkbox[white]::before {
+    color: #ddd !important;
+}
+.checkbox[white] input:checked + label {
+    background: #ddd !important;
+}
+.checkbox[white] input:checked + label:hover {
+    background: #fff !important;
+}
+
+[orange], .checkbox[orange]::before {
+    color: #cc7b19 !important;
+}
+.checkbox[orange] input:checked + label {
+    background: #cc7b19 !important;
+}
+.checkbox[orange] input:checked + label:hover {
+    background: #e59029 !important;
+}
+
+[blue], .checkbox[blue]::before {
+    color: #197bcc !important;
+}
+.checkbox[blue] input:checked + label {
+    background: #197bcc !important;
+}
+.checkbox[blue] input:checked + label:hover {
+    background: #2094f5 !important;
+}
+
+input[type="range"] {
+    appearance: none;
+    -webkit-appearance: none;
+
+    background: #0004;
+    outline: none;
+
+    height: 5px !important;
+    width: 83% !important;
+}
+
+input[type="range"] + output {
+    display: inline-block;
+    position: relative;
+    width: 7% !important;
+    color: #cc7b19;
+    line-height: 20px;
+    text-align: center;
+    border-radius: 3px;
+    background: #000;
+    padding: 5px 10px;
+    margin-left: 8px;
+    vertical-align: sub;
+}
+
+input[type="range"] + output::after {
+    position: absolute;
+    top: 8px;
+    left: -7px;
+    width: 0;
+    height: 0;
+    border-top: 7px solid transparent;
+    border-right: 7px solid #000;
+    border-bottom: 7px solid transparent;
+    content: '';
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    appearance: none;
+    -webkit-appearance: none;
+
+    background: #cc7b19;
+    border: 1px solid #cc7b19;
+    border-radius: 100%;
+    cursor: pointer;
+
+    height: 32px;
+    width: 32px;
+}
+
+[disabled], [disabled] * {
+    cursor: not-allowed !important;
+    color: #909090EE !important;
+}
+
+code, [code], [type^="code"i] {
+    background: #222 !important;
+    border-radius: 3px !important;
+    box-shadow: none !important;
+    box-sizing: border-box !important;
+    font-family: "System, Monospace, Menlo, Arial", Consolas, "Liberation Mono", Menlo, Courier, monospace !important;
+    font-size: 12px !important;
+    line-height: 18px !important;
+    white-space: pre;
+
+    margin: 0 !important;
+    padding: 0.2em 0.4em !important;
+}
+
+code[contenteditable="true"], [code][contenteditable="true"], [type^="code"i][contenteditable="true"] {
+    height: 12em;
+    width: 50em;
+}
+
+code code, code [code], code [type^="code"i],
+[code] code, [code] [code], [code] [type^="code"i],
+[type^="code"] code, [type^="code"] [code], [type^="code"] [type^="code"i]
+{
+    padding: 0 !important;
+}
+
+code[var], [code][var], [type^="code"i][var] {
+    color: #ae94c0 !important;
+}
+
+code[val], [code][val], [type^="code"i][val] {
+    color: #b5bc67 !important;
+}
+
+code[num], [code][num], [type^="code"i][num] {
+    color: #dd925f !important;
+}
+
+code[new], [code][new], [type^="code"i][new] {
+    color: #efc371 !important;
+}
+
+#version {
+    background: #0000 !important;
+    border: 1px solid #666 !important;
+    color: #666 !important;
+
+    position: fixed !important;
+    right: 12px !important;
+    top: calc(100vh - 30px) !important;
+
+    transition: border 0.15s, color 0.15s;
+}
+
+/* Release is higher than GitHub */
+#version[status="high"] {
+    border-color: #6cc644 !important;
+    color: #6cc644 !important;
+}
+
+/* Release is same as GitHub */
+#version[status="same"] {
+    border-color: #197bcc !important;
+    color: #197bcc !important;
+}
+
+/* Release is lower than GitHub */
+#version[status="low"] {
+    border-color: #f66a0a !important;
+    color: #f3582c !important;
+}
+
+/* notifications */
+.notification {
+    background: #F45A26;
+    border-radius: 4px;
+    color: #FFF !important;
+    cursor: pointer;
+    display: block;
+    font-family: arial, verdana, sans-serif;
+    font-size: 20px;
+    text-align: center;
+
+    position: fixed;
+    left: 50%;
+    margin-left: -175px;
+    padding: 10px;
+    top: 80px;
+
+    width: 350px;
+    z-index: 999999;
+}
+
+/* Web to Plex general information notifications */
+.notification.info {
+    background: #666 !important;
+}
+
+/* Web to Plex update notifications */
+.notification.update {
+    background: #2A2AFF !important;
+}
+
+/* Web to Plex warning notifications */
+.notification.warning {
+    background: #FF2A2A !important;
+}
+
+/* Web to Plex prompt */
+.prompt {
+    background: #0008 !important;
+    box-sizing: border-box !important;
+    color: #eee !important;
+    display: block !important;
+    font-family: Open Sans Regular, Helvetica Neue, Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 24px;
+    overflow: auto;
+
+    height: 100% !important;
+    width: 100% !important;
+
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    top: 0 !important;
+    position: fixed !important;
+    z-index: 999999999 !important;
+}
+
+.prompt-body {
+    background: #282828;
+    box-shadow: 0 5px 15px #0008;
+    display: block;
+
+    left: 20%;
+    top: 5%;
+    padding-top: 10px;
+    padding-bottom: 70px;
+    position: relative;
+
+    height: 60%;
+    width: 60%;
+}
+
+.prompt-header, .prompt-footer {
+    background: #323232;
+    border: 1px solid #0000;
+    box-sizing: border-box;
+    color: #eee;
+    text-size-adjust: 100%;
+
+    margin-top: 0;
+    padding: 15px 20px;
+    position: absolute;
+
+    height: 65px;
+    width: 100%;
+
+    -webkit-tap-highlight-color: #0000;
+}
+
+.prompt-header {
+    text-align: left;
+    border-bottom-color: #222;
+    border-bottom-width: 1px;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+
+    top: 0;
+}
+
+.prompt-options {
+    display: block;
+    overflow-x: hidden;
+    overflow-y: auto;
+
+    padding: 12px;
+    position: relative;
+    top: 65px;
+
+    max-height: calc(100% - 65px);
+}
+
+.prompt-option {
+    background: #323232;
+    border: 1px solid #202020;
+    border-radius: 3px;
+    color: #999;
+    display: block;
+    text-align: left;
+
+    margin-bottom: 10px;
+    padding: 10px;
+
+    min-height: 20px;
+}
+
+.prompt-option.mutable {
+    max-width: 60%;
+}
+
+.prompt-option.mutable > *:last-child {
+    background: #ffffff40;
+    border-radius: 3px;
+    transition: all 0.1s;
+
+    height: 30px;
+    width: 30px;
+
+    float: right;
+    margin-right: -9px;
+    margin-top: -9px;
+    padding: 0;
+}
+
+.prompt-option.mutable > *:last-child:hover {
+    background: #ffffff4d;
+}
+
+.prompt-option.mutable > *:last-child::after {
+    content: '\00d7';
+}
+
+.prompt-footer {
+    text-align: right;
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
+    border-top-color: #222;
+    border-top-width: 1px;
+
+    bottom: 0;
+}
+
+.prompt-input {
+    float: left;
+    position: relative;
+    margin-left: -16px !important;
+    margin-top: -11px !important;
+}
+
+.prompt-accept, .prompt-decline {
+    transition: all 0.1s;
+}
+
+.prompt-accept {
+    background: #cc7b19 !important;
+    margin-left: 5px !important;
+}
+
+.prompt-accept:hover {
+    background: #e59029 !important;
+}
+
+.prompt-decline {
+    background: #ffffff40 !important;
+}
+
+.prompt-decline:hover {
+    background: #ffffff4d !important;
+}
+
+
+*::-webkit-scrollbar {
+    width: 10px;
+}
+
+*::-webkit-scrollbar-thumb {
+    min-height: 50px;
+    background: rgba(255, 255, 255, 0.15);
+    border: 2px solid rgba(0, 0, 0, 0);
+    border-radius: 8px;
+    background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-track {
+    /* background: url(noise.png) fixed, #3f4245 !important; */
+}
+
+*::placeholder {
+    color: #999 !important;
+}
+
+*::-webkit-input-placeholder {
+    color: #999;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg) }
+
+    100% { transform: rotate(360deg) }
+}
+
+@keyframes fade {
+    0% { opacity: 1 }
+
+    100% { opacity: 0.3 }
+}

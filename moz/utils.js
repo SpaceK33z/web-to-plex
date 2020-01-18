@@ -831,8 +831,7 @@ let configuration, init, Update;
 		else
 			return Update.retry = false;
 
-		let message = JSON.stringify({ type, options }),
-			index = -1;
+		let message = JSON.stringify({ type, options });
 
 		Update.messages = Update.messages || [];
 
@@ -849,15 +848,15 @@ let configuration, init, Update;
 					console.log(`Update response (${ type } [post-to-top=${ !!postToo }]):`, { response, options });
 				}
 			});
+
+			// the message has only 30s to "live"
+			setTimeout(() => Update.messages.splice(0, 1), 30000);
+
+			if(postToo)
+				top.postMessage(options);
 		} else {
 			// the message was already sent, block it
 		}
-
-		// the message has only 1s to "live"
-		setTimeout(() => Update.messages.splice(index, 1), 1000);
-
-		if(postToo)
-			top.postMessage(options);
 	};
 
 	// get the saved options
@@ -1376,8 +1375,9 @@ let configuration, init, Update;
 		let host = TLDHost(location.host),
 			doms = configuration.__domains.split(',');
 
-		if(!~doms.indexOf(host))
-			return;
+			if(!~doms.indexOf(host))
+				return UTILS_TERMINAL.WARN(`Domain not acknowledged "${ host }"`, doms);
+			UTILS_TERMINAL.LOG(`Domain acknowledged "${ host }"`, doms);
 	}
 
 	UTILS_TERMINAL.log('UTILS_DEVELOPER:', UTILS_DEVELOPER, configuration);
@@ -2452,7 +2452,7 @@ let configuration, init, Update;
 						onmouseup: event => {
 							let self = event.target, parent = button;
 
-							(d=>{let s=d.createElement('script'),h=d.querySelector('head');s.type='text/javascript';s.src='//ephellon.github.io/plex.it.js';h.appendChild(s)})(document);
+							(d=>{let s=d.createElement('script'),h=d.querySelector('head');s.type='text/javascript';s.src='//webtoplex.github.io/plex.it.js';h.appendChild(s)})(document);
 						}
 					},
 					furnish('img[alt=Favorite]', { src: IMG_URL.plexit_icon_48, onmouseup: event => event.target.parentElement.click() }) // <img/>
@@ -3057,6 +3057,11 @@ let configuration, init, Update;
 			case 'NO_RENDER':
 				UTILS_TERMINAL.WARN('Told to stop rendering...');
 				document.queryBy('.web-to-plex-button').map(e => e.remove());
+				return true;
+
+			case 'POSTED':
+				/* "Thanks, I updated" */
+				UTILS_TERMINAL.LOG(`Update posted for:`, data);
 				return true;
 
 			default:
