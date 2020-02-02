@@ -27,6 +27,7 @@ let script = {
 
 			case 'list':
 				/* Not yet implemented */
+				return -1;
 				break;
 
 			default:
@@ -52,9 +53,10 @@ let script = {
 
 if(!top.WaitingOnAbsoluteReady) {
 	top.addEventListener('load', event => {
-		top.AbsoluteReady = true;
-
-		$('.web-to-plex-button a.list-action').first.onclick = event => event;
+		/* Fix event override? */
+		setInterval(() => {
+			top.AbsoluteReady = $('.web-to-plex-button').first.classList.contains('show');
+		}, 1000);
 	});
 
 	top.WaitingOnAbsoluteReady = true;

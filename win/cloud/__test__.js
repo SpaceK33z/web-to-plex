@@ -1,6 +1,6 @@
 let script = {
 	// required
-	"url": "*://ephellon.github.io/web.to.plex/test/*",
+	"url": "*://webtoplex.github.io/web/test/*",
 	// Example: *://*.amazon.com/*/video/(detail|buy)/*
 	// *://         - match any protocol (http, https, etc.)
 	// *.amazon.com - match any sub-domain (www, ww5, etc.)

@@ -67,3 +67,8 @@ BUTTON  [style].web-to-plex-button.<floating>.<hide|show>.<open|closed>
 .web-to-plex-button.hide.closed[button-opacity-hidden="10"] {
     opacity: 0.10 !important;
 }
+
+/* Button shape */
+.web-to-plex-button.button-shape-box {
+    /* ... */
+}

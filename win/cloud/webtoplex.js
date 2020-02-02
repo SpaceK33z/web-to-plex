@@ -1,10 +1,10 @@
 // optional
-// "Web to Plex" requires: token
+// "Web to Plex" requires: api
 // 'Friendly Name' requires permissions...
 
 let script = {
 	// required
-	"url": "*://ephellon.github.io/web.to.plex/(?!test|login)",
+	"url": "*://(ephellon|webtoplex).github.io/web[\\w\\.]*/(?!test|login)",
 	// Example: *://*.amazon.com/*/video/(detail|buy)/*
 	// *://         - match any protocol (http, https, etc.)
 	// *.amazon.com - match any sub-domain (www, ww5, etc.)
@@ -54,4 +54,4 @@ setTimeout(() => {
 		return -1;
 		// don't run on the login page
 	}
-}, 100);
+}, 1000);

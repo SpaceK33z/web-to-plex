@@ -1,6 +1,6 @@
 // optional
 // "Friendly Name" requires: api|username|password|token
-// api - the user's api tokens (external, such as TMDb/OMDb)
+// api - the user's API keys (external, such as TMDb/OMDb)
 // username - the user's usernames (internal, such as Radarr/Sonarr/etc.)
 // password - the user's passwords (internal)
 // token - the user's tokens (internal)

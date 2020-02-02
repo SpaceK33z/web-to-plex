@@ -159,7 +159,7 @@ async function UpdateConfiguration(force_update = false) {
 	let configuration = load('configuration');
 
 	if(force_update || configuration === null || configuration === undefined)
-		BACKGROUND_CONFIGURATION = await parseConfiguration();
+		BACKGROUND_CONFIGURATION = configuration = await parseConfiguration();
 	else
 		BACKGROUND_CONFIGURATION = configuration;
 

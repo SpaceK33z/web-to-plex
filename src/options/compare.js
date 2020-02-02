@@ -1,38 +1,44 @@
-/** GitHub@alexey-bass
- * Simply compares two string version values.
+/** function compareVer({String|Number} L, {String|Number} R) => {Integer|Boolean};
+ * Simply compares two version values.
  *
- * Example:
+ * Examples:
  * compareVer('1.1', '1.2') => -1
  * compareVer('1.1', '1.1') =>  0
- * compareVer('1.2', '1.1') =>  1
- * compareVer('2.23.3', '2.22.3') => 1
+ * compareVer('1.2', '1.1') => +1
+ * compareVer('2.23.3', '2.22.3') => +1
  *
  * Returns:
- * -1 = left is LOWER = right is GREATER
- *  0 = they are equal
- *  1 = left is GREATER = right is LOWER
- *  And FALSE if one of input versions are not valid
+ * -1    => L < R: L is LOWER <-> R is HIGHER
+ *  0    => L = R: L and R are EQUAL
+ * +1    => L > R: L is HIGHER <-> R is LOWER
+ * false => one of the versions is invalid
  *
  * @function
- * @param {String} left  Version #1
- * @param {String} right Version #2
+ * @param  {String|Number} L Version #1
+ * @param  {String|Number} R Version #2
  * @return {Integer|Boolean}
- * @author Alexey Bass (albass)
- * @since 2011-07-14
+ * @author Alexey Bass (GitHub@alexey-bass)
+ * @since  2011-07-14
  */
-function compareVer(left, right) {
-    if(typeof left + typeof right != 'stringstring')
+function compareVer(L, R) {
+    if(!/^(string|number)(string|number)$/i.test(typeof L + typeof R))
         return false;
 
-    for(let a = left.split('.'), b = right.split('.'), i = 0, l = Math.max(a.length, b.length); i < l; i++) {
-        if((a[i] && !b[i] && parseInt(a[i]) > 0) || (parseInt(a[i]) > parseInt(b[i])))
+    L += '';
+    R += '';
+
+    let pI = Number.parseInt || parseInt || (string => +string.replace(/^\s*(-?\d+)[^]*$/, '$1')),
+        mx = Math.max || ((...numbers) => numbers.sort((a, b) => +a < +b? +1: -1)[0]);
+
+    for(let a = L.split('.'), b = R.split('.'), i = 0, l = mx(a.length, b.length), p = pI; i < l; i++) {
+        if((a[i] && !b[i] && p(a[i]) > 0) || (p(a[i]) > p(b[i])))
             return +1
-            /* left is higher */;
-        else if((b[i] && !a[i] && parseInt(b[i]) > 0) || (parseInt(a[i]) < parseInt(b[i])))
+            /* L > R */;
+        else if((b[i] && !a[i] && p(b[i]) > 0) || (p(a[i]) < p(b[i])))
             return -1
-            /* right is higher */;
+            /* L < R */;
     }
 
     return 0
-    /* equal */;
+    /* L = R */;
 }

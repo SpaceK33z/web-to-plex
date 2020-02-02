@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8"/>
+
+	<title>Web To Plex | Options</title>
+	<link rel="stylesheet" type="text/css" href="options.css"/>
+</head>
+
+<body>
+	<!--
+
+	Layout of code (Jade/Pug)
+
+	#sidebar
+		.bar
+		    header
+		        | Setting Name
+		    article
+		        details
+		            summary
+		                | Title
+		            h2
+		                | Sub-Title
+		            section
+		                label
+		                    | Description
+		                ...
+		                div
+		                    | Help text
+
+	-->
+
+	<div id="sidebar">
+		<div class="bar">
+		    <header>Plex Settings</header>
+
+			<article>
+		        <details>
+		            <summary>Login <span using="plex" special></span></summary>
+
+		            <h2>Login Settings</h2>
+		            <details>
+		                <summary>Use your Plex token <span using="plex"></span></summary>
+		                <input type="text" id="plex_token" data-option="plexToken" placeholder="Enter your Plex token"/>
+		                <div>
+		                    How to find your <a href="https://support.plex.tv/hc/en-us/articles/204059436-Finding-your-account-token-X-Plex-Token" title="How to find your token?" target="_blank">Plex token</a>.
+		                </div>
+		            </details>
+
+		            <h3 style="width: 35%; text-align: center;"><em>&mdash; OR &mdash;</em></h3>
+
+		            <details>
+		                <summary>Login with Plex</summary>
+		                <input type="text" id="plex_username" top placeholder="Enter your Plex username"/>
+		                <input type="password" id="plex_password" bottom placeholder="Enter your Plex password"/>
+		                <div>
+		                    Your Plex username and password are never stored, only your <a href="https://support.plex.tv/hc/en-us/articles/204059436-Finding-your-account-token-X-Plex-Token" title="How to find your token?" target="_blank">Plex token</a>.
+		                    <br>
+		                    Your username and password are used in order to get a token from Plex itself.
+		                </div>
+		            </details>
+
+		            <h3 style="width: 35%; text-align: center;"><em>&mdash; OR &mdash;</em></h3>
+
+		            <details>
+		                <summary>Attach to Ombi<sup><em>*</em></sup></summary>
+		                <input type="text" id="ombi_url" top placeholder="Enter your Ombi URL"/>
+		                <input type="text" id="ombi_api" bottom placeholder="Enter your Ombi API key"/>
+		                <br>
+		                <h3><em>Fill in Manager Settings with Ombi?</em></h3>
+		                <div class="checkbox" prompt="y/n">
+		                    <input id="use-ombi" type="checkbox" data-option="UseOmbi" checked/>
+		                    <label for="use-ombi"></label>
+		                </div>
+		                <div>
+		                    Your Ombi <a href="https://support.plex.tv/hc/en-us/articles/204059436-Finding-your-account-token-X-Plex-Token" title="How to find your token?" target="_blank">Plex token</a> will be shared by this extension.
+		                </div>
+		            </details>
+					<hr><br>
+		            <section>
+		                <button type="button" id="plex_test">Test <span id="plex_test_status">?</span></button>
+		            </section>
+		            <section>
+		                <label>Select a preferred server</label>
+		                <select data-option="preferredServer">
+		                    <option value="">Press "Test [?]" first</option>
+		                </select>
+		            </section>
+		        </details>
+
+		        <details>
+		            <summary>Advance</summary>
+
+		            <h2>Plex Server Options</h2>
+		            <section>
+		                <label>Plex Server URL</label>
+		                <input type="text" data-option="plexURL" placeholder="Enter your Plex URL (for direct access)"/>
+		                <div>
+		                    Use this to communicate directly with your Plex server.<br/>
+		                    Such as <em>http://localhost:32400/</em> or <em>http://192.168.1.100:32400/</em>
+		                </div>
+		            </section>
+		        </details>
+		    </article>
+		</div>
+		<div class="bar">
+			<header>Manager Settings</header>
+
+		    <article>
+		        <details id="ombi">
+		            <summary>
+						Ombi (Movies/TV Shows)
+						<span class="checkbox" disabled prompt-yes="use" prompt-no="skip"><input id="using-ombi" type="checkbox" data-option="usingOmbi"/><label for="using-ombi"></label></span>
+						<span using="ombi"></span>
+					</summary>
+
+		            <h2>Connection Settings</h2>
+		            <section>
+		                <label>Ombi URL</label>
+		                <input type="text" data-option="ombiURLRoot" placeholder="What's your Ombi URL?"/>
+		                <div>
+		                    Such as <em>https://example.com/ombi</em> or <em>http://192.168.1.100:5000</em>
+		                </div>
+		            </section>
+
+		            <section>
+		                <label>Ombi API Key</label>
+		                <input type="text" data-option="ombiToken" placeholder="What's your Ombi API key?"/>
+		                <div>
+		                    1. Go to Ombi | Settings | Ombi<br/>
+		                    2. Copy/Paste the "API Key."<br/>
+		                    Such as <em>aa756d33242f6g8ffbca2b3963586f21</em>
+		                </div>
+		            </section>
+			<!--
+
+		        <h3>Login <em>(saved)</em></h3>
+		        <section>
+		            <label>Username</label>
+		            <input type="text" data-option="ombiBasicAuthUsername" placeholder="Enter your Ombi username"/>
+		        </section>
+		        <section>
+		            <label>Password</label>
+		            <input type="text" data-option="ombiBasicAuthPassword" placeholder="Enter your Ombi password"/>
+		            <div class="hidden-help">Your password will be hidden once saved.</div>
+		            <br>
+		            <div>This information will be used for <a href="https://wikipedia.org/wiki/Basic_access_authentication" target="_blank">Basic Access Authentication</a> only. This will allow the extension to ask Ombi for your list of films, or to add to your list of films.</div>
+		        </section>
+			-->
+
+		            <section>
+		                <button type="button" id="ombi_test">Test <span id="ombi_test_status">?</span></button>
+		            </section>
+					<hr><br>
+					<section>
+						<button class="test" target="_blank" href="https://webtoplex.github.io/web/?movie=492">try out ombi</button>
+					</section>
+		        </details>
+
+				<hr>
+
+		        <details id="watcher">
+		            <summary>
+						Watcher (Movies)
+						<span class="checkbox" disabled prompt-yes="use" prompt-no="skip"><input id="using-watcher" type="checkbox" data-option="usingWatcher"/><label for="using-watcher"></label></span>
+						<span using="watcher"></span>
+					</summary>
+
+		            <h2>Connection Settings</h2>
+		            <section>
+		                <label>Watcher URL</label>
+		                <input type="text" data-option="watcherURLRoot" placeholder="What's your Watcher URL?"/>
+		                <div>
+		                    Such as <em>https://example.com/watcher</em> or <em>http://192.168.1.100:9090</em>
+		                </div>
+		            </section>
+
+		            <section>
+		                <label>Watcher API Key</label>
+		                <input type="text" data-option="watcherToken" placeholder="What's your Watcher API key?"/>
+		                <div>
+		                    1. Go to Watcher | Settings | Server<br/>
+		                    2. Copy/Paste the "API Key."<br/>
+		                    Such as <em>aa756d33242f6g8ffbca2b3963586f21</em>
+		                </div>
+		            </section>
+
+		            <h3>Login <em>(saved)</em></h3>
+		            <div class="hidden-help">The default username is <em>watcher</em>. The default password is <em>rehctaw</em>.</div>
+		            <br>
+		            <section>
+		                <label>Username</label>
+		                <input type="text" data-option="watcherBasicAuthUsername" placeholder="Enter your Watcher username"/>
+		                <div>Only use this if you setup a Watcher username.</div>
+
+		            </section>
+		            <section>
+		                <label>Password</label>
+		                <input type="text" data-option="watcherBasicAuthPassword" placeholder="Enter your Watcher password"/>
+		                <div>Only use this if you setup a Watcher password.</div>
+		                <div class="hidden-help">Your password will be hidden once saved.</div>
+		                <br>
+		                <div>This information will be used for <a href="https://wikipedia.org/wiki/Basic_access_authentication" target="_blank">Basic Access Authentication</a> only. This will allow the extension to ask Watcher for your list of films, or to add to your list of films.</div>
+		            </section>
+
+		            <section>
+		                <button type="button" id="watcher_test">Test <span id="watcher_test_status">?</span></button>
+		            </section>
+
+		            <section>
+		                <label>Watcher Storage Path</label>
+		                <input type="text" disabled="true" data-option="watcherStoragePath" title="Can only be changed via Watcher's settings"/>
+		            </section>
+		            <section>
+		                <label>Quality Profile</label>
+		                <select data-option="watcherQualityProfileId">
+		                    <option value="">Press "Test [?]" first</option>
+		                </select>
+		            </section>
+					<hr><br>
+					<section>
+						<button class="test" target="_blank" href="https://webtoplex.github.io/web/?movie=492">try out watcher</button>
+					</section>
+		        </details>
+
+		        <details id="radarr">
+		            <summary>
+						Radarr (Movies)
+						<span class="checkbox" disabled prompt-yes="use" prompt-no="skip"><input id="using-radarr" type="checkbox" data-option="usingRadarr"/><label for="using-radarr"></label></span>
+						<span using="radarr"></span>
+					</summary>
+
+		            <h2>Connection Settings</h2>
+		            <section>
+		                <label>Radarr URL</label>
+		                <input type="text" data-option="radarrURLRoot" placeholder="What's your Radarr URL?"/>
+		                <div>
+		                    Such as <em>https://example.com/radarr</em> or <em>http://192.168.1.100:7878</em>
+		                </div>
+		            </section>
+
+		            <section>
+		                <label>Radarr API Key</label>
+		                <input type="text" data-option="radarrToken" placeholder="What's your Radarr API key?"/>
+		                <div>
+		                    1. Go to Radarr | Settings | General<br/>
+		                    2. Click on "Show advance," then copy/paste the "API Key."<br/>
+		                    Such as <em>aa756d33242f6g8ffbca2b3963586f21</em>
+		                </div>
+		            </section>
+
+		            <h3>Login <em>(saved)</em></h3>
+		            <section>
+		                <label>Username</label>
+		                <input type="text" data-option="radarrBasicAuthUsername" placeholder="Enter your Radarr username"/>
+		                <div>Only use this if you setup a Radarr username.</div>
+		            </section>
+		            <section>
+		                <label>Password</label>
+		                <input type="text" data-option="radarrBasicAuthPassword" placeholder="Enter your Radarr password"/>
+		                <div>Only use this if you setup a Radarr password.</div>
+		                <div class="hidden-help">Your password will be hidden once saved.</div>
+		                <br>
+		                <div>This information will be used for <a href="https://wikipedia.org/wiki/Basic_access_authentication" target="_blank">Basic Access Authentication</a> only. This will allow the extension to ask Radarr for your list of films, or to add to your list of films.</div>
+		            </section>
+
+		            <section>
+		                <button type="button" id="radarr_test">Test <span id="radarr_test_status">?</span></button>
+		            </section>
+
+		            <section>
+		                <label>Radarr Storage Path</label>
+		                <select data-option="radarrStoragePath">
+		                    <option value="">Press "Test [?]" first</option>
+		                </select>
+		                <div>
+		                    This should be the same path (verbatim) used in Radarr.
+		                </div>
+		            </section>
+		            <section>
+		                <label>Quality Profile</label>
+		                <select data-option="radarrQualityProfileId">
+		                    <option value="">Press "Test [?]" first</option>
+		                </select>
+		            </section>
+					<hr><br>
+					<section>
+						<button class="test" target="_blank" href="https://webtoplex.github.io/web/?movie=492">try out radarr</button>
+					</section>
+		        </details>
+
+				<details id="couchpotato">
+		            <summary>
+						CouchPotato (Movies)
+						<span class="checkbox" disabled prompt-yes="use" prompt-no="skip"><input id="use-couchpotato" type="checkbox" data-option="usingCouchPotato"/><label for="use-couchpotato"></label></span>
+						<span using="couchpotato"></span>
+					</summary>
+
+		            <h2>Connection Settings</h2>
+		            <section>
+		                <label>CouchPotato URL</label>
+		                <input type="text" data-option="couchpotatoURLRoot" placeholder="What's your CouchPotato URL?"/>
+		                <div>
+		                    Such as <em>https://example.com/couchpotato</em> or <em>http://192.168.1.100:5050</em>
+		                </div>
+		            </section>
+
+		            <section>
+		                <label>CouchPotato API Key</label>
+		                <input type="text" data-option="couchpotatoToken" placeholder="What's your CouchPotato API key?"/>
+		                <div>
+		                    1. Go to CouchPotato | Settings<br/>
+		                    2. Copy/Paste the "API Key."<br/>
+		                    Such as <em>aa756d33242f6g8ffbca2b3963586f21</em>
+		                </div>
+		            </section>
+
+		            <h3>Login <em>(saved)</em></h3>
+		            <section>
+		                <label>Username</label>
+		                <input type="text" data-option="couchpotatoBasicAuthUsername" placeholder="Enter your CouchPotato username"/>
+		                <div>Only use this if you setup a CouchPotato username.</div>
+		            </section>
+		            <section>
+		                <label>Password</label>
+		                <input type="text" data-option="couchpotatoBasicAuthPassword" placeholder="Enter your CouchPotato password"/>
+		                <div>Only use this if you setup a CouchPotato password.</div>
+		                <div class="hidden-help">Your password will be hidden once saved.</div>
+		            </section>
+
+		            <section>
+		                <div>This information will be used for <a href="https://wikipedia.org/wiki/Basic_access_authentication" target="_blank">Basic Access Authentication</a> only. This will allow the extension to ask Couchpotato for your list of films, or to add to your list of films.</div>
+		            </section>
+			<!--
+		            <section>
+		                <button type="button" id="couchpotato_test" disabled="true">Test <span id="couchpotato_test_status">?</span></button>
+		            </section>
+		            <section>
+		                <label>Quality Profile</label>
+		                <select data-option="couchpotatoQualityProfileId" disabled="true">
+		                    <option value="">Press "Test [?]" first</option>
+		                </select>
+		            </section>
+			-->
+					<section>
+						<button id="enable-couchpotato" data-option="enableCouchPotato">Enable CouchPotato</button>
+					</section>
+					<hr><br>
+					<section>
+						<button class="test" target="_blank" href="https://webtoplex.github.io/web/?movie=492">try out couchpotato</button>
+					</section>
+		        </details>
+
+				<hr>
+
+				<details id="medusa">
+				    <summary>
+						Medusa (TV Shows)
+						<span class="checkbox" disabled prompt-yes="use" prompt-no="skip"><input id="using-medusa" type="checkbox" data-option="usingMedusa"/><label for="using-medusa"></label></span>
+						<span using="medusa"></span>
+					</summary>
+
+				    <h2>Connection Settings</h2>
+				    <section>
+				        <label>Medusa URL</label>
+				        <input type="text" data-option="medusaURLRoot" placeholder="What's your Medusa URL?"/>
+				        <div>
+				            Such as <em>https://example.com/medusa</em> or <em>http://192.168.1.100:8081</em>
+				        </div>
+				    </section>
+
+				    <section>
+				        <label>Medusa API Key</label>
+				        <input type="text" data-option="medusaToken" placeholder="What's your Medusa API key?"/>
+				        <div>
+				            1. Go to Medusa | Settings | General | Interface | Web Interface<br/>
+				            2. Copy/Paste the "API key."<br/>
+				            Such as <em>aa756d33242f6g8ffbca2b3963586f21</em>
+				        </div>
+				    </section>
+
+				    <h3>Login <em>(saved)</em></h3>
+				    <section>
+				        <label>Username</label>
+				        <input type="text" data-option="medusaBasicAuthUsername" placeholder="Enter your Medusa (HTTP) username"/>
+				    </section>
+				    <section>
+				        <label>Password</label>
+				        <input type="text" data-option="medusaBasicAuthPassword" placeholder="Enter your Medusa (HTTP) password"/>
+				        <div class="hidden-help">Your password will be hidden once saved.</div>
+				        <br>
+				        <div>This information will be used for <a href="https://wikipedia.org/wiki/Basic_access_authentication" target="_blank">Basic Access Authentication</a> only. This will allow the extension to ask Medusa for your list of TV shows, or to add to your list of TV shows.</div>
+				    </section>
+
+				    <section>
+				        <button type="button" id="medusa_test">Test <span id="medusa_test_status">?</span></button>
+				    </section>
+
+		            <section>
+		                <label>Medusa Storage Path</label>
+		                <select data-option="medusaStoragePath">
+		                    <option value="">Press "Test [?]" first</option>
+		                </select>
+						<div>
+							This should be the same path (verbatim) used in Medusa.
+						</div>
+		            </section>
+		            <section>
+						<label>Quality Profile Type</label>
+						<select data-option="medusaQualityProfileType">
+							<option>Default</option>
+							<option>User Defined</option>
+							<option>Any Defined Type</option>
+						</select>
+		                <label>Quality Profile</label>
+		                <select data-option="medusaQualityProfileId">
+		                    <option value="">Press "Test [?]" first</option>
+						</select>
+		            </section>
+					<hr><br>
+					<section>
+						<button class="test" target="_blank" href="https://webtoplex.github.io/web/?tv=86831">try out medusa</button>
+					</section>
+				</details>
+
+		        <details id="sonarr">
+		            <summary>
+						Sonarr (TV Shows)
+						<span class="checkbox" disabled prompt-yes="use" prompt-no="skip"><input id="using-sonarr" type="checkbox" data-option="usingSonarr"/><label for="using-sonarr"></label></span>
+						<span using="sonarr"></span>
+					</summary>
+
+		            <h2>Connection Settings</h2>
+		            <section>
+		                <label>Sonarr URL</label>
+		                <input type="text" data-option="sonarrURLRoot" placeholder="What's your Sonarr URL?"/>
+		                <div>
+		                    Such as <em>https://example.com/sonarr</em> or <em>http://192.168.1.100:8989</em>
+		                </div>
+		            </section>
+
+		            <section>
+		                <label>Sonarr API Key</label>
+		                <input type="text" data-option="sonarrToken" placeholder="What's your Sonarr API key?"/>
+		                <div>
+		                    1. Go to Sonarr | Settings | General<br/>
+		                    2. Click on "Show advance," then copy/paste the "API Key."<br/>
+		                    Such as <em>aa756d33242f6g8ffbca2b3963586f21</em>
+		                </div>
+		            </section>
+
+		            <h3>Login <em>(saved)</em></h3>
+		            <section>
+		                <label>Username</label>
+		                <input type="text" data-option="sonarrBasicAuthUsername" placeholder="Enter your Sonarr username"/>
+		                <div>Only use this if you setup a Sonarr username.</div>
+		            </section>
+		            <section>
+		                <label>Password</label>
+		                <input type="text" data-option="sonarrBasicAuthPassword" placeholder="Enter your Sonarr password"/>
+		                <div>Only use this if you setup a Sonarr password.</div>
+		                <div class="hidden-help">Your password will be hidden once saved.</div>
+		                <br>
+		                <div>This information will be used for <a href="https://wikipedia.org/wiki/Basic_access_authentication" target="_blank">Basic Access Authentication</a> only. This will allow the extension to ask Sonarr for your list of TV shows, or to add to your list of TV shows.</div>
+		            </section>
+
+		            <section>
+		                <button type="button" id="sonarr_test">Test <span id="sonarr_test_status">?</span></button>
+		            </section>
+
+		            <section>
+		                <label>Sonarr Storage Path</label>
+		                <select data-option="sonarrStoragePath">
+		                    <option value="">Press "Test [?]" first</option>
+		                </select>
+		                <div>
+		                    This should be the same path (verbatim) used in Sonarr.
+		                </div>
+		            </section>
+		            <section>
+		                <label>Quality Profile</label>
+		                <select data-option="sonarrQualityProfileId">
+		                    <option value="">Press "Test [?]" first</option>
+		                </select>
+		            </section>
+					<hr><br>
+					<section>
+						<button class="test" target="_blank" href="https://webtoplex.github.io/web/?tv=86831">try out sonarr</button>
+					</section>
+		        </details>
+
+				<details id="sickBeard">
+				    <summary>
+						Sick Beard (TV Shows)
+						<span class="checkbox" disabled prompt-yes="use" prompt-no="skip"><input id="using-sickBeard" type="checkbox" data-option="usingSickBeard"/><label for="using-sickBeard"></label></span>
+						<span using="sickbeard"></span>
+					</summary>
+
+				    <h2>Connection Settings</h2>
+				    <section>
+				        <label>Sick Beard URL</label>
+				        <input type="text" data-option="sickBeardURLRoot" placeholder="What's your Sick Beard URL?"/>
+				        <div>
+				            Such as <em>https://example.com/sickBeard</em> or <em>http://192.168.1.100:8081</em>
+				        </div>
+				    </section>
+
+				    <section>
+				        <label>Sick Beard API Key</label>
+				        <input type="text" data-option="sickBeardToken" placeholder="What's your Sick Beard API key?"/>
+				        <div>
+				            1. Go to Sick Beard | Config | General | API<br/>
+				            &mdash; a. Ensure the checkbox "Enable API" is enabled<br/>
+				            &mdash; b. Press the "Generate" button<br/>
+				            2. Copy/Paste the "API Key."<br/>
+				            Such as <em>aa756d33242f6g8ffbca2b3963586f21</em>
+				        </div>
+				    </section>
+
+				    <h3>Login <em>(saved)</em></h3>
+				    <section>
+				        <label>Username</label>
+				        <input type="text" data-option="sickBeardBasicAuthUsername" placeholder="Enter your Sick Beard (HTTP) username"/>
+				    </section>
+				    <section>
+				        <label>Password</label>
+				        <input type="text" data-option="sickBeardBasicAuthPassword" placeholder="Enter your Sick Beard (HTTP) password"/>
+				        <div class="hidden-help">Your password will be hidden once saved.</div>
+				        <br>
+				        <div>This information will be used for <a href="https://wikipedia.org/wiki/Basic_access_authentication" target="_blank">Basic Access Authentication</a> only. This will allow the extension to ask Sick Beard for your list of TV shows, or to add to your list of TV shows.</div>
+				    </section>
+
+				    <section>
+				        <button type="button" id="sickBeard_test">Test <span id="sickBeard_test_status">?</span></button>
+				    </section>
+
+				    <section>
+				        <label>Sick Beard Storage Path</label>
+				        <select data-option="sickBeardStoragePath">
+				            <option value="">Press "Test [?]" first</option>
+				        </select>
+				        <div>
+				            This should be the same path (verbatim) used in Sick Beard.
+				        </div>
+				    </section>
+				    <section>
+				        <label>Quality Profile Type</label>
+				        <select data-option="sickBeardQualityProfileType">
+							<option>Initial</option>
+				            <option>Archive</option>
+				        </select>
+				        <label>Quality Profile</label>
+				        <select data-option="sickBeardQualityProfileId">
+				            <option value="">Press "Test [?]" first</option>
+				        </select>
+						<!-- <div>
+							Use <code>Ctrl + Click</code> to select multiple items.
+						</div> -->
+				    </section>
+				    <hr><br>
+				    <section>
+				        <button class="test" target="_blank" href="https://webtoplex.github.io/web/?tv=86831">try out Sick Beard</button>
+				    </section>
+				</details>
+		    </article>
+		</div>
+		<div class="bar">
+		    <header>Other Settings</header>
+
+			<article>
+				<details>
+					<summary>Theme Settings</summary>
+
+					<h2>The Button</h2>
+					<!--
+					<section>
+						What shape should the button be?
+						<br>
+						<span class="checkbox" prompt-size="large" prompt-yes="&#9723;" prompt-no="&#9675;">
+							<!-- When true (checked), will be accessed in CSS (/theme.css) as ".button-shape-box { ... }" --/>
+							<input data-option="theme:button-shape" theme="true:box" type="checkbox"/>
+							<label for="theme:button-shape"></label>
+						</span>
+					</section>
+					-->
+					<section>
+						Which direction should the button open (<span orange>&#9711;</span> only)?
+						<br>
+						<span class="checkbox" prompt-size="large" prompt-yes="&#8672;" prompt-no="&#8674;">
+							<!-- When true (checked), will be accessed in CSS (/theme.css) as ".button-location-right { ... }" -->
+							<input data-option="theme:button-location" theme="true:right" type="checkbox"/>
+							<label for="theme:button-location"></label>
+						</span>
+					</section>
+					<section>
+						How transparent should the button be when hidden?
+						<br>
+		                <input data-option="theme:button-opacity" theme="for:hidden" type="range" min="0" max="10" step="5" value="10" symbol="%"/>
+		                <output type="text" value="10%"></output>
+					</section>
+				</details>
+			</article>
+
+			<article>
+				<details>
+					<summary>Site Settings
+						<span counter-for="sites">...</span>
+					</summary>
+
+					<strong class="h2">Experimental Sites</strong>
+					<div class="checkbox" blue><input id="all-plugin" type="checkbox"/><label for="all-plugin"></label></div>
+					<hr>
+		            <section id="plugins">
+		                <!-- Filled in via the options.js script -->
+		            </section>
+					<hr>
+					<strong class="h2">Default Sites</strong>
+					<div class="checkbox" blue><input id="all-builtin" type="checkbox"/><label for="all-builtin"></label></div>
+					<hr>
+		            <section id="builtin">
+		                <!-- Filled in via the options.js script -->
+		            </section>
+				</details>
+			</article>
+
+			<article>
+				<details>
+					<summary>Connection Settings
+						<span using="always-secure" special></span>
+					</summary>
+
+					<h2>Proxy Settings</h2>
+					<section>
+						<h3>
+							Force Secure Connections
+							<span class="checkbox">
+			                    <input id="always-secure" type="checkbox" data-option="UseProxy"/>
+			                    <label for="always-secure"></label>
+			                </span>
+						</h3>
+						<div>
+							If enabled, all insecure (HTTP) requests will be through an <a href="https://en.wikipedia.org/wiki/Proxy_server" target="_blank">HTTPS proxy</a>.
+						</div>
+					</section>
+
+					<section>
+						<h3>Proxy URL &amp; Syntax</h3>
+						<input type="text" code data-option="ProxyURL" placeholder="Enter the Proxy URL and syntax">
+						<div>
+							Please provide the URL of your proxy.
+							<br>
+							If your proxy requires a special syntax, enter that information in as well.
+							<br>
+							<ul>
+								<li><code>{raw-url}</code> <em>OR</em> <code>{url}</code> &mdash; the raw, uneditied URL</li>
+								<li><code>{enc-url}</code> <em>OR</em> <code>{encode-url}</code> &mdash; an encoded URL</li>
+								<li><code>{b64-url}</code> <em>OR</em> <code>{base64-url}</code> &mdash; a Base-64 encoded URL</li>
+							</ul>
+						</div>
+					</section>
+
+					<section>
+						<h3>Proxy Headers</h3>
+						<div type="code-editable" contenteditable="true" data-option="ProxyHeaders" placeholder="Enter the Proxy headers"></div>
+						<div>
+							If your proxy requires <a href="https://github.com/SpaceK33z/web-to-plex/wiki/Settings#connection-settings--proxy-settings" target="_blank">special headers</a>, enter that information in here.
+							<br>
+							<ul>
+								<li><code>@{raw-url}</code> <em>OR</em> <code>@{url}</code> &mdash; the raw, uneditied URL</li>
+								<li><code>@{enc-url}</code> <em>OR</em> <code>@{encode-url}</code> &mdash; an encoded URL</li>
+								<li><code>@{b64-url}</code> <em>OR</em> <code>@{base64-url}</code> &mdash; a Base-64 encoded URL</li>
+								<li><code>@object.property</code> &mdash; a computed value (such as <code>@location.href</code>)</li>
+							</ul>
+						</div>
+					</section>
+
+					<section>
+						<h3>Native Proxy Settings</h3>
+						<div>
+							<a href="#!/native/settings/network/proxy">
+								<button>Open your computer's proxy settings</button>
+							</a>
+						</div>
+					</section>
+				</details>
+			</article>
+
+			<article>
+				<details>
+					<summary>Media Settings</summary>
+					<section>
+						<h3>
+							Auto Grab
+							<span class="checkbox" prompt-yes="all" prompt-no="ask">
+			                    <input id="use-autograb" type="checkbox" data-option="UseAutoGrab"/>
+			                    <label for="use-autograb"></label>
+			                </span>
+						</h3>
+						<div>
+							When the user presses the Grab button, the extension should:
+							<ul>
+								<li>Grab <em>ALL</em>: Find items not on Plex, and grab them</li>
+								<li><em>ASK</em> user: Find items not on Plex, and grab what the user approves</li>
+							</ul>
+						</div>
+						<h3>Maximum Auto Grabs</h3>
+		                <input type="range" data-option="AutoGrabLimit" min="10" max="100" step="10" value="30"/>
+		                <output type="text" value="30"></output>
+						<div>
+							How many items can be automatically handled before requiring permission to continue?
+						</div>
+					</section>
+					<hr>
+					<section>
+						<h3>
+							Prompt for Save Location
+							<span class="checkbox" prompt="y/n">
+			                    <input id="prompt-location" type="checkbox" data-option="PromptLocation"/>
+			                    <label for="prompt-location"></label>
+			                </span>
+						</h3>
+						<div>
+							When the user presses the Grab button should the save location be asked for?
+							<br>
+							<em>Only supports Medusa, Radarr, and Sonarr.</em>
+						</div>
+					</section>
+					<hr>
+					<section>
+						<h3>
+							Prompt for Quality
+							<span class="checkbox" prompt="y/n">
+			                    <input id="prompt-quality" type="checkbox" data-option="PromptQuality"/>
+			                    <label for="prompt-quality"></label>
+			                </span>
+						</h3>
+						<div>
+							When the user presses the Grab button should the quality be asked for?
+							<br>
+							<em>Only supports Medusa, Radarr, and Sonarr.</em>
+						</div>
+					</section>
+				</details>
+			</article>
+
+			<article>
+				<details>
+					<summary>Notification Settings</summary>
+					<h3>
+						Ignore Found Items
+			            <span class="checkbox" prompt="y/n">
+			                <input id="notify-new-only" type="checkbox" data-option="NotifyNewOnly"/>
+			                <label for="notify-new-only"></label>
+			            </span>
+					</h3>
+					<div>
+						When the user presses the Grab button and an item already exists, should the notification be ignored or not?
+					</div>
+					<hr>
+					<h3>
+						Ignore Repetitive Notifications
+			            <span class="checkbox" prompt="y/n">
+			                <input id="notify-only-once" type="checkbox" data-option="NotifyOnlyOnce"/>
+			                <label for="notify-only-once"></label>
+			            </span>
+					</h3>
+					<div>
+						When the user presses the Grab button and there are several incoming notifications of similar information, should the notifications be ignored (after the first one) or not?
+					</div>
+				</details>
+			</article>
+
+			<article>
+				<details>
+					<Summary>Search Settings</Summary>
+		            <section>
+		                <h3>
+							Loose Searching
+							<span class="checkbox">
+			                    <input id="use-loose" type="checkbox" data-option="UseLoose" checked/>
+			                    <label for="use-loose"></label>
+			                </span>
+						</h3>
+		                <label>Searching Sensitivity</label>
+		                <br>
+		                <input type="range" data-option="UseLooseScore" min="0" max="100" step="5" value="40" symbol="%"/>
+		                <output type="text" value="40%"></output>
+		                <div>
+		                    Allows the extension to search for non-English titles using pattern matching (as a last resort).
+							<br>
+		                    Higer sensitivity means more strict searches.
+		                </div>
+		            </section>
+					<hr>
+		            <section>
+		                <h3>
+							Manager Searching
+							<span class="checkbox">
+			                    <input id="manager-search" type="checkbox" data-option="ManagerSearch"/>
+			                    <label for="manager-search"></label>
+			                </span>
+						</h3>
+		                <div>
+		                    Allows the extension to use your manager(s) to find media.<br>
+		                    Currently supports: Medusa, Ombi, Radarr, and Sonarr.
+		                </div>
+					</section>
+					<hr>
+					<section>
+						<h3>
+							ID Fetching Mode
+							<span class="checkbox" prompt-yes="all" prompt-no="min">
+								<input id="use-low-cache" type="checkbox" data-option="UseLowCache"/>
+								<label for="use-low-cache"></label>
+							</span>
+						</h3>
+						<ul>
+							<li><em>MIN</em>: when a page is loaded, the extension will keep a small number of IDs on hand to speed up the process of finding media</li>
+							<li><em>ALL</em>: when a page is loaded, the extension will ask for every single ID from your Manager(s)</li>
+						</ul>
+					</section>
+				</details>
+			</article>
+
+		    <article>
+		        <details>
+		            <summary>Advance Settings
+						<span counter-for="devmode" special>BETA</span>
+					</summary>
+		            <h2>API Keys</h2>
+		            <section>
+		                <label>OMDb</label>
+		                <input type="text" data-option="OMDbAPI" placeholder="Enter your OMDb API Key"/>
+		                <div>
+		                    You can <a href="https://www.omdbapi.com/apikey.aspx" target="_blank">sign up</a> for an API key, or have OMDb used as a last resort.
+		                </div>
+		            </section>
+
+		            <section>
+		                <label>TMDb</label>
+		                <input type="text" data-option="TMDbAPI" placeholder="Enter your TMDb API Key"/>
+		                <div>
+		                    You can <a href="https://developers.themoviedb.org/3/" target="_blank">learn more</a> on how to obtain an API key.
+		                </div>
+		            </section>
+					<hr>
+		            <h2>Data Handling</h2>
+					<section>
+						<h3 x-mode>Data Compression</h3>
+						<div class="checkbox">
+							<input id="use-lzw" type="checkbox" data-option="UseLZW"/>
+							<label for="use-lzw"></label>
+						</div>
+						<div>
+							<em>WARNING</em>: may cause data loss.<br>
+							Enabling this option will compress your cached search data using the <a href="https://wikipedia.org/wiki/Burrows%E2%80%93Wheeler_transform" target="_blank">BWT (transform)</a> and <a href="https://wikipedia.org/wiki/Lempel%E2%80%93Ziv%E2%80%93Welch" target="_blank">LZW Compression Algorithm</a>.
+						</div>
+					</section>
+					<hr>
+		            <section>
+		                <h3>Configuration Data (Copy/Paste)</h3>
+		                <input id="json_data" type="text" code placeholder="Enter your configuration data"/>
+		                <div>
+		                    Use this for testing purposes only, as it may contain saved usernames and/or passwords.
+							<br>
+							You cannot use this feature with <strong>Data Compression</strong> enabled.
+		                </div>
+		                <br>
+		                <button type="button" id="json_set">Generate Data</button>
+		                <button type="button" id="json_get">Restore Data</button>
+		            </section>
+		            <hr>
+		            <section>
+		                <h3>Cached Data</h3>
+		                <label>Would you like to erase all of your cached data?</label>
+		                <br>
+		                <button type="button" id="erase_cache">Yes, Erase</button>
+		                <div>
+		                    This will remove all of your Local Search, permission, and other cached data.
+		                    <br>
+		                    <strong>This action cannot be undone.</strong>
+		                </div>
+		            </section>
+					<hr>
+					<h2>Developer Options</h2>
+					<section>
+						<h3>
+							Developer Mode
+			                <span class="checkbox">
+			                    <input id="extension-branch-type" type="checkbox" checked data-option="DeveloperMode"/>
+			                    <label for="extension-branch-type"></label>
+			                </span>
+						</h3>
+						<div>
+							<em>WARNING</em>: may cause data loss.<br>
+							Enables developer (debugging) mode, showing advance errors and logging to the console when possible.
+						</div>
+					</section>
+		        </details>
+		    </article>
+
+		    <article>
+		        <details>
+		            <summary>Help</summary>
+
+		            <h2>External Links</h2>
+		            <section>
+		                <label>Web to Plex Links</label>
+		                <ul>
+		                    <li>Browse the <a href="https://github.com/SpaceK33z/web-to-plex/wiki" target="_blank">Web to Plex Wiki</a> for help setting up</li>
+		                    <li><a href="https://github.com/SpaceK33z/web-to-plex/issues" target="_blank">Browse issues</a> if you're having trouble</li>
+		                </ul>
+		            </section>
+
+		            <section>
+		                <label>Watcher's Website</label>
+		                <div>
+		                    Download, and/or find more information for <a href="https://nosmokingbandit.github.io/" target="_blank">Watcher</a>.
+		                </div>
+		            </section>
+
+		            <section>
+		                <label>Radarr's Website</label>
+		                <div>
+		                    Download, and/or find more information for <a href="http://radarr.video/" target="_blank">Radarr</a>.
+		                </div>
+		            </section>
+
+		            <section>
+		                <label>Sonarr's Website</label>
+		                <div>
+		                    Download, and/or find more information for <a href="https://sonarr.tv/" target="_blank">Sonarr</a>.
+		                </div>
+		            </section>
+
+		            <section>
+		                <label>CouchPotato's Website</label>
+		                <div>
+		                    Download, and/or find more information for <a href="https://couchpota.to/" target="_blank">CouchPotato</a>.
+		                </div>
+		            </section>
+
+		            <section>
+		                <label>Ombi's Website</label>
+		                <div>
+		                    Download, and/or find more information for <a href="https://ombi.io/" target="_blank">Ombi</a>.
+		                </div>
+		            </section>
+
+		            <section>
+		                <label>Medusa's Website</label>
+		                <div>
+		                    Download, and/or find more information for <a href="https://pymedusa.com/" target="_blank">Medusa</a>.
+		                </div>
+		            </section>
+
+					<section>
+						<label>Sick Beard's Website</label>
+						<div>
+							Download, and/or find more information for <a href="https://sickbeard.com/" target="_blank">Sick Beard</a>.
+						</div>
+					</section>
+		        </details>
+		    </article>
+		</div>
+
+		<button id="save">Save</button>
+	</div>
+
+	<display></display>
+
+	<footer>
+		<!-- footer -->
+	</footer>
+
+	<div class="hide">
+		<input data-option="watcherQualities" value/>
+		<input data-option="radarrQualities" value/>
+		<input data-option="sonarrQualities" value/>
+		<input data-option="medusaQualities" value/>
+		<input data-option="sickBeardQualities" value/>
+		<input data-option="watcherStoragePaths" value/>
+		<input data-option="radarrStoragePaths" value/>
+		<input data-option="sonarrStoragePaths" value/>
+		<input data-option="medusaStoragePaths" value/>
+		<input data-option="sickBeardStoragePaths" value/>
+		<input data-option="__radarrQuality" value/>
+		<input data-option="__sonarrQuality" value/>
+		<input data-option="__medusaQuality" value/>
+		<input data-option="__sickBeardQuality" value/>
+		<input data-option="__radarrStoragePath" value/>
+		<input data-option="__sonarrStoragePath" value/>
+		<input data-option="__medusaStoragePath" value/>
+		<input data-option="__sickBeardStoragePath" value/>
+		<input data-option="__domains" value/>
+		<input data-option="__caught" value/>
+		<input data-option="__theme" value/>
+	</div>
+
+    <a id="version" code href="https://github.com/SpaceK33z/web-to-plex/releases" target="_blank">...</a>
+
+	<iframe id="native-frame" name="native-frame" style="display: none !important"></iframe>
+
+	<script src="lodash.min.js"></script>
+	<script src="xml.js"></script>
+	<script src="compare.js"></script>
+	<script src="options.js"></script>
+</body>
+</html>

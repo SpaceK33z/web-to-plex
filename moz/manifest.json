@@ -1,10 +1,10 @@
 {
 	"name": "Web to Plex",
 	"description": "Adds a button on various movie & TV show sites to open the item in Plex, or send to your designated NZB manager for download.",
-	"homepage_url": "https://github.com/SpaceK33z/web-to-plex/",
+	"homepage_url": "https://webtoplex.github.io/",
 
 	"manifest_version": 2,
-	"version": "4.1.1.9",
+	"version": "4.1.1.11",
 	"browser_specific_settings": {
 		"gecko": {
 			"id": "mink.cbos@gmail.com",
@@ -103,8 +103,8 @@
 			"matches": ["*://itunes.apple.com/*"],
 			"js": ["utils.js", "itunes$.js"]
 		},{
-			"matches": ["*://*.metacritic.com/*"],
-			"js": ["utils.js", "metacritic$.js"]
+			"matches": ["*://*.shanaproject.com/*"],
+			"js": ["utils.js", "shanaproject$.js"]
 		},{
 			"matches": ["*://*.fandango.com/*"],
 			"js": ["utils.js", "fandango$.js"]
@@ -154,7 +154,7 @@
 			"matches": ["*://*.tubitv.com/*"],
 			"js": ["utils.js", "tubi$.js"]
 		},{
-			"matches": ["*://ephellon.github.io/web.to.plex/?*", "*://ephellon.github.io/web.to.plex/index.html?*", "*://ephellon.github.io/web.to.plex/login.html?*"],
+			"matches": ["*://webtoplex.github.io/web/*", "*://ephellon.github.io/web.to.plex/*"],
 			"js": ["utils.js", "webtoplex$.js"]
 		},{
 			"matches": ["*://app.plex.tv/desktop/*"],
