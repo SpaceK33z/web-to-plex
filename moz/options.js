@@ -179,7 +179,6 @@ const storage = (chrome.storage.sync || chrome.storage.local),
 			'builtin_gostream',
 			'builtin_tubi',
 			'builtin_webtoplex',
-			'builtin_shanaproject',
 
 			// Plugins - End of file, "let plugins ="
 			'plugin_toloka',
@@ -1924,7 +1923,6 @@ let builtins = {
 	"Netflix": "https://netflix.com/",
 	"Verizon": "https://tv.verizon.com/",
 	"Trakt": "https://trakt.tv/",
-	"Shana Project": "https://shanaproject.com/",
 	"YouTube": "https://youtube.com/",
 	"Rotten Tomatoes": "https://rottentomatoes.com/",
 	"Fandango": "https://www.fandango.com/",
