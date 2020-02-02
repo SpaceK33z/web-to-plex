@@ -726,22 +726,56 @@ let configuration, init, Update;
 					prompt = furnish('div.web-to-plex-prompt', {},
 						furnish('div.web-to-plex-prompt-body', { style: `background-image: url(${ IMG_URL.noise_background }), url(${ IMG_URL.background }); background-size: auto, cover;` },
 							// The prompt's title
-							furnish('h1.web-to-plex-prompt-header', { innerHTML: `${ alias || name } (${ location.host }) would like:` }),
+							furnish('h1.web-to-plex-prompt-header', { innerHTML: `<span style="text-decoration: underline; cursor: pointer;" title="${ location.host }">"${ alias || name }"</span> would like:` }),
 
 							// The prompt's items
 							furnish('div.web-to-plex-prompt-options', {},
 								...((permissions = permission.split(/\s*,\s*/).filter(v=>v&&v.length)).map(
 									__permission =>
-										furnish('div.web-to-plex-prompt-option', { innerHTML: `Access to your ${ __permission } information` })
+										furnish('div.web-to-plex-prompt-option.web-to-plex-permission', { innerHTML: `Access to your <strong>${ __permission.replace(/(y)?s?$/, ($0, $1, $$, $_) => ($1? 'ies': 's')) }</strong> &mdash; ` + (p => {
+												let R = RegExp,
+													X = [
+														/^client(id)?$/i,
+														/^servers?$/i,
+														/^tokens?$/i,
+														/^(url(root)?|proxy)$/,
+														/^usernames?$/i,
+														/^passwords?$/i,
+														/^storage$/i,
+														/^qualit(y|ies)$/i,
+														/^cache$/i,
+														/^(built|plug)in$/i,
+														/^api$/i,
+													],
+													E = [
+														'The API key to Plex (also called your "Client ID")',
+														'The server address(es) to Plex',
+														'The API keys to Plex, Radarr, Sonarr, etc.',
+														'The URLs to Radarr, Sonarr, etc. And your proxy settings',
+														'The usernames to Radarr, Sonarr, etc.',
+														'The passwords to Radarr, Sonarr, etc.',
+														'The folder locations from Radarr, Sonarr, etc.',
+														'The quality settigns from Radarr, Sonarr, etc.',
+														'Your cached data: permissions, searches, etc.',
+														'The status of all sites: enabled, or disabled',
+														'The external API keys to TMDb, OMDb, etc.',
+													];
+
+												for(let x of X)
+													if(x.test(p))
+														return E[X.indexOf(x)];
+
+												return `Unknown permission "${p}," will be skipped.`;
+											})(__permission)
+										})
 									)
 								)
 							),
 
-
 							// The engagers
 							furnish('div.web-to-plex-prompt-footer', {},
-								furnish('button.web-to-plex-prompt-decline', { onmouseup: event => { remove(true); callback(false, {}) }, title: 'Deny' }, '\u2718'),
-								furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { remove(true); callback(true, permissions) }, title: 'Allow' }, '\u2714')
+								furnish('button.web-to-plex-prompt-decline', { onmouseup: event => { if(!event.isTrusted) throw alert('The script for this site is trying to decline its own permissions!'), 'Malicious script. Decline permissions'; remove(true); callback(false, {}) }, title: 'Deny all permissions' }, '\u2718'),
+								furnish('button.web-to-plex-prompt-accept', { onmouseup: async event => { if(!event.isTrusted) throw alert('The script for this site is trying to grant its own permissions!'), 'Malicious script. Grant permissions'; remove(true); await callback(true, permissions); top.open(top.location.href, '_top'); }, title: 'Allow all permissions' }, '\u2714')
 							)
 						)
 					);
@@ -831,8 +865,7 @@ let configuration, init, Update;
 		else
 			return Update.retry = false;
 
-		let message = JSON.stringify({ type, options }),
-			index = -1;
+		let message = JSON.stringify({ type, options });
 
 		Update.messages = Update.messages || [];
 
@@ -849,15 +882,15 @@ let configuration, init, Update;
 					console.log(`Update response (${ type } [post-to-top=${ !!postToo }]):`, { response, options });
 				}
 			});
+
+			// the message has only 30s to "live"
+			setTimeout(() => Update.messages.splice(0, 1), 30000);
+
+			if(postToo)
+				top.postMessage(options);
 		} else {
 			// the message was already sent, block it
 		}
-
-		// the message has only 1s to "live"
-		setTimeout(() => Update.messages.splice(index, 1), 1000);
-
-		if(postToo)
-			top.postMessage(options);
 	};
 
 	// get the saved options
@@ -997,8 +1030,8 @@ let configuration, init, Update;
 							else
 								/* Do nothing */;
 						// else if(/(^cache-data|paths|qualities)/i.test(key))
-						//     /* Pre-parse JSON - make sure anything accessing thedata handles objects too */
-						//     configuration[key] = JSON.parse(options[key] || null);
+						//	 /* Pre-parse JSON - make sure anything accessing the data handles objects too */
+						//	 configuration[key] = JSON.parse(options[key] || null);
 						else
 							/* Simple copy */
 							configuration[key] = options[key];
@@ -1376,8 +1409,9 @@ let configuration, init, Update;
 		let host = TLDHost(location.host),
 			doms = configuration.__domains.split(',');
 
-		if(!~doms.indexOf(host))
-			return;
+			if(!~doms.indexOf(host))
+				return UTILS_TERMINAL.WARN(`Domain not acknowledged "${ host }"`, doms);
+			UTILS_TERMINAL.LOG(`Domain acknowledged "${ host }"`, doms);
 	}
 
 	UTILS_TERMINAL.log('UTILS_DEVELOPER:', UTILS_DEVELOPER, configuration);
@@ -2452,7 +2486,7 @@ let configuration, init, Update;
 						onmouseup: event => {
 							let self = event.target, parent = button;
 
-							(d=>{let s=d.createElement('script'),h=d.querySelector('head');s.type='text/javascript';s.src='//ephellon.github.io/plex.it.js';h.appendChild(s)})(document);
+							(d=>{let s=d.createElement('script'),h=d.querySelector('head');s.type='text/javascript';s.src='//webtoplex.github.io/plex.it.js';h.appendChild(s)})(document);
 						}
 					},
 					furnish('img[alt=Favorite]', { src: IMG_URL.plexit_icon_48, onmouseup: event => event.target.parentElement.click() }) // <img/>
@@ -3057,6 +3091,11 @@ let configuration, init, Update;
 			case 'NO_RENDER':
 				UTILS_TERMINAL.WARN('Told to stop rendering...');
 				document.queryBy('.web-to-plex-button').map(e => e.remove());
+				return true;
+
+			case 'POSTED':
+				/* "Thanks, I updated" */
+				UTILS_TERMINAL.LOG(`Update posted for:`, data);
 				return true;
 
 			default:
