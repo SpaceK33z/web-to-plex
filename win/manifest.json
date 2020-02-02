@@ -4,7 +4,7 @@
 	"homepage_url": "https://webtoplex.github.io/",
 
 	"manifest_version": 2,
-	"version": "4.1.1.10",
+	"version": "4.1.1.11",
 
 	"icons": {
 		"16":  "img/16.png",
@@ -108,9 +108,9 @@
 			"js": ["utils.js", "sites/itunes/index.js"],
 			"css": ["sites/itunes/index.css"]
 		},{
-			"matches": ["*://*.metacritic.com/*"],
-			"js": ["utils.js", "sites/metacritic/index.js"],
-			"css": ["sites/metacritic/index.css"]
+			"matches": ["*://*.shanaproject.com/*"],
+			"js": ["utils.js", "sites/shanaproject/index.js"],
+			"css": ["sites/shanaproject/index.css"]
 		},{
 			"matches": ["*://*.fandango.com/*"],
 			"js": ["utils.js", "sites/fandango/index.js"],
@@ -176,10 +176,7 @@
 			"js": ["utils.js", "sites/tubi/index.js"],
 			"css": ["sites/tubi/index.css"]
 		},{
-			"matches": [
-				"*://webtoplex.github.io/web/?*", "*://webtoplex.github.io/web/index.html?*", "*://webtoplex.github.io/web/login.html?*",
-				"*://ephellon.github.io/web.to.plex/?*", "*://ephellon.github.io/web.to.plex/index.html?*", "*://ephellon.github.io/web.to.plex/login.html?*"
-			],
+			"matches": ["*://webtoplex.github.io/web/*", "*://ephellon.github.io/web.to.plex/*"],
 			"js": ["utils.js", "sites/webtoplex/index.js"],
 			"css": ["sites/webtoplex/index.css"]
 		},{

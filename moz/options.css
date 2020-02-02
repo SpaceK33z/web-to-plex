@@ -692,20 +692,26 @@ code[new], [code][new], [type^="code"i][new] {
 
 /* Release is higher than GitHub */
 #version[status="high"] {
-    border-color: #6cc644 !important;
-    color: #6cc644 !important;
-}
-
-/* Release is same as GitHub */
-#version[status="same"] {
+    /* Blue */
     border-color: #197bcc !important;
     color: #197bcc !important;
 }
 
+/* Release is same as GitHub */
+#version[status="same"] {
+    /* Green */
+    border-color: #6cc644 !important;
+    color: #6cc644 !important;
+}
+
 /* Release is lower than GitHub */
 #version[status="low"] {
+    /* Orange/Red (#f3582c) */
     border-color: #f66a0a !important;
-    color: #f3582c !important;
+    color: #f66a0a !important;
+    /* Grey */
+    /* border-color: #949494 !important;
+    color: #949494 !important; */
 }
 
 /* notifications */

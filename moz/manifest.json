@@ -4,7 +4,7 @@
 	"homepage_url": "https://webtoplex.github.io/",
 
 	"manifest_version": 2,
-	"version": "4.1.1.10",
+	"version": "4.1.1.11",
 	"browser_specific_settings": {
 		"gecko": {
 			"id": "mink.cbos@gmail.com",
@@ -103,8 +103,8 @@
 			"matches": ["*://itunes.apple.com/*"],
 			"js": ["utils.js", "itunes$.js"]
 		},{
-			"matches": ["*://*.metacritic.com/*"],
-			"js": ["utils.js", "metacritic$.js"]
+			"matches": ["*://*.shanaproject.com/*"],
+			"js": ["utils.js", "shanaproject$.js"]
 		},{
 			"matches": ["*://*.fandango.com/*"],
 			"js": ["utils.js", "fandango$.js"]
@@ -154,10 +154,7 @@
 			"matches": ["*://*.tubitv.com/*"],
 			"js": ["utils.js", "tubi$.js"]
 		},{
-			"matches": [
-				"*://webtoplex.github.io/web/?*", "*://webtoplex.github.io/web/index.html?*", "*://webtoplex.github.io/web/login.html?*",
-				"*://ephellon.github.io/web.to.plex/?*", "*://ephellon.github.io/web.to.plex/index.html?*", "*://ephellon.github.io/web.to.plex/login.html?*"
-			],
+			"matches": ["*://webtoplex.github.io/web/*", "*://ephellon.github.io/web.to.plex/*"],
 			"js": ["utils.js", "webtoplex$.js"]
 		},{
 			"matches": ["*://app.plex.tv/desktop/*"],

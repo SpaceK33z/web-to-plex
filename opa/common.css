@@ -150,6 +150,8 @@
 
 .web-to-plex-prompt-body {
 	background: #282828;
+    border: 0 !important;
+    border-radius: 3px !important;
 	box-shadow: 0 5px 15px #0008 !important;
 	display: block !important;
 
@@ -184,7 +186,7 @@
 }
 
 .web-to-plex-prompt-header {
-    border-bottom-color: #222 !important;
+	border-bottom-color: #222 !important;
 	border-bottom-width: 1px !important;
 	border-top-left-radius: 3px !important;
 	border-top-right-radius: 3px !important;
@@ -276,6 +278,25 @@
 
 .web-to-plex-prompt-option.mutable > .location:last-child:not(:first-child) {
     margin-top: 5px !important;
+}
+
+.web-to-plex-permission:after {
+    background: #0000;
+    border-radius: 3px;
+    border: 0;
+    color: #cc7b19;
+    content: "\29eb";
+    display: inline-block;
+    font-size: 150%;
+    padding: 0;
+    text-align: center;
+
+    margin: 0;
+    position: absolute;
+    right: 3%;
+
+    height: 2em;
+    width: 2em;
 }
 
 .web-to-plex-prompt-footer {
@@ -503,6 +524,10 @@
     display: inline !important;
 
     margin-top: 0 !important;
+}
+
+.web-to-plex-button.hide.closed li:not(:first-child) {
+    display: none !important;
 }
 
 *:not(#plexit-bookmarklet-frame) + .web-to-plex-button.closed .list-item {

@@ -23,11 +23,11 @@ BUTTON  [style].web-to-plex-button.<floating>.<hide|show>.<open|closed>
         LI  [tooltip]#wtp-list-name.list-name
             // The actionable anchor
             A  [tooltip][href][`id`].list-action
-               IMG  [src=48.png] // Web to Plex logo
+               IMG  [src=/img/48.png] // Web to Plex logo
 
         // The Plex It! button
         LI  [tooltip]#wtp-plexit.list-item
-            IMG [src=plexit.48.png] // Alarm bell
+            IMG [src=/img/plexit.48.png] // Alarm bell
 
         // The Add to Plex It! button (normally hidden, until Plex It! is visible)
         LI  [tooltip][data]#plexit.list-item
@@ -35,15 +35,15 @@ BUTTON  [style].web-to-plex-button.<floating>.<hide|show>.<open|closed>
 
         // The hide button
         LI  [tooltip]#wtp-hide.list-item
-            IMG [src=hide.48.png] // Eye icon
+            IMG [src=/img/hide.48.png] // Eye icon
 
         // The refresh button
         LI  [tooltip]#wtp-refresh.list-item
-            IMG [src=reload.48.png] // Refresh
+            IMG [src=/img/reload.48.png] // Refresh
 
         // The settings button
         LI  [tooltip]#wtp-options.list-item
-            IMG [src=settings.48.png] // Gear icon
+            IMG [src=/img/settings.48.png] // Gear icon
 
         // The small, circular, colored indicator
         ::after
@@ -66,4 +66,9 @@ BUTTON  [style].web-to-plex-button.<floating>.<hide|show>.<open|closed>
 
 .web-to-plex-button.hide.closed[button-opacity-hidden="10"] {
     opacity: 0.10 !important;
+}
+
+/* Button shape */
+.web-to-plex-button.button-shape-box {
+    /* ... */
 }

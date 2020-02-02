@@ -1,5 +1,5 @@
 // optional
-// "Web to Plex" requires: token
+// "Web to Plex" requires: api
 // 'Friendly Name' requires permissions...
 
 let script = {
@@ -54,4 +54,4 @@ setTimeout(() => {
 		return -1;
 		// don't run on the login page
 	}
-}, 100);
+}, 1000);

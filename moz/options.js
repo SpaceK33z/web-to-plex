@@ -120,6 +120,7 @@ const storage = (chrome.storage.sync || chrome.storage.local),
 			// Advance Settings
 			'OMDbAPI',
 			'TMDbAPI',
+			'UseLZW',
 			'DeveloperMode',
 
 			// Hidden values
@@ -157,7 +158,7 @@ const storage = (chrome.storage.sync || chrome.storage.local),
 			'builtin_imdb',
 			'builtin_justwatch',
 			'builtin_letterboxd',
-			'builtin_metacritic',
+			// 'builtin_metacritic', // demoted - 01.18.2020 15:10 MST
 			'builtin_moviemeter',
 			'builtin_movieo',
 			'builtin_netflix',
@@ -178,10 +179,11 @@ const storage = (chrome.storage.sync || chrome.storage.local),
 			'builtin_gostream',
 			'builtin_tubi',
 			'builtin_webtoplex',
+			'builtin_shanaproject',
 
 			// Plugins - End of file, "let plugins ="
 			'plugin_toloka',
-			'plugin_shanaproject',
+			// 'plugin_shanaproject', // promoted - 01.18.2020 15:10 MST
 			'plugin_myanimelist',
 			'plugin_myshows',
 			'plugin_indomovie',
@@ -191,6 +193,7 @@ const storage = (chrome.storage.sync || chrome.storage.local),
 			'plugin_snagfilms',
 			'plugin_freemoviescinema',
 			'plugin_foxsearchlight',
+			'plugin_metacritic',
 
 			// Theme Settings
 			...(() => [...$('[data-option^="theme:"i]', true)].map(e => e.dataset.option))()
@@ -1934,7 +1937,6 @@ let builtins = {
 	"Hulu": "https://hulu.com/",
 	"Flickmetrix": "https://flickmetrix.com/",
 	"TVDb": "https://thetvdb.com/",
-	"Metacritic": "https://www.metacritic.com/",
 	"ShowRSS": "https://showrss.info/",
 	"Vudu": "https://vudu.com/",
 	"Movieo": "https://movieo.me/",
@@ -1950,6 +1952,7 @@ let builtins = {
 	"Web to Plex": ["https://webtoplex.github.io/web/", "https://ephellon.github.io/web.to.plex/"],
 	"Allocine": "https://allocine.fr/",
 	"Plex": "https://app.plex.tv/",
+	"Shana Project": "https://www.shanaproject.com/",
 
 	// Dont' forget to add to the __options__ array!
 }, builtin_array = [], builtin_sites = {}, builtinElement = $('#builtin');
@@ -2056,7 +2059,6 @@ addListener($('#all-builtin'), 'click', event => {
 let plugins = {
 	'Indomovie': ['https://indomovietv.club/', 'https://indomovietv.org/', 'https://indomovietv.net/'],
 	'Toloka': 'https://toloka.to/',
-	'Shana Project': 'https://www.shanaproject.com/',
 	'My Anime List': 'https://myanimelist.net/',
 	'My Shows': 'https://myshows.me/',
 	'Redbox': 'https://www.redbox.com/',
@@ -2065,6 +2067,7 @@ let plugins = {
 	'SnagFilms': 'http://snagfilms.com/',
 	'Free Movies Cinema': 'https://freemoviescinema.com/',
 	'Fox Searchlight': 'http://foxsearchlight.com/',
+	'Metacritic': 'https://www.metacritic.com/',
 
 	// Don't forget to add to the __options__ array!
 }, plugin_array = [], plugin_sites = {}, pluginElement = $('#plugins');
@@ -2544,24 +2547,30 @@ Recall['@0sec'].SetVersionInfo = async() => {
 			status;
 
 		switch(compareVer(remote, local)) {
-			case 0:
-				status = 'same';
-				verEl.setAttribute('title', `The installed version is the most recent. No update required`);
-				break;
-
 			case -1:
 				status = 'high';
-				verEl.setAttribute('title', `The installed version is ahead of GitHub. No update required`);
+				verEl.setAttribute('title', `The installed version (v${ local }) is ahead of GitHub. No update required`);
+				break;
+
+			case 0:
+				status = 'same';
+				verEl.setAttribute('title', `The installed version (v${ local }) is the most recent. No update required`);
 				break;
 
 			case 1:
 				status = 'low';
 				verEl.href += (DM? '': '/latest');
-				verEl.setAttribute('title', `The installed version is behind GitHub. Update available`);
+				verEl.setAttribute('title', `The installed version (v${ local }) is behind GitHub. Update to v${ remote } available`);
 				break;
+
+			default:
+				verEl.setAttribute('title', `An error has occured comparing Web to Plex versions ([v${ local }] \u2194 [v${ remote }])`);
+				verEl.setAttribute('status', 'low');
+				verEl.innerHTML = 'ERROR';
+				return;
 		}
 
-		verEl.innerHTML = `v${ manifest.version }`;
+		verEl.innerHTML = `v${ local }`;
 		verEl.setAttribute('status', status);
 	}
 

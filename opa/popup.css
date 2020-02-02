@@ -1,4 +1,8 @@
 html, body {
+    border: 0;
+    margin: 0;
+    padding: 0;
+
     height: 625px !important;
     width: 625px !important;
 }
@@ -61,7 +65,7 @@ td, footer > * > * {
     line-height: 1.33 !important;
     border-radius: 3px;
     cursor: pointer !important;
-    text-transform: uppercase;
+    text-transform: capitalize;
     border: 0;
     background: rgba(255, 255, 255, 0.3);
     margin-bottom: 0;
@@ -76,6 +80,21 @@ td, footer > * > * {
 
 tbody:not(:last-child) {
     border-bottom: 1px solid #6668;
+}
+
+tbody[header]:before {
+    background: #fff1;
+    border: 0;
+    border-radius: 3px;
+    box-shadow: 0 3px 6px 0 #0004;
+    color: #fffb;
+    content: attr(header);
+    display: block;
+    text-align: center;
+
+    margin: 1px 1px 3px;
+
+    width: calc(300% + 3px);
 }
 
 #movieo:hover {

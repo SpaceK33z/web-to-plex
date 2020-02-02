@@ -725,22 +725,56 @@ let configuration, init, Update;
 					prompt = furnish('div.web-to-plex-prompt', {},
 						furnish('div.web-to-plex-prompt-body', { style: `background-image: url(${ IMG_URL.noise_background }), url(${ IMG_URL.background }); background-size: auto, cover;` },
 							// The prompt's title
-							furnish('h1.web-to-plex-prompt-header', { innerHTML: `${ alias || name } (${ location.host }) would like:` }),
+							furnish('h1.web-to-plex-prompt-header', { innerHTML: `<span style="text-decoration: underline; cursor: pointer;" title="${ location.host }">"${ alias || name }"</span> would like:` }),
 
 							// The prompt's items
 							furnish('div.web-to-plex-prompt-options', {},
 								...((permissions = permission.split(/\s*,\s*/).filter(v=>v&&v.length)).map(
 									__permission =>
-										furnish('div.web-to-plex-prompt-option', { innerHTML: `Access to your ${ __permission } information` })
+										furnish('div.web-to-plex-prompt-option.web-to-plex-permission', { innerHTML: `Access to your <strong>${ __permission.replace(/(y)?s?$/, ($0, $1, $$, $_) => ($1? 'ies': 's')) }</strong> &mdash; ` + (p => {
+												let R = RegExp,
+													X = [
+														/^client(id)?$/i,
+														/^servers?$/i,
+														/^tokens?$/i,
+														/^(url(root)?|proxy)$/,
+														/^usernames?$/i,
+														/^passwords?$/i,
+														/^storage$/i,
+														/^qualit(y|ies)$/i,
+														/^cache$/i,
+														/^(built|plug)in$/i,
+														/^api$/i,
+													],
+													E = [
+														'The API key to Plex (also called your "Client ID")',
+														'The server address(es) to Plex',
+														'The API keys to Plex, Radarr, Sonarr, etc.',
+														'The URLs to Radarr, Sonarr, etc. And your proxy settings',
+														'The usernames to Radarr, Sonarr, etc.',
+														'The passwords to Radarr, Sonarr, etc.',
+														'The folder locations from Radarr, Sonarr, etc.',
+														'The quality settigns from Radarr, Sonarr, etc.',
+														'Your cached data: permissions, searches, etc.',
+														'The status of all sites: enabled, or disabled',
+														'The external API keys to TMDb, OMDb, etc.',
+													];
+
+												for(let x of X)
+													if(x.test(p))
+														return E[X.indexOf(x)];
+
+												return `Unknown permission "${p}," will be skipped.`;
+											})(__permission)
+										})
 									)
 								)
 							),
 
-
 							// The engagers
 							furnish('div.web-to-plex-prompt-footer', {},
-								furnish('button.web-to-plex-prompt-decline', { onmouseup: event => { remove(true); callback(false, {}) }, title: 'Deny' }, '\u2718'),
-								furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { remove(true); callback(true, permissions) }, title: 'Allow' }, '\u2714')
+								furnish('button.web-to-plex-prompt-decline', { onmouseup: event => { if(!event.isTrusted) throw alert('The script for this site is trying to decline its own permissions!'), 'Malicious script. Decline permissions'; remove(true); callback(false, {}) }, title: 'Deny all permissions' }, '\u2718'),
+								furnish('button.web-to-plex-prompt-accept', { onmouseup: async event => { if(!event.isTrusted) throw alert('The script for this site is trying to grant its own permissions!'), 'Malicious script. Grant permissions'; remove(true); await callback(true, permissions); top.open(top.location.href, '_top'); }, title: 'Allow all permissions' }, '\u2714')
 							)
 						)
 					);
@@ -804,7 +838,7 @@ let configuration, init, Update;
 			} catch(error) {
 				console.warn(`Update failed... "${ error }" Attempting to save configuration...`);
 
-				return sFrame(extURL(`options.html#!/~save`), {
+				return sFrame(extURL(`options/index.html#!/~save`), {
 					success: async event => {
 						let self = event.target;
 
@@ -994,7 +1028,7 @@ let configuration, init, Update;
 							else
 								/* Do nothing */;
 						// else if(/(^cache-data|paths|qualities)/i.test(key))
-						//	 /* Pre-parse JSON - make sure anything accessing thedata handles objects too */
+						//	 /* Pre-parse JSON - make sure anything accessing the data handles objects too */
 						//	 configuration[key] = JSON.parse(options[key] || null);
 						else
 							/* Simple copy */
@@ -2415,7 +2449,7 @@ let configuration, init, Update;
 						(d=>{let s=d.createElement('script'),h=d.querySelector('head');s.type='text/javascript';s.src='//webtoplex.github.io/plex.it.js';h.appendChild(s)})(document);
 					}
 				},
-				furnish('img[alt=Favorite]', { src: IMG_URL.plexit_icon_48, onmouseup: event => event.target.parentElement.click() }) // <>
+				furnish('img[alt=Favorite]', { src: IMG_URL.plexit_icon_48, onmouseup: event => event.target.parentElement.click() }) // <img/>
 				),
 
 				furnish('li#wtp-hide.list-item', {
@@ -2441,7 +2475,7 @@ let configuration, init, Update;
 						self.setAttribute('state', state);
 					}
 				},
-				furnish('img[alt=Hide]', { src: IMG_URL.hide_icon_48, onmouseup: event => event.target.parentElement.click() }) // <>
+				furnish('img[alt=Hide]', { src: IMG_URL.hide_icon_48, onmouseup: event => event.target.parentElement.click() }) // <img/>
 				),
 
 				furnish('li#wtp-refresh.list-item', {
@@ -2455,7 +2489,7 @@ let configuration, init, Update;
 							new Notification('warning', "Couldn't reload. Please refresh the page.");
 					}
 				},
-				furnish('img[alt=Reload]', { src: IMG_URL.reload_icon_48, onmouseup: event => event.target.parentElement.click() }) // <>
+				furnish('img[alt=Reload]', { src: IMG_URL.reload_icon_48, onmouseup: event => event.target.parentElement.click() }) // <img/>
 				),
 
 				furnish('li#wtp-options.list-item', {
@@ -2466,7 +2500,7 @@ let configuration, init, Update;
 						return Options();
 					}
 				},
-				furnish('img[alt=Settings]', { src: IMG_URL.settings_icon_48, onmouseup: event => event.target.parentElement.click() }) // <>
+				furnish('img[alt=Settings]', { src: IMG_URL.settings_icon_48, onmouseup: event => event.target.parentElement.click() }) // <img/>
 				)
 				// </li>
 			)

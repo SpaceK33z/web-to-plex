@@ -68,7 +68,8 @@ async function GetAuthorization(name) {
 		permissions = await Load(`get/${ name }`),
 		Ausername, Apassword, Atoken,
 		Aapi, Aserver, Aurl, Astorage,
-		Acache, Anormie, Aquality;
+		Acache, Anormie, Aquality,
+		Aclient;
 
 		if(!permissions)
 			return {};
@@ -80,8 +81,10 @@ async function GetAuthorization(name) {
 				Apassword = true;
 			else if(/^(tokens?)$/i.test(permission))
 				Atoken = true;
-			else if(/^(api|client(?:id)?)$/i.test(permission))
+			else if(/^(api)$/i.test(permission))
 				Aapi = true;
+			else if(/^(client(?:id)?)$/i.test(permission))
+				Aclient = true;
 			else if(/^(servers?)$/i.test(permission))
 				Aserver = true;
 			else if(/^(url(?:root)?|proxy)$/i.test(permission))
@@ -103,7 +106,7 @@ async function GetAuthorization(name) {
 			for(let permission in permissions)
 				WriteOff(permission);
 
-	return { authorized, Ausername, Apassword, Atoken, Aapi, Aserver, Aurl, Astorage, Acache, Anormie, Aquality };
+	return { authorized, Ausername, Apassword, Atoken, Aapi, Aclient, Aserver, Aurl, Astorage, Acache, Anormie, Aquality };
 }
 
 // get the saved options
@@ -292,6 +295,9 @@ ${
 	code
 		.replace(/\/\/+\s*"([^\"\n\f\r\v]+?)"\s*requires?\:?\s*(.+)/i, ($0, $1, $2, $$, $_) =>
 			`;(async() => await Require("${ $2 }", "${ alias }", "${ $1 }", "${ instance }"))();`
+		)
+		.replace(/\b(chrome|browser)\.storage\.(sync|local|managed)\.?/g, ($0, $1, $2, $$, $_) =>
+			`;console.warn("This ${ type } attempted to access <${ $1 }.storage.${ $2 }>; use <async function save>, <async function load>, and <async function kill> instead.");`
 		)
 }
 /* End Injected ${ Type } */
