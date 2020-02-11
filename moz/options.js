@@ -14,7 +14,7 @@ if(chrome.runtime.lastError)
 
 // FireFox doesn't support sync storage.
 const storage = (chrome.storage.sync || chrome.storage.local),
-		$ = top.$ = (selector, all) => (all? [...document.querySelectorAll(selector)]: document.querySelector(selector)),
+		$ = top.$ = (selector, all = false, container = document) => (all? [...container.querySelectorAll(selector)]: container.querySelector(selector)),
 		$$ = top.$$ = (selector, all) => (all? [...$('display').querySelectorAll(selector)]: $('display').querySelector(selector)),
 		__servers__ = $('[data-option="preferredServer"]'),
 		__sickBeard_qualityProfile__  = $(`[data-option="sickBeardQualityProfileId"]`),
@@ -117,7 +117,7 @@ const storage = (chrome.storage.sync || chrome.storage.local),
 			'ManagerSearch',
 			'UseLowCache',
 
-			// Advance Settings
+			// Advanced Settings
 			'OMDbAPI',
 			'TMDbAPI',
 			'UseLZW',
@@ -2492,7 +2492,7 @@ if(hash.length > 1)
 
 		/* #!/SETTING[/SUB-SETTING]
 		 * #!/radarr
-		 * #!/advance-settings/api-keys
+		 * #!/advanced-settings/api-keys
 		 */
 		case '':
 			break;
@@ -2948,3 +2948,27 @@ function restoreSelection({ anchor, focus }, editor, key) {
 
 	selection.setBaseAndExtent(nodes.anchor, index.anchor, nodes.focus, index.focus);
 }
+
+addListener($('#ip-address'), 'mouseup', async event => {
+	let self = event.target;
+
+	self.innerHTML = 'Loading...';
+
+	await fetch('https://check.torproject.org', { mode: 'cors' })
+		.then(results => results.text())
+		.then(text => {
+			let DOM = new DOMParser,
+				html = DOM.parseFromString(text, 'text/html'),
+				strong = $('.content strong', false, html),
+				IPAddress;
+
+			if(strong)
+				IPAddress = strong.textContent;
+			else if(/([\d\.]{7,15})/.test(html.body.textContent))
+				IPAddress = RegExp.$1;
+			else
+				IPAddress = 'unknown';
+
+			self.innerHTML = IPAddress;
+		});
+});

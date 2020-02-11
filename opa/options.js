@@ -117,7 +117,7 @@ const storage = (chrome.storage.sync || chrome.storage.local),
 			'ManagerSearch',
 			'UseLowCache',
 
-			// Advance Settings
+			// Advanced Settings
 			'OMDbAPI',
 			'TMDbAPI',
 			'UseLZW',
@@ -2491,7 +2491,7 @@ if(hash.length > 1)
 
 		/* #!/SETTING[/SUB-SETTING]
 		 * #!/radarr
-		 * #!/advance-settings/api-keys
+		 * #!/advanced-settings/api-keys
 		 */
 		case '':
 			break;

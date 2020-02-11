@@ -1,9 +1,56 @@
 /* eslint-disable no-unused-vars */
 /* global configuration, init, Update, "Helpers" */
 
-let configuration, init, Update;
+let configuration, init, Update, Glyphs = {},
+	HELPERS_STORAGE = {
+		get(keys, callback = () => {}) {
+			let results;
 
-(async date => {
+			if(keys === null) {
+				return callback(configuration);
+			} else if(keys instanceof String) {
+				return callback(configuration[keys]);
+			} else if(keys instanceof Array) {
+				results = [...keys];
+
+				for(let key of keys)
+					result.push(configuration[key]);
+				return callback(results);
+			} else if(keys instanceof Object) {
+				results = { ...keys };
+
+				for(let key in keys)
+					results[key] = configuration[key];
+				return callback(results);
+			}
+		},
+
+		set(keys, callback = () => {}) {
+			let results = {};
+
+			for(let key in keys)
+				configuration[key] = results[key] = keys[key];
+			return callback(results);
+		},
+
+		remove(keys, callback = () => {}) {
+			if(keys === null)
+				for(let key in configuration)
+					delete configuration[key];
+			else if(keys instanceof String)
+				delete configuration[key];
+			else if(keys instanceof Array)
+				for(let key of keys)
+					delete configuration[key];
+			else if(keys instanceof Object)
+				for(let key in keys)
+					delete configuration[key];
+
+			callback();
+		}
+	};
+
+let INITIALIZE = (async date => {
 
 	// default date items
 	let YEAR  = date.getFullYear(),
@@ -46,6 +93,15 @@ let configuration, init, Update;
 		'settings_icon_48': extURL('img/settings.48.png'),
 	};
 
+	for(let glyph of "adjust,airplane,alarm,albums,amazon,anchor,android,apple,asterisk,ax,badoo,ban,bank,barcode,baseball,basketball,bathrobe,beer,behance,bell,bicycle,bin,binoculars,blacksmith,blog,blogger,bluetooth,boat,bold,bomb,book,bookmark,bowling,briefcase,brush,bug,building,bullets,bullhorn,buoy,bus,cake,calculator,calendar,camera,candle,car,cardio,cargo,cars,celebration,certificate,charts,chat,check,cleaning,clock,cloud,cogwheel,cogwheels,coins,collapse,comments,compass,compressed,conversation,crop,crown,cup,cutlery,dashboard,delete,deviantart,direction,dislikes,display,divide,dog,download,dress,dribbble,drink,dropbox,dumbbell,earphone,edit,eject,electricity,embed,envelope,euro,evernote,exit,expand,eyedropper,fabric,facebook,factory,fax,female,file,film,filter,fins,fire,fishes,flag,flash,flickr,flower,font,forrst,forward,foursquare,fullscreen,gamepad,gbp,gift,girl,github,glass,global,globe,golf,goodreads,google_plus,grater,group,hdd,header,headphones,headset,heart,heat,history,hockey,home,hospital,imac,inbox,instagram,instapaper,ios,ipad,iphone,ipod,italic,jolicloud,justify,kettle,keynote,keys,kiosk,last_fm,leaf,leather,lightbulb,link,linked_in,list,lock,luggage,macbook,magic,magnet,male,microphone,minus,money,moon,more,move,music,mute,myspace,nails,nameplate,note,notes,ok,package,pants,paperclip,parents,pause,pen,pencil,piano,picasa,picture,pin,pinboard,pinterest,pipe,pizza,play,playlist,playstation,plus,podium,pool,posterous_spaces,pot,power,print,projector,pushpin,qrcode,quora,rabbit,radar,random,read_it_later,readability,record,redo,refresh,remove,repeat,restart,retweet,rewind,riflescope,ring,road,roundabout,router,rss,rugby,ruller,sampler,scissors,screenshot,search,send,server,settings,share,shield,shirt,shop,signal,skateboard,skitch,skull,skype,smoking,snowflake,sort,sorting,spade,spotify,spray,star,stats,stop,stopwatch,stroller,stumbleupon,subtitles,suitcase,sun,sweater,table,tablet,tag,tags,tie,tint,tower,train,transfer,translate,truck,tumblr,turtle,twitter,umbrella,unchecked,underwear,undo,unlock,unshare,upload,usd,user,vases,vcard,vimeo,vine,wallet,webcam,wifi,windows,woman,wordpress,wrench,xbox,xing,yahoo,yelp,youtube,zootool".split(','))
+		Object.defineProperty(Glyphs, glyph, {
+			get() { return document.furnish('i', { glyph }) },
+			set(value) { return document.furnish('i', { glyph: value }) },
+
+			configurable: true,
+			enumerable: true,
+		});
+
 	// the storage - priority to sync
 	const UTILS_STORAGE = chrome.storage.sync || chrome.storage.local;
 
@@ -64,7 +120,7 @@ let configuration, init, Update;
 
 			UTILS_STORAGE.get(null, DISK => {
 				if(chrome.runtime.lastError)
-					chrome.storage.local.get(null, LOAD);
+					UTILS_STORAGE.get(null, LOAD);
 				else
 					LOAD(DISK);
 			});
@@ -346,7 +402,7 @@ let configuration, init, Update;
 
 										elements.push(
 											furnish('li.web-to-plex-prompt-option.mutable', { value: index, innerHTML: `<h2>${ index + 1 }. ${ title }${ year? ` (${ year })`: '' } \u2014 ${ type }</h2>` },
-												furnish('button.remove', { title: `Remove "${ title }"`, onmouseup: event => { remove(event.target.parentElement); event.target.remove() } }),
+												furnish('i[glyph=remove]', { title: `Remove "${ title }"`, onmouseup: event => { remove(event.target.parentElement); event.target.remove() } }),
 												(
 													__CONFIG__.PromptQuality?
 														P_QUA = furnish('select.quality', { index, onchange: event => data[event.target.getAttribute('index')].quality = event.target.value }, ...profiles[/(movie|film|cinema)/i.test(type)?'movie':'show'].map(Q => furnish('option', { value: Q.id }, Q.name))):
@@ -420,9 +476,9 @@ let configuration, init, Update;
 										}
 									}
 								} }),
-								furnish('button.web-to-plex-prompt-decline', { onmouseup: event => { remove(true); callback([]) }, title: 'Close' }, '\u2718'),
-								furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { remove(true); new Prompt(prompt_type, options, callback, container) }, title: 'Reset' }, '\u21BA'),
-								furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { remove(true); callback(data.filter(value => value !== null && value !== undefined)) }, title: 'Continue' }, '\u2714')
+								furnish('button.web-to-plex-prompt-decline', { onmouseup: event => { remove(true); callback([]) }, title: 'Close' }, Glyphs.exit),
+								furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { remove(true); new Prompt(prompt_type, options, callback, container) }, title: 'Reset' }, Glyphs.restart),
+								furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { remove(true); callback(data.filter(value => value !== null && value !== undefined)) }, title: 'Continue' }, Glyphs.ok)
 							)
 						)
 					);
@@ -477,16 +533,21 @@ let configuration, init, Update;
 											captured.tvdb.push(v);
 
 										elements.push(
-											furnish('li.web-to-plex-prompt-option.mutable', { value: index, innerHTML: `<h2>${ index + 1 }. ${ title }${ year? ` (${ year })`: '' } \u2014 ${ type }</h2> ${ i? `<a href="https://imdb.com/title/${i}/?ref=web_to_plex" ${s}>${i}</a>`: '/' } \u2014 ${ t? `<a href="https://themoviedb.org/${type=='show'?'tv':type}/${t}" ${s}>${t}</a>`: '/' } \u2014 ${ v? `<a href="https://thetvdb.com/series/${title.replace(/\s+/g,'-').replace(/&/g,'and').replace(/[^\w\-]+/g,'')}#${v}" ${s}>${v}</a>`: '/' }` },
-												furnish('button.choose', { title: `Use "${ title } (${ year })"`, onmouseup: event => {
-													let element = event.target.parentElement,
-														children = [...element.parentElement.children].filter(e => e != element);
+											furnish('li.web-to-plex-prompt-option.mutable.choose', {
+												value: index,
+												innerHTML: `<h2>${ index + 1 }. ${ title }${ year? ` (${ year })`: '' } \u2014 ${ type }</h2> ${ i? `<a href="https://imdb.com/title/${i}/?ref=web_to_plex" ${s}>${i}</a>`: '/' } \u2014 ${ t? `<a href="https://themoviedb.org/${type=='show'?'tv':type}/${t}" ${s}>${t}</a>`: '/' } \u2014 ${ v? `<a href="https://thetvdb.com/series/${title.replace(/\s+/g,'-').replace(/&/g,'and').replace(/[^\w\-]+/g,'')}#${v}" ${s}>${v}</a>`: '/' }`,
+												onmouseup: event => {
+													let self = traverse(event.target, element => element.classList.contains('mutable')),
+														children = [...self.parentElement.children].filter(e => e != self);
 														children.forEach(child => {
+															child.classList.remove('chosen');
 															remove(child);
-															element.parentElement.appendChild(child);
+															self.parentElement.appendChild(child);
 														});
-													element.classList.add('chosen');
-												} })
+													self.classList.add('chosen');
+												}
+											},
+												furnish('i[glyph=ok]', { title: `Use "${ title } (${ year })"` })
 											)
 										);
 									}
@@ -545,9 +606,9 @@ let configuration, init, Update;
 										}
 									}
 								} }),
-								furnish('button.web-to-plex-prompt-decline', { onmouseup: event => { remove(true); prompt.done = true; callback([]) }, title: 'Close' }, '\u2718'),
-								furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { remove(true); prompt.done = false; new Prompt(prompt_type, options, callback, container) }, title: 'Reset' }, '\u21BA'),
-								furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { remove(true); prompt.done = true; callback(data.filter(value => value !== null && value !== undefined)) }, title: 'Continue' }, '\u2714')
+								furnish('button.web-to-plex-prompt-decline', { onmouseup: event => { remove(true); prompt.done = true; callback([]) }, title: 'Close' }, Glyphs.exit),
+								furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { remove(true); prompt.done = false; new Prompt(prompt_type, options, callback, container) }, title: 'Reset' }, Glyphs.restart),
+								furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { remove(true); prompt.done = true; callback(data.filter(value => value !== null && value !== undefined)) }, title: 'Continue' }, Glyphs.ok)
 							)
 						)
 					);
@@ -586,7 +647,7 @@ let configuration, init, Update;
 
 										elements.push(
 											furnish('li.web-to-plex-prompt-option.mutable', { value: index, innerHTML: `<h2>${ index + 1 } \u00b7 ${ title }${ year? ` (${ year })`: '' } <em>\u2014 ${ type }</em></h2>` },
-												furnish('button.remove', { title: `Remove "${ title }"`, onmouseup: event => { remove(event.target.parentElement); event.target.remove() } }),
+												furnish('i[glyph=remove]', { title: `Remove "${ title }"`, onmouseup: event => { remove(event.target.parentElement); event.target.remove() } }),
 												(
 													__CONFIG__.PromptQuality?
 														P_QUA = furnish('select.quality', { index, onchange: event => data[event.target.getAttribute('index')].quality = event.target.value }, ...profiles[/(movie|film|cinema)/i.test(type)?'movie':'show'].map(Q => furnish('option', { value: Q.id }, Q.name))):
@@ -611,9 +672,9 @@ let configuration, init, Update;
 
 							// The engagers
 							furnish('div.web-to-plex-prompt-footer', {},
-								furnish('button.web-to-plex-prompt-decline', { onmouseup: event => { remove(true); callback([]) }, title: 'Close' }, '\u2718'),
-								furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { remove(true); new Prompt(prompt_type, options, callback, container) }, title: 'Reset' }, '\u21BA'),
-								furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { remove(true); callback(data.filter(value => value !== null && value !== undefined)) }, title: 'Continue' }, '\u2714')
+								furnish('button.web-to-plex-prompt-decline', { onmouseup: event => { remove(true); callback([]) }, title: 'Close' }, Glyphs.exit),
+								furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { remove(true); new Prompt(prompt_type, options, callback, container) }, title: 'Reset' }, Glyphs.restart),
+								furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { remove(true); callback(data.filter(value => value !== null && value !== undefined)) }, title: 'Continue' }, Glyphs.ok)
 							)
 						)
 					);
@@ -669,9 +730,9 @@ let configuration, init, Update;
 
 							// The engagers
 							furnish('div.web-to-plex-prompt-footer', {},
-								furnish('button.web-to-plex-prompt-decline', { onmouseup: event => { remove(true); callback([]) }, title: 'Close' }, '\u2718'),
-								furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { remove(true); new Prompt(prompt_type, options, callback, container) }, title: 'Reset' }, '\u21BA'),
-								furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { remove(true); callback(options) }, title: 'Continue' }, '\u2714'),
+								furnish('button.web-to-plex-prompt-decline', { onmouseup: event => { remove(true); callback([]) }, title: 'Close' }, Glyphs.exit),
+								furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { remove(true); new Prompt(prompt_type, options, callback, container) }, title: 'Reset' }, Glyphs.restart),
+								furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { remove(true); callback(options) }, title: 'Continue' }, Glyphs.ok),
 								(
 									(!__CONFIG__.UseLowCache || (__CONFIG__.UseLowCache && CAUGHT.has({ imdb: i, tmdb: t, tvdb: v })))?
 										furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { let self = event.target; open(self.getAttribute('href'), '_blank') }, href: slugify(type), title: `Open on ${ manager[type] }` }, manager[type]):
@@ -729,7 +790,7 @@ let configuration, init, Update;
 
 							// The prompt's items
 							furnish('div.web-to-plex-prompt-options', {},
-								...((permissions = permission.split(/\s*,\s*/).filter(v=>v&&v.length)).map(
+								...((permissions = permission.split(/\s*,\s*/).filter((v,i,a)=>v&&v.length&&a.indexOf(v)==i)).map(
 									__permission =>
 										furnish('div.web-to-plex-prompt-option.web-to-plex-permission', { innerHTML: `Access to your <strong>${ __permission.replace(/(y)?s?$/, ($0, $1, $$, $_) => ($1? 'ies': 's')) }</strong> &mdash; ` + (p => {
 												let R = RegExp,
@@ -773,8 +834,8 @@ let configuration, init, Update;
 
 							// The engagers
 							furnish('div.web-to-plex-prompt-footer', {},
-								furnish('button.web-to-plex-prompt-decline', { onmouseup: event => { if(!event.isTrusted) throw alert('The script for this site is trying to decline its own permissions!'), 'Malicious script. Decline permissions'; remove(true); callback(false, {}) }, title: 'Deny all permissions' }, '\u2718'),
-								furnish('button.web-to-plex-prompt-accept', { onmouseup: async event => { if(!event.isTrusted) throw alert('The script for this site is trying to grant its own permissions!'), 'Malicious script. Grant permissions'; remove(true); await callback(true, permissions); top.open(top.location.href, '_top'); }, title: 'Allow all permissions' }, '\u2714')
+								furnish('button.web-to-plex-prompt-decline', { onmouseup: event => { if(!event.isTrusted) throw alert('The script for this site is trying to decline its own permissions!'), 'Malicious script. Decline permissions'; remove(true); callback(false, {}) }, title: 'Deny all permissions' }, Glyphs.ban),
+								furnish('button.web-to-plex-prompt-accept', { onmouseup: async event => { if(!event.isTrusted) throw alert('The script for this site is trying to grant its own permissions!'), 'Malicious script. Grant permissions'; remove(true); await callback(true, permissions); top.open(top.location.href, '_top'); }, title: 'Allow all permissions' }, Glyphs.ok)
 							)
 						)
 					);
@@ -806,7 +867,7 @@ let configuration, init, Update;
 			src: url,
 			style: `
 				display:	none   !important;
-				opacity:	0	  !important;
+				opacity:	0	   !important;
 				visibility: hidden !important;
 			`,
 
@@ -824,6 +885,8 @@ let configuration, init, Update;
 
 	// Send an update query to background.js
 	Update = (type, options = {}, postToo) => {
+		Update.running = options.script || options.plugin || null;
+
 		if(configuration)
 			console.log(`Requesting update (${ type } [post-to-top=${ !!postToo }])`, options);
 		else if(!Update.retry)
@@ -1006,7 +1069,7 @@ let configuration, init, Update;
 
 			UTILS_STORAGE.get(null, options => {
 				if(chrome.runtime.lastError)
-					chrome.storage.local.get(null, handleOptions);
+					UTILS_STORAGE.get(null, handleOptions);
 				else
 					handleOptions(options);
 			});
@@ -1017,13 +1080,17 @@ let configuration, init, Update;
 	async function ParsedOptions() {
 		return await options()
 			.then(
-				options => {
+				async options => {
 					configuration = {};
+
+					let { running } = Update,
+						allowed = await load(`has/${ running }`),
+						permiss = await load(`get/${ running }`);
 
 					/* Don't expose the user's authentication information to sites */
 					for(let key in options)
 						if(/username|password|token|api|server|url|storage|cache|proxy|client|builtin|plugin|qualit/i.test(key))
-							if(ALLOWED && RegExp(PERMISS.join('|'),'i').test(key))
+							if(allowed && RegExp(permiss.join('|'),'i').test(key))
 								configuration[key] = options[key];
 							else
 								/* Do nothing */;
@@ -1439,6 +1506,8 @@ let configuration, init, Update;
 				.replace(/@\{b(ase-?)?64-url\}/gi, btoa(URL))
 				.replace(/@\{enc(ode)?-url\}/gi, encodeURIComponent(URL))
 				.replace(/@\{(raw-)?url\}/gi, URL);
+
+            	headers[$1] = $2;
 			}
 		});
 
@@ -1570,7 +1639,7 @@ let configuration, init, Update;
 			cors = proxy.url, // if cors is requried and not uspported, proxy through this URL
 			headers = HandleProxyHeaders(proxy.headers, url);
 
-		if(proxy.enabled && /(^http:\/\/)(?!localhost|127\.0\.0\.1(?:\/8)?|::1(?:\/128)?|:\d+)\b/i.test(url)) {
+		if(proxy.enabled && /(^https?:\/\/)(?!localhost|127\.0\.0\.1(?:\/8)?|::1(?:\/128)?|:\d+)\b/i.test(url)) {
 			url = cors
 				.replace(/\{b(ase-?)?64-url\}/gi, btoa(url))
 				.replace(/\{enc(ode)?-url\}/gi, encodeURIComponent(url))
@@ -2432,13 +2501,13 @@ let configuration, init, Update;
 					self.classList.remove('open', 'animate');
 					self.classList.add('closed');
 				},
-				style: `background-image: url(${ IMG_URL.noise_background }), url(${ IMG_URL.background }); background-size: auto, cover;`
+				style: `display: none; background-image: url(${ IMG_URL.noise_background }), url(${ IMG_URL.background }); background-size: auto, cover; display: none;`
 			},
 			// <ul>
 			furnish('ul', {},
 				// <li>
 				furnish('li#wtp-list-name.list-name', {},
-					furnish('a.list-action', { tooltip: 'Web to Plex' }, furnish(`img[alt=Web to Plex]`, { src: IMG_URL.icon_48 }))
+					furnish('a.list-action', { tooltip: 'Web to Plex' }, furnish(`img[alt=Web to Plex]`, { src: (__CONFIG__['theme:button-shape']? IMG_URL.icon_16: IMG_URL.icon_48) }))
 				),
 
 				furnish('li#wtp-plexit.list-item', {
@@ -2449,33 +2518,32 @@ let configuration, init, Update;
 						(d=>{let s=d.createElement('script'),h=d.querySelector('head');s.type='text/javascript';s.src='//webtoplex.github.io/plex.it.js';h.appendChild(s)})(document);
 					}
 				},
-				furnish('img[alt=Favorite]', { src: IMG_URL.plexit_icon_48, onmouseup: event => event.target.parentElement.click() }) // <img/>
+				furnish('i[red][gradient=lighten]', { glyph: 'fire 3x', onmouseup: event => event.target.parentElement.click() }) // <img/>
 				),
 
 				furnish('li#wtp-hide.list-item', {
 					tooltip: 'Hide Web to Plex',
 					onmouseup: event => {
-						let self = $('#wtp-hide').first, state = self.getAttribute('state') || 'show';
+						let self = $('#wtp-hide').first,
+							state = (self.getAttribute('state') || 'show'),
+							visual = (state == 'show'? 'sun': 'cloud');
 
 						button.classList.remove(state);
-
 						self.setAttribute('tooltip', state.toCaps() + ' Web to Plex');
 
-						let img = self.querySelector('img');
+						state = state == 'show'? 'hide': 'show';
 
-						img && (img.src = state == 'show'? IMG_URL.show_icon_48: IMG_URL.hide_icon_48);
-
-						if(state == 'show') {
-							state = 'hide';
-						} else {
-							state = 'show';
-						}
+						let g = $('[glyph]', self).first;
+						g.setAttribute('glyph', `${ visual } 3x`);
+						g.removeAttribute('blue');
+						g.removeAttribute('orange');
+						g.setAttribute((visual == 'sun'? 'orange': 'blue'), '');
 
 						button.classList.add(state);
 						self.setAttribute('state', state);
 					}
 				},
-				furnish('img[alt=Hide]', { src: IMG_URL.hide_icon_48, onmouseup: event => event.target.parentElement.click() }) // <img/>
+				furnish('i[blue][gradient=lighten]', { glyph: 'cloud 3x', onmouseup: event => event.target.parentElement.click() }) // <img/>
 				),
 
 				furnish('li#wtp-refresh.list-item', {
@@ -2489,7 +2557,7 @@ let configuration, init, Update;
 							new Notification('warning', "Couldn't reload. Please refresh the page.");
 					}
 				},
-				furnish('img[alt=Reload]', { src: IMG_URL.reload_icon_48, onmouseup: event => event.target.parentElement.click() }) // <img/>
+				furnish('i[orange][gradient=lighten]', { glyph: 'restart 3x', onmouseup: event => event.target.parentElement.click() }) // <img/>
 				),
 
 				furnish('li#wtp-options.list-item', {
@@ -2500,7 +2568,7 @@ let configuration, init, Update;
 						return Options();
 					}
 				},
-				furnish('img[alt=Settings]', { src: IMG_URL.settings_icon_48, onmouseup: event => event.target.parentElement.click() }) // <img/>
+				furnish('i[grey][gradient=lighten]', { glyph: 'cogwheel 3x', onmouseup: event => event.target.parentElement.click() }) // <img/>
 				)
 				// </li>
 			)
@@ -2830,7 +2898,7 @@ let configuration, init, Update;
 
 		results = results.filter(v => v.status == 'downloader');
 
-		let img = furnish('img', { title: 'Add to Plex It!', src: IMG_URL.plexit_icon_48, onmouseup: event => {let frame = document.querySelector('#plexit-bookmarklet-frame'); frame.src = frame.src.replace(/(#plexit:.*)?$/, '#plexit:' + event.target.parentElement.getAttribute('data'))} }),
+		let img = furnish('img', { title: 'Add to Plex It!', onmouseup: event => {let frame = document.querySelector('#plexit-bookmarklet-frame'); frame.src = frame.src.replace(/(#plexit:.*)?$/, '#plexit:' + event.target.parentElement.getAttribute('data'))} }),
 			po, pi = furnish('li#plexit.list-item', { data: encode(JSON.stringify(results)) }, img),
 			op  = document.querySelector('#wtp-plexit');
 
@@ -3038,7 +3106,8 @@ let configuration, init, Update;
 
 			case 'INITIALIZE':
 				UTILS_TERMINAL.LOG('Told to reinitialize...');
-				init && init();
+				document.queryBy('.web-to-plex-button').map(e => e.remove());
+				INITIALIZE(new Date);
 				return true;
 
 			case 'NO_RENDER':
@@ -3109,7 +3178,7 @@ let configuration, init, Update;
 	// create the sleeping button
 	wait(() => document.readyState === 'complete', () => RenderButton(null, { sleeper: true }));
 
-})(new Date);
+});
 
 /* Helpers */
 /* Zipping Algorithm */
@@ -3241,6 +3310,49 @@ function wait(on, then) {
 		then && then();
 	else
 		setTimeout(() => wait(on, then), 50);
+}
+
+function addListener(element, eventName, callback = event => {}) {
+	eventName = eventName.replace(/^(on)?/, 'on');
+	callback = callback.toString().replace(/;+$/g, '');
+
+	let event = element.getAttribute(eventName);
+
+	if(event && event.length)
+		event = `${ event }; ${ callback }`;
+	else
+		event = callback;
+
+	element[eventName] = eval(event);
+}
+
+function traverse(element, until, siblings = false) {
+	let elements;
+
+	if(siblings) {
+		if(element instanceof Array || element instanceof NodeList) {
+			for(elements = [...element], element = elements[0]; element && until(element) === false;)
+				if(element.previousElementSibling)
+					element = element.previousElementSibling;
+				else
+					elements.splice(0, 1),
+					element = elements[0];
+		} else {
+			while(until(element) === false && element)
+				element = element.previousElementSibling || element.parentElement;
+		}
+	}
+
+	if(element instanceof Array || element instanceof NodeList) {
+		for(element = [...element]; element.length && until(element[0]) === false; element.splice(0, 1))
+			continue;
+		element = element[0];
+	} else {
+		while(until(element) === false && element)
+			element = element.parentElement;
+	}
+
+	return element;
 }
 
 // the custom "on location change" event
@@ -3585,3 +3697,5 @@ queryBy[PRIMITIVE] = furnish[PRIMITIVE] = String.prototype.toCaps[PRIMITIVE] = (
 
 if(chrome.runtime.lastError)
 	chrome.runtime.lastError.message;
+
+INITIALIZE(new Date);

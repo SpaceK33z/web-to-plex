@@ -45,4 +45,25 @@ let script = {
 			'show';
 		}
 	},
+
+	"minions": () => {
+		let actions = $('.Details > .SimpleModalNav');
+
+		if(actions.empty)
+			return;
+
+		actions.forEach(element => {
+			let minion,
+				sibling = $('.Nav__spacer ~ .Nav__item', element).last;
+
+			let parent = furnish('div.Nav__item', {},
+				minion = furnish('button.web-to-plex-minion', {},
+					furnish('img', { src: IMAGES.icon_32 })
+				)
+			);
+
+			addMinions(minion);
+			element.insertBefore(parent, sibling);
+		});
+	},
 };

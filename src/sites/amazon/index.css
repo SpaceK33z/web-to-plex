@@ -1,0 +1,32 @@
+.web-to-plex-minion {
+	margin-right: 8px;
+	color: #fff!important;
+    margin-bottom: 8px!important;
+    line-height: 2!important;
+    text-decoration: none!important;
+    width: auto!important;
+}
+
+.web-to-plex-minion.wtp--download {
+	background: linear-gradient(180deg, #f67e56, #f45a26)!important;
+}
+
+.web-to-plex-minion.wtp--download:hover {
+	background: linear-gradient(180deg, #ff8960, #fd6430)!important;
+}
+
+.web-to-plex-minion.wtp--found {
+	background: linear-gradient(180deg, #f7dfa5, #ca7c1f)!important;
+}
+
+.web-to-plex-minion.wtp--found:hover {
+	background: linear-gradient(180deg, #f7dfa5, #f8c022)!important;
+}
+
+#tt--0-0 {
+	background: linear-gradient(180deg, #70767d 0, #696f78 0, #3d444e 100%)!important;
+}
+
+#tt--0-0:hover {
+    background: linear-gradient(180deg, #70767d 0, #696f78 0, #3d444e 100%)!important;
+}

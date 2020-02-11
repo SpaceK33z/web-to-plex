@@ -50,7 +50,7 @@ Use this to hide the **Web to Plex** button. It changes the button's opacity to 
 Use this to reload **Web to Plex** on the current page. This can sometimes fix loading issues or cache errors.
 
 ### Plex URL
-This is a *moderately advance* setting, but is very useful to know. If you know your Plex server's URL (e.g. `https://localhost:32400`), then you can specify this and avoid bandwidth usage, as the extension will communicate with Plex on your device instead of `https://app.plex.tv/`.
+This is a *moderately advanced* setting, but is very useful to know. If you know your Plex server's URL (e.g. `https://localhost:32400`), then you can specify this and avoid bandwidth usage, as the extension will communicate with Plex on your device instead of `https://app.plex.tv/`.
 
 ### Find this | Right Click
 If you aren't satisfied with a found item, or it is incorrect, you can right click the page and use the **Web to Plex | Find "XYZ"** feature to search for the item.

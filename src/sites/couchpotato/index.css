@@ -1,0 +1,23 @@
+.web-to-plex-minion.wtp--download {
+	color: var(--blue)!important;
+}
+
+.web-to-plex-minion.wtp--download:hover {
+	color: var(--light-blue)!important;
+}
+
+.web-to-plex-minion.wtp--found {
+	color: var(--orange)!important;
+}
+
+.web-to-plex-minion.wtp--found:hover {
+	color: var(--light-orange)!important;
+}
+
+#tt--0-0 {
+	color: var(--grey)!important;
+}
+
+#tt--0-0:hover {
+	color: var(--light-grey)!important;
+}

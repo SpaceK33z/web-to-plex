@@ -1,5 +1,5 @@
 let script = {
-	"url": "",
+	"url": "*://itunes.apple.com/*",
 
 	"init": (ready) => {
 		let _title, _year, _image, R = RegExp;

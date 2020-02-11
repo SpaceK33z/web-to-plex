@@ -257,7 +257,15 @@ async function prepare({ code, alias, type, allowed, url }) {
 		Type = type.replace(/^\w/, ($0, $$, $_) => $0.toUpperCase());
 
 	let org = url.origin,
-		ali = TLDHost(url.host);
+		ali = TLDHost(url.host),
+		runOnInit = ['(null)'];
+
+	let funcs = {
+		minions: PLUGN_CONFIGURATION.UseMinions,
+	};
+	for(let func in funcs)
+		runOnInit.push(`(${ funcs[func] } && ${ type }.${ func } instanceof Function? ${ type }.${ func }(): null)`);
+	runOnInit = runOnInit.join(',');
 
 	let { authorized, ...A } = await GetAuthorization(alias);
 
@@ -294,7 +302,7 @@ ${
 ${
 	code
 		.replace(/\/\/+\s*"([^\"\n\f\r\v]+?)"\s*requires?\:?\s*(.+)/i, ($0, $1, $2, $$, $_) =>
-			`;(async() => await Require("${ $2 }", "${ alias }", "${ $1 }", "${ instance }"))();`
+			`;(async() => await Require("cache,${ $2 }", "${ alias }", "${ $1 }", "${ instance }"))();`
 		)
 		.replace(/\b(chrome|browser)\.storage\.(sync|local|managed)\.?/g, ($0, $1, $2, $$, $_) =>
 			`;console.warn("This ${ type } attempted to access <${ $1 }.storage.${ $2 }>; use <async function save>, <async function load>, and <async function kill> instead.");`
@@ -334,11 +342,17 @@ return (
 				/* "ready" is a sync (normal) function */
 				${ type }.ready()
 			)?
-				${ type }.init( ${ Type }ReadyState ):
+				(
+					${ runOnInit },
+					${ type }.init( ${ Type }ReadyState )
+				):
 			/* Injected ${ type } isn't ready */
 			(${ type }.timeout || 1000):
 		/* Injected ${ type } doesn't have the "ready" property */
-		${ type }.init():
+		(
+			${ runOnInit },
+			${ type }.init()
+		):
 	/* Injected ${ type } isn't properly structured */
 	(console.warn("The ${ type } (${ alias }) is incorrectly structured. Could not find required function ${ type }.init"), -1):
 /* URL doesn't match pattern */
@@ -360,6 +374,9 @@ let handle = async(results, tabID, instance, script, type) => {
 
 	/* Always display a pretty button */
 	chrome.tabs.insertCSS(tabID, { file: 'sites/common.css' });
+	chrome.tabs.insertCSS(tabID, { file: 'sites/theme.css' });
+	chrome.tabs.insertCSS(tabID, { file: 'sites/glyphs.css' });
+	chrome.tabs.insertCSS(tabID, { file: 'sites/colors.css' });
 
 	if((!results || !results[0] || !instance) && !FOUND[instance])
 		try {
@@ -602,6 +619,9 @@ chrome.runtime.onMessage.addListener(processMessage = async(request = {}, sender
 					break;
 
 				case 'GRANT_PERMISSION':
+					if(!options[_type])
+						return false;
+
 					await Save(`has/${ options[_type] }`, options.allowed);
 					await Save(`get/${ options[_type] }`, options.permissions);
 					break;

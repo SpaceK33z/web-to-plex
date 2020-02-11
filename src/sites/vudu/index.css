@@ -1,0 +1,59 @@
+.web-to-plex-minion {
+	color: #566273!important;
+    background: transparent;
+    border: 2px solid #566273;
+    height: 30px;
+    font-size: 15px;
+    line-height: 25px;
+    border-radius: 6px;
+    font-weight: 700;
+    text-align: center;
+    display: block;
+    outline: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+    text-decoration: none!important;
+    margin-top: 12px;
+}
+
+.web-to-plex-minion:hover {
+    opacity: 0.7;
+}
+
+[class*="web-to-plex-wrapper"] {
+    width: 33.333333%!important;
+}
+
+*:not(:first-child) ~ [class*="web-to-plex-wrapper"] {
+    margin-top: 35px!important;
+}
+
+.web-to-plex-minion.wtp--download {
+	border-color: #f45a26!important;
+	color: #f45a26!important;
+}
+
+[class*="web-to-plex-wrapper"]:hover > .web-to-plex-minion.wtp--download {
+	border-color: #f67e56!important;
+    color: #f67e56!important;
+}
+
+.web-to-plex-minion.wtp--found {
+	border-color: #ca7c1f!important;
+	color: #ca7c1f!important;
+}
+
+[class*="web-to-plex-wrapper"]:hover > .web-to-plex-minion.wtp--found {
+	border-color: #f8c022!important;
+    color: #f8c022!important;
+}
+
+#tt--0-0 {
+	border-color: #666!important;;
+}
+
+#tt--0-0:hover {
+    border-color: #888!important;
+}
