@@ -2578,6 +2578,8 @@ let INITIALIZE = (async date => {
 		else
 			HeaderClasses = '.' + HeaderClasses.join('.');
 
+		console.log({ HeaderClasses, ThemeClasses, ParsedAttributes, __CONFIG__ });
+
 		// <button>
 		let button =
 		furnish(`button.show.closed.floating.web-to-plex-button${HeaderClasses}${ThemeClasses}`, {
@@ -2594,13 +2596,13 @@ let INITIALIZE = (async date => {
 					self.classList.remove('open', 'animate');
 					self.classList.add('closed');
 				},
-				style: `display: none; background-image: url(${ IMG_URL.noise_background }), url(${ IMG_URL.background }); background-size: auto, cover; display: none;`
+				style: `display: none; background-image: url(${ IMG_URL.noise_background }), url(${ IMG_URL.background }); background-size: auto, cover;`
 			},
 			// <ul>
 			furnish('ul', {},
 				// <li>
 				furnish('li#wtp-list-name.list-name', {},
-					furnish('a.list-action', { tooltip: 'Web to Plex' }, furnish(`img[alt=Web to Plex]`, { style: 'display: inline !important;', src: (__CONFIG__['theme:button-shape']? IMG_URL.icon_16: IMG_URL.icon_48) }))
+					furnish('a.list-action', { tooltip: 'Web to Plex' }, furnish(`img[alt=Web to Plex]`, { style: 'display: inline !important;', src: IMG_URL.icon_48 }))
 				),
 
 				furnish('li#wtp-plexit.list-item', {

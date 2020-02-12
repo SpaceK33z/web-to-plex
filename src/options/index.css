@@ -4,7 +4,8 @@
 
 @font-face {
     font-family: "Plex";
-    src: url(/font/Plex.woff2) format('woff2'),
+    src: local(Plex),
+        url(/font/Plex.woff2) format('woff2'),
         url(/font/Plex.woff) format('woff');
     font-weight: 400;
     font-style: normal;
@@ -12,7 +13,8 @@
 
 @font-face {
     font-family: "Plex-bold";
-    src: url(/font/Plex.bold.woff2) format('woff2'),
+    src: local(Plex-bold),
+        url(/font/Plex.bold.woff2) format('woff2'),
         url(/font/Plex.bold.woff) format('woff');
     font-weight: 400;
     font-style: normal;
@@ -29,7 +31,7 @@ html, body {
 body {
     background: url(../img/noise.png) fixed, url(../img/background.png) no-repeat fixed center/cover, #3f4245 !important;
     color: #999 !important;
-    font-family: Plex, "Open Sans Regular", "Helvetica Neue", Helvetica, Arial, sans-serif, system;
+    font-family: "Plex", "Open Sans Regular", "Helvetica Neue", Helvetica, Arial, sans-serif, system;
     flex-grow: 1;
     overflow-x: hidden;
     overflow-y: auto;
@@ -325,6 +327,11 @@ em {
 
 strike, st, k {
     text-decoration: line-through !important;
+}
+
+[href^="#!/NaCl+"], [href^="#!/NaCl+"] *{
+    font-family: system-ui !important;
+    text-transform: none !important;
 }
 
 [href="#!/NaCl+Iw"], [href="#!/NaCl+Iw"] * {

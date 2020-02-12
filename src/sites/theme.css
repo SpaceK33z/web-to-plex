@@ -88,6 +88,11 @@ BUTTON  [style].web-to-plex-button.<floating>.<hide|show>.<open|closed>
     width: 75px !important;
 }
 
+.web-to-plex-button.button-shape-box .list-action img {
+    height: 16px !important;
+    width: 16px !important;
+}
+
 .web-to-plex-button.button-shape-box:not(:hover) {
     margin-top: -20px !important;
 }

@@ -196,7 +196,10 @@ const storage = (chrome.storage.sync || chrome.storage.local),
 
 			// Theme Settings
 			'UseMinions',
-			...(() => [...$('[data-option^="theme:"i]', true)].map(e => e.dataset.option))()
+			...(() => [...$('[data-option^="theme:"i]', true)].map(e => e.dataset.option))(),
+
+			// Other Settings
+			'__defaults',
 		];
 
 let PlexServers = [],
@@ -633,7 +636,8 @@ function getOptionValues() {
 		}
 	});
 
-	let COM = options.UseLZW;
+	let COM = options.UseLZW,
+		DEF = options.__defaults == 'true';
 
 	for(let key in __caught)
 		__caught[key] = __caught[key].filter(id => id).slice(0, (COM? 200: 100)).sort();
@@ -803,38 +807,38 @@ function performOmbiTest({ refreshing = false, event }) {
 						__caught.imdb.push(item.imdbId);
 						__caught.tmdb.push(item.theMovieDbId);
 					});
-				})
-				.catch(error => { LoadingAnimation(); new Notification('error', error); teststatus.innerHTML = MARKERS.no });
 
-			fetch(`${ url }/api/v1/Request/tv`)
-				.then(r => r.json())
-				.then(json => {
-					json.map(item => {
-						__caught.imdb.push(item.imdbId);
-						__caught.tvdb.push(item.tvDbId);
-					});
-				})
-				.catch(error => { LoadingAnimation(); new Notification('error', error); teststatus.innerHTML = MARKERS.no });
+					fetch(`${ url }/api/v1/Request/tv`)
+						.then(r => r.json())
+						.then(json => {
+							json.map(item => {
+								__caught.imdb.push(item.imdbId);
+								__caught.tvdb.push(item.tvDbId);
+							});
+						})
+						.catch(error => { LoadingAnimation(); new Notification('error', error); teststatus.innerHTML = MARKERS.no });
 
-			fetch(`${ url }/api/v1/Status`, headers)
-				.then( response => response.text() )
-				.then( status => {
-					LoadingAnimation();
-					if (!status || !status.length) throw new Error('Unable to communicate with Ombi');
+					fetch(`${ url }/api/v1/Status`, headers)
+						.then( response => response.text() )
+						.then( status => {
+							LoadingAnimation();
+							if (!status || !status.length) throw new Error('Unable to communicate with Ombi');
 
-					if ((status = +status) >= 200 && status < 400) {
-						teststatus.innerHTML = MARKERS.yes;
-						enabled.checked = teststatus.classList = true;
-						enabled.parentElement.removeAttribute('disabled');
-						inusestatus.map(e => e.setAttribute('in-use', true));
-					} else {
-						teststatus.innerHTML = MARKERS.no;
-						enabled.checked = teststatus.classList = false;
-						enabled.parentElement.setAttribute('disabled');
-						inusestatus.map(e => e.setAttribute('in-use', false));
+							if ((status = +status) >= 200 && status < 400) {
+								teststatus.innerHTML = MARKERS.yes;
+								enabled.checked = teststatus.classList = true;
+								enabled.parentElement.removeAttribute('disabled');
+								inusestatus.map(e => e.setAttribute('in-use', true));
+							} else {
+								teststatus.innerHTML = MARKERS.no;
+								enabled.checked = teststatus.classList = false;
+								enabled.parentElement.setAttribute('disabled');
+								inusestatus.map(e => e.setAttribute('in-use', false));
 
-						throw new Error(`Ombi error [${ status }]`);
-					}
+								throw new Error(`Ombi error [${ status }]`);
+							}
+						})
+						.catch(error => { LoadingAnimation(); new Notification('error', error); teststatus.innerHTML = MARKERS.no });
 				})
 				.catch(error => { LoadingAnimation(); new Notification('error', error); teststatus.innerHTML = MARKERS.no });
 		} catch(error) {
@@ -1110,8 +1114,6 @@ function getSonarr(options, api = "profile") {
 }
 
 function performSonarrTest({ QualityProfileID, StoragePath, refreshing = false, event }) {
-	console.log({ QualityProfileID, StoragePath, refreshing, event });
-
 	let options = getOptionValues(),
 		teststatus = $('#sonarr_test_status'),
 		path = $('[data-option="sonarrURLRoot"]'),
@@ -1963,6 +1965,7 @@ function restoreOptions(OPTIONS) {
 		})({ ...builtin_sites, ...plugin_sites });
 
 		$('[data-option="__domains"i]').value = __domains;
+		$('[data-option="__defaults"i]').value = 'false';
 	}
 
 	if (OPTIONS && typeof OPTIONS == 'string') {
@@ -2405,12 +2408,16 @@ $('.checkbox', true)
 			switch(self.id.toLowerCase()) {
 				/* Update the database when the option is toggled */
 				case 'use-lzw':
-					if(!self.checked)
+					let enabled;
+
+					if(enabled = !self.checked)
 						new Notification('update', 'Compressing data...', 3000, () => new Notification('update', 'Compressed', 3000), false);
 					else
 						new Notification('update', 'Decompressing data...', 3000, () => new Notification('update', 'Decompressed', 3000), false);
 
 					let options = getOptionValues();
+
+					Recall.ToggleConfigurationAvailability(enabled);
 
 					for(let name in options)
 						if(/^__/.test(name)) {
@@ -2454,7 +2461,9 @@ $('.test', true)
 
 $('[data-option^="theme:"i], [data-option^="theme:"i] + label', true)
 	.forEach((element, index, array) => {
-		addListener(element, 'mouseup', async event => {
+		let UpdateTheme;
+
+		addListener(element, 'mouseup', UpdateTheme = async event => {
 			let self = traverse(event.target, element => /^theme:/i.test(element.dataset.option), true),
 				R = RegExp;
 
@@ -2472,8 +2481,10 @@ $('[data-option^="theme:"i], [data-option^="theme:"i] + label', true)
 				__theme = __theme.filter(v => v != value);
 
 			/* Get rid of repeats */
-			// __theme = __theme.join('\u0000').replace(/([\w\-]+\=)([^\u0000]+?)\u0000\1[^\u0000]+?/g, ($0, $1, $2, $$, $_) => $1 + $2);
+			__theme = __theme.filter((v, i) => __theme.indexOf(v) == i);
 		});
+
+		setTimeout(() => UpdateTheme({ target: element }), 1000);
 	});
 
 let hold = document.createElement('summary'),
@@ -2653,7 +2664,7 @@ if(hash.length > 1)
 
 /* Functions that require some time */
 let Recall = {
-	'@auto': {}, // run at 100ms, and be recallable
+	'@auto': {}, // run at 100ms
 	'@0sec': {}, // run at 1ms
 	'@1sec': {}, // run at 1000ms
 };
@@ -2815,6 +2826,32 @@ Recall['@auto'].GetIPAddress = async() => {
 	self.setAttribute('notice', `Public${proxy.enabled?' (Proxy)':''}`);
 };
 
+let ToggleConfigurationAvailabilityListener = false;
+/* Setting the Configuration Data disabled state */
+Recall['@1sec'].ToggleConfigurationAvailability = (enabled = null) => {
+	if(enabled === null)
+		enabled = $('#use-lzw').checked;
+
+	if(enabled) {
+		let parent = $('#json_data').parentElement;
+
+		parent.setAttribute('disabled', '');
+
+		if(!ToggleConfigurationAvailabilityListener)
+			$('*:not([data-option])', true, parent).forEach(element => {
+			    addListener(element, 'mousedown', event => {
+			        let disabled = traverse(element, () => 'disabled' in element.attributes, false);
+
+			        if(disabled)
+			            return event.preventDefault();
+			    });
+			});
+		ToggleConfigurationAvailabilityListener = true;
+	} else {
+		$('#json_data').parentElement.removeAttribute('disabled');
+	}
+};
+
 for(let func in Recall) {
 	if(/^@/.test(func)) {
 		let f;
@@ -2833,15 +2870,21 @@ for(let func in Recall) {
 				for(let fn in Recall[func]) {
 					f = Recall[func][fn];
 
+					Recall[fn] = f;
 					setTimeout(f, 1);
 				}
 				break;
 
-			case '@1sec':
+			default:
+				/^@(\d+)sec$/i.test(func);
+
+				let time = +RegExp.$1;
+
 				for(let fn in Recall[func]) {
 					f = Recall[func][fn];
 
-					setTimeout(f, 1000);
+					Recall[fn] = f;
+					setTimeout(f, time * 1000);
 				}
 				break;
 		}

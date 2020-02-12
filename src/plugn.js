@@ -372,11 +372,13 @@ let handle = async(results, tabID, instance, script, type) => {
 
 	results = await results;
 
+	let extURL = url => chrome.extension.getURL(url);
+
 	/* Always display a pretty button */
-	chrome.tabs.insertCSS(tabID, { file: 'sites/common.css' });
-	chrome.tabs.insertCSS(tabID, { file: 'sites/theme.css' });
-	chrome.tabs.insertCSS(tabID, { file: 'sites/glyphs.css' });
-	chrome.tabs.insertCSS(tabID, { file: 'sites/colors.css' });
+	chrome.tabs.insertCSS(tabID, { cssOrigin: 'user', file: 'sites/common.css' });
+	chrome.tabs.insertCSS(tabID, { cssOrigin: 'user', file: 'sites/theme.css' });
+	chrome.tabs.insertCSS(tabID, { cssOrigin: 'user', file: 'sites/glyphs.css' });
+	chrome.tabs.insertCSS(tabID, { cssOrigin: 'user', file: 'sites/colors.css' });
 
 	if((!results || !results[0] || !instance) && !FOUND[instance])
 		try {
