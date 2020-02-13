@@ -330,6 +330,10 @@
 	bottom: 0 !important;
 }
 
+.web-to-plex-prompt-footer > * {
+    vertical-align: text-bottom !important;
+}
+
 .web-to-plex-prompt-input {
 	float: left !important;
 	position: relative !important;
