@@ -440,7 +440,7 @@ let INITIALIZE = (async date => {
 				);
 
 			let preX = document.queryBy('.web-to-plex-prompt').first,
-				movie = /^(m(?:ovies?)?|f(?:ilms?)?|c(?:inemas?)?)?$/i;
+				movie = /^(m(?:ovies?)?|f(?:ilms?)?|c(?:inemas?)?|theat[re]{2})?$/i;
 
 			if(preX)
 				return /* Ignore while another prompt is open, prevents double prompts */;
@@ -487,11 +487,11 @@ let INITIALIZE = (async date => {
 												furnish('i[glyph=remove]', { title: `Remove "${ title }"`, onmouseup: event => { remove(event.target.parentElement); event.target.remove() } }),
 												(
 													__CONFIG__.PromptQuality?
-														P_QUA = furnish('select.quality', { index, onchange: event => data[event.target.getAttribute('index')].quality = event.target.value }, ...profiles[/(movie|film|cinema)/i.test(type)?'movie':'show'].map(Q => furnish('option', { value: Q.id }, Q.name))):
+														P_QUA = furnish('select.quality', { index, onchange: event => data[event.target.getAttribute('index')].quality = event.target.value }, ...profiles[movie.test(type)?'movie':'show'].map(Q => furnish('option', { value: Q.id }, Q.name))):
 													''
 												),(
 													__CONFIG__.PromptLocation?
-														P_LOC = furnish('select.location', { index, onchange: event => data[event.target.getAttribute('index')].location = event.target.value }, ...locations[/(movie|film|cinema)/i.test(type)?'movie':'show'].map(Q => furnish('option', { value: Q.id }, Q.path))):
+														P_LOC = furnish('select.location', { index, onchange: event => data[event.target.getAttribute('index')].location = event.target.value }, ...locations[movie.test(type)?'movie':'show'].map(Q => furnish('option', { value: Q.id }, Q.path))):
 													''
 												)
 											)
@@ -512,7 +512,7 @@ let INITIALIZE = (async date => {
 								furnish('input.web-to-plex-prompt-input[type=text]', { placeholder: 'Add an item (enter to add): Title (Year) Type / ID Type', title: 'Solo: A Star Wars Story (2018) movie / tt3778644 m', onkeydown: async event => {
 									if(event.keyCode == 13) {
 										let title, year, type, self = event.target, R = RegExp,
-											movie = /^(m(?:ovies?)?|f(?:ilms?)?|c(?:inemas?)?)/i,
+											movie = /^(m(?:ovies?)?|f(?:ilms?)?|c(?:inemas?)?|theat[re]{2})/i,
 											Db, IMDbID, TMDbID, TVDbID, value = self.value;
 
 										self.setAttribute('disabled', self.disabled = true);
@@ -617,7 +617,7 @@ let INITIALIZE = (async date => {
 										elements.push(
 											furnish('li.web-to-plex-prompt-option.mutable.choose', {
 												value: index,
-												innerHTML: `<h2>${ index + 1 }. ${ title }${ year? ` (${ year })`: '' } \u2014 ${ type }</h2> ${ i? `<a href="https://imdb.com/title/${i}/?ref=web_to_plex" ${s}>${i}</a>`: '/' } \u2014 ${ t? `<a href="https://themoviedb.org/${type=='show'?'tv':type}/${t}" ${s}>${t}</a>`: '/' } \u2014 ${ v? `<a href="https://thetvdb.com/series/${title.replace(/\s+/g,'-').replace(/&/g,'and').replace(/[^\w\-]+/g,'')}#${v}" ${s}>${v}</a>`: '/' }`,
+												innerHTML: `<h2>${ index + 1 }. ${ title }${ year? ` (${ year })`: '' } \u2014 ${ type }</h2> ${ i? `<a href="https://imdb.com/title/${i}/?ref=web_to_plex" ${s}>${i}</a>`: '/' } \u2014 ${ t? `<a href="https://themoviedb.org/${movie.test(type)?'movie':'tv'}/${t}" ${s}>${t}</a>`: '/' } \u2014 ${ v? `<a href="https://thetvdb.com/series/${title.replace(/\s+/g,'-').replace(/&/g,'and').replace(/[^\w\-]+/g,'')}#${v}" ${s}>${v}</a>`: '/' }`,
 												onmouseup: event => {
 													let self = traverse(event.target, element => element.classList.contains('mutable')),
 														children = [...self.parentElement.children].filter(e => e != self);
@@ -732,11 +732,11 @@ let INITIALIZE = (async date => {
 												furnish('i[glyph=remove]', { title: `Remove "${ title }"`, onmouseup: event => { remove(event.target.parentElement); event.target.remove() } }),
 												(
 													__CONFIG__.PromptQuality?
-														P_QUA = furnish('select.quality', { index, onchange: event => data[+event.target.getAttribute('index')].quality = event.target.value }, ...profiles[/(movie|film|cinema)/i.test(type)?'movie':'show'].map(Q => furnish('option', { value: Q.id }, Q.name))):
+														P_QUA = furnish('select.quality', { index, onchange: event => data[+event.target.getAttribute('index')].quality = event.target.value }, ...profiles[movie.test(type)?'movie':'show'].map(Q => furnish('option', { value: Q.id }, Q.name))):
 													''
 												),(
 													__CONFIG__.PromptLocation?
-														P_LOC = furnish('select.location', { index, onchange: event => data[+event.target.getAttribute('index')].location = event.target.value }, ...locations[/(movie|film|cinema)/i.test(type)?'movie':'show'].map(Q => furnish('option', { value: Q.id }, Q.path))):
+														P_LOC = furnish('select.location', { index, onchange: event => data[+event.target.getAttribute('index')].location = event.target.value }, ...locations[movie.test(type)?'movie':'show'].map(Q => furnish('option', { value: Q.id }, Q.path))):
 													''
 												)
 											)
@@ -794,16 +794,16 @@ let INITIALIZE = (async date => {
 							element.remove();
 					};
 
-					type = /(movie|film|cinema)/i.test(type)?'movie':'show';
+					type = /(movie|film|cinema|theat[re]{2})s?/i.test(type)?'movie':'show';
 
 					prompt = furnish('div.web-to-plex-prompt', { type: prompt_type },
 						furnish('div.web-to-plex-prompt-body', { style: `background-image: url(${ IMG_URL.noise_background }), url(${ IMG_URL.background }); background-size: auto, cover;` },
 							// The prompt's title
-							furnish('h1.web-to-plex-prompt-header', { innerHTML: `${ title }${ year? ` (${ year })`: '' }` }),
+							furnish('h1.web-to-plex-prompt-header', { innerHTML: `${ title.length < 40? title: title.slice(0, 37) + '...' }${ parseInt(year)? ` (${ year })`: '' } \u2014 ${ movie.test(type)? 'Movie': 'TV Show' }` }),
 
 							// The prompt's items
 							furnish('div.web-to-plex-prompt-options', {},
-								furnish('div.web-to-plex-prompt-option', { innerHTML: `${ type } \u2014 ${ i? `<a href="https://imdb.com/title/${i}/?ref=web_to_plex" ${s}>${i}</a>`: '/' } \u2014 ${ t? `<a href="https://themoviedb.org/${type=='show'?'tv':type}/${t}" ${s}>${t}</a>`: '/' } \u2014 ${ v? `<a href="https://thetvdb.com/series/${title.replace(/\s+/g,'-').replace(/&/g,'and').replace(/[^\w\-]+/g,'')}#${v}" ${s}>${v}</a>`: '/' }` }),
+								furnish('div.web-to-plex-prompt-option', { innerHTML: `${ i? `<a href="https://imdb.com/title/${i}/?ref=web_to_plex" ${s}>${i}</a>`: '?' } \u2014 ${ t? `<a href="https://themoviedb.org/${type=='show'?'tv':type}/${t}" ${s}>${t}</a>`: '?' } \u2014 ${ v? `<a href="https://thetvdb.com/series/${title.replace(/\s+/g,'-').replace(/&/g,'and').replace(/[^\w\-]+/g,'')}#${v}" ${s}>${v}</a>`: '?' }` }),
 								(
 									__CONFIG__.PromptQuality?
 										P_QUA = furnish('select.quality', { onchange: event => REFINED[uuid].quality = event.target.value }, ...profiles[type].map(Q => furnish('option', { value: Q.id }, Q.name))):
@@ -1622,7 +1622,7 @@ let INITIALIZE = (async date => {
 			rqut = apit, // request type: tmdb, imdb, or tvdb
 			manable = __CONFIG__.ManagerSearch && !(rerun & 0b1000), // is the user's "Manager Searches" option enabled?
 			UTF_16 = /[^0\u0020-\u007e, 1\u00a1\u00bf-\u00ff, 2\u0100-\u017f, 3\u0180-\u024f, 4\u0300-\u036f, 5\u0370-\u03ff, 6\u0400-\u04ff, 7\u0500-\u052f, 8\u20a0-\u20bf]+/g,
-			MV = /^(movies?|films?|cinemas?)$/i.test(apit),
+			MV = /^(movies?|films?|cinemas?|theat[re]{2}s?)$/i.test(apit),
 			TV = /^(tv[\s\-]*(?:shows?|series)?)$/i.test(apit);
 
 		iid = iid == 'tt'? null: iid;
@@ -1631,7 +1631,7 @@ let INITIALIZE = (async date => {
 		rqut =
 		/(tv|show|series)/i.test(rqut)?
 			'tvdb':
-		/(movie|film|cinema)s?/i.test(rqut)?
+		/(movie|film|cinema|theat[re])s?/i.test(rqut)?
 			'tmdb':
 		rqut || '*';
 		manable = manable && (__CONFIG__.usingOmbi || (__CONFIG__.usingRadarr && rqut == 'tmdb') || ((__CONFIG__.usingSonarr || __CONFIG__.usingMedusa /*|| __CONFIG__.usingSickBeard*/) && rqut == 'tvdb'));
@@ -2183,7 +2183,7 @@ let INITIALIZE = (async date => {
 			);
 		}
 
-		let contentType = (/movies?|film/i.test(options.type)? 'movie': 'tv');
+		let contentType = (/(movie|film|cinema|theat[re]{2})s?/i.test(options.type)? 'movie': 'tv');
 
 		chrome.runtime.sendMessage({
 				type: 'PUSH_OMBI',
