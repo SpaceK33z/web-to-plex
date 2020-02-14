@@ -1,5 +1,5 @@
 let script = {
-	"url": "*://app.plex.tv/desktop#!/(server/(?:[a-f\\d]+)|provider/(?:tv.plex.provider.vod))/(details|list)\\?*",
+	"url": "*://app.plex.tv/desktop/?#!/(server/(?:[a-f\\d]+)|provider/(?:tv.plex.provider.vod))/(details|list)\\?*",
 
 	"ready": () => $('.loading').empty,
 
