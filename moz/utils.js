@@ -1003,7 +1003,7 @@ var INITIALIZE = INITIALIZE || (async date => {
 			});
 
 			// the message has only 30s to "live"
-			setTimeout(() => Update.messages.splice(0, 1), 30000);
+			setTimeout(() => (Update.messages || []).splice(0, 1), 30000);
 
 			if(postToo)
 				top.postMessage(options);
@@ -2643,10 +2643,15 @@ var INITIALIZE = INITIALIZE || (async date => {
 						onmouseup: event => {
 							let self = event.target, parent = button;
 
-							if(init instanceof Function)
-								button.setAttribute('class', 'closed floating web-to-plex-button restarting'), button.onmouseenter = button.onmouseleave = null, button.querySelector('.list-action').setAttribute('tooltip', 'Restarting...'), setTimeout(() => (init && !RUNNING? (init(), RUNNING = true): RUNNING = false), 500);
-							else
+							if(init instanceof Function) {
+								button.setAttribute('class', 'closed floating web-to-plex-button restarting');
+								button.onmouseenter = button.onmouseleave = null;
+								button.querySelector('.list-action').setAttribute('tooltip', 'Restarting...');
+								INITIALIZE(new Date);
+								init();
+							} else {
 								new Notification('warning', "Couldn't reload. Please refresh the page.");
+							}
 						}
 					},
 					furnish('i[orange][gradient=lighten]', { glyph: 'restart 3x', onmouseup: event => event.target.parentElement.click() }) // <img/>
@@ -3207,6 +3212,7 @@ var INITIALIZE = INITIALIZE || (async date => {
 				UTILS_TERMINAL.LOG('Told to reinitialize...');
 				document.queryBy('.web-to-plex-button').map(e => e.remove());
 				INITIALIZE(new Date);
+				init && init();
 				return true;
 
 			case 'NO_RENDER':
