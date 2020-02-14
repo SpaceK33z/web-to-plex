@@ -632,21 +632,23 @@ function getOptionValues() {
 	});
 
 	let COM = options.UseLZW,
-		DEF = options.__defaults == 'true';
+		DEF = options.__defaults == 'true',
+		CHT = $('[data-option="__caught"i]'),
+		THM = $('[data-option="__theme"i]');
 
 	for(let key in __caught)
 		__caught[key] = __caught[key].filter(id => id).slice(0, (COM? 200: 100)).sort();
 
-	// if(options.__theme)
-	// 	__theme = JSON.parse(options.__theme);
+	if(THM.value)
+		__theme = JSON.parse(THM.value);
 	//
 	// __theme = __theme.filter(v => v);
 
 	let _c = JSON.stringify(__caught),
 		_t = JSON.stringify(__theme);
 
-	$('[data-option="__caught"i]').value = options.__caught = (COM? compress(zip(BWT(_c))): _c);
-	$('[data-option="__theme"i]').value = options.__theme = (COM? compress(zip(BWT(_t))): _t);
+	CHT.value = options.__caught = (COM? compress(zip(BWT(_c))): _c);
+	THM.value = options.__theme = (COM? compress(zip(BWT(_t))): _t);
 
 	return options;
 }
