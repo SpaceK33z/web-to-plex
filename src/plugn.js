@@ -665,7 +665,7 @@ chrome.runtime.onMessage.addListener(processMessage = async(request = {}, sender
 
 			await fetch(style, { mode: 'cors' })
 				.then(response => response.text())
-				.then(async code => browser.tabs.insertCSS({ code }));
+				.then(async code => chrome.tabs.insertCSS({ code }));
 
 			return true;
 		} catch(error) {
