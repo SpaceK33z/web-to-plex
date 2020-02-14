@@ -52,4 +52,18 @@ let script = {
 			'tv':
 		'movie'
 	},
+
+	"minions": () => {
+		let actions = $(script.getType() == 'tv'? '#dv-action-box .av-action-button-box': '#dv-action-box');
+
+		if(actions.empty)
+			return;
+
+		actions.forEach(element => {
+			let minion = furnish('a.av-button.av-button--default', {}, 'Web to Plex');
+
+			addMinions(minion);
+			element.appendChild(minion);
+		});
+	},
 };

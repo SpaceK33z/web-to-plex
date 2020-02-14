@@ -14,8 +14,10 @@ body {
     font-size: 1.25em !important;
     flex-grow: 1 !important;
     padding: 1px !important;
-    overflow: hidden !important;
-    position: absolute !important;
+    /* Disable for Firefox to work properly */
+    /* overflow: hidden !important; */
+    overflow-x: hidden;
+    /* position: absolute !important; */
 }
 
 a {
@@ -337,11 +339,11 @@ tbody[header]:before {
     float: right;
 }
 
-*::-webkit-scrollbar {
+*::-moz-scrollbar {
     width: 10px;
 }
 
-*::-webkit-scrollbar-thumb {
+*::-moz-scrollbar-thumb {
     min-height: 50px;
     background: rgba(255, 255, 255, 0.15);
     border: 2px solid rgba(0, 0, 0, 0);
@@ -349,6 +351,6 @@ tbody[header]:before {
     background-clip: padding-box;
 }
 
-*::-webkit-scrollbar-track {
+*::-moz-scrollbar-track {
     background: url(noise.png) repeat, #3f4245 !important;
 }

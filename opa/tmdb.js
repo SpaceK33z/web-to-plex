@@ -76,4 +76,22 @@ let script = {
 
 		return { type, title, year, image, TMDbID };
 	},
+
+	"minions": () => {
+		let actions = $('.header .actions');
+
+		if(actions.empty)
+			return;
+
+		actions.forEach(element => {
+			let minion;
+
+			let parent = furnish('li.tooltip.use_tooltip', { title: 'Web to Plex' },
+				minion = furnish('a.web-to-plex-minion', { style: `background: url("${ IMAGES.icon_32 }") center/50% no-repeat !important` })
+			);
+
+			addMinions(minion);
+			element.insertBefore(parent, element.lastElementChild);
+		});
+	},
 };

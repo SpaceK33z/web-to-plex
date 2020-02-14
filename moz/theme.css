@@ -23,11 +23,11 @@ BUTTON  [style].web-to-plex-button.<floating>.<hide|show>.<open|closed>
         LI  [tooltip]#wtp-list-name.list-name
             // The actionable anchor
             A  [tooltip][href][`id`].list-action
-               IMG  [src=/img/48.png] // Web to Plex logo
+               IMG  [src=48.png] // Web to Plex logo
 
         // The Plex It! button
         LI  [tooltip]#wtp-plexit.list-item
-            IMG [src=/img/plexit.48.png] // Alarm bell
+            IMG [src=plexit.48.png] // Alarm bell
 
         // The Add to Plex It! button (normally hidden, until Plex It! is visible)
         LI  [tooltip][data]#plexit.list-item
@@ -35,22 +35,22 @@ BUTTON  [style].web-to-plex-button.<floating>.<hide|show>.<open|closed>
 
         // The hide button
         LI  [tooltip]#wtp-hide.list-item
-            IMG [src=/img/hide.48.png] // Eye icon
+            IMG [src=hide.48.png] // Eye icon
 
         // The refresh button
         LI  [tooltip]#wtp-refresh.list-item
-            IMG [src=/img/reload.48.png] // Refresh
+            IMG [src=reload.48.png] // Refresh
 
         // The settings button
         LI  [tooltip]#wtp-options.list-item
-            IMG [src=/img/settings.48.png] // Gear icon
+            IMG [src=settings.48.png] // Gear icon
 
         // The small, circular, colored indicator
         ::after
 */
 
-/* Button location */
-.web-to-plex-button.button-location-right {
+/* Button location (Circular) */
+.web-to-plex-button.button-location-right:not(.button-shape-box) {
     left: unset !important;
     right: 5px !important;
 }
@@ -68,7 +68,72 @@ BUTTON  [style].web-to-plex-button.<floating>.<hide|show>.<open|closed>
     opacity: 0.10 !important;
 }
 
-/* Button shape */
-.web-to-plex-button.button-shape-box {
-    /* ... */
+/* Button shape (Box) */
+.web-to-plex-button.button-shape-box.animate::before {
+    border-radius: 75px !important;
+}
+
+.web-to-plex-button.button-shape-box, #plexit-bookmarklet-frame ~ .web-to-plex-button.button-shape-box {
+    border-radius: 0 !important;
+    border-bottom-left-radius: 2px !important;
+    border-bottom-right-radius: 2px !important;
+
+    bottom: 0 !important;
+    margin-left: calc(50% - 34.5px) !important;
+    margin-top: -3px !important;
+    padding: 0 !important;
+    top: 0 !important;
+
+    height: 20px !important;
+    width: 75px !important;
+}
+
+.web-to-plex-button.button-shape-box .list-action img {
+    height: 16px !important;
+    width: 16px !important;
+}
+
+.web-to-plex-button.button-shape-box:not(:hover) {
+    margin-top: -20px !important;
+}
+
+.web-to-plex-button.button-shape-box::after {
+    border: 0 !important;
+    border-radius: 0 !important;
+    border-bottom: inherit !important;
+
+    top: 100% !important;
+
+    height: 2px !important;
+    width: 100% !important;
+}
+
+.web-to-plex-button.button-shape-box:not(:hover)::after {
+    height: 6px !important;
+}
+
+.web-to-plex-button.button-shape-box #wtp-list-name {
+    padding: 0 !important;
+    margin-top: 0 !important;
+
+    width: 75px !important;
+}
+
+.web-to-plex-button.button-shape-box #wtp-list-name img[src$="16.png"] {
+    height: 12px !important;
+}
+
+.web-to-plex-button.button-shape-box:not(:hover) #wtp-list-name ~ * {
+    display: none !important;
+}
+
+.web-to-plex-button.button-shape-box.open li:hover [tooltip]::before, .web-to-plex-button.button-shape-box.open [tooltip]::before {
+    background: #000c !important;
+
+    left: -115px !important;
+    top: 30px !important;
+    z-index: 999999999 !important;
+
+    height: -moz-fit-content !important;
+    width: 300px !important;
 }

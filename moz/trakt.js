@@ -101,4 +101,42 @@ let script = {
 
 		return { type, title, year };
 	},
+
+	"minions": () => {
+		let actions = $('#info-wrapper .action-buttons');
+
+		if(actions.empty)
+			return;
+
+		actions.forEach(element => {
+			let subtitle;
+
+			let minion = furnish('a.web-to-plex-minion.btn.btn-block.btn-summary.selected', {},
+				furnish('i.fa.fa-fw.fa-download'),
+				furnish('div.text', {},
+					furnish('div.main-info', {}, 'Web to Plex'),
+					subtitle = furnish('div.wtp-min.under-info', {
+						title: 'Loading...',
+						onmouseenter: event => {
+							let self = event.target,
+								title = self.getAttribute('title');
+
+							self.setAttribute('title', '');
+							self.innerHTML = title;
+						},
+						onmouseleave: event => {
+							let self = event.target,
+								title = self.innerHTML;
+
+							self.setAttribute('title', title);
+							self.innerHTML = '';
+						},
+					})
+				)
+			);
+
+			addMinions(minion, subtitle);
+			element.insertBefore(minion, element.childNodes[3]);
+		});
+	},
 };

@@ -1,0 +1,78 @@
+.web-to-plex-minion {
+    background: #727272;
+    border-radius: 1000px;
+    color: #fff!important;
+    display: inline-block;
+    text-decoration: none!important;
+    text-transform: uppercase;
+
+	margin-top: 10px;
+	padding: 5px 10px;
+}
+
+.web-to-plex-minion.wtp--queued {
+	background: var(--light-blue)!important;
+}
+
+.web-to-plex-minion.wtp--queued:hover {
+	background: var(--blue)!important;
+}
+
+.web-to-plex-minion.wtp--download {
+	background: var(--dark-blue)!important;
+}
+
+.web-to-plex-minion.wtp--download:hover {
+	background: var(--blue)!important;
+}
+
+.web-to-plex-minion.wtp--found {
+	background: var(--orange)!important;
+}
+
+.web-to-plex-minion.wtp--found:hover {
+	background: var(--light-orange)!important;
+}
+
+.lister-list .web-to-plex-minion {
+    background: 0!important;
+    border: 0!important;
+    border-bottom: 5px solid #727272!important;
+    border-radius: 0!important;
+	font-size: 10px;
+
+    margin-top: 0;
+	padding: 4px 6px;
+}
+
+.lister-list .web-to-plex-minion.wtp--queued {
+	border-color: var(--light-blue)!important;
+}
+
+.lister-list .web-to-plex-minion.wtp--queued:hover {
+	border-color: var(--blue)!important;
+}
+
+.lister-list .web-to-plex-minion.wtp--download {
+	border-color: var(--dark-blue)!important;
+}
+
+.lister-list .web-to-plex-minion.wtp--download:hover {
+	border-color: var(--blue)!important;
+}
+
+.lister-list .web-to-plex-minion.wtp--found {
+	border-color: var(--orange)!important;
+}
+
+.lister-list .web-to-plex-minion.wtp--found:hover {
+	border-color: var(--light-orange)!important;
+}
+
+#tt--0-0 {
+	background: var(--grey)!important;
+}
+
+#tt--0-0:hover {
+    background: var(--light-grey)!important;
+}

@@ -1,0 +1,572 @@
+:root {
+    --light-black: #222;
+    --black: #282828;
+    --dark-black: #000;
+
+    --light-blue: #197bcc;
+    --blue: #265af4;
+    --dark-blue: #2a2aff;
+
+    --light-grey: #999;
+    --grey: #666;
+    --dark-grey: #3f4245;
+
+    --green: #80f080;
+
+    --light-orange: #e59029;
+    --orange: #cc7b19;
+    --dark-orange: #f45a26;
+
+    --light-red: #f44;
+    --red: #ff2a2a;
+    --dark-red: #d11;
+
+    --light-white: #fff;
+    --white: #eee;
+
+    --disabled: #909090ee;
+    --half-black: #0008;
+    --half-green: #80f08088;
+    --half-grey: #8888;
+    --half-white: #fff8;
+    --quarter-black: #0004;
+    --quarter-grey: #8884;
+    --quarter-white: #fff4;
+    --transparent: #0000;
+}
+
+/* Text Color */
+[light-black]:not([gradient]) {
+	color: var(--light-black)
+}
+
+[black]:not([gradient]) {
+	color: var(--black)
+}
+
+[dark-black]:not([gradient]) {
+	color: var(--dark-black)
+}
+
+[light-blue]:not([gradient]) {
+	color: var(--light-blue)
+}
+
+[blue]:not([gradient]) {
+	color: var(--blue)
+}
+
+[dark-blue]:not([gradient]) {
+	color: var(--dark-blue)
+}
+
+[light-grey]:not([gradient]) {
+	color: var(--light-grey)
+}
+
+[grey]:not([gradient]) {
+	color: var(--grey)
+}
+
+[dark-grey]:not([gradient]) {
+	color: var(--dark-grey)
+}
+
+[green]:not([gradient]) {
+	color: var(--green)
+}
+
+[light-orange]:not([gradient]) {
+	color: var(--light-orange)
+}
+
+[orange]:not([gradient]) {
+	color: var(--orange)
+}
+
+[dark-orange]:not([gradient]) {
+	color: var(--dark-orange)
+}
+
+[light-red]:not([gradient]) {
+	color: var(--light-red)
+}
+
+[red]:not([gradient]) {
+	color: var(--red)
+}
+
+[dark-red]:not([gradient]) {
+	color: var(--dark-red)
+}
+
+[light-white]:not([gradient]) {
+	color: var(--light-white)
+}
+
+[white]:not([gradient]) {
+	color: var(--white)
+}
+
+[disabled]:not([gradient]) {
+	color: var(--disabled)
+}
+
+[half-black]:not([gradient]) {
+	color: var(--half-black)
+}
+
+[half-green]:not([gradient]) {
+	color: var(--half-green)
+}
+
+[half-grey]:not([gradient]) {
+	color: var(--half-grey)
+}
+
+[half-white]:not([gradient]) {
+	color: var(--half-white)
+}
+
+[quarter-black]:not([gradient]) {
+	color: var(--quarter-black)
+}
+
+[quarter-grey]:not([gradient]) {
+	color: var(--quarter-grey)
+}
+
+[quarter-white]:not([gradient]) {
+	color: var(--quarter-white)
+}
+
+[transparent]:not([gradient]) {
+	color: var(--transparent)
+}
+
+/* Text Color (Hover) */
+[light-black\$]:hover {
+	color: var(--light-black)
+}
+
+[black\$]:hover {
+	color: var(--black)
+}
+
+[dark-black\$]:hover {
+	color: var(--dark-black)
+}
+
+[light-blue\$]:hover {
+	color: var(--light-blue)
+}
+
+[blue\$]:hover {
+	color: var(--blue)
+}
+
+[dark-blue\$]:hover {
+	color: var(--dark-blue)
+}
+
+[light-grey\$]:hover {
+	color: var(--light-grey)
+}
+
+[grey\$]:hover {
+	color: var(--grey)
+}
+
+[dark-grey\$]:hover {
+	color: var(--dark-grey)
+}
+
+[green\$]:hover {
+	color: var(--green)
+}
+
+[light-orange\$]:hover {
+	color: var(--light-orange)
+}
+
+[orange\$]:hover {
+	color: var(--orange)
+}
+
+[dark-orange\$]:hover {
+	color: var(--dark-orange)
+}
+
+[light-red\$]:hover {
+	color: var(--light-red)
+}
+
+[red\$]:hover {
+	color: var(--red)
+}
+
+[dark-red\$]:hover {
+	color: var(--dark-red)
+}
+
+[light-white\$]:hover {
+	color: var(--light-white)
+}
+
+[white\$]:hover {
+	color: var(--white)
+}
+
+[disabled\$]:hover {
+	color: var(--disabled)
+}
+
+[half-black\$]:hover {
+	color: var(--half-black)
+}
+
+[half-green\$]:hover {
+	color: var(--half-green)
+}
+
+[half-grey\$]:hover {
+	color: var(--half-grey)
+}
+
+[half-white\$]:hover {
+	color: var(--half-white)
+}
+
+[quarter-black\$]:hover {
+	color: var(--quarter-black)
+}
+
+[quarter-grey\$]:hover {
+	color: var(--quarter-grey)
+}
+
+[quarter-white\$]:hover {
+	color: var(--quarter-white)
+}
+
+[transparent\$]:hover {
+	color: var(--transparent)
+}
+
+/* Background Color */
+[light-black-bg], [light-black][gradient] {
+	background: var(--light-black)
+}
+
+[black-bg], [black][gradient] {
+	background: var(--black)
+}
+
+[dark-black-bg], [dark-black][gradient] {
+	background: var(--dark-black)
+}
+
+[light-blue-bg], [light-blue][gradient] {
+	background: var(--light-blue)
+}
+
+[blue-bg], [blue][gradient] {
+	background: var(--blue)
+}
+
+[dark-blue-bg], [dark-blue][gradient] {
+	background: var(--dark-blue)
+}
+
+[light-grey-bg], [light-grey][gradient] {
+	background: var(--light-grey)
+}
+
+[grey-bg], [grey][gradient] {
+	background: var(--grey)
+}
+
+[dark-grey-bg], [dark-grey][gradient] {
+	background: var(--dark-grey)
+}
+
+[green], [green][gradient] {
+	background: var(--green)
+}
+
+[light-orange-bg], [light-orange][gradient] {
+	background: var(--light-orange)
+}
+
+[orange-bg], [orange][gradient] {
+	background: var(--orange)
+}
+
+[dark-orange-bg], [dark-orange][gradient] {
+	background: var(--dark-orange)
+}
+
+[light-red-bg], [light-red][gradient] {
+	background: var(--light-red)
+}
+
+[red-bg], [red][gradient] {
+	background: var(--red)
+}
+
+[dark-red-bg], [dark-red][gradient] {
+	background: var(--dark-red)
+}
+
+[light-white-bg], [light-white][gradient] {
+	background: var(--light-white)
+}
+
+[white-bg], [white][gradient] {
+	background: var(--white)
+}
+
+[disabled-bg] {
+	background: var(--disabled)
+}
+
+[half-black-bg] {
+	background: var(--half-black)
+}
+
+[half-green-bg] {
+	background: var(--half-green)
+}
+
+[half-grey-bg] {
+	background: var(--half-grey)
+}
+
+[half-white-bg] {
+	background: var(--half-white)
+}
+
+[quarter-black-bg] {
+	background: var(--quarter-black)
+}
+
+[quarter-grey-bg] {
+	background: var(--quarter-grey)
+}
+
+[quarter-white-bg] {
+	background: var(--quarter-white)
+}
+
+[transparent-bg] {
+	background: var(--transparent)
+}
+
+/* Background Color (Hover) */
+[light-black-bg\$]:hover {
+	background: var(--light-black)
+}
+
+[black-bg\$]:hover {
+	background: var(--black)
+}
+
+[dark-black-bg\$]:hover {
+	background: var(--dark-black)
+}
+
+[light-blue-bg\$]:hover {
+	background: var(--light-blue)
+}
+
+[blue-bg\$]:hover {
+	background: var(--blue)
+}
+
+[dark-blue-bg\$]:hover {
+	background: var(--dark-blue)
+}
+
+[light-grey-bg\$]:hover {
+	background: var(--light-grey)
+}
+
+[grey-bg\$]:hover {
+	background: var(--grey)
+}
+
+[dark-grey-bg\$]:hover {
+	background: var(--dark-grey)
+}
+
+[green-bg\$]:hover {
+	background: var(--green)
+}
+
+[light-orange-bg\$]:hover {
+	background: var(--light-orange)
+}
+
+[orange-bg\$]:hover {
+	background: var(--orange)
+}
+
+[dark-orange-bg\$]:hover {
+	background: var(--dark-orange)
+}
+
+[light-red-bg\$]:hover {
+	background: var(--light-red)
+}
+
+[red-bg\$]:hover {
+	background: var(--red)
+}
+
+[dark-red-bg\$]:hover {
+	background: var(--dark-red)
+}
+
+[light-white-bg\$]:hover {
+	background: var(--light-white)
+}
+
+[white-bg\$]:hover {
+	background: var(--white)
+}
+
+[disabled-bg\$]:hover {
+	background: var(--disabled)
+}
+
+[half-black-bg\$]:hover {
+	background: var(--half-black)
+}
+
+[half-green-bg\$]:hover {
+	background: var(--half-green)
+}
+
+[half-grey-bg\$]:hover {
+	background: var(--half-grey)
+}
+
+[half-white-bg\$]:hover {
+	background: var(--half-white)
+}
+
+[quarter-black-bg\$]:hover {
+	background: var(--quarter-black)
+}
+
+[quarter-grey-bg\$]:hover {
+	background: var(--quarter-grey)
+}
+
+[quarter-white-bg\$]:hover {
+	background: var(--quarter-white)
+}
+
+[transparent-bg\$]:hover {
+	background: var(--transparent)
+}
+
+/* Gradient Text (Darken) */
+[light-black][gradient="darken"i] {
+	background: linear-gradient(var(--light-black), var(--black))
+}
+
+[black][gradient="darken"i] {
+	background: linear-gradient(var(--black), var(--dark-black))
+}
+
+[light-blue][gradient="darken"i] {
+	background: linear-gradient(var(--light-blue), var(--blue))
+}
+
+[blue][gradient="darken"i] {
+	background: linear-gradient(var(--blue), var(--dark-blue))
+}
+
+[light-grey][gradient="darken"i] {
+	background: linear-gradient(var(--light-grey), var(--grey))
+}
+
+[grey][gradient="darken"i] {
+	background: linear-gradient(var(--grey), var(--dark-grey))
+}
+
+[light-orange][gradient="darken"i] {
+	background: linear-gradient(var(--light-orange), var(--orange))
+}
+
+[orange][gradient="darken"i] {
+	background: linear-gradient(var(--orange), var(--dark-orange))
+}
+
+[light-red][gradient="darken"i] {
+	background: linear-gradient(var(--light-red), var(--red))
+}
+
+[red][gradient="darken"i] {
+	background: linear-gradient(var(--red), var(--dark-red))
+}
+
+[light-white][gradient="darken"i] {
+	background: linear-gradient(var(--light-white), var(--white))
+}
+
+/* Gradient Text (Lighten) */
+[black][gradient="lighten"i] {
+	background: linear-gradient(var(--black), var(--light-black))
+}
+
+[dark-black][gradient="lighten"i] {
+	background: linear-gradient(var(--dark-black), var(--black))
+}
+
+[blue][gradient="lighten"i] {
+	background: linear-gradient(var(--blue), var(--light-blue))
+}
+
+[dark-blue][gradient="lighten"i] {
+	background: linear-gradient(var(--dark-blue), var(--blue))
+}
+
+[grey][gradient="lighten"i] {
+	background: linear-gradient(var(--grey), var(--light-grey))
+}
+
+[dark-grey][gradient="lighten"i] {
+	background: linear-gradient(var(--dark-grey), var(--grey))
+}
+
+[orange][gradient="lighten"i] {
+	background: linear-gradient(var(--orange), var(--light-orange))
+}
+
+[dark-orange][gradient="lighten"i] {
+	background: linear-gradient(var(--dark-orange), var(--orange))
+}
+
+[red][gradient="lighten"i] {
+	background: linear-gradient(var(--red), var(--light-red))
+}
+
+[dark-red][gradient="lighten"i] {
+	background: linear-gradient(var(--dark-red), var(--red))
+}
+
+[white][gradient="lighten"i] {
+	background: linear-gradient(var(--white), var(--light-white))
+}
+
+/* All Gradient Properties */
+[gradient] {
+    background-clip: text;
+    -moz-background-clip: text;
+    -webkit-background-clip: text;
+
+    color: #0000;
+    -webkit-text-fill-color: #0000;
+}

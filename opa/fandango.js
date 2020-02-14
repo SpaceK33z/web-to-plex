@@ -17,4 +17,21 @@ let script = {
 
 		return { type, title, year, image };
 	},
+
+	"minions": () => {
+		let actions = $('.subnav ul');
+
+		if(actions.empty)
+			return;
+
+		actions.forEach(element => {
+			let minion;
+			let parent = furnish('li.web-to-plex-wrapper.subnav__link-item', {},
+				minion = furnish('a.web-to-plex-minion.subnav__link', {}, 'Web to Plex')
+			);
+
+			addMinions(minion);
+			element.appendChild(parent);
+		});
+	},
 };

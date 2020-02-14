@@ -1,0 +1,68 @@
+.wtp-w {
+    display: inline-block;
+    margin: 8px 0 0 4px;
+    transition: all 0.2s!important;
+}
+
+.wtp-w, .web-to-plex-minion {
+    color: #ffffff!important;
+}
+
+.web-to-plex-minion {
+    background: rgba(0,0,0,0)!important;
+}
+
+.wtp-b {
+    background-color: #e5a00d!important;
+    line-height: 36px;
+    border-radius: 4px;
+    border: 1px;
+    font-size: 14px;
+    height: 36px;
+    padding: 0 20px;
+    box-shadow: 0 1px 0 rgba(0,0,0,0.05);
+    box-sizing: border-box;
+    cursor: pointer;
+    display: inline-block;
+    font-style: normal;
+    font-weight: 500;
+    min-width: 40px;
+    position: relative;
+    text-align: center;
+    text-decoration: none;
+    white-space: no-wrap;
+    vertical-align: middle;
+}
+
+.wtp-b:hover {
+    background-color: #fbc022!important;
+    box-shadow: inset 0 -2px 0 rgba(0,0,0,0.27);
+}
+
+.wtp--download .wtp-b {
+    background-color: var(--blue)!important;
+}
+
+.wtp--download .wtp-b:hover {
+    background-color: var(--light-blue)!important;
+}
+
+.wtp--found .wtp-b {
+    background-color: var(--orange)!important;
+}
+
+.wtp--found .wtp-b:hover {
+    background-color: var(--light-orange)!important;
+}
+
+.wtp-b:empty {
+    display: none!important;
+}
+
+#tt--0-0 {
+	color: #666!important;
+}
+
+#tt--0-0:hover {
+    color: #888!important;
+}

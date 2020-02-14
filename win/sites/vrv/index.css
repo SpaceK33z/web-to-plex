@@ -1,0 +1,57 @@
+.web-to-plex-minion:nth-child(2) {
+    margin-left: 0.625rem;
+}
+
+.web-to-plex-minion {
+	box-shadow: inset 0 0 0 0.125rem var(--orange)!important;
+    color: var(--orange)!important;
+}
+
+.web-to-plex-minion:hover {
+    background-color: var(--orange)!important;
+    color: var(--light-white)!important;
+}
+
+.web-to-plex-minion.wtp--found {
+	box-shadow: inset 0 0 0 0.125rem var(--orange)!important;
+    color: var(--orange)!important;
+}
+
+.web-to-plex-minion.wtp--found:hover {
+    background-color: var(--orange)!important;
+	color: var(--light-white)!important;
+}
+
+.web-to-plex-minion.wtp--download {
+	box-shadow: inset 0 0 0 0.125rem var(--blue)!important;
+    color: var(--blue)!important;
+}
+
+.web-to-plex-minion.wtp--download:hover {
+    background-color: var(--blue)!important;
+	color: var(--light-white)!important;
+}
+
+.web-to-plex-minion.wtp--error {
+	box-shadow: inset 0 0 0 0.125rem var(--red)!important;
+    color: var(--red)!important;
+}
+
+.web-to-plex-minion.wtp--error:hover {
+    background-color: var(--red)!important;
+	color: var(--light-white)!important;
+}
+
+.watchlist-card .web-to-plex-minion {
+    background: 0!important;
+    box-shadow: none!important;
+}
+
+#tt--0-0 {
+	box-shadow: inset 0 0 0 0.125rem var(--grey)!important;
+    color: var(--grey)!important;
+}
+
+#tt--0-0:hover {
+    background-color: var(--grey)!important;
+}

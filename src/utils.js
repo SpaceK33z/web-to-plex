@@ -1,9 +1,105 @@
 /* eslint-disable no-unused-vars */
 /* global configuration, init, Update, "Helpers" */
 
-let configuration, init, Update;
+let configuration, init, Update, IMAGES, Glyphs = {},
+	HELPERS_STORAGE = {
+		get(keys, callback = () => {}) {
+			let results;
 
-(async date => {
+			if(keys === null) {
+				return callback(configuration);
+			} else if(keys instanceof String) {
+				return callback(configuration[keys]);
+			} else if(keys instanceof Array) {
+				results = [...keys];
+
+				for(let key of keys)
+					result.push(configuration[key]);
+				return callback(results);
+			} else if(keys instanceof Object) {
+				results = { ...keys };
+
+				for(let key in keys)
+					results[key] = configuration[key];
+				return callback(results);
+			}
+		},
+
+		set(keys, callback = () => {}) {
+			let results = {};
+
+			for(let key in keys)
+				configuration[key] = results[key] = keys[key];
+			return callback(results);
+		},
+
+		remove(keys, callback = () => {}) {
+			if(keys === null)
+				for(let key in configuration)
+					delete configuration[key];
+			else if(keys instanceof String)
+				delete configuration[key];
+			else if(keys instanceof Array)
+				for(let key of keys)
+					delete configuration[key];
+			else if(keys instanceof Object)
+				for(let key in keys)
+					delete configuration[key];
+
+			callback();
+		}
+	},
+	MINIONS = [],
+	addMinions = (...minions) => {
+		MINIONS = [...minions, ...MINIONS];
+
+		return {
+			stayUnique: status => {
+				MINIONS = MINIONS.map(minion => ((!!~minions.indexOf(minion)? minion.setAttribute('ignore-web-to-plex-updates', status): null), minion))
+			}
+		}
+	};
+
+class UUID {
+	constructor(length = 16, symbol = '-') {
+		let values = [];
+
+		window.crypto.getRandomValues(new Uint32Array(length)).forEach(value => values.push(value.toString(36)));
+
+		return values.join(symbol).replace(/^[^a-z]+/i, '');
+	}
+
+	static from(object, seed = 64, symbol = '-') {
+		let id = [];
+
+		for(let key in object) {
+			let o = object[key];
+
+			if(o instanceof Array)
+				o = o.join(symbol);
+			else if(o instanceof Object)
+				o = Object.values(o).join(symbol);
+            else
+                o = o + '';
+
+			if(typeof(o) == 'string')
+				o = o
+					.toLowerCase()
+					.split('')
+					.reduce((a, b) => ((typeof(a) == 'number'? a: a.charCodeAt(0)) + b.charCodeAt(0)), seed)
+                    .toString(36);
+			else
+				return
+				/* Error occurred */;
+
+            id.push(o);
+		}
+
+        return id.join('').replace(/(\w{1,8})(\w{4})?(\w{4})?(\w{4})?(\w{12})?(\w+)?/, '$1-$2-$3-$4-$5:$6').replace(/\-+\:/g, '');
+	}
+}
+
+let INITIALIZE = (async date => {
 
 	// default date items
 	let YEAR  = date.getFullYear(),
@@ -14,7 +110,38 @@ let configuration, init, Update;
 		RUNNING  = false,
 	// Other items
 	/* Items that the user has already asked for */
-		CAUGHT, COMPRESS;
+		CAUGHT, COMPRESS,
+		REFINED = {};
+
+	// update ALL minions
+	let updateMinions = (attributes) => {
+		let { title, href, text, hover, classes, event } = attributes;
+
+		for(let minion of MINIONS.filter(minion => minion.getAttribute('ignore-web-to-plex-updates') != 'true')) {
+			classes.forEach(c => minion.classList.add(c));
+			minion.setAttribute('title', hover);
+			minion.addEventListener('click', event? event: href? (() => top.open(href, '_top')): null);
+		}
+	},
+	// update a single (ID) minion
+	updateMinion = (properties, status, options) => {
+		let minions;
+
+		for(let property in properties)
+			if(!(minions = $(`.web-to-plex-minion[${ property }="${properties[property]}"], .web-to-plex-minion[${ property }id="${properties[property]}"], .web-to-plex-minion[${ property }-id="${properties[property]}"]`)).empty)
+				break;
+
+		if(!minions || minions.empty)
+			return;
+
+		minions.forEach(minion => status? minion.classList.add(`wtp--${status}`): '');
+
+		if(status == 'found' && options.key)
+			minions.forEach(minion => {
+				minion.setAttribute('href', Request_PlexURL(__CONFIG__.server.id, options.key));
+				minion.setAttribute('title', `Watch "${options.title} (${options.year})" on Plex`);
+			});
+	};
 
 	// simple helpers
 	let extURL = url => chrome.extension.getURL(url),
@@ -22,9 +149,10 @@ let configuration, init, Update;
 		// DO NOT EXPOSE
 		__CONFIG__, ALLOWED, PERMISS;
 
-	let IMG_URL = {
+	let IMG_URL = IMAGES = {
 		'nil':				extURL('img/null.png'),
 		'icon_16':			extURL('img/16.png'),
+		'icon_32':			extURL('img/32.png'),
 		'icon_48':			extURL('img/48.png'),
 		'background': 		extURL('img/background.png'),
 		'hide_icon_16':		extURL('img/hide.16.png'),
@@ -34,6 +162,7 @@ let configuration, init, Update;
 		'close_icon_16':	extURL('img/close.16.png'),
 		'close_icon_48':	extURL('img/close.48.png'),
 		'icon_white_16':	extURL('img/_16.png'),
+		'icon_white_32':	extURL('img/_32.png'),
 		'icon_white_48':	extURL('img/_48.png'),
 		'plexit_icon_16':   extURL('img/plexit.16.png'),
 		'plexit_icon_48':   extURL('img/plexit.48.png'),
@@ -45,6 +174,15 @@ let configuration, init, Update;
 		'settings_icon_16': extURL('img/settings.16.png'),
 		'settings_icon_48': extURL('img/settings.48.png'),
 	};
+
+	for(let glyph of "adjust,airplane,alarm,albums,amazon,anchor,android,apple,asterisk,ax,badoo,ban,bank,barcode,baseball,basketball,bathrobe,beer,behance,bell,bicycle,bin,binoculars,blacksmith,blog,blogger,bluetooth,boat,bold,bomb,book,bookmark,bowling,briefcase,brush,bug,building,bullets,bullhorn,buoy,bus,cake,calculator,calendar,camera,candle,car,cardio,cargo,cars,celebration,certificate,charts,chat,check,cleaning,clock,cloud,cogwheel,cogwheels,coins,collapse,comments,compass,compressed,conversation,crop,crown,cup,cutlery,dashboard,delete,deviantart,direction,dislikes,display,divide,dog,download,dress,dribbble,drink,dropbox,dumbbell,earphone,edit,eject,electricity,embed,envelope,euro,evernote,exit,expand,eyedropper,fabric,facebook,factory,fax,female,file,film,filter,fins,fire,fishes,flag,flash,flickr,flower,font,forrst,forward,foursquare,fullscreen,gamepad,gbp,gift,girl,github,glass,global,globe,golf,goodreads,google_plus,grater,group,hdd,header,headphones,headset,heart,heat,history,hockey,home,hospital,imac,inbox,instagram,instapaper,ios,ipad,iphone,ipod,italic,jolicloud,justify,kettle,keynote,keys,kiosk,last_fm,leaf,leather,lightbulb,link,linked_in,list,lock,luggage,macbook,magic,magnet,male,microphone,minus,money,moon,more,move,music,mute,myspace,nails,nameplate,note,notes,ok,package,pants,paperclip,parents,pause,pen,pencil,piano,picasa,picture,pin,pinboard,pinterest,pipe,pizza,play,playlist,playstation,plus,podium,pool,posterous_spaces,pot,power,print,projector,pushpin,qrcode,quora,rabbit,radar,random,read_it_later,readability,record,redo,refresh,remove,repeat,restart,retweet,rewind,riflescope,ring,road,roundabout,router,rss,rugby,ruller,sampler,scissors,screenshot,search,send,server,settings,share,shield,shirt,shop,signal,skateboard,skitch,skull,skype,smoking,snowflake,sort,sorting,spade,spotify,spray,star,stats,stop,stopwatch,stroller,stumbleupon,subtitles,suitcase,sun,sweater,table,tablet,tag,tags,tie,tint,tower,train,transfer,translate,truck,tumblr,turtle,twitter,umbrella,unchecked,underwear,undo,unlock,unshare,upload,usd,user,vases,vcard,vimeo,vine,wallet,webcam,wifi,windows,woman,wordpress,wrench,xbox,xing,yahoo,yelp,youtube,zootool".split(','))
+		Object.defineProperty(Glyphs, glyph, {
+			get() { return document.furnish('i', { glyph }) },
+			set(value) { return document.furnish('i', { glyph: value }) },
+
+			configurable: true,
+			enumerable: true,
+		});
 
 	// the storage - priority to sync
 	const UTILS_STORAGE = chrome.storage.sync || chrome.storage.local;
@@ -64,7 +202,7 @@ let configuration, init, Update;
 
 			UTILS_STORAGE.get(null, DISK => {
 				if(chrome.runtime.lastError)
-					chrome.storage.local.get(null, LOAD);
+					UTILS_STORAGE.get(null, LOAD);
 				else
 					LOAD(DISK);
 			});
@@ -302,7 +440,7 @@ let configuration, init, Update;
 				);
 
 			let preX = document.queryBy('.web-to-plex-prompt').first,
-				movie = /^(m(?:ovies?)?|f(?:ilms?)?|c(?:inemas?)?)?$/i;
+				movie = /^(m(?:ovies?)?|f(?:ilms?)?|c(?:inemas?)?|theat[re]{2})?$/i;
 
 			if(preX)
 				return /* Ignore while another prompt is open, prevents double prompts */;
@@ -329,7 +467,7 @@ let configuration, init, Update;
 						header.innerText = 'Approve ' + counter.children.length + (counter.children.length == 1?' item': ' items');
 					};
 
-					prompt = furnish('div.web-to-plex-prompt', {},
+					prompt = furnish('div.web-to-plex-prompt', { type: prompt_type },
 						furnish('div.web-to-plex-prompt-body', { style: `background-image: url(${ IMG_URL.noise_background }), url(${ IMG_URL.background }); background-size: auto, cover;` },
 							// The prompt's title
 							furnish('h1.web-to-plex-prompt-header', {}, 'Approve ' + array.length + (array.length == 1? ' item': ' items')),
@@ -346,14 +484,14 @@ let configuration, init, Update;
 
 										elements.push(
 											furnish('li.web-to-plex-prompt-option.mutable', { value: index, innerHTML: `<h2>${ index + 1 }. ${ title }${ year? ` (${ year })`: '' } \u2014 ${ type }</h2>` },
-												furnish('button.remove', { title: `Remove "${ title }"`, onmouseup: event => { remove(event.target.parentElement); event.target.remove() } }),
+												furnish('i[glyph=remove]', { title: `Remove "${ title }"`, onmouseup: event => { remove(event.target.parentElement); event.target.remove() } }),
 												(
 													__CONFIG__.PromptQuality?
-														P_QUA = furnish('select.quality', { index, onchange: event => data[event.target.getAttribute('index')].quality = event.target.value }, ...profiles[/(movie|film|cinema)/i.test(type)?'movie':'show'].map(Q => furnish('option', { value: Q.id }, Q.name))):
+														P_QUA = furnish('select.quality', { index, onchange: event => data[event.target.getAttribute('index')].quality = event.target.value }, ...profiles[movie.test(type)?'movie':'show'].map(Q => furnish('option', { value: Q.id }, Q.name))):
 													''
 												),(
 													__CONFIG__.PromptLocation?
-														P_LOC = furnish('select.location', { index, onchange: event => data[event.target.getAttribute('index')].location = event.target.value }, ...locations[/(movie|film|cinema)/i.test(type)?'movie':'show'].map(Q => furnish('option', { value: Q.id }, Q.path))):
+														P_LOC = furnish('select.location', { index, onchange: event => data[event.target.getAttribute('index')].location = event.target.value }, ...locations[movie.test(type)?'movie':'show'].map(Q => furnish('option', { value: Q.id }, Q.path))):
 													''
 												)
 											)
@@ -374,7 +512,7 @@ let configuration, init, Update;
 								furnish('input.web-to-plex-prompt-input[type=text]', { placeholder: 'Add an item (enter to add): Title (Year) Type / ID Type', title: 'Solo: A Star Wars Story (2018) movie / tt3778644 m', onkeydown: async event => {
 									if(event.keyCode == 13) {
 										let title, year, type, self = event.target, R = RegExp,
-											movie = /^(m(?:ovies?)?|f(?:ilms?)?|c(?:inemas?)?)/i,
+											movie = /^(m(?:ovies?)?|f(?:ilms?)?|c(?:inemas?)?|theat[re]{2})/i,
 											Db, IMDbID, TMDbID, TVDbID, value = self.value;
 
 										self.setAttribute('disabled', self.disabled = true);
@@ -420,9 +558,9 @@ let configuration, init, Update;
 										}
 									}
 								} }),
-								furnish('button.web-to-plex-prompt-decline', { onmouseup: event => { remove(true); callback([]) }, title: 'Close' }, '\u2718'),
-								furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { remove(true); new Prompt(prompt_type, options, callback, container) }, title: 'Reset' }, '\u21BA'),
-								furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { remove(true); callback(data.filter(value => value !== null && value !== undefined)) }, title: 'Continue' }, '\u2714')
+								furnish('button.web-to-plex-prompt-decline', { onmouseup: event => { remove(true); callback([]) }, title: 'Close' }, Glyphs.exit),
+								furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { remove(true); new Prompt(prompt_type, options, callback, container) }, title: 'Reset' }, Glyphs.restart),
+								furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { remove(true); callback(data.filter(value => value !== null && value !== undefined)) }, title: 'Continue' }, Glyphs.ok)
 							)
 						)
 					);
@@ -448,7 +586,7 @@ let configuration, init, Update;
 						header.innerText = `Correction ready...`;
 					};
 
-					prompt = furnish('div.web-to-plex-prompt', {},
+					prompt = furnish('div.web-to-plex-prompt', { type: prompt_type },
 						furnish('div.web-to-plex-prompt-body', { style: `background-image: url(${ IMG_URL.noise_background }), url(${ IMG_URL.background }); background-size: auto, cover;` },
 							// The prompt's title
 							furnish('h1.web-to-plex-prompt-header', {}, (array.length == 1? 'Correction ready...': `Choose a correction from ${array.length} items`)),
@@ -477,16 +615,21 @@ let configuration, init, Update;
 											captured.tvdb.push(v);
 
 										elements.push(
-											furnish('li.web-to-plex-prompt-option.mutable', { value: index, innerHTML: `<h2>${ index + 1 }. ${ title }${ year? ` (${ year })`: '' } \u2014 ${ type }</h2> ${ i? `<a href="https://imdb.com/title/${i}/?ref=web_to_plex" ${s}>${i}</a>`: '/' } \u2014 ${ t? `<a href="https://themoviedb.org/${type=='show'?'tv':type}/${t}" ${s}>${t}</a>`: '/' } \u2014 ${ v? `<a href="https://thetvdb.com/series/${title.replace(/\s+/g,'-').replace(/&/g,'and').replace(/[^\w\-]+/g,'')}#${v}" ${s}>${v}</a>`: '/' }` },
-												furnish('button.choose', { title: `Use "${ title } (${ year })"`, onmouseup: event => {
-													let element = event.target.parentElement,
-														children = [...element.parentElement.children].filter(e => e != element);
+											furnish('li.web-to-plex-prompt-option.mutable.choose', {
+												value: index,
+												innerHTML: `<h2>${ index + 1 }. ${ title }${ year? ` (${ year })`: '' } \u2014 ${ type }</h2> ${ i? `<a href="https://imdb.com/title/${i}/?ref=web_to_plex" ${s}>${i}</a>`: '/' } \u2014 ${ t? `<a href="https://themoviedb.org/${movie.test(type)?'movie':'tv'}/${t}" ${s}>${t}</a>`: '/' } \u2014 ${ v? `<a href="https://thetvdb.com/series/${title.replace(/\s+/g,'-').replace(/&/g,'and').replace(/[^\w\-]+/g,'')}#${v}" ${s}>${v}</a>`: '/' }`,
+												onmouseup: event => {
+													let self = traverse(event.target, element => element.classList.contains('mutable')),
+														children = [...self.parentElement.children].filter(e => e != self);
 														children.forEach(child => {
+															child.classList.remove('chosen');
 															remove(child);
-															element.parentElement.appendChild(child);
+															self.parentElement.appendChild(child);
 														});
-													element.classList.add('chosen');
-												} })
+													self.classList.add('chosen');
+												}
+											},
+												furnish('i[glyph=ok]', { title: `Use "${ title } (${ year })"` })
 											)
 										);
 									}
@@ -545,9 +688,9 @@ let configuration, init, Update;
 										}
 									}
 								} }),
-								furnish('button.web-to-plex-prompt-decline', { onmouseup: event => { remove(true); prompt.done = true; callback([]) }, title: 'Close' }, '\u2718'),
-								furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { remove(true); prompt.done = false; new Prompt(prompt_type, options, callback, container) }, title: 'Reset' }, '\u21BA'),
-								furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { remove(true); prompt.done = true; callback(data.filter(value => value !== null && value !== undefined)) }, title: 'Continue' }, '\u2714')
+								furnish('button.web-to-plex-prompt-decline', { onmouseup: event => { remove(true); prompt.done = true; callback([]) }, title: 'Close' }, Glyphs.exit),
+								furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { remove(true); prompt.done = false; new Prompt(prompt_type, options, callback, container) }, title: 'Reset' }, Glyphs.restart),
+								furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { remove(true); prompt.done = true; callback(data.filter(value => value !== null && value !== undefined)) }, title: 'Continue' }, Glyphs.ok)
 							)
 						)
 					);
@@ -569,7 +712,7 @@ let configuration, init, Update;
 						header.innerText = 'Approve ' + counter.children.length + (counter.children.length == 1?' item': ' items');
 					};
 
-					prompt = furnish('div.web-to-plex-prompt', {},
+					prompt = furnish('div.web-to-plex-prompt', { type: prompt_type },
 						furnish('div.web-to-plex-prompt-body', { style: `background-image: url(${ IMG_URL.noise_background }), url(${ IMG_URL.background }); background-size: auto, cover;` },
 							// The prompt's title
 							furnish('h1.web-to-plex-prompt-header', {}, 'Approve ' + array.length + (array.length == 1? ' item': ' items')),
@@ -586,21 +729,21 @@ let configuration, init, Update;
 
 										elements.push(
 											furnish('li.web-to-plex-prompt-option.mutable', { value: index, innerHTML: `<h2>${ index + 1 } \u00b7 ${ title }${ year? ` (${ year })`: '' } <em>\u2014 ${ type }</em></h2>` },
-												furnish('button.remove', { title: `Remove "${ title }"`, onmouseup: event => { remove(event.target.parentElement); event.target.remove() } }),
+												furnish('i[glyph=remove]', { title: `Remove "${ title }"`, onmouseup: event => { remove(event.target.parentElement); event.target.remove() } }),
 												(
 													__CONFIG__.PromptQuality?
-														P_QUA = furnish('select.quality', { index, onchange: event => data[event.target.getAttribute('index')].quality = event.target.value }, ...profiles[/(movie|film|cinema)/i.test(type)?'movie':'show'].map(Q => furnish('option', { value: Q.id }, Q.name))):
+														P_QUA = furnish('select.quality', { index, onchange: event => data[+event.target.getAttribute('index')].quality = event.target.value }, ...profiles[movie.test(type)?'movie':'show'].map(Q => furnish('option', { value: Q.id }, Q.name))):
 													''
 												),(
 													__CONFIG__.PromptLocation?
-														P_LOC = furnish('select.location', { index, onchange: event => data[event.target.getAttribute('index')].location = event.target.value }, ...locations[/(movie|film|cinema)/i.test(type)?'movie':'show'].map(Q => furnish('option', { value: Q.id }, Q.path))):
+														P_LOC = furnish('select.location', { index, onchange: event => data[+event.target.getAttribute('index')].location = event.target.value }, ...locations[movie.test(type)?'movie':'show'].map(Q => furnish('option', { value: Q.id }, Q.path))):
 													''
 												)
 											)
 										);
 
-										if(P_QUA) P_QUA.value = defaults[type].quality;
-										if(P_LOC) P_LOC.value = defaults[type].location;
+										if(P_QUA) P_QUA.value = data[index].quality = defaults[type].quality;
+										if(P_LOC) P_LOC.value = data[index].location = defaults[type].location;
 
 										P_QUA = P_LOC = null;
 									}
@@ -611,9 +754,9 @@ let configuration, init, Update;
 
 							// The engagers
 							furnish('div.web-to-plex-prompt-footer', {},
-								furnish('button.web-to-plex-prompt-decline', { onmouseup: event => { remove(true); callback([]) }, title: 'Close' }, '\u2718'),
-								furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { remove(true); new Prompt(prompt_type, options, callback, container) }, title: 'Reset' }, '\u21BA'),
-								furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { remove(true); callback(data.filter(value => value !== null && value !== undefined)) }, title: 'Continue' }, '\u2714')
+								furnish('button.web-to-plex-prompt-decline', { onmouseup: event => { remove(true); callback([]) }, title: 'Close' }, Glyphs.exit),
+								furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { remove(true); new Prompt(prompt_type, options, callback, container) }, title: 'Reset' }, Glyphs.restart),
+								furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { remove(true); callback(data.filter(value => value)) }, title: 'Continue' }, Glyphs.ok)
 							)
 						)
 					);
@@ -622,7 +765,14 @@ let configuration, init, Update;
 				/* Allows the user to modify a single item (before being pushed) */
 				case 'modify':
 					let { title, year, type, IMDbID, TMDbID, TVDbID } = options,
+						refined = { ...defaults[type], ...options },
+						uuid = UUID.from({ type, title, IMDbID, TMDbID, TVDbID }),
 						P_QUA, P_LOC;
+
+					if(REFINED[uuid])
+						refined = REFINED[uuid];
+					else
+						REFINED[uuid] = refined;
 
 					let i = IMDbID,
 						t = TMDbID,
@@ -644,34 +794,34 @@ let configuration, init, Update;
 							element.remove();
 					};
 
-					type = /(movie|film|cinema)/i.test(type)?'movie':'show';
+					type = /(movie|film|cinema|theat[re]{2})s?/i.test(type)?'movie':'show';
 
-					prompt = furnish('div.web-to-plex-prompt', {},
+					prompt = furnish('div.web-to-plex-prompt', { type: prompt_type },
 						furnish('div.web-to-plex-prompt-body', { style: `background-image: url(${ IMG_URL.noise_background }), url(${ IMG_URL.background }); background-size: auto, cover;` },
 							// The prompt's title
-							furnish('h1.web-to-plex-prompt-header', { innerHTML: `${ title }${ year? ` (${ year })`: '' }` }),
+							furnish('h1.web-to-plex-prompt-header', { innerHTML: `${ title.length < 40? title: title.slice(0, 37) + '...' }${ parseInt(year)? ` (${ year })`: '' } \u2014 ${ movie.test(type)? 'Movie': 'TV Show' }` }),
 
 							// The prompt's items
 							furnish('div.web-to-plex-prompt-options', {},
-								furnish('div.web-to-plex-prompt-option', { innerHTML: `${ type } \u2014 ${ i? `<a href="https://imdb.com/title/${i}/?ref=web_to_plex" ${s}>${i}</a>`: '/' } \u2014 ${ t? `<a href="https://themoviedb.org/${type=='show'?'tv':type}/${t}" ${s}>${t}</a>`: '/' } \u2014 ${ v? `<a href="https://thetvdb.com/series/${title.replace(/\s+/g,'-').replace(/&/g,'and').replace(/[^\w\-]+/g,'')}#${v}" ${s}>${v}</a>`: '/' }` }),
+								furnish('div.web-to-plex-prompt-option', { innerHTML: `${ i? `<a href="https://imdb.com/title/${i}/?ref=web_to_plex" ${s}>${i}</a>`: '?' } \u2014 ${ t? `<a href="https://themoviedb.org/${type=='show'?'tv':type}/${t}" ${s}>${t}</a>`: '?' } \u2014 ${ v? `<a href="https://thetvdb.com/series/${title.replace(/\s+/g,'-').replace(/&/g,'and').replace(/[^\w\-]+/g,'')}#${v}" ${s}>${v}</a>`: '?' }` }),
 								(
 									__CONFIG__.PromptQuality?
-										P_QUA = furnish('select.quality', { onchange: event => options.quality = event.target.value }, ...profiles[type].map(Q => furnish('option', { value: Q.id }, Q.name))):
+										P_QUA = furnish('select.quality', { onchange: event => REFINED[uuid].quality = event.target.value }, ...profiles[type].map(Q => furnish('option', { value: Q.id }, Q.name))):
 									''
 								),
 								furnish('br'),
 								(
 									__CONFIG__.PromptLocation?
-										P_LOC = furnish('select.location', { onchange: event => options.location = event.target.value }, ...locations[type].map(Q => furnish('option', { value: Q.id }, Q.path))):
+										P_LOC = furnish('select.location', { onchange: event => REFINED[uuid].location = event.target.value }, ...locations[type].map(Q => furnish('option', { value: Q.id }, Q.path))):
 									''
 								)
 							),
 
 							// The engagers
 							furnish('div.web-to-plex-prompt-footer', {},
-								furnish('button.web-to-plex-prompt-decline', { onmouseup: event => { remove(true); callback([]) }, title: 'Close' }, '\u2718'),
-								furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { remove(true); new Prompt(prompt_type, options, callback, container) }, title: 'Reset' }, '\u21BA'),
-								furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { remove(true); callback(options) }, title: 'Continue' }, '\u2714'),
+								furnish('button.web-to-plex-prompt-decline', { onmouseup: event => { remove(true); callback([]) }, title: 'Close' }, Glyphs.exit),
+								furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { remove(true); new Prompt(prompt_type, REFINED[uuid], callback, container) }, title: 'Reset' }, Glyphs.restart),
+								furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { remove(true); callback(REFINED[uuid]) }, title: 'Continue' }, Glyphs.ok),
 								(
 									(!__CONFIG__.UseLowCache || (__CONFIG__.UseLowCache && CAUGHT.has({ imdb: i, tmdb: t, tvdb: v })))?
 										furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { let self = event.target; open(self.getAttribute('href'), '_blank') }, href: slugify(type), title: `Open on ${ manager[type] }` }, manager[type]):
@@ -722,14 +872,14 @@ let configuration, init, Update;
 							(init && !RUNNING? (init(), RUNNING = true): RUNNING = false);
 					};
 
-					prompt = furnish('div.web-to-plex-prompt', {},
+					prompt = furnish('div.web-to-plex-prompt', { type: prompt_type },
 						furnish('div.web-to-plex-prompt-body', { style: `background-image: url(${ IMG_URL.noise_background }), url(${ IMG_URL.background }); background-size: auto, cover;` },
 							// The prompt's title
 							furnish('h1.web-to-plex-prompt-header', { innerHTML: `<span style="text-decoration: underline; cursor: pointer;" title="${ location.host }">"${ alias || name }"</span> would like:` }),
 
 							// The prompt's items
 							furnish('div.web-to-plex-prompt-options', {},
-								...((permissions = permission.split(/\s*,\s*/).filter(v=>v&&v.length)).map(
+								...((permissions = permission.split(/\s*,\s*/).filter((v,i,a)=>v&&v.length&&a.indexOf(v)==i)).map(
 									__permission =>
 										furnish('div.web-to-plex-prompt-option.web-to-plex-permission', { innerHTML: `Access to your <strong>${ __permission.replace(/(y)?s?$/, ($0, $1, $$, $_) => ($1? 'ies': 's')) }</strong> &mdash; ` + (p => {
 												let R = RegExp,
@@ -773,8 +923,8 @@ let configuration, init, Update;
 
 							// The engagers
 							furnish('div.web-to-plex-prompt-footer', {},
-								furnish('button.web-to-plex-prompt-decline', { onmouseup: event => { if(!event.isTrusted) throw alert('The script for this site is trying to decline its own permissions!'), 'Malicious script. Decline permissions'; remove(true); callback(false, {}) }, title: 'Deny all permissions' }, '\u2718'),
-								furnish('button.web-to-plex-prompt-accept', { onmouseup: async event => { if(!event.isTrusted) throw alert('The script for this site is trying to grant its own permissions!'), 'Malicious script. Grant permissions'; remove(true); await callback(true, permissions); top.open(top.location.href, '_top'); }, title: 'Allow all permissions' }, '\u2714')
+								furnish('button.web-to-plex-prompt-decline', { onmouseup: event => { if(!event.isTrusted) throw alert('The script for this site is trying to decline its own permissions!'), 'Malicious script. Decline permissions'; remove(true); callback(false, {}) }, title: 'Deny all permissions' }, Glyphs.ban),
+								furnish('button.web-to-plex-prompt-accept', { onmouseup: async event => { if(!event.isTrusted) throw alert('The script for this site is trying to grant its own permissions!'), 'Malicious script. Grant permissions'; remove(true); await callback(true, permissions); top.open(top.location.href, '_top'); }, title: 'Allow all permissions' }, Glyphs.ok)
 							)
 						)
 					);
@@ -806,7 +956,7 @@ let configuration, init, Update;
 			src: url,
 			style: `
 				display:	none   !important;
-				opacity:	0	  !important;
+				opacity:	0	   !important;
 				visibility: hidden !important;
 			`,
 
@@ -824,6 +974,8 @@ let configuration, init, Update;
 
 	// Send an update query to background.js
 	Update = (type, options = {}, postToo) => {
+		Update.running = options.script || options.plugin || null;
+
 		if(configuration)
 			console.log(`Requesting update (${ type } [post-to-top=${ !!postToo }])`, options);
 		else if(!Update.retry)
@@ -1006,7 +1158,7 @@ let configuration, init, Update;
 
 			UTILS_STORAGE.get(null, options => {
 				if(chrome.runtime.lastError)
-					chrome.storage.local.get(null, handleOptions);
+					UTILS_STORAGE.get(null, handleOptions);
 				else
 					handleOptions(options);
 			});
@@ -1017,13 +1169,17 @@ let configuration, init, Update;
 	async function ParsedOptions() {
 		return await options()
 			.then(
-				options => {
+				async options => {
 					configuration = {};
+
+					let { running } = Update,
+						allowed = await load(`has/${ running }`),
+						permiss = await load(`get/${ running }`);
 
 					/* Don't expose the user's authentication information to sites */
 					for(let key in options)
 						if(/username|password|token|api|server|url|storage|cache|proxy|client|builtin|plugin|qualit/i.test(key))
-							if(ALLOWED && RegExp(PERMISS.join('|'),'i').test(key))
+							if(allowed && RegExp(permiss.join('|'),'i').test(key))
 								configuration[key] = options[key];
 							else
 								/* Do nothing */;
@@ -1439,6 +1595,8 @@ let configuration, init, Update;
 				.replace(/@\{b(ase-?)?64-url\}/gi, btoa(URL))
 				.replace(/@\{enc(ode)?-url\}/gi, encodeURIComponent(URL))
 				.replace(/@\{(raw-)?url\}/gi, URL);
+
+            	headers[$1] = $2;
 			}
 		});
 
@@ -1464,7 +1622,7 @@ let configuration, init, Update;
 			rqut = apit, // request type: tmdb, imdb, or tvdb
 			manable = __CONFIG__.ManagerSearch && !(rerun & 0b1000), // is the user's "Manager Searches" option enabled?
 			UTF_16 = /[^0\u0020-\u007e, 1\u00a1\u00bf-\u00ff, 2\u0100-\u017f, 3\u0180-\u024f, 4\u0300-\u036f, 5\u0370-\u03ff, 6\u0400-\u04ff, 7\u0500-\u052f, 8\u20a0-\u20bf]+/g,
-			MV = /^(movies?|films?|cinemas?)$/i.test(apit),
+			MV = /^(movies?|films?|cinemas?|theat[re]{2}s?)$/i.test(apit),
 			TV = /^(tv[\s\-]*(?:shows?|series)?)$/i.test(apit);
 
 		iid = iid == 'tt'? null: iid;
@@ -1473,7 +1631,7 @@ let configuration, init, Update;
 		rqut =
 		/(tv|show|series)/i.test(rqut)?
 			'tvdb':
-		/(movie|film|cinema)s?/i.test(rqut)?
+		/(movie|film|cinema|theat[re])s?/i.test(rqut)?
 			'tmdb':
 		rqut || '*';
 		manable = manable && (__CONFIG__.usingOmbi || (__CONFIG__.usingRadarr && rqut == 'tmdb') || ((__CONFIG__.usingSonarr || __CONFIG__.usingMedusa /*|| __CONFIG__.usingSickBeard*/) && rqut == 'tvdb'));
@@ -1570,7 +1728,7 @@ let configuration, init, Update;
 			cors = proxy.url, // if cors is requried and not uspported, proxy through this URL
 			headers = HandleProxyHeaders(proxy.headers, url);
 
-		if(proxy.enabled && /(^http:\/\/)(?!localhost|127\.0\.0\.1(?:\/8)?|::1(?:\/128)?|:\d+)\b/i.test(url)) {
+		if(proxy.enabled && /(^https?:\/\/)(?!localhost|127\.0\.0\.1(?:\/8)?|::1(?:\/128)?|:\d+)\b/i.test(url)) {
 			url = cors
 				.replace(/\{b(ase-?)?64-url\}/gi, btoa(url))
 				.replace(/\{enc(ode)?-url\}/gi, encodeURIComponent(url))
@@ -2025,7 +2183,7 @@ let configuration, init, Update;
 			);
 		}
 
-		let contentType = (/movies?|film/i.test(options.type)? 'movie': 'tv');
+		let contentType = (/(movie|film|cinema|theat[re]{2})s?/i.test(options.type)? 'movie': 'tv');
 
 		chrome.runtime.sendMessage({
 				type: 'PUSH_OMBI',
@@ -2156,10 +2314,12 @@ let configuration, init, Update;
 		if(!prompted && (PromptQuality || PromptLocation))
 			return new Prompt('modify', options, refined => Request_Radarr(refined, true));
 
+		let parsePath = id => JSON.parse(__CONFIG__.radarrStoragePaths).map(item => item.id == id? item: null).filter(n => n)[0].path.replace(/\\/g, '\\\\');
+
 		if(PromptQuality && +options.quality > 0)
 			PromptValues.QualityID = +options.quality;
-		if(PromptLocation && options.location)
-			PromptValues.StoragePath = JSON.parse(__CONFIG__.radarrStoragePaths).map(item => item.id == options.location? item: null).filter(n => n)[0].path.replace(/\\/g, '\\\\');
+		if(PromptLocation && +options.location > 0)
+			PromptValues.StoragePath = parsePath(options.location);
 
 		new Notification('info', `Sending "${ options.title }" to Radarr`, 3000);
 
@@ -2167,7 +2327,7 @@ let configuration, init, Update;
 				type: 'PUSH_RADARR',
 				url: `${ __CONFIG__.radarrURL }api/movie/`,
 				token: __CONFIG__.radarrToken,
-				StoragePath: __CONFIG__.radarrStoragePath,
+				StoragePath: parsePath(__CONFIG__.radarrStoragePath),
 				QualityID: __CONFIG__.radarrQualityProfileId,
 				basicAuth: __CONFIG__.radarrBasicAuth,
 				title: options.title,
@@ -2213,10 +2373,12 @@ let configuration, init, Update;
 		if(!prompted && (PromptQuality || PromptLocation))
 			return new Prompt('modify', options, refined => Request_Sonarr(refined, true));
 
+		let parsePath = id => JSON.parse(__CONFIG__.sonarrStoragePaths).map(item => item.id == id? item: null).filter(n => n)[0].path.replace(/\\/g, '\\\\');
+
 		if(PromptQuality && +options.quality > 0)
 			PromptValues.QualityID = +options.quality;
-		if(PromptLocation && options.location)
-			PromptValues.StoragePath = JSON.parse(__CONFIG__.sonarrStoragePaths).map(item => item.id == options.location? item: null).filter(n => n)[0].path.replace(/\\/g, '\\\\');
+		if(PromptLocation && +options.location > 0)
+			PromptValues.StoragePath = parsePath(options.location);
 
 		new Notification('info', `Sending "${ options.title }" to Sonarr`, 3000);
 
@@ -2224,7 +2386,7 @@ let configuration, init, Update;
 				type: 'PUSH_SONARR',
 				url: `${ __CONFIG__.sonarrURL }api/series/`,
 				token: __CONFIG__.sonarrToken,
-				StoragePath: __CONFIG__.sonarrStoragePath,
+				StoragePath: parsePath(__CONFIG__.sonarrStoragePath),
 				QualityID: __CONFIG__.sonarrQualityProfileId,
 				basicAuth: __CONFIG__.sonarrBasicAuth,
 				title: options.title,
@@ -2384,27 +2546,23 @@ let configuration, init, Update;
 
 		let { __theme } = __CONFIG__;
 
-		let ThemeClasses = JSON.parse(COMPRESS? iBWT(unzip(decompress(__theme))): __theme),
+		__theme = JSON.parse(COMPRESS? iBWT(unzip(decompress(__theme))): __theme);
+
+		let ThemeClasses = [],
 			HeaderClasses = [],
 			ParsedAttributes = {};
 
 		// Theme(s)
+		for(let theme in __theme)
+			if((typeof __theme[theme]) == 'boolean')
+				ThemeClasses.push(theme);
+			else
+				ParsedAttributes[theme] = __theme[theme];
+
 		if(!ThemeClasses.length)
 			ThemeClasses = '';
 		else
 			ThemeClasses = '.' + ThemeClasses.join('.');
-
-		ThemeClasses = ThemeClasses.split('.').filter(v => {
-			let R = RegExp;
-
-			if(/([^=]+?)=([^.]+?)/.test(v)) {
-				ParsedAttributes[R.$1] = R.$2;
-
-				return false;
-			}
-
-			return true;
-		}).join('.');
 
 		// Header(s)
 		for(let header in headers)
@@ -2418,7 +2576,7 @@ let configuration, init, Update;
 
 		// <button>
 		let button =
-			furnish(`button.show.closed.floating.web-to-plex-button${HeaderClasses}${ThemeClasses}`, {
+		furnish(`button.show.closed.floating.web-to-plex-button${HeaderClasses}${ThemeClasses}`, {
 				...ParsedAttributes,
 				onmouseenter: event => {
 					let self = event.target;
@@ -2432,13 +2590,13 @@ let configuration, init, Update;
 					self.classList.remove('open', 'animate');
 					self.classList.add('closed');
 				},
-				style: `background-image: url(${ IMG_URL.noise_background }), url(${ IMG_URL.background }); background-size: auto, cover;`
+				style: `display: none; background-image: url(${ IMG_URL.noise_background }), url(${ IMG_URL.background }); background-size: auto, cover;`
 			},
 			// <ul>
 			furnish('ul', {},
 				// <li>
 				furnish('li#wtp-list-name.list-name', {},
-					furnish('a.list-action', { tooltip: 'Web to Plex' }, furnish(`img[alt=Web to Plex]`, { src: IMG_URL.icon_48 }))
+					furnish('a.list-action', { tooltip: 'Web to Plex' }, furnish(`img[alt=Web to Plex]`, { style: 'display: inline !important;', src: IMG_URL.icon_48 }))
 				),
 
 				furnish('li#wtp-plexit.list-item', {
@@ -2449,33 +2607,32 @@ let configuration, init, Update;
 						(d=>{let s=d.createElement('script'),h=d.querySelector('head');s.type='text/javascript';s.src='//webtoplex.github.io/plex.it.js';h.appendChild(s)})(document);
 					}
 				},
-				furnish('img[alt=Favorite]', { src: IMG_URL.plexit_icon_48, onmouseup: event => event.target.parentElement.click() }) // <img/>
+					furnish('i[red][gradient=lighten]', { glyph: 'fire 3x', onmouseup: event => event.target.parentElement.click() }) // <img/>
 				),
 
 				furnish('li#wtp-hide.list-item', {
 					tooltip: 'Hide Web to Plex',
 					onmouseup: event => {
-						let self = $('#wtp-hide').first, state = self.getAttribute('state') || 'show';
+						let self = $('#wtp-hide').first,
+							state = (self.getAttribute('state') || 'show'),
+							visual = (state == 'show'? 'sun': 'cloud');
 
 						button.classList.remove(state);
-
 						self.setAttribute('tooltip', state.toCaps() + ' Web to Plex');
 
-						let img = self.querySelector('img');
+						state = state == 'show'? 'hide': 'show';
 
-						img && (img.src = state == 'show'? IMG_URL.show_icon_48: IMG_URL.hide_icon_48);
-
-						if(state == 'show') {
-							state = 'hide';
-						} else {
-							state = 'show';
-						}
+						let g = $('[glyph]', self).first;
+						g.setAttribute('glyph', `${ visual } 3x`);
+						g.removeAttribute('blue');
+						g.removeAttribute('orange');
+						g.setAttribute((visual == 'sun'? 'orange': 'blue'), '');
 
 						button.classList.add(state);
 						self.setAttribute('state', state);
 					}
 				},
-				furnish('img[alt=Hide]', { src: IMG_URL.hide_icon_48, onmouseup: event => event.target.parentElement.click() }) // <img/>
+					furnish('i[blue][gradient=lighten]', { glyph: 'cloud 3x', onmouseup: event => event.target.parentElement.click() }) // <img/>
 				),
 
 				furnish('li#wtp-refresh.list-item', {
@@ -2489,7 +2646,7 @@ let configuration, init, Update;
 							new Notification('warning', "Couldn't reload. Please refresh the page.");
 					}
 				},
-				furnish('img[alt=Reload]', { src: IMG_URL.reload_icon_48, onmouseup: event => event.target.parentElement.click() }) // <img/>
+					furnish('i[orange][gradient=lighten]', { glyph: 'restart 3x', onmouseup: event => event.target.parentElement.click() }) // <img/>
 				),
 
 				furnish('li#wtp-options.list-item', {
@@ -2500,7 +2657,7 @@ let configuration, init, Update;
 						return Options();
 					}
 				},
-				furnish('img[alt=Settings]', { src: IMG_URL.settings_icon_48, onmouseup: event => event.target.parentElement.click() }) // <img/>
+					furnish('i[grey][gradient=lighten]', { glyph: 'cogwheel 3x', onmouseup: event => event.target.parentElement.click() }) // <img/>
 				)
 				// </li>
 			)
@@ -2569,7 +2726,7 @@ let configuration, init, Update;
 			element.ON_CLICK = e => {
 				e.preventDefault();
 
-				let self = e.target, tv = /tv[\s-]?|shows?|series/i, fail = 0,
+				let self = element, tv = /tv[\s-]?|shows?|series/i, fail = 0,
 					options = JSON.parse(decode(button.getAttribute('saved_options')));
 
 				for(let index = 0, length = options.length, option; index < length; index++) {
@@ -2602,11 +2759,15 @@ let configuration, init, Update;
 					new Notification('error', `Failed to grab ${ fail } item${fail==1?'':'s'}`);
 			};
 
+			let MINION_EVENT;
+
 			button.setAttribute('saved_options', encode(JSON.stringify(saved_options)));
-			element.addEventListener('click', e => (AUTO_GRAB.ENABLED && AUTO_GRAB.LIMIT > options.length)? element.ON_CLICK(e): new Prompt('select', options, o => { button.setAttribute('saved_options', encode(JSON.stringify(o))); element.ON_CLICK(e) }));
+			element.addEventListener('click', MINION_EVENT = e => (AUTO_GRAB.ENABLED && AUTO_GRAB.LIMIT > options.length)? element.ON_CLICK(e): new Prompt('select', options, o => { button.setAttribute('saved_options', encode(JSON.stringify(o))); element.ON_CLICK(e) }));
 
 			element.setAttribute(hov, `Grab ${ len } new item${ s }: ${ t }`);
 			button.classList.add(saved_options.length || len? 'wtp--download': 'wtp--error');
+
+			updateMinions({ title, href: element.getAttribute('href'), text: element.getAttribute(txt), hover: element.getAttribute(hov), classes: [...button.classList].filter(v => /^wtp--/i.test(v)), event: MINION_EVENT });
 		} else {
 		/* Handle a single item */
 
@@ -2627,8 +2788,8 @@ let configuration, init, Update;
 				element.setAttribute(hov, `Watch "${options.title} (${options.year})" on Plex`);
 				button.classList.add('wtp--found');
 
-				new Notification('success', `Watch "${ nice_title }"`, 7000, e => element.click(e));
-			} else if(action == 'downloader' || options.remote) {
+				new Notification('success', `Watch "${ nice_title }"`, 7000, e => top.open(element.href, '_self'));
+			} else if(action == 'download' || options.remote) {
 
 				switch(options.remote) {
 					/* Vumoo & GoStream */
@@ -2744,12 +2905,12 @@ let configuration, init, Update;
 
 						button.classList.remove('wtp--error');
 
-						UpdateButton(button, 'downloader', `Add "${ title }${( year? ` (${year})`: '' )}" | ${ type }`, correction);
+						UpdateButton(button, 'download', `Add "${ title }${( year? ` (${year})`: '' )}" | ${ type }`, correction);
 					});
 				});
 			}
 
-			if((action == 'downloader') && CAUGHT.has({ imdb: options.IMDbID, tmdb: options.TMDbID, tvdb: options.TVDbID })) {
+			if((action == 'download') && CAUGHT.has({ imdb: options.IMDbID, tmdb: options.TMDbID, tvdb: options.TVDbID })) {
 				element.setAttribute(hov, `Modify "${ nice_title }" | ${ty}`);
 
 				button.classList.remove('wtp--found');
@@ -2757,6 +2918,8 @@ let configuration, init, Update;
 			}
 
 			element.id = options? `${options.IMDbID || 'tt'}-${options.TMDbID | 0}-${options.TVDbID | 0}`: 'tt-0-0';
+
+			updateMinions({ title, href: element.getAttribute('href'), text: element.getAttribute(txt), hover: element.getAttribute(hov), classes: [...button.classList].filter(v => /^wtp--/i.test(v)), event: (e => {for(let v in e)if(/^ON_/.test(v))return e[v]})(element) });
 		}
 	}
 
@@ -2764,6 +2927,21 @@ let configuration, init, Update;
 	async function FindMediaItems(options = [], button) {
 		if(!(options.length && button))
 			return;
+
+		/* Get rid of repeats */
+		let uuids = [];
+
+		options = options.map((v, i, a) => {
+			let { type, title } = v,
+				uuid = UUID.from({ type, title });
+
+			if(!!~uuids.indexOf(uuid))
+				return options.splice(i, 1), null;
+			uuids.push(uuid);
+
+			return v;
+		})
+		.filter(v => v);
 
 		let results = [],
 			length = options.length,
@@ -2800,8 +2978,13 @@ let configuration, init, Update;
 			try {
 				await Request_Plex(option)
 					.then(async({ found, key }) => {
+						let { imdb, tmdb, tvdb } = opt,
+							{ type, title, year } = opt,
+							uuid = UUID.from({ type, title });
+
 						if(found) {
 							// ignore found items, we only want new items
+							updateMinion({ imdb, tmdb, tvdb, uuid }, 'found', { ...opt, key })
 						} else {
 							option.field = 'original_title';
 
@@ -2809,13 +2992,18 @@ let configuration, init, Update;
 								.then(({ found, key }) => {
 									if(found) {
 										// ignore found items, we only want new items
+										updateMinion({ imdb, tmdb, tvdb, uuid }, 'found', { ...opt, key })
+									} else if(CAUGHT.has({ imdb, tmdb, tvdb })) {
+										// ignore items already being watched
+										updateMinion({ imdb, tmdb, tvdb, uuid }, 'queued')
 									} else {
 										let available = (__CONFIG__.usingOmbi || __CONFIG__.usingWatcher || __CONFIG__.usingRadarr || __CONFIG__.usingSonarr || __CONFIG__.usingMedusa || __CONFIG__.usingSickBeard || __CONFIG__.usingCouchPotato),
-											action = (available? 'downloader': 'notfound'),
+											action = (available? 'download': 'notfound'),
 											title = available?
 												'Not on Plex (download available)':
 											'Not on Plex (download not available)';
 
+										updateMinion({ imdb, tmdb, tvdb, uuid }, (available? 'download': 'not-found'));
 										results.push({ ...opt, found: false, status: action });
 									}
 								});
@@ -2828,9 +3016,9 @@ let configuration, init, Update;
 			}
 		}
 
-		results = results.filter(v => v.status == 'downloader');
+		results = results.filter(v => v.status == 'download');
 
-		let img = furnish('img', { title: 'Add to Plex It!', src: IMG_URL.plexit_icon_48, onmouseup: event => {let frame = document.querySelector('#plexit-bookmarklet-frame'); frame.src = frame.src.replace(/(#plexit:.*)?$/, '#plexit:' + event.target.parentElement.getAttribute('data'))} }),
+		let img = furnish('img', { title: 'Add to Plex It!', onmouseup: event => {let frame = document.querySelector('#plexit-bookmarklet-frame'); frame.src = frame.src.replace(/(#plexit:.*)?$/, '#plexit:' + event.target.parentElement.getAttribute('data'))} }),
 			po, pi = furnish('li#plexit.list-item', { data: encode(JSON.stringify(results)) }, img),
 			op  = document.querySelector('#wtp-plexit');
 
@@ -2901,7 +3089,7 @@ let configuration, init, Update;
 							} catch(e) { /* Don't do anything */ }
 						} else {
 							let available = (__CONFIG__.usingOmbi || __CONFIG__.usingWatcher || __CONFIG__.usingRadarr || __CONFIG__.usingSonarr || __CONFIG__.usingMedusa || __CONFIG__.usingSickBeard || __CONFIG__.usingCouchPotato),
-								action = (available ? 'downloader' : 'notfound'),
+								action = (available ? 'download' : 'notfound'),
 								title = available ?
 									'Not on Plex (download available)':
 								'Not on Plex (download not available)';
@@ -2943,24 +3131,34 @@ let configuration, init, Update;
 		if(!(__CONFIG__.plexURL && __CONFIG__.plexToken) || __CONFIG__.IGNORE_PLEX)
 			return new Promise((resolve, reject) => resolve({ found: false, key: null }));
 
+		Request_Plex.IN_WORK = Request_Plex.IN_WORK || [];
+		Request_Plex.PROMISED_WORK = Request_Plex.PROMISED_WORK || {};
+
 		return new Promise((resolve, reject) => {
 			// Sanitize the object
 			options = JSON.parse( JSON.stringify(options) );
 
-			UTILS_TERMINAL.LOG('Searching for item on Plex', options);
+			let uuid = UUID.from(options);
+
+			UTILS_TERMINAL.LOG('Searching for item on Plex', { uuid, ...options });
+
+			if(!!~Request_Plex.IN_WORK.indexOf(uuid) || Request_Plex.PROMISED_WORK[uuid])
+				return console.warn('Sending promised work back...', { uuid, options }), Request_Plex.PROMISED_WORK[uuid];
+			Request_Plex.IN_WORK.push(uuid);
 
 			chrome.runtime.sendMessage({
 					type: 'SEARCH_PLEX',
 					options,
 					serverConfig: __CONFIG__.server
 				},
-				response =>
-					(response && response.error)?
-						reject(response.error):
-					(!response)?
-						reject(new Error(`Unknown error: ${ response }`)):
-					resolve(response)
-				);
+				response => {
+					Request_Plex.PROMISED_WORK[uuid] =
+						(response && response.error)?
+							reject(response.error):
+						(!response)?
+							reject(new Error(`Unknown error: ${ response }`)):
+						resolve(response)
+				});
 			});
 	}
 
@@ -3038,7 +3236,8 @@ let configuration, init, Update;
 
 			case 'INITIALIZE':
 				UTILS_TERMINAL.LOG('Told to reinitialize...');
-				init && init();
+				document.queryBy('.web-to-plex-button').map(e => e.remove());
+				INITIALIZE(new Date);
 				return true;
 
 			case 'NO_RENDER':
@@ -3068,7 +3267,7 @@ let configuration, init, Update;
 
 					UTILS_TERMINAL.LOG(`Download Event [${ options.remote }]:`, options);
 
-					UpdateButton(MASTER_BUTTON, 'downloader', 'Download', options);
+					UpdateButton(MASTER_BUTTON, 'download', 'Download', options);
 					return true;
 
 				case 'NOTIFICATION':
@@ -3101,7 +3300,7 @@ let configuration, init, Update;
 					return false;
 			}
 		} catch(error) {
-			new Notification('error', `Unable to use downloader: ${ String(error) }`);
+			new Notification('error', `Unable to use download: ${ String(error) }`);
 			throw error
 		}
 	});
@@ -3109,7 +3308,7 @@ let configuration, init, Update;
 	// create the sleeping button
 	wait(() => document.readyState === 'complete', () => RenderButton(null, { sleeper: true }));
 
-})(new Date);
+});
 
 /* Helpers */
 /* Zipping Algorithm */
@@ -3243,6 +3442,70 @@ function wait(on, then) {
 		setTimeout(() => wait(on, then), 50);
 }
 
+function addListener(element, eventName, callback = event => {}) {
+	eventName = eventName.replace(/^(on)?/, 'on');
+	callback = callback.toString().replace(/;+$/g, '');
+
+	let event = element.getAttribute(eventName);
+
+	if(event && event.length)
+		event = `${ event }; ${ callback }`;
+	else
+		event = callback;
+
+	element[eventName] = eval(event);
+}
+
+function traverse(element, until, siblings = false) {
+	let elements;
+
+	if(siblings) {
+		if(element instanceof Array || element instanceof NodeList) {
+			for(elements = [...element], element = elements[0]; element && until(element) === false;)
+				if(element.previousElementSibling)
+					element = element.previousElementSibling;
+				else
+					elements.splice(0, 1),
+					element = elements[0];
+		} else {
+			while(until(element) === false && element)
+				element = element.previousElementSibling || element.parentElement;
+		}
+	}
+
+	if(element instanceof Array || element instanceof NodeList) {
+		for(element = [...element]; element.length && until(element[0]) === false; element.splice(0, 1))
+			continue;
+		element = element[0];
+	} else {
+		while(until(element) === false && element)
+			element = element.parentElement;
+	}
+
+	return element;
+}
+
+function pathOf(element) {
+	if(element.path)
+		return element.path;
+	else if(element.composedPath)
+		return element.composedPath();
+
+	let path = [];
+
+	while(element) {
+		path.push(element);
+
+		if(element.parentElement === undefined || element.parentElement === null) {
+			path.push(document, top);
+
+			return path;
+		}
+
+		element = element.parentElement;
+	}
+}
+
 // the custom "on location change" event
 function watchlocationchange(subject) {
 	let locationchangecallbacks = watchlocationchange.locationchangecallbacks;
@@ -3372,137 +3635,202 @@ Object.filter = Object.filter || function filter(object, prejudice) {
  <div>3</div>
  */
 	parent.queryBy = parent.queryBy || function queryBy(selectors, container = document) {
-		// Helpers
-		let copy  = array => [...array],
-			query = (SELECTORS, CONTAINER = container) => CONTAINER.querySelectorAll(SELECTORS);
+		let properties = { writable: false, enumerable: false, configurable: false },
+			media;
 
-		// Get rid of enclosing syntaxes: [...] and (...)
-		let regexp = /(\([^\(\)]+?\)|\[[^\[\]]+?\])/g,
-			pulled = [],
-			media  = [],
-			index, length;
+		if(selectors instanceof Element) {
+			media = selectors;
 
-		// The index shouldn't be longer than the length of the selector's string
-		// Keep this to prevent infinite loops
-		for(index = 0, length = selectors.length; index++ < length && regexp.test(selectors);)
-			selectors = selectors.replace(regexp, ($0, $1, $$, $_) => '\b--' + pulled.push($1) + '\b');
+			for(let key of 'first last child parent empty'.split(' '))
+				if(key in media && media[key] instanceof Function)
+					return media;
 
-		let order	   = selectors.split(','),
-			dummy	   = copy(order),
-			output	  = [],
-			generations = 0,
-			cousins		= 0;
+			Object.defineProperties(media, {
+				first: {
+					value: media,
+					...properties
+				},
+				last: {
+					value: media,
+					...properties
+				},
+				child: {
+					value: index => [...media.children][index - 1],
+					...properties
+				},
+				parent: {
+					value: selector => container.queryBy(/^\d+$/.test(selector + '')?
+							pathOf(media)[+selector]:
+						pathOf(media).filter(element => !!~container.queryBy(selector).indexOf(element))
+					),
+					...properties
+				},
+				empty: {
+					value: !media.length,
+					...properties
+				},
+			});
+		} else if(selectors instanceof Array) {
+			media = selectors.map(object => container.queryBy(object));
 
-		// Replace those syntaxes (they were ignored)
-		for(index = 0, length = dummy.length, order = [], regexp = /[\b]--(\d+)[\b]/g; index < length; index++)
-			order.push(dummy[index].replace(regexp, ($0, $1, $$, $_) => pulled[+$1 - 1]));
+			Object.defineProperties(media, {
+				first: {
+					value: media[0],
+					...properties
+				},
+				last: {
+					value: media[media.length - 1],
+					...properties
+				},
+				child: {
+					value: index => media[index - 1],
+					...properties
+				},
+				parent: {
+					value: selector => container.queryBy(media.map(element => container.queryBy(element).parent(selector))),
+					...properties
+				},
+				empty: {
+					value: !media.length,
+					...properties
+				},
+			});
+		} else {
+			// Helpers
+			let copy  = array => [...array],
+				query = (SELECTORS, CONTAINER = container) => (CONTAINER instanceof Array? CONTAINER.map(C => C.querySelectorAll(SELECTORS)) : CONTAINER.querySelectorAll(SELECTORS));
 
-		// Make sure to put the elements in order
-		// Handle the :parent (pseudo) selector
-		for(index = 0, length = order.length; index < length; generations = 0, cousins = 0, index++) {
-			let selector = order[index], ancestor, cousin;
+			// Get rid of enclosing syntaxes: [...] and (...)
+			let regexp = /(\([^\(\)]+?\)|\[[^\[\]]+?\])/g,
+				pulled = [],
+				index, length;
 
-			selector = selector
-			// siblings
-			.replace(/\:nth-sibling\((\d+)\)/g, ($0, $1, $$, $_) => (cousins += +$1, ''))
-			.replace(/(\:{1,2}(next-|previous-)?sibling)/g, ($0, $1, $2, $$, $_) => (cousins += ($2 == 'next'? 1: -1), ''))
-			// parents
-			.replace(/\:nth-parent\((\d+)\)/g, ($0, $1, $$, $_) => (generations -= +$1, ''))
-			.replace(/(\:{1,2}parent\b|<\s*(\s*(,|$)))/g, ($0, $$, $_) => (--generations, ''))
-			.replace(/<([^<,]+)?/g, ($0, $1, $$, $_) => (ancestor = $1, --generations, ''))
-			// miscellaneous
-			.replace(/^\s+|\s+$/g, '');
+			media = [];
 
-			let elements = [].slice.call(query(selector)),
-				parents = [], parent,
-				siblings = [], sibling;
+			// The index shouldn't be longer than the length of the selector's string
+			// Keep this to prevent infinite loops
+			for(index = 0, length = selectors.length; index++ < length && regexp.test(selectors);)
+				selectors = selectors.replace(regexp, ($0, $1, $$, $_) => '\b--' + pulled.push($1) + '\b');
 
-			// Parents
-			for(; generations < 0; generations++)
-				elements = elements.map(element => {
-					let P = element, Q = (P? P.parentElement: {}), R = (Q? Q.parentElement: {}),
-						E = C => [...query(ancestor, C)],
-						F, G;
+			let order	    = selectors.split(','),
+				dummy	    = copy(order),
+				output	    = [],
+				generations = 0,
+				cousins		= 0;
 
-					for(let I = 0, L = -generations; ancestor && !!R && !!Q && !!P && I < L; I++)
-						parent = !!~E(R).indexOf(Q)? Q: G;
+			// Replace those syntaxes (they were ignored)
+			for(index = 0, length = dummy.length, order = [], regexp = /[\b]--(\d+)[\b]/gi; index < length; index++)
+				order.push(dummy[index].replace(regexp, ($0, $1, $$, $_) => pulled[+$1 - 1]));
 
-					for(let I = 0, L = -generations; !ancestor && !!Q && !!P && I < L; I++)
-						Q = (parent = P = Q).parentElement;
+			// Make sure to put the elements in order
+			// Handle the :parent (pseudo) selector
+			for(index = 0, length = order.length; index < length; generations = 0, cousins = 0, index++) {
+				let selector = order[index], ancestor, cousin;
 
-					if((generations === 0 || /\*$/.test(ancestor)) && !~parents.indexOf(parent))
-						parents.push(parent);
+				selector = selector
+				// siblings
+					.replace(/\:nth-sibling\((\d+)\)/gi, ($0, $1, $$, $_) => (cousins += +$1, ''))
+					.replace(/(\:{1,2}(next-|previous-)?sibling)/gi, ($0, $1, $2, $$, $_) => (cousins += ($2 == 'next'? 1: -1), ''))
+				// parents
+					.replace(/\:nth-parent\((\d+)\)/gi, ($0, $1, $$, $_) => (generations -= +$1, ''))
+					.replace(/(\:{1,2}parent\b|<\s*(\s*(,|$)))/gi, ($0, $$, $_) => (--generations, ''))
+					.replace(/<([^<,]+)?/gi, ($0, $1, $$, $_) => (ancestor = $1, --generations, ''))
+				// miscellaneous
+					.replace(/^\s+|\s+$/gi, '');
 
-					return parent;
-				});
+				let elements = [].slice.call(query(selector)),
+					parents = [], parent,
+					siblings = [], sibling;
 
-			// Siblings
-			if(cousins === 0)
-				/* Do nothing */;
-			else if(cousins < 0)
-				for(; cousins < 0; cousins++)
+				// Parents
+				for(; generations < 0; generations++)
 					elements = elements.map(element => {
-						let P = element, Q = (P? P.previousElementSibling: {}),
+						let P = element, Q = (P? P.parentElement: {}), R = (Q? Q.parentElement: {}),
+							E = C => [...query(ancestor, C)],
 							F, G;
 
-						for(let I = 0, L = -cousins; !!Q && !!P && I < L; I++)
-							Q = (sibling = P = Q).previousElementSibling;
+						for(let I = 0, L = -generations; ancestor && !!R && !!Q && !!P && I < L; I++)
+							parent = !!~E(R).indexOf(Q)? Q: G;
 
-						if(cousins === 0 && !~siblings.indexOf(sibling))
-							siblings.push(sibling);
+						for(let I = 0, L = -generations; !ancestor && !!Q && !!P && I < L; I++)
+							Q = (parent = P = Q).parentElement;
 
-						return sibling;
-					});
-			else
-				for(; cousins > 0; cousins--)
-					elements = elements.map(element => {
-						let P = element, Q = (P? P.nextElementSibling: {}),
-							F, G;
+						if((generations === 0 || /\*$/.test(ancestor)) && !~parents.indexOf(parent))
+							parents.push(parent);
 
-						for(let I = 0, L = -cousins; !!Q && !!P && I > L; I--)
-							Q = (sibling = P = Q).nextElementSibling;
-
-						if(cousins === 0 && !~siblings.indexOf(sibling))
-							siblings.push(sibling);
-
-						return sibling;
+						return parent;
 					});
 
-			media.push(parents.length? parents: elements);
-			media.push(siblings.length? siblings: elements);
-			order.splice(index, 1, selector);
+				// Siblings
+				if(cousins === 0)
+					/* Do nothing */;
+				else if(cousins < 0)
+					for(; cousins < 0; cousins++)
+						elements = elements.map(element => {
+							let P = element, Q = (P? P.previousElementSibling: {}),
+								F, G;
+
+							for(let I = 0, L = -cousins; !!Q && !!P && I < L; I++)
+								Q = (sibling = P = Q).previousElementSibling;
+
+							if(cousins === 0 && !~siblings.indexOf(sibling))
+								siblings.push(sibling);
+
+							return sibling;
+						});
+				else
+					for(; cousins > 0; cousins--)
+						elements = elements.map(element => {
+							let P = element, Q = (P? P.nextElementSibling: {}),
+								F, G;
+
+							for(let I = 0, L = -cousins; !!Q && !!P && I > L; I--)
+								Q = (sibling = P = Q).nextElementSibling;
+
+							if(cousins === 0 && !~siblings.indexOf(sibling))
+								siblings.push(sibling);
+
+							return sibling;
+						});
+
+				media.push(parents.length? parents: elements);
+				media.push(siblings.length? siblings: elements);
+				order.splice(index, 1, selector);
+			}
+
+			// Create a continuous array from the sub-arrays
+			for(index = 1, length = media.length; index < length; index++)
+				media.splice(0, 1, copy(media[0]).concat( copy(media[index]) ));
+			output = [].slice.call(media[0]).filter( value => value );
+
+			// Remove repeats
+			for(index = 0, length = output.length, media = []; index < length; index++)
+				if(!~media.indexOf(output[index]))
+					media.push(output[index]);
+
+			Object.defineProperties(media, {
+				first: {
+					value: media[0],
+					...properties
+				},
+				last: {
+					value: media[media.length - 1],
+					...properties
+				},
+				child: {
+					value: index => media[index - 1],
+					...properties
+				},
+				parent: {
+					value: selector => media.map(element => container.queryBy(element).parent(selector)),
+					...properties
+				},
+				empty: {
+					value: !media.length,
+					...properties
+				},
+			});
 		}
-
-		// Create a continuous array from the sub-arrays
-		for(index = 1, length = media.length; index < length; index++)
-			media.splice(0, 1, copy(media[0]).concat( copy(media[index]) ));
-		output = [].slice.call(media[0]).filter( value => value );
-
-		// Remove repeats
-		for(index = 0, length = output.length, media = []; index < length; index++)
-			if(!~media.indexOf(output[index]))
-			media.push(output[index]);
-
-		let properties = { writable: false, enumerable: false, configurable: false };
-
-		Object.defineProperties(media, {
-			first: {
-				value: media[0],
-				...properties
-			},
-			last: {
-				value: media[media.length - 1],
-				...properties
-			},
-			child: {
-				value: index => media[index - 1],
-				...properties
-			},
-			empty: {
-				value: !media.length,
-				...properties
-			},
-		});
 
 		return media;
 	};
@@ -3585,3 +3913,5 @@ queryBy[PRIMITIVE] = furnish[PRIMITIVE] = String.prototype.toCaps[PRIMITIVE] = (
 
 if(chrome.runtime.lastError)
 	chrome.runtime.lastError.message;
+
+INITIALIZE(new Date);

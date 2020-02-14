@@ -4,7 +4,7 @@
 	"homepage_url": "https://webtoplex.github.io/",
 
 	"manifest_version": 2,
-	"version": "4.1.1.11",
+	"version": "4.1.2.0",
 	"browser_specific_settings": {
 		"gecko": {
 			"id": "mink.cbos@gmail.com",
@@ -161,8 +161,7 @@
 			"js": ["utils.js", "plex$.js"]
 		},{
 			"matches": ["*://*/*"],
-			"js": ["utils.js", "common.js"],
-			"css": ["common.css", "theme.css"]
+			"js": ["utils.js", "common.js"]
 		}
 	],
 
@@ -194,5 +193,5 @@
 		"contextMenus",
 		"<all_urls>"
 	],
-	"web_accessible_resources": ["*.png", "options.*"]
+	"web_accessible_resources": ["*.woff", "*.png", "options.*", "*.css"]
 }

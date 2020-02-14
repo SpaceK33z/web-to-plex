@@ -1,0 +1,22 @@
+.web-to-plex-minion {
+    background-color: #f45a26!important;
+    border-color: #f45a26!important;
+    color: #fff!important;
+}
+
+.web-to-plex-minion:hover {
+    background-color: #d43a06!important;
+}
+
+.wtp-min.under-info[title]::after {
+    content: attr(title);
+}
+
+#tt--0-0 {
+	color: #666!important;
+    text-decoration: line-through!important;
+}
+
+#tt--0-0:hover {
+	color: #888!important;
+}

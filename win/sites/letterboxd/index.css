@@ -1,0 +1,10 @@
+.web-to-plex-minion {
+	display: inline-block;
+	vertical-align: middle;
+	font-size: 12px;
+	line-height: 1.66666667;
+}
+
+.web-to-plex-minion:hover {
+    color: #f67e56!important;
+}

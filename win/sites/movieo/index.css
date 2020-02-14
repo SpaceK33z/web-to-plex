@@ -1,0 +1,35 @@
+.mid-top-actions .share-box {
+	padding-left: 20px!important;
+}
+
+.web-to-plex-minion {
+	margin-right: 8px;
+	color: #566273!important;
+}
+
+.web-to-plex-minion.wtp--download {
+	border-color: #f45a26!important;
+	color: #acb4bf!important;
+}
+
+.web-to-plex-minion.wtp--download:hover {
+	border-color: #f67e56!important;
+}
+
+.web-to-plex-minion.wtp--found {
+	border-color: #ca7c1f!important;
+	color: #acb4bf!important;
+}
+
+.web-to-plex-minion.wtp--found:hover {
+	border-color: #f8c022!important;
+}
+
+#tt--0-0 {
+	background: #666!important;
+}
+
+#tt--0-0:hover {
+    background: #888!important;
+	border-color: #888!important;
+}
