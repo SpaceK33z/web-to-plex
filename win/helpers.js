@@ -1,3 +1,7 @@
+function $(selector, container = document) {
+	return queryBy(selector, container);
+}
+
 async function load(name = '') {
 	if(!name) return;
 

@@ -330,7 +330,7 @@ strike, st, k {
 }
 
 [href^="#!/NaCl+"], [href^="#!/NaCl+"] *{
-    font-family: system-ui !important;
+    font-family: system-ui, Plex !important;
     text-transform: none !important;
 }
 

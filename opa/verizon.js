@@ -1,7 +1,7 @@
 let script = {
 	"url": "*://*.verizon.com/*/(movie|show)s?/*",
 
-	"ready": () => !$('.container .btn-with-play, .moredetails, .more-like').empty,
+	"ready": () => !$('.container .btn-with-play, .moredetails, .more-like, #more_like_this').empty,
 
 	"init": (ready) => {
 		let _title, _year, _image, R = RegExp;
@@ -50,6 +50,20 @@ let script = {
 		/\bseries\b/i.test(pathname)?
 			'show':
 		'error'
+	},
+
+	"minions": () => {
+		let actions = $('.container .content-holder, .detail .fl, [class^="primaryButtons"]');
+
+		if(actions.empty)
+			return;
+
+		actions.forEach(element => {
+			let minion = furnish('a.web-to-plex-minion.button.btn.detail-btn', { style: 'padding-top: 3% !important' }, 'Web to Plex');
+
+			addMinions(minion);
+			element.appendChild(minion);
+		});
 	},
 
 	ondemand: /\bondemand\b/i.test(top.location.pathname),

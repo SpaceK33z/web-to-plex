@@ -21,4 +21,46 @@ let script = {
 			'movie':
 		'show'
 	),
+
+	"minions": () => {
+		let type = script.getType();
+
+		let actions = $('wishlist-add, wishlist-added');
+
+		if(actions.empty)
+			return;
+
+
+		actions.forEach(element => {
+			while(/c-wiz/i.test(element.parentElement.tagName))
+				element = element.parentElement;
+			element = element.parentElement;
+
+			let next, first, second;
+
+			if(type == 'movie') {
+				next = element.nextElementSibling.firstElementChild;
+				first = next.firstChild;
+				second = first.firstChild;
+			} else {
+				next = furnish('div', {},
+					first = furnish('span.wtp-w', {},
+						second = furnish('button.wtp-b')
+					)
+				);
+
+				element.appendChild(next);
+			}
+
+			let minion;
+			let parent = furnish(`span.${['wtp-w', ...first.classList].join('.')}`, {},
+				furnish(`button.${['wtp-b', ...second.classList].join('.')}`, {},
+					minion = furnish('a.web-to-plex-minion', {}, 'Web to Plex')
+				)
+			);
+
+			addMinions(parent, minion);
+			next.insertBefore(parent, first);
+		});
+	},
 };

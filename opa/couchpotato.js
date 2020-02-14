@@ -37,4 +37,22 @@ let script = {
 				.replace(/^.*imdb\.com\/title\//, '')
 				.replace(/\/(?:maindetails\/?)?$/, '');
 	},
+
+	"minions": () => {
+		let actions = $('[href*="imdb.com/title/tt"] < *');
+
+		if(actions.empty)
+			return;
+
+		actions.forEach(element => {
+			let minion;
+			let parent = furnish('span', {},
+				furnish('img', { src: IMAGES.icon_16 }),
+				minion = furnish('a.web-to-plex-minion', {}, 'Web to Plex')
+			);
+
+			addMinions(minion);
+			element.appendChild(parent);
+		});
+	},
 };

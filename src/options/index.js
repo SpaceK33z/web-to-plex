@@ -221,7 +221,7 @@ let __caught = {
 	tvdb: [],
 },
 // The theme classes
-	__theme = [];
+	__theme = {};
 
 // Icon Markers
 let MARKERS = [
@@ -642,7 +642,10 @@ function getOptionValues() {
 	for(let key in __caught)
 		__caught[key] = __caught[key].filter(id => id).slice(0, (COM? 200: 100)).sort();
 
-	__theme = __theme.filter(v => v);
+	// if(options.__theme)
+	// 	__theme = JSON.parse(options.__theme);
+	//
+	// __theme = __theme.filter(v => v);
 
 	let _c = JSON.stringify(__caught),
 		_t = JSON.stringify(__theme);
@@ -2467,21 +2470,18 @@ $('[data-option^="theme:"i], [data-option^="theme:"i] + label', true)
 			let self = traverse(event.target, element => /^theme:/i.test(element.dataset.option), true),
 				R = RegExp;
 
-			let [a, b] = self.getAttribute('theme').split(/\s*:\s*/).filter(v => v),
+			let [a, b] = self.getAttribute('theme').split(/^([^]+):([^]+?)$/).filter(v => v),
 				value = `${self.dataset.option.replace(/^theme:/i, '')}-${b}`;
 
 			if(/^(get|read|for)$/i.test(a))
-				__theme.push(`${ value }=${ self.value }`)
+				__theme[value] = (self.value == 'true'? true: self.value == 'false'? false: self.value);
 			else if(/^(checkbox)$/i.test(self.type) && (self.checked + '') != a)
 			// backwards; fires late
-				__theme.push(value);
-			else if(/^(text|input|button|\B)$/i.test(self.type) && R(self.value + '', 'i').test(a))
-				__theme.push(value);
+				__theme[value] = JSON.parse(a);
+			else if(/^(text|input|button|\B)$/i.test(self.type) && R(a, 'i').test(self.value))
+				__theme[value] = self.value;
 			else
-				__theme = __theme.filter(v => v != value);
-
-			/* Get rid of repeats */
-			__theme = __theme.filter((v, i) => __theme.indexOf(v) == i);
+				delete __theme[value];
 		});
 
 		setTimeout(() => UpdateTheme({ target: element }), 1000);

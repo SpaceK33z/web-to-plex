@@ -49,8 +49,8 @@ BUTTON  [style].web-to-plex-button.<floating>.<hide|show>.<open|closed>
         ::after
 */
 
-/* Button location */
-.web-to-plex-button.button-location-right {
+/* Button location (Circular) */
+.web-to-plex-button.button-location-right:not(.button-shape-box) {
     left: unset !important;
     right: 5px !important;
 }
@@ -86,6 +86,11 @@ BUTTON  [style].web-to-plex-button.<floating>.<hide|show>.<open|closed>
 
     height: 20px !important;
     width: 75px !important;
+}
+
+.web-to-plex-button.button-shape-box .list-action img {
+    height: 16px !important;
+    width: 16px !important;
 }
 
 .web-to-plex-button.button-shape-box:not(:hover) {

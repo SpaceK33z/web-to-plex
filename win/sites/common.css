@@ -1,7 +1,25 @@
 /** Common CSS
 * Web to Plex
 */
+
 @charset "utf-8";
+@font-face {
+    font-family: "Plex";
+    src: local(Plex),
+        url(//webtoplex.github.io/font/Plex.woff2) format('woff2'),
+        url(//webtoplex.github.io/font/Plex.woff) format('woff');
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Plex-bold";
+    src: local(Plex-bold),
+        url(//webtoplex.github.io/font/Plex.bold.woff2) format('woff2'),
+        url(//webtoplex.github.io/font/Plex.bold.woff) format('woff');
+    font-weight: 400;
+    font-style: normal;
+}
 
 /* Basic/Global Styling */
 *::-webkit-scrollbar {
@@ -99,7 +117,7 @@
 	color: var(--light-white) !important;
 	cursor: pointer !important;
 	display: block !important;
-    font-family: arial, verdana, sans-serif !important;
+    font-family: "Plex", "Open Sans Regular", "Helvetica Neue", Helvetica, Arial, sans-serif, system !important;
 	font-size: 20px !important;
     text-align: center !important;
 
@@ -139,7 +157,7 @@
 	box-sizing: border-box !important;
 	color: var(--white) !important;
 	display: block !important;
-	font-family: Open Sans Regular, Helvetica Neue, Helvetica, Arial, sans-serif !important;
+	font-family: "Plex", "Open Sans Regular", "Helvetica Neue", Helvetica, Arial, sans-serif, system !important;
 	font-size: 14px !important;
 	line-height: 24px !important;
 	overflow: auto !important;
@@ -160,6 +178,7 @@
     border: 0 !important;
     border-radius: 3px !important;
 	box-shadow: 0 5px 15px #0008 !important;
+    box-sizing: content-box !important;
 	display: block !important;
 
 	left: 20% !important;
@@ -210,7 +229,7 @@
 	overflow-x: hidden !important;
 	overflow-y: auto !important;
 
-	padding: 12px !important;
+	padding: 0 12px 5px !important;
 	position: relative !important;
 	top: 65px !important;
 
@@ -311,6 +330,10 @@
 	bottom: 0 !important;
 }
 
+.web-to-plex-prompt-footer > * {
+    vertical-align: text-bottom !important;
+}
+
 .web-to-plex-prompt-input {
 	float: left !important;
 	position: relative !important;
@@ -354,7 +377,7 @@
    border: none !important;
    color: var(--light-white) !important;
    display: block !important;
-   font-family: Open Sans Semibold, Helvetica Neue, Helvetica, Arial, sans-serif !important;
+   font-family: "Plex", "Open Sans Regular", "Helvetica Neue", Helvetica, Arial, sans-serif, system !important;
    font-size: 1em !important;
    font-weight: 100 !important;
    text-align: center !important;
@@ -437,7 +460,7 @@
 }
 
 .web-to-plex-button.wtp--found::after, .web-to-plex-button.wtp--found::before {
-   background: var(--blue) !important;
+   background: var(--light-orange) !important;
 }
 
 .web-to-plex-button.wtp--error::after, .web-to-plex-button.wtp--error::before {
@@ -505,6 +528,7 @@
 
    width: 350px !important;
 }
+
 .web-to-plex-button .list-name {
    float: left !important;
 }
@@ -550,13 +574,17 @@
    background: var(--quarter-grey) !important;
    border-radius: 3px !important;
    color: var(--light-white) !important;
-   font-family: arial, calibri, sans-serif, sans, monospace !important;
+   font-family: "Plex", "Open Sans Regular", "Helvetica Neue", Helvetica, Arial, sans-serif, system !important;
    font-size: 15px !important;
 
    bottom: 85px !important;
    left: 35px !important;
    padding: 3px 6px !important;
    position: absolute !important;
+}
+
+.web-to-plex-minion {
+    cursor: pointer;
 }
 
 /* bbodine @CodePen - https://codepen.io/bbodine1/pen/novBm */

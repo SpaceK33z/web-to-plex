@@ -69,13 +69,13 @@
 		                <input type="text" id="ombi_url" top placeholder="Enter your Ombi URL" default/>
 		                <input type="text" id="ombi_api" bottom placeholder="Enter your Ombi API key" default/>
 		                <br>
-		                <h3><em>Fill in Manager Settings with Ombi?</em></h3>
+		                <h3><em>Would you like to use Ombi to fill in your Manager Settings?</em></h3>
 		                <div class="checkbox" prompt="y/n">
 		                    <input id="use-ombi" type="checkbox" data-option="UseOmbi" checked default="true"/>
 		                    <label for="use-ombi"></label>
 		                </div>
 		                <div>
-							Your Ombi's <a href="https://support.plex.tv/hc/en-us/articles/204059436-Finding-your-account-token-X-Plex-Token" title="How to find your token?" target="_blank">Plex token</a> will be shared by this extension.
+							Ombi's <a href="https://support.plex.tv/hc/en-us/articles/204059436-Finding-your-account-token-X-Plex-Token" title="How to find your token?" target="_blank">Plex token</a> will be shared by this extension.
 		                </div>
 		            </details>
 					<hr><br>
@@ -85,7 +85,7 @@
 		            <section>
 		                <label>Select a preferred server</label>
 		                <select data-option="preferredServer" default>
-		                    <option value="">Press "Test Settings [?]" first</option>
+		                    <option value="">Press "Test Settings" first</option>
 		                </select>
 		            </section>
 		        </details>
@@ -129,14 +129,14 @@
 		                <label>Ombi API Key</label>
 		                <input type="text" data-option="ombiToken" placeholder="What's your Ombi API key?" default/>
 		                <div>
-		                    1. Go to Ombi | Settings | Ombi<br/>
-		                    2. Copy/Paste the "API Key."<br/>
-		                    Such as <em>aa756d33242f6g8ffbca2b3963586f21</em>
+		                    1. Go to <strong>Ombi</strong> &rarr; <strong>Settings</strong> &rarr; <strong>Ombi</strong><br/>
+		                    2. Copy/Paste the <u>API Key</u><br/>
+		                    &mdash; Such as <em>aa756d33242f6a8ffbca2b3963586f21</em>
 		                </div>
 		            </section>
 			<!--
 
-		        <h3>Login <em>(saved)</em></h3>
+		        <h3>Login <strong orange>(saved)</strong></h3>
 		        <section>
 		            <label>Username</label>
 		            <input type="text" data-option="ombiBasicAuthUsername" placeholder="Enter your Ombi username" default/>
@@ -146,7 +146,10 @@
 		            <input type="text" data-option="ombiBasicAuthPassword" placeholder="Enter your Ombi password" default/>
 		            <div class="hidden-help">Your password will be hidden once saved.</div>
 		            <br>
-		            <div>This information will be used for <a href="https://wikipedia.org/wiki/Basic_access_authentication" target="_blank">Basic Access Authentication</a> only. This will allow the extension to ask Ombi for your list of films, or to add to your list of films.</div>
+		            <div>
+						This information will be used for <a href="https://wikipedia.org/wiki/Basic_access_authentication" target="_blank">Basic Access Authentication</a> only.<br>
+						This will allow the extension to ask Ombi for your list of films, or to add to your list of films.
+					</div>
 		        </section>
 			-->
 
@@ -181,13 +184,13 @@
 		                <label>Watcher API Key</label>
 		                <input type="text" data-option="watcherToken" placeholder="What's your Watcher API key?" default/>
 		                <div>
-		                    1. Go to Watcher | Settings | Server<br/>
-		                    2. Copy/Paste the "API Key."<br/>
-		                    Such as <em>aa756d33242f6g8ffbca2b3963586f21</em>
+		                    1. Go to <strong>Watcher</strong> &rarr; <strong>Settings</strong> &rarr; <strong>Server</strong><br/>
+		                    2. Copy/Paste the <u>API Key</u><br/>
+		                    &mdash; Such as <em>aa756d33242f6a8ffbca2b3963586f21</em>
 		                </div>
 		            </section>
 
-		            <h3>Login <em>(saved)</em></h3>
+		            <h3>Login <strong orange>(saved)</strong></h3>
 		            <div class="hidden-help">The default username is <em>watcher</em>. The default password is <em>rehctaw</em>.</div>
 		            <br>
 		            <section>
@@ -202,7 +205,10 @@
 		                <div>Only use this if you setup a Watcher password.</div>
 		                <div class="hidden-help">Your password will be hidden once saved.</div>
 		                <br>
-		                <div>This information will be used for <a href="https://wikipedia.org/wiki/Basic_access_authentication" target="_blank">Basic Access Authentication</a> only. This will allow the extension to ask Watcher for your list of films, or to add to your list of films.</div>
+		                <div>
+							This information will be used for <a href="https://wikipedia.org/wiki/Basic_access_authentication" target="_blank">Basic Access Authentication</a> only.<br>
+							This will allow the extension to ask Watcher for your list of films, or to add to your list of films.
+						</div>
 		            </section>
 
 		            <section>
@@ -211,12 +217,14 @@
 
 		            <section>
 		                <label>Watcher Storage Path</label>
-		                <input type="text" disabled="true" data-option="watcherStoragePath" title="Can only be changed via Watcher's settings" default="[Empty]"/>
+		                <select disabled="true" data-option="watcherStoragePath" title="Can only be changed via Watcher's settings" default="[Empty]">
+		                    <option value="[Empty]">[Empty]</option>
+		                </select>
 		            </section>
 		            <section>
 		                <label>Quality Profile</label>
 		                <select data-option="watcherQualityProfileId" default>
-		                    <option value="">Press "Test Settings [?]" first</option>
+		                    <option value="">Press "Test Settings" first</option>
 		                </select>
 		            </section>
 					<hr><br>
@@ -245,13 +253,13 @@
 		                <label>Radarr API Key</label>
 		                <input type="text" data-option="radarrToken" placeholder="What's your Radarr API key?" default/>
 		                <div>
-		                    1. Go to Radarr | Settings | General<br/>
-		                    2. Click on "Show advanced," then copy/paste the "API Key."<br/>
-		                    Such as <em>aa756d33242f6g8ffbca2b3963586f21</em>
+		                    1. Go to <strong>Radarr</strong> &rarr; <strong>Settings</strong> &rarr; <strong>General</strong><br/>
+		                    2. Click on <u>Show Advanced</u> then copy/paste the <u>API Key</u><br/>
+		                    &mdash; Such as <em>aa756d33242f6a8ffbca2b3963586f21</em>
 		                </div>
 		            </section>
 
-		            <h3>Login <em>(saved)</em></h3>
+		            <h3>Login <strong orange>(saved)</strong></h3>
 		            <section>
 		                <label>Username</label>
 		                <input type="text" data-option="radarrBasicAuthUsername" placeholder="Enter your Radarr username" default/>
@@ -263,7 +271,10 @@
 		                <div>Only use this if you setup a Radarr password.</div>
 		                <div class="hidden-help">Your password will be hidden once saved.</div>
 		                <br>
-		                <div>This information will be used for <a href="https://wikipedia.org/wiki/Basic_access_authentication" target="_blank">Basic Access Authentication</a> only. This will allow the extension to ask Radarr for your list of films, or to add to your list of films.</div>
+		                <div>
+							This information will be used for <a href="https://wikipedia.org/wiki/Basic_access_authentication" target="_blank">Basic Access Authentication</a> only.<br>
+							This will allow the extension to ask Radarr for your list of films, or to add to your list of films.
+						</div>
 		            </section>
 
 		            <section>
@@ -273,7 +284,7 @@
 		            <section>
 		                <label>Radarr Storage Path</label>
 		                <select data-option="radarrStoragePath" default>
-		                    <option value="">Press "Test Settings [?]" first</option>
+		                    <option value="">Press "Test Settings" first</option>
 		                </select>
 		                <div>
 		                    This should be the same path (verbatim) used in Radarr.
@@ -282,7 +293,7 @@
 		            <section>
 		                <label>Quality Profile</label>
 		                <select data-option="radarrQualityProfileId" default>
-		                    <option value="">Press "Test Settings [?]" first</option>
+		                    <option value="">Press "Test Settings" first</option>
 		                </select>
 		            </section>
 					<hr><br>
@@ -311,13 +322,13 @@
 		                <label>CouchPotato API Key</label>
 		                <input type="text" data-option="couchpotatoToken" placeholder="What's your CouchPotato API key?" default/>
 		                <div>
-		                    1. Go to CouchPotato | Settings<br/>
-		                    2. Copy/Paste the "API Key."<br/>
-		                    Such as <em>aa756d33242f6g8ffbca2b3963586f21</em>
+		                    1. Go to <strong>CouchPotato</strong> &rarr; <strong>Settings</strong><br/>
+		                    2. Copy/Paste the <u>API Key</u><br/>
+		                    &mdash; Such as <em>aa756d33242f6a8ffbca2b3963586f21</em>
 		                </div>
 		            </section>
 
-		            <h3>Login <em>(saved)</em></h3>
+		            <h3>Login <strong orange>(saved)</strong></h3>
 		            <section>
 		                <label>Username</label>
 		                <input type="text" data-option="couchpotatoBasicAuthUsername" placeholder="Enter your CouchPotato username" default/>
@@ -331,7 +342,10 @@
 		            </section>
 
 		            <section>
-		                <div>This information will be used for <a href="https://wikipedia.org/wiki/Basic_access_authentication" target="_blank">Basic Access Authentication</a> only. This will allow the extension to ask Couchpotato for your list of films, or to add to your list of films.</div>
+		                <div>
+							This information will be used for <a href="https://wikipedia.org/wiki/Basic_access_authentication" target="_blank">Basic Access Authentication</a> only.<br>
+							This will allow the extension to ask Couchpotato for your list of films, or to add to your list of films.
+						</div>
 		            </section>
 			<!--
 		            <section>
@@ -340,7 +354,7 @@
 		            <section>
 		                <label>Quality Profile</label>
 		                <select data-option="couchpotatoQualityProfileId" disabled="true" default>
-		                    <option value="">Press "Test Settings [?]" first</option>
+		                    <option value="">Press "Test Settings" first</option>
 		                </select>
 		            </section>
 			-->
@@ -375,13 +389,13 @@
 				        <label>Medusa API Key</label>
 				        <input type="text" data-option="medusaToken" placeholder="What's your Medusa API key?" default/>
 				        <div>
-				            1. Go to Medusa | Settings | General | Interface | Web Interface<br/>
-				            2. Copy/Paste the "API key."<br/>
-				            Such as <em>aa756d33242f6g8ffbca2b3963586f21</em>
+				            1. Go to <strong>Medusa</strong> &rarr; <strong>Settings</strong> &rarr; <strong>General</strong> &rarr; <strong>Interface</strong> &rarr; <strong>Web Interface</strong><br/>
+				            2. Copy/Paste the <u>API key</u><br/>
+				            &mdash; Such as <em>aa756d33242f6a8ffbca2b3963586f21</em>
 				        </div>
 				    </section>
 
-				    <h3>Login <em>(saved)</em></h3>
+				    <h3>Login <strong orange>(saved)</strong></h3>
 				    <section>
 				        <label>Username</label>
 				        <input type="text" data-option="medusaBasicAuthUsername" placeholder="Enter your Medusa (HTTP) username" default/>
@@ -391,7 +405,10 @@
 				        <input type="text" data-option="medusaBasicAuthPassword" placeholder="Enter your Medusa (HTTP) password" default/>
 				        <div class="hidden-help">Your password will be hidden once saved.</div>
 				        <br>
-				        <div>This information will be used for <a href="https://wikipedia.org/wiki/Basic_access_authentication" target="_blank">Basic Access Authentication</a> only. This will allow the extension to ask Medusa for your list of TV shows, or to add to your list of TV shows.</div>
+				        <div>
+							This information will be used for <a href="https://wikipedia.org/wiki/Basic_access_authentication" target="_blank">Basic Access Authentication</a> only.<br>
+							This will allow the extension to ask Medusa for your list of TV shows, or to add to your list of TV shows.
+						</div>
 				    </section>
 
 				    <section>
@@ -401,7 +418,7 @@
 		            <section>
 		                <label>Medusa Storage Path</label>
 		                <select data-option="medusaStoragePath" default>
-		                    <option value="">Press "Test Settings [?]" first</option>
+		                    <option value="">Press "Test Settings" first</option>
 		                </select>
 						<div>
 							This should be the same path (verbatim) used in Medusa.
@@ -416,7 +433,7 @@
 						</select>
 		                <label>Quality Profile</label>
 		                <select data-option="medusaQualityProfileId" default>
-		                    <option value="">Press "Test Settings [?]" first</option>
+		                    <option value="">Press "Test Settings" first</option>
 						</select>
 		            </section>
 					<hr><br>
@@ -445,13 +462,13 @@
 		                <label>Sonarr API Key</label>
 		                <input type="text" data-option="sonarrToken" placeholder="What's your Sonarr API key?" default/>
 		                <div>
-		                    1. Go to Sonarr | Settings | General<br/>
-		                    2. Click on "Show advanced," then copy/paste the "API Key."<br/>
-		                    Such as <em>aa756d33242f6g8ffbca2b3963586f21</em>
+		                    1. Go to <strong>Sonarr</strong> &rarr; <strong>Settings</strong> &rarr; <strong>General</strong><br/>
+		                    2. Click on <u>Show Advanced</u> then copy/paste the <u>API Key</u><br/>
+		                    &mdash; Such as <em>aa756d33242f6a8ffbca2b3963586f21</em>
 		                </div>
 		            </section>
 
-		            <h3>Login <em>(saved)</em></h3>
+		            <h3>Login <strong orange>(saved)</strong></h3>
 		            <section>
 		                <label>Username</label>
 		                <input type="text" data-option="sonarrBasicAuthUsername" placeholder="Enter your Sonarr username" default/>
@@ -463,7 +480,10 @@
 		                <div>Only use this if you setup a Sonarr password.</div>
 		                <div class="hidden-help">Your password will be hidden once saved.</div>
 		                <br>
-		                <div>This information will be used for <a href="https://wikipedia.org/wiki/Basic_access_authentication" target="_blank">Basic Access Authentication</a> only. This will allow the extension to ask Sonarr for your list of TV shows, or to add to your list of TV shows.</div>
+		                <div>
+							This information will be used for <a href="https://wikipedia.org/wiki/Basic_access_authentication" target="_blank">Basic Access Authentication</a> only.<br>
+							This will allow the extension to ask Sonarr for your list of TV shows, or to add to your list of TV shows.
+						</div>
 		            </section>
 
 		            <section>
@@ -473,7 +493,7 @@
 		            <section>
 		                <label>Sonarr Storage Path</label>
 		                <select data-option="sonarrStoragePath" default>
-		                    <option value="">Press "Test Settings [?]" first</option>
+		                    <option value="">Press "Test Settings" first</option>
 		                </select>
 		                <div>
 		                    This should be the same path (verbatim) used in Sonarr.
@@ -482,7 +502,7 @@
 		            <section>
 		                <label>Quality Profile</label>
 		                <select data-option="sonarrQualityProfileId" default>
-		                    <option value="">Press "Test Settings [?]" first</option>
+		                    <option value="">Press "Test Settings" first</option>
 		                </select>
 		            </section>
 					<hr><br>
@@ -511,15 +531,15 @@
 				        <label>Sick Beard API Key</label>
 				        <input type="text" data-option="sickBeardToken" placeholder="What's your Sick Beard API key?" default/>
 				        <div>
-				            1. Go to Sick Beard | Config | General | API<br/>
-				            &mdash; a. Ensure the checkbox "Enable API" is enabled<br/>
-				            &mdash; b. Press the "Generate" button<br/>
-				            2. Copy/Paste the "API Key."<br/>
-				            Such as <em>aa756d33242f6g8ffbca2b3963586f21</em>
+				            1. Go to Sick <strong>Beard</strong> &rarr; <strong>Config</strong> &rarr; <strong>General</strong> &rarr; <strong>API</strong><br/>
+				            &mdash; a. Ensure the checkbox <u>Enable API</u> is checked<br/>
+				            &mdash; b. Press the <u>Generate</u> button<br/>
+				            2. Copy/Paste the <u>API Key</u><br/>
+				            &mdash; Such as <em>aa756d33242f6a8ffbca2b3963586f21</em>
 				        </div>
 				    </section>
 
-				    <h3>Login <em>(saved)</em></h3>
+				    <h3>Login <strong orange>(saved)</strong></h3>
 				    <section>
 				        <label>Username</label>
 				        <input type="text" data-option="sickBeardBasicAuthUsername" placeholder="Enter your Sick Beard (HTTP) username" default/>
@@ -529,7 +549,10 @@
 				        <input type="text" data-option="sickBeardBasicAuthPassword" placeholder="Enter your Sick Beard (HTTP) password" default/>
 				        <div class="hidden-help">Your password will be hidden once saved.</div>
 				        <br>
-				        <div>This information will be used for <a href="https://wikipedia.org/wiki/Basic_access_authentication" target="_blank">Basic Access Authentication</a> only. This will allow the extension to ask Sick Beard for your list of TV shows, or to add to your list of TV shows.</div>
+				        <div>
+							This information will be used for <a href="https://wikipedia.org/wiki/Basic_access_authentication" target="_blank">Basic Access Authentication</a> only.<br>
+							This will allow the extension to ask Sick Beard for your list of TV shows, or to add to your list of TV shows.
+						</div>
 				    </section>
 
 				    <section>
@@ -539,7 +562,7 @@
 				    <section>
 				        <label>Sick Beard Storage Path</label>
 				        <select data-option="sickBeardStoragePath" default>
-				            <option value="">Press "Test Settings [?]" first</option>
+				            <option value="">Press "Test Settings" first</option>
 				        </select>
 				        <div>
 				            This should be the same path (verbatim) used in Sick Beard.
@@ -553,7 +576,7 @@
 				        </select>
 				        <label>Quality Profile</label>
 				        <select data-option="sickBeardQualityProfileId" default>
-				            <option value="">Press "Test Settings [?]" first</option>
+				            <option value="">Press "Test Settings" first</option>
 				        </select>
 						<!-- <div>
 							Use <code>Ctrl + Click</code> to select multiple items.
@@ -582,6 +605,13 @@
 							<input data-option="theme:button-shape" theme="true:box" type="checkbox" default/>
 							<label for="theme:button-shape"></label>
 						</span>
+						<br><br>
+						<div>
+							<span orange>&#9633;</span> &mdash; a minimalist, rectangular button (top center of page)
+						</div>
+						<div>
+							<span orange>&#9675;</span> &mdash; a normal, circular button (bottom left or right of page)
+						</div>
 					</section>
 					<section>
 						Which direction should the master button open (&#9711; only)?
@@ -598,10 +628,10 @@
 		                <input data-option="theme:button-opacity" theme="for:hidden" type="range" min="0" max="10" step="5" value="10" symbol="%" default="10"/>
 		                <output type="text" value="10%" default="10%"></output>
 					</section>
-
-					<h2>The Minion Button(s)</h2>
+					<hr>
+					<h2 x-mode>The Minion Button(s)</h2>
 					<section>
-						Allow the use of minion buttons?
+						Allow the use of custom (minion) buttons?
 						<br>
 						<span class="checkbox" prompt"y/n">
 							<!-- When true (checked), will be accessed in CSS (/sites/*/index.css) as ".web-to-plex-minion { ... }" -->
@@ -650,7 +680,7 @@
 			                </span>
 						</h3>
 						<div>
-							If enabled, all insecure (HTTP) requests will be through an <a href="https://en.wikipedia.org/wiki/Proxy_server" target="_blank">HTTPS proxy</a>.
+							If enabled, all requests sent by Web to Plex will be <a href="https://en.wikipedia.org/wiki/Proxy_server" target="_blank">proxied</a>.
 						</div>
 					</section>
 
@@ -701,7 +731,7 @@
 						<h3>Native Proxy Settings</h3>
 						<div>
 							<a href="#!/native/settings/network/proxy">
-								<button>Open <u>proxy settings</u></button>
+								<button>Open <u>System &rarr; Network &amp; Internet &rarr; Proxy</u></button>
 							</a>
 						</div>
 					</section>
@@ -720,10 +750,10 @@
 			                </span>
 						</h3>
 						<div>
-							When the user presses the Grab button, the extension should:
+							When you press the Grab button, the extension should:
 							<ul>
 								<li>Grab <em>ALL</em> &mdash; Find items not on Plex, and grab them</li>
-								<li><em>ASK</em> user &mdash; Find items not on Plex, and grab what the user approves</li>
+								<li><em>ASK</em> you &mdash; Find items not on Plex, and grab what you approve</li>
 							</ul>
 						</div>
 						<h3>Maximum Auto Grabs</h3>
@@ -743,7 +773,7 @@
 			                </span>
 						</h3>
 						<div>
-							When the user presses the Grab button should the save location be asked for?
+							When you press the Grab button, should the save location be asked for?
 							<br>
 							<em>Only supports Medusa, Radarr, and Sonarr.</em>
 						</div>
@@ -758,7 +788,7 @@
 			                </span>
 						</h3>
 						<div>
-							When the user presses the Grab button should the quality be asked for?
+							When you press the Grab button, should the quality be asked for?
 							<br>
 							<em>Only supports Medusa, Radarr, and Sonarr.</em>
 						</div>
@@ -777,7 +807,7 @@
 			            </span>
 					</h3>
 					<div>
-						When the user presses the Grab button and an item already exists, should the notification be ignored or not?
+						When you press the Grab button and the item already exists, should the notification be ignored or not?
 					</div>
 					<hr>
 					<h3>
@@ -788,7 +818,7 @@
 			            </span>
 					</h3>
 					<div>
-						When the user presses the Grab button and there are several incoming notifications of similar information, should the notifications be ignored (after the first one) or not?
+						When you press the Grab button and there are several incoming notifications of similar information, should the notifications be ignored (after the first one) or not?
 					</div>
 				</details>
 			</article>
@@ -825,7 +855,7 @@
 						</h3>
 		                <div>
 		                    Allows the extension to use your manager(s) to find media.<br>
-		                    Currently supports: Medusa, Ombi, Radarr, and Sonarr.
+		                    <em>Currently supports Medusa, Ombi, Radarr, and Sonarr.</em>
 		                </div>
 					</section>
 					<hr>
@@ -928,7 +958,7 @@
 						</h3>
 						<div>
 							<em>WARNING</em> &mdash; may cause data loss.<br>
-							Enables developer (debugging) mode, showing advanced errors and logging to the console when possible.
+							Enables developer (debugging) mode, showing Advanced errors and logging to the console when possible.
 						</div>
 					</section>
 		        </details>
@@ -1035,6 +1065,7 @@
 		<input data-option="__domains" value/>
 		<input data-option="__caught" value/>
 		<input data-option="__theme" value/>
+		<input data-option="__defaults" value="true"/>
 	</div>
 
     <a id="version" code href="https://github.com/webtoplex/browser-extension/releases" target="_blank">...</a>

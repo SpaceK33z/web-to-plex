@@ -218,5 +218,5 @@
 		"contextMenus",
 		"<all_urls>"
 	],
-	"web_accessible_resources": ["img/*", "options/*", "sites/*.css"]
+	"web_accessible_resources": ["font/*", "img/*", "options/*", "sites/*.css"]
 }

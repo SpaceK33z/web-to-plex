@@ -116,4 +116,40 @@ let script = {
 	},
 
 	"clean": year => (year + '').replace(/^\(|\)$/g, '').trim(),
+
+	"minions": () => {
+		let type = script.getType(),
+			actions;
+
+		if(type == 'list')
+			actions = $('.lister-list .lister-col-wrapper');
+		else
+			actions = $('.plot_summary');
+
+		if(actions.empty)
+			return;
+
+		actions.forEach(element => {
+			let minion;
+
+			if(type == 'list') {
+				let processed = script.process(element.parentElement.parentElement);
+
+				if(!processed)
+					return;
+
+				minion = furnish('a.web-to-plex-minion', { imdb: processed.IMDbID },
+					furnish('img', { src: IMAGES.icon_32 })
+				);
+
+				addMinions(minion).stayUnique(true);
+			} else {
+				minion = furnish('a.web-to-plex-minion', {}, 'Web to Plex');
+
+				addMinions(minion);
+			}
+
+			element.appendChild(minion);
+		});
+	},
 };

@@ -24,4 +24,28 @@ let script = {
 
 		return pathname.replace(/\/shows\/(\d+).*/, '$1');
 	},
+
+	"minions": () => {
+		let actions = $('nav.page-subnav > ul');
+
+		if(actions.empty)
+			return;
+
+		actions.forEach(element => {
+			let li = /^[ou]l$/i.test(element.tagName);
+
+			let parent = furnish('li.web-to-plex-wrapper', {}),
+				minion = furnish(`a.web-to-plex-minion.${ li? 'flatButton': 'roundButton' }`, {}, 'Web to Plex');
+
+			if(li) {
+				parent.appendChild(minion);
+				element.appendChild(parent);
+			} else {
+				element.appendChild(minion);
+			}
+
+			addMinions(minion);
+		});
+
+	},
 };

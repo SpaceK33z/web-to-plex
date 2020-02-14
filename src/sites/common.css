@@ -570,6 +570,7 @@
 
 .web-to-plex-button.open li:hover [tooltip]::before, .web-to-plex-button.open [tooltip]:hover::before {
    content: attr(tooltip) !important;
+   display: inline-block;
 
    background: var(--quarter-grey) !important;
    border-radius: 3px !important;

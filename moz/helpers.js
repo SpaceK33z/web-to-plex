@@ -1,7 +1,9 @@
+function $(selector, container = document) {
+	return queryBy(selector, container);
+}
+
 async function load(name = '') {
 	if(!name) return;
-
-	let HELPERS_STORAGE = chrome.storage.sync || chrome.storage.local;
 
 	name = '~/cache/' + (name.toLowerCase().replace(/\s+/g, '_'));
 
@@ -12,20 +14,12 @@ async function load(name = '') {
 			return resolve(data);
 		}
 
-		HELPERS_STORAGE.get(null, DISK => {
-			if(chrome.runtime.lastError)
-				chrome.runtime.lastError.message ||
-				chrome.storage.local.get(null, LOAD);
-			else
-				LOAD(DISK);
-		});
+		HELPERS_STORAGE.get(null, DISK => LOAD(DISK));
 	});
 }
 
 async function save(name = '', data) {
 	if(!name) return;
-
-	let HELPERS_STORAGE = chrome.storage.sync || chrome.storage.local;
 
 	name = '~/cache/' + (name.toLowerCase().replace(/\s+/g, '_'));
 	data = JSON.stringify(data);
@@ -36,8 +30,6 @@ async function save(name = '', data) {
 }
 
 async function kill(name) {
-	let HELPERS_STORAGE = chrome.storage.sync || chrome.storage.local;
-
 	return HELPERS_STORAGE.remove(['~/cache/' + (name.toLowerCase().replace(/\s+/g, '_'))]);
 }
 

@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 /* global configuration, init, Update, "Helpers" */
 
-let configuration, init, Update, Glyphs = {},
+let configuration, init, Update, IMAGES, Glyphs = {},
 	HELPERS_STORAGE = {
 		get(keys, callback = () => {}) {
 			let results;
@@ -48,7 +48,56 @@ let configuration, init, Update, Glyphs = {},
 
 			callback();
 		}
+	},
+	MINIONS = [],
+	addMinions = (...minions) => {
+		MINIONS = [...minions, ...MINIONS];
+
+		return {
+			stayUnique: status => {
+				MINIONS = MINIONS.map(minion => ((!!~minions.indexOf(minion)? minion.setAttribute('ignore-web-to-plex-updates', status): null), minion))
+			}
+		}
 	};
+
+class UUID {
+	constructor(length = 16, symbol = '-') {
+		let values = [];
+
+		window.crypto.getRandomValues(new Uint32Array(length)).forEach(value => values.push(value.toString(36)));
+
+		return values.join(symbol).replace(/^[^a-z]+/i, '');
+	}
+
+	static from(object, seed = 64, symbol = '-') {
+		let id = [];
+
+		for(let key in object) {
+			let o = object[key];
+
+			if(o instanceof Array)
+				o = o.join(symbol);
+			else if(o instanceof Object)
+				o = Object.values(o).join(symbol);
+            else
+                o = o + '';
+
+			if(typeof(o) == 'string')
+				o = o
+					.toLowerCase()
+					.split('')
+					.reduce((a, b) => ((typeof(a) == 'number'? a: a.charCodeAt(0)) + b.charCodeAt(0)), seed)
+                    .toString(36);
+			else
+				return
+				/* Error occurred */;
+
+            id.push(o);
+		}
+
+        return id.join('').replace(/(\w{1,8})(\w{4})?(\w{4})?(\w{4})?(\w{12})?(\w+)?/, '$1-$2-$3-$4-$5:$6').replace(/\-+\:/g, '');
+	}
+}
 
 let INITIALIZE = (async date => {
 
@@ -61,7 +110,38 @@ let INITIALIZE = (async date => {
 		RUNNING  = false,
 	// Other items
 	/* Items that the user has already asked for */
-		CAUGHT, COMPRESS;
+		CAUGHT, COMPRESS,
+		REFINED = {};
+
+	// update ALL minions
+	let updateMinions = (attributes) => {
+		let { title, href, text, hover, classes, event } = attributes;
+
+		for(let minion of MINIONS.filter(minion => minion.getAttribute('ignore-web-to-plex-updates') != 'true')) {
+			classes.forEach(c => minion.classList.add(c));
+			minion.setAttribute('title', hover);
+			minion.addEventListener('click', event? event: href? (() => top.open(href, '_top')): null);
+		}
+	},
+	// update a single (ID) minion
+	updateMinion = (properties, status, options) => {
+		let minions;
+
+		for(let property in properties)
+			if(!(minions = $(`.web-to-plex-minion[${ property }="${properties[property]}"], .web-to-plex-minion[${ property }id="${properties[property]}"], .web-to-plex-minion[${ property }-id="${properties[property]}"]`)).empty)
+				break;
+
+		if(!minions || minions.empty)
+			return;
+
+		minions.forEach(minion => status? minion.classList.add(`wtp--${status}`): '');
+
+		if(status == 'found' && options.key)
+			minions.forEach(minion => {
+				minion.setAttribute('href', Request_PlexURL(__CONFIG__.server.id, options.key));
+				minion.setAttribute('title', `Watch "${options.title} (${options.year})" on Plex`);
+			});
+	};
 
 	// simple helpers
 	let extURL = url => chrome.extension.getURL(url),
@@ -69,9 +149,10 @@ let INITIALIZE = (async date => {
 		// DO NOT EXPOSE
 		__CONFIG__, ALLOWED, PERMISS;
 
-	let IMG_URL = {
+	let IMG_URL = IMAGES = {
 		'nil':				extURL('img/null.png'),
 		'icon_16':			extURL('img/16.png'),
+		'icon_32':			extURL('img/32.png'),
 		'icon_48':			extURL('img/48.png'),
 		'background': 		extURL('img/background.png'),
 		'hide_icon_16':		extURL('img/hide.16.png'),
@@ -81,6 +162,7 @@ let INITIALIZE = (async date => {
 		'close_icon_16':	extURL('img/close.16.png'),
 		'close_icon_48':	extURL('img/close.48.png'),
 		'icon_white_16':	extURL('img/_16.png'),
+		'icon_white_32':	extURL('img/_32.png'),
 		'icon_white_48':	extURL('img/_48.png'),
 		'plexit_icon_16':   extURL('img/plexit.16.png'),
 		'plexit_icon_48':   extURL('img/plexit.48.png'),
@@ -358,7 +440,7 @@ let INITIALIZE = (async date => {
 				);
 
 			let preX = document.queryBy('.web-to-plex-prompt').first,
-				movie = /^(m(?:ovies?)?|f(?:ilms?)?|c(?:inemas?)?)?$/i;
+				movie = /^(m(?:ovies?)?|f(?:ilms?)?|c(?:inemas?)?|theat[re]{2})?$/i;
 
 			if(preX)
 				return /* Ignore while another prompt is open, prevents double prompts */;
@@ -385,7 +467,7 @@ let INITIALIZE = (async date => {
 						header.innerText = 'Approve ' + counter.children.length + (counter.children.length == 1?' item': ' items');
 					};
 
-					prompt = furnish('div.web-to-plex-prompt', {},
+					prompt = furnish('div.web-to-plex-prompt', { type: prompt_type },
 						furnish('div.web-to-plex-prompt-body', { style: `background-image: url(${ IMG_URL.noise_background }), url(${ IMG_URL.background }); background-size: auto, cover;` },
 							// The prompt's title
 							furnish('h1.web-to-plex-prompt-header', {}, 'Approve ' + array.length + (array.length == 1? ' item': ' items')),
@@ -405,11 +487,11 @@ let INITIALIZE = (async date => {
 												furnish('i[glyph=remove]', { title: `Remove "${ title }"`, onmouseup: event => { remove(event.target.parentElement); event.target.remove() } }),
 												(
 													__CONFIG__.PromptQuality?
-														P_QUA = furnish('select.quality', { index, onchange: event => data[event.target.getAttribute('index')].quality = event.target.value }, ...profiles[/(movie|film|cinema)/i.test(type)?'movie':'show'].map(Q => furnish('option', { value: Q.id }, Q.name))):
+														P_QUA = furnish('select.quality', { index, onchange: event => data[event.target.getAttribute('index')].quality = event.target.value }, ...profiles[movie.test(type)?'movie':'show'].map(Q => furnish('option', { value: Q.id }, Q.name))):
 													''
 												),(
 													__CONFIG__.PromptLocation?
-														P_LOC = furnish('select.location', { index, onchange: event => data[event.target.getAttribute('index')].location = event.target.value }, ...locations[/(movie|film|cinema)/i.test(type)?'movie':'show'].map(Q => furnish('option', { value: Q.id }, Q.path))):
+														P_LOC = furnish('select.location', { index, onchange: event => data[event.target.getAttribute('index')].location = event.target.value }, ...locations[movie.test(type)?'movie':'show'].map(Q => furnish('option', { value: Q.id }, Q.path))):
 													''
 												)
 											)
@@ -430,7 +512,7 @@ let INITIALIZE = (async date => {
 								furnish('input.web-to-plex-prompt-input[type=text]', { placeholder: 'Add an item (enter to add): Title (Year) Type / ID Type', title: 'Solo: A Star Wars Story (2018) movie / tt3778644 m', onkeydown: async event => {
 									if(event.keyCode == 13) {
 										let title, year, type, self = event.target, R = RegExp,
-											movie = /^(m(?:ovies?)?|f(?:ilms?)?|c(?:inemas?)?)/i,
+											movie = /^(m(?:ovies?)?|f(?:ilms?)?|c(?:inemas?)?|theat[re]{2})/i,
 											Db, IMDbID, TMDbID, TVDbID, value = self.value;
 
 										self.setAttribute('disabled', self.disabled = true);
@@ -504,7 +586,7 @@ let INITIALIZE = (async date => {
 						header.innerText = `Correction ready...`;
 					};
 
-					prompt = furnish('div.web-to-plex-prompt', {},
+					prompt = furnish('div.web-to-plex-prompt', { type: prompt_type },
 						furnish('div.web-to-plex-prompt-body', { style: `background-image: url(${ IMG_URL.noise_background }), url(${ IMG_URL.background }); background-size: auto, cover;` },
 							// The prompt's title
 							furnish('h1.web-to-plex-prompt-header', {}, (array.length == 1? 'Correction ready...': `Choose a correction from ${array.length} items`)),
@@ -535,7 +617,7 @@ let INITIALIZE = (async date => {
 										elements.push(
 											furnish('li.web-to-plex-prompt-option.mutable.choose', {
 												value: index,
-												innerHTML: `<h2>${ index + 1 }. ${ title }${ year? ` (${ year })`: '' } \u2014 ${ type }</h2> ${ i? `<a href="https://imdb.com/title/${i}/?ref=web_to_plex" ${s}>${i}</a>`: '/' } \u2014 ${ t? `<a href="https://themoviedb.org/${type=='show'?'tv':type}/${t}" ${s}>${t}</a>`: '/' } \u2014 ${ v? `<a href="https://thetvdb.com/series/${title.replace(/\s+/g,'-').replace(/&/g,'and').replace(/[^\w\-]+/g,'')}#${v}" ${s}>${v}</a>`: '/' }`,
+												innerHTML: `<h2>${ index + 1 }. ${ title }${ year? ` (${ year })`: '' } \u2014 ${ type }</h2> ${ i? `<a href="https://imdb.com/title/${i}/?ref=web_to_plex" ${s}>${i}</a>`: '/' } \u2014 ${ t? `<a href="https://themoviedb.org/${movie.test(type)?'movie':'tv'}/${t}" ${s}>${t}</a>`: '/' } \u2014 ${ v? `<a href="https://thetvdb.com/series/${title.replace(/\s+/g,'-').replace(/&/g,'and').replace(/[^\w\-]+/g,'')}#${v}" ${s}>${v}</a>`: '/' }`,
 												onmouseup: event => {
 													let self = traverse(event.target, element => element.classList.contains('mutable')),
 														children = [...self.parentElement.children].filter(e => e != self);
@@ -630,7 +712,7 @@ let INITIALIZE = (async date => {
 						header.innerText = 'Approve ' + counter.children.length + (counter.children.length == 1?' item': ' items');
 					};
 
-					prompt = furnish('div.web-to-plex-prompt', {},
+					prompt = furnish('div.web-to-plex-prompt', { type: prompt_type },
 						furnish('div.web-to-plex-prompt-body', { style: `background-image: url(${ IMG_URL.noise_background }), url(${ IMG_URL.background }); background-size: auto, cover;` },
 							// The prompt's title
 							furnish('h1.web-to-plex-prompt-header', {}, 'Approve ' + array.length + (array.length == 1? ' item': ' items')),
@@ -650,18 +732,18 @@ let INITIALIZE = (async date => {
 												furnish('i[glyph=remove]', { title: `Remove "${ title }"`, onmouseup: event => { remove(event.target.parentElement); event.target.remove() } }),
 												(
 													__CONFIG__.PromptQuality?
-														P_QUA = furnish('select.quality', { index, onchange: event => data[event.target.getAttribute('index')].quality = event.target.value }, ...profiles[/(movie|film|cinema)/i.test(type)?'movie':'show'].map(Q => furnish('option', { value: Q.id }, Q.name))):
+														P_QUA = furnish('select.quality', { index, onchange: event => data[+event.target.getAttribute('index')].quality = event.target.value }, ...profiles[movie.test(type)?'movie':'show'].map(Q => furnish('option', { value: Q.id }, Q.name))):
 													''
 												),(
 													__CONFIG__.PromptLocation?
-														P_LOC = furnish('select.location', { index, onchange: event => data[event.target.getAttribute('index')].location = event.target.value }, ...locations[/(movie|film|cinema)/i.test(type)?'movie':'show'].map(Q => furnish('option', { value: Q.id }, Q.path))):
+														P_LOC = furnish('select.location', { index, onchange: event => data[+event.target.getAttribute('index')].location = event.target.value }, ...locations[movie.test(type)?'movie':'show'].map(Q => furnish('option', { value: Q.id }, Q.path))):
 													''
 												)
 											)
 										);
 
-										if(P_QUA) P_QUA.value = defaults[type].quality;
-										if(P_LOC) P_LOC.value = defaults[type].location;
+										if(P_QUA) P_QUA.value = data[index].quality = defaults[type].quality;
+										if(P_LOC) P_LOC.value = data[index].location = defaults[type].location;
 
 										P_QUA = P_LOC = null;
 									}
@@ -674,7 +756,7 @@ let INITIALIZE = (async date => {
 							furnish('div.web-to-plex-prompt-footer', {},
 								furnish('button.web-to-plex-prompt-decline', { onmouseup: event => { remove(true); callback([]) }, title: 'Close' }, Glyphs.exit),
 								furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { remove(true); new Prompt(prompt_type, options, callback, container) }, title: 'Reset' }, Glyphs.restart),
-								furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { remove(true); callback(data.filter(value => value !== null && value !== undefined)) }, title: 'Continue' }, Glyphs.ok)
+								furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { remove(true); callback(data.filter(value => value)) }, title: 'Continue' }, Glyphs.ok)
 							)
 						)
 					);
@@ -683,7 +765,14 @@ let INITIALIZE = (async date => {
 				/* Allows the user to modify a single item (before being pushed) */
 				case 'modify':
 					let { title, year, type, IMDbID, TMDbID, TVDbID } = options,
+						refined = { ...defaults[type], ...options },
+						uuid = UUID.from({ type, title, IMDbID, TMDbID, TVDbID }),
 						P_QUA, P_LOC;
+
+					if(REFINED[uuid])
+						refined = REFINED[uuid];
+					else
+						REFINED[uuid] = refined;
 
 					let i = IMDbID,
 						t = TMDbID,
@@ -705,25 +794,25 @@ let INITIALIZE = (async date => {
 							element.remove();
 					};
 
-					type = /(movie|film|cinema)/i.test(type)?'movie':'show';
+					type = /(movie|film|cinema|theat[re]{2})s?/i.test(type)?'movie':'show';
 
-					prompt = furnish('div.web-to-plex-prompt', {},
+					prompt = furnish('div.web-to-plex-prompt', { type: prompt_type },
 						furnish('div.web-to-plex-prompt-body', { style: `background-image: url(${ IMG_URL.noise_background }), url(${ IMG_URL.background }); background-size: auto, cover;` },
 							// The prompt's title
-							furnish('h1.web-to-plex-prompt-header', { innerHTML: `${ title }${ year? ` (${ year })`: '' }` }),
+							furnish('h1.web-to-plex-prompt-header', { innerHTML: `${ title.length < 40? title: title.slice(0, 37) + '...' }${ parseInt(year)? ` (${ year })`: '' } \u2014 ${ movie.test(type)? 'Movie': 'TV Show' }` }),
 
 							// The prompt's items
 							furnish('div.web-to-plex-prompt-options', {},
-								furnish('div.web-to-plex-prompt-option', { innerHTML: `${ type } \u2014 ${ i? `<a href="https://imdb.com/title/${i}/?ref=web_to_plex" ${s}>${i}</a>`: '/' } \u2014 ${ t? `<a href="https://themoviedb.org/${type=='show'?'tv':type}/${t}" ${s}>${t}</a>`: '/' } \u2014 ${ v? `<a href="https://thetvdb.com/series/${title.replace(/\s+/g,'-').replace(/&/g,'and').replace(/[^\w\-]+/g,'')}#${v}" ${s}>${v}</a>`: '/' }` }),
+								furnish('div.web-to-plex-prompt-option', { innerHTML: `${ i? `<a href="https://imdb.com/title/${i}/?ref=web_to_plex" ${s}>${i}</a>`: '?' } \u2014 ${ t? `<a href="https://themoviedb.org/${type=='show'?'tv':type}/${t}" ${s}>${t}</a>`: '?' } \u2014 ${ v? `<a href="https://thetvdb.com/series/${title.replace(/\s+/g,'-').replace(/&/g,'and').replace(/[^\w\-]+/g,'')}#${v}" ${s}>${v}</a>`: '?' }` }),
 								(
 									__CONFIG__.PromptQuality?
-										P_QUA = furnish('select.quality', { onchange: event => options.quality = event.target.value }, ...profiles[type].map(Q => furnish('option', { value: Q.id }, Q.name))):
+										P_QUA = furnish('select.quality', { onchange: event => REFINED[uuid].quality = event.target.value }, ...profiles[type].map(Q => furnish('option', { value: Q.id }, Q.name))):
 									''
 								),
 								furnish('br'),
 								(
 									__CONFIG__.PromptLocation?
-										P_LOC = furnish('select.location', { onchange: event => options.location = event.target.value }, ...locations[type].map(Q => furnish('option', { value: Q.id }, Q.path))):
+										P_LOC = furnish('select.location', { onchange: event => REFINED[uuid].location = event.target.value }, ...locations[type].map(Q => furnish('option', { value: Q.id }, Q.path))):
 									''
 								)
 							),
@@ -731,8 +820,8 @@ let INITIALIZE = (async date => {
 							// The engagers
 							furnish('div.web-to-plex-prompt-footer', {},
 								furnish('button.web-to-plex-prompt-decline', { onmouseup: event => { remove(true); callback([]) }, title: 'Close' }, Glyphs.exit),
-								furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { remove(true); new Prompt(prompt_type, options, callback, container) }, title: 'Reset' }, Glyphs.restart),
-								furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { remove(true); callback(options) }, title: 'Continue' }, Glyphs.ok),
+								furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { remove(true); new Prompt(prompt_type, REFINED[uuid], callback, container) }, title: 'Reset' }, Glyphs.restart),
+								furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { remove(true); callback(REFINED[uuid]) }, title: 'Continue' }, Glyphs.ok),
 								(
 									(!__CONFIG__.UseLowCache || (__CONFIG__.UseLowCache && CAUGHT.has({ imdb: i, tmdb: t, tvdb: v })))?
 										furnish('button.web-to-plex-prompt-accept', { onmouseup: event => { let self = event.target; open(self.getAttribute('href'), '_blank') }, href: slugify(type), title: `Open on ${ manager[type] }` }, manager[type]):
@@ -783,7 +872,7 @@ let INITIALIZE = (async date => {
 							(init && !RUNNING? (init(), RUNNING = true): RUNNING = false);
 					};
 
-					prompt = furnish('div.web-to-plex-prompt', {},
+					prompt = furnish('div.web-to-plex-prompt', { type: prompt_type },
 						furnish('div.web-to-plex-prompt-body', { style: `background-image: url(${ IMG_URL.noise_background }), url(${ IMG_URL.background }); background-size: auto, cover;` },
 							// The prompt's title
 							furnish('h1.web-to-plex-prompt-header', { innerHTML: `<span style="text-decoration: underline; cursor: pointer;" title="${ location.host }">"${ alias || name }"</span> would like:` }),
@@ -1533,7 +1622,7 @@ let INITIALIZE = (async date => {
 			rqut = apit, // request type: tmdb, imdb, or tvdb
 			manable = __CONFIG__.ManagerSearch && !(rerun & 0b1000), // is the user's "Manager Searches" option enabled?
 			UTF_16 = /[^0\u0020-\u007e, 1\u00a1\u00bf-\u00ff, 2\u0100-\u017f, 3\u0180-\u024f, 4\u0300-\u036f, 5\u0370-\u03ff, 6\u0400-\u04ff, 7\u0500-\u052f, 8\u20a0-\u20bf]+/g,
-			MV = /^(movies?|films?|cinemas?)$/i.test(apit),
+			MV = /^(movies?|films?|cinemas?|theat[re]{2}s?)$/i.test(apit),
 			TV = /^(tv[\s\-]*(?:shows?|series)?)$/i.test(apit);
 
 		iid = iid == 'tt'? null: iid;
@@ -1542,7 +1631,7 @@ let INITIALIZE = (async date => {
 		rqut =
 		/(tv|show|series)/i.test(rqut)?
 			'tvdb':
-		/(movie|film|cinema)s?/i.test(rqut)?
+		/(movie|film|cinema|theat[re])s?/i.test(rqut)?
 			'tmdb':
 		rqut || '*';
 		manable = manable && (__CONFIG__.usingOmbi || (__CONFIG__.usingRadarr && rqut == 'tmdb') || ((__CONFIG__.usingSonarr || __CONFIG__.usingMedusa /*|| __CONFIG__.usingSickBeard*/) && rqut == 'tvdb'));
@@ -2094,7 +2183,7 @@ let INITIALIZE = (async date => {
 			);
 		}
 
-		let contentType = (/movies?|film/i.test(options.type)? 'movie': 'tv');
+		let contentType = (/(movie|film|cinema|theat[re]{2})s?/i.test(options.type)? 'movie': 'tv');
 
 		chrome.runtime.sendMessage({
 				type: 'PUSH_OMBI',
@@ -2225,10 +2314,12 @@ let INITIALIZE = (async date => {
 		if(!prompted && (PromptQuality || PromptLocation))
 			return new Prompt('modify', options, refined => Request_Radarr(refined, true));
 
+		let parsePath = id => JSON.parse(__CONFIG__.radarrStoragePaths).map(item => item.id == id? item: null).filter(n => n)[0].path.replace(/\\/g, '\\\\');
+
 		if(PromptQuality && +options.quality > 0)
 			PromptValues.QualityID = +options.quality;
-		if(PromptLocation && options.location)
-			PromptValues.StoragePath = JSON.parse(__CONFIG__.radarrStoragePaths).map(item => item.id == options.location? item: null).filter(n => n)[0].path.replace(/\\/g, '\\\\');
+		if(PromptLocation && +options.location > 0)
+			PromptValues.StoragePath = parsePath(options.location);
 
 		new Notification('info', `Sending "${ options.title }" to Radarr`, 3000);
 
@@ -2236,7 +2327,7 @@ let INITIALIZE = (async date => {
 				type: 'PUSH_RADARR',
 				url: `${ __CONFIG__.radarrURL }api/movie/`,
 				token: __CONFIG__.radarrToken,
-				StoragePath: __CONFIG__.radarrStoragePath,
+				StoragePath: parsePath(__CONFIG__.radarrStoragePath),
 				QualityID: __CONFIG__.radarrQualityProfileId,
 				basicAuth: __CONFIG__.radarrBasicAuth,
 				title: options.title,
@@ -2282,10 +2373,12 @@ let INITIALIZE = (async date => {
 		if(!prompted && (PromptQuality || PromptLocation))
 			return new Prompt('modify', options, refined => Request_Sonarr(refined, true));
 
+		let parsePath = id => JSON.parse(__CONFIG__.sonarrStoragePaths).map(item => item.id == id? item: null).filter(n => n)[0].path.replace(/\\/g, '\\\\');
+
 		if(PromptQuality && +options.quality > 0)
 			PromptValues.QualityID = +options.quality;
-		if(PromptLocation && options.location)
-			PromptValues.StoragePath = JSON.parse(__CONFIG__.sonarrStoragePaths).map(item => item.id == options.location? item: null).filter(n => n)[0].path.replace(/\\/g, '\\\\');
+		if(PromptLocation && +options.location > 0)
+			PromptValues.StoragePath = parsePath(options.location);
 
 		new Notification('info', `Sending "${ options.title }" to Sonarr`, 3000);
 
@@ -2293,7 +2386,7 @@ let INITIALIZE = (async date => {
 				type: 'PUSH_SONARR',
 				url: `${ __CONFIG__.sonarrURL }api/series/`,
 				token: __CONFIG__.sonarrToken,
-				StoragePath: __CONFIG__.sonarrStoragePath,
+				StoragePath: parsePath(__CONFIG__.sonarrStoragePath),
 				QualityID: __CONFIG__.sonarrQualityProfileId,
 				basicAuth: __CONFIG__.sonarrBasicAuth,
 				title: options.title,
@@ -2451,43 +2544,39 @@ let INITIALIZE = (async date => {
 		else if(persistent && firstButton !== null && firstButton !== undefined)
 			return firstButton;
 
-		let { __theme } = __CONFIG__;
+			let { __theme } = __CONFIG__;
 
-		let ThemeClasses = JSON.parse(COMPRESS? iBWT(unzip(decompress(__theme))): __theme),
-			HeaderClasses = [],
-			ParsedAttributes = {};
+			__theme = JSON.parse(COMPRESS? iBWT(unzip(decompress(__theme))): __theme);
 
-		// Theme(s)
-		if(!ThemeClasses.length)
-			ThemeClasses = '';
-		else
-			ThemeClasses = '.' + ThemeClasses.join('.');
+			let ThemeClasses = [],
+				HeaderClasses = [],
+				ParsedAttributes = {};
 
-		ThemeClasses = ThemeClasses.split('.').filter(v => {
-			let R = RegExp;
+			// Theme(s)
+			for(let theme in __theme)
+				if((typeof __theme[theme]) == 'boolean')
+					ThemeClasses.push(theme);
+				else
+					ParsedAttributes[theme] = __theme[theme];
 
-			if(/([^=]+?)=([^.]+?)/.test(v)) {
-				ParsedAttributes[R.$1] = R.$2;
+			if(!ThemeClasses.length)
+				ThemeClasses = '';
+			else
+				ThemeClasses = '.' + ThemeClasses.join('.');
 
-				return false;
-			}
+			// Header(s)
+			for(let header in headers)
+				if(headers[header])
+					HeaderClasses.push( header );
 
-			return true;
-		}).join('.');
-
-		// Header(s)
-		for(let header in headers)
-			if(headers[header])
-				HeaderClasses.push( header );
-
-		if(!HeaderClasses.length)
-			HeaderClasses = '';
-		else
-			HeaderClasses = '.' + HeaderClasses.join('.');
+			if(!HeaderClasses.length)
+				HeaderClasses = '';
+			else
+				HeaderClasses = '.' + HeaderClasses.join('.');
 
 		// <button>
 		let button =
-			furnish(`button.show.closed.floating.web-to-plex-button${HeaderClasses}${ThemeClasses}`, {
+		furnish(`button.show.closed.floating.web-to-plex-button${HeaderClasses}${ThemeClasses}`, {
 				...ParsedAttributes,
 				onmouseenter: event => {
 					let self = event.target;
@@ -2501,13 +2590,13 @@ let INITIALIZE = (async date => {
 					self.classList.remove('open', 'animate');
 					self.classList.add('closed');
 				},
-				style: `display: none; background-image: url(${ IMG_URL.noise_background }), url(${ IMG_URL.background }); background-size: auto, cover; display: none;`
+				style: `display: none; background-image: url(${ IMG_URL.noise_background }), url(${ IMG_URL.background }); background-size: auto, cover;`
 			},
 			// <ul>
 			furnish('ul', {},
 				// <li>
 				furnish('li#wtp-list-name.list-name', {},
-					furnish('a.list-action', { tooltip: 'Web to Plex' }, furnish(`img[alt=Web to Plex]`, { src: (__CONFIG__['theme:button-shape']? IMG_URL.icon_16: IMG_URL.icon_48) }))
+					furnish('a.list-action', { tooltip: 'Web to Plex' }, furnish(`img[alt=Web to Plex]`, { style: 'display: inline !important;', src: IMG_URL.icon_48 }))
 				),
 
 				furnish('li#wtp-plexit.list-item', {
@@ -2518,7 +2607,7 @@ let INITIALIZE = (async date => {
 						(d=>{let s=d.createElement('script'),h=d.querySelector('head');s.type='text/javascript';s.src='//webtoplex.github.io/plex.it.js';h.appendChild(s)})(document);
 					}
 				},
-				furnish('i[red][gradient=lighten]', { glyph: 'fire 3x', onmouseup: event => event.target.parentElement.click() }) // <img/>
+					furnish('i[red][gradient=lighten]', { glyph: 'fire 3x', onmouseup: event => event.target.parentElement.click() }) // <img/>
 				),
 
 				furnish('li#wtp-hide.list-item', {
@@ -2543,7 +2632,7 @@ let INITIALIZE = (async date => {
 						self.setAttribute('state', state);
 					}
 				},
-				furnish('i[blue][gradient=lighten]', { glyph: 'cloud 3x', onmouseup: event => event.target.parentElement.click() }) // <img/>
+					furnish('i[blue][gradient=lighten]', { glyph: 'cloud 3x', onmouseup: event => event.target.parentElement.click() }) // <img/>
 				),
 
 				furnish('li#wtp-refresh.list-item', {
@@ -2557,7 +2646,7 @@ let INITIALIZE = (async date => {
 							new Notification('warning', "Couldn't reload. Please refresh the page.");
 					}
 				},
-				furnish('i[orange][gradient=lighten]', { glyph: 'restart 3x', onmouseup: event => event.target.parentElement.click() }) // <img/>
+					furnish('i[orange][gradient=lighten]', { glyph: 'restart 3x', onmouseup: event => event.target.parentElement.click() }) // <img/>
 				),
 
 				furnish('li#wtp-options.list-item', {
@@ -2568,7 +2657,7 @@ let INITIALIZE = (async date => {
 						return Options();
 					}
 				},
-				furnish('i[grey][gradient=lighten]', { glyph: 'cogwheel 3x', onmouseup: event => event.target.parentElement.click() }) // <img/>
+					furnish('i[grey][gradient=lighten]', { glyph: 'cogwheel 3x', onmouseup: event => event.target.parentElement.click() }) // <img/>
 				)
 				// </li>
 			)
@@ -2637,7 +2726,7 @@ let INITIALIZE = (async date => {
 			element.ON_CLICK = e => {
 				e.preventDefault();
 
-				let self = e.target, tv = /tv[\s-]?|shows?|series/i, fail = 0,
+				let self = element, tv = /tv[\s-]?|shows?|series/i, fail = 0,
 					options = JSON.parse(decode(button.getAttribute('saved_options')));
 
 				for(let index = 0, length = options.length, option; index < length; index++) {
@@ -2670,11 +2759,15 @@ let INITIALIZE = (async date => {
 					new Notification('error', `Failed to grab ${ fail } item${fail==1?'':'s'}`);
 			};
 
+			let MINION_EVENT;
+
 			button.setAttribute('saved_options', encode(JSON.stringify(saved_options)));
-			element.addEventListener('click', e => (AUTO_GRAB.ENABLED && AUTO_GRAB.LIMIT > options.length)? element.ON_CLICK(e): new Prompt('select', options, o => { button.setAttribute('saved_options', encode(JSON.stringify(o))); element.ON_CLICK(e) }));
+			element.addEventListener('click', MINION_EVENT = e => (AUTO_GRAB.ENABLED && AUTO_GRAB.LIMIT > options.length)? element.ON_CLICK(e): new Prompt('select', options, o => { button.setAttribute('saved_options', encode(JSON.stringify(o))); element.ON_CLICK(e) }));
 
 			element.setAttribute(hov, `Grab ${ len } new item${ s }: ${ t }`);
 			button.classList.add(saved_options.length || len? 'wtp--download': 'wtp--error');
+
+			updateMinions({ title, href: element.getAttribute('href'), text: element.getAttribute(txt), hover: element.getAttribute(hov), classes: [...button.classList].filter(v => /^wtp--/i.test(v)), event: MINION_EVENT });
 		} else {
 		/* Handle a single item */
 
@@ -2695,8 +2788,8 @@ let INITIALIZE = (async date => {
 				element.setAttribute(hov, `Watch "${options.title} (${options.year})" on Plex`);
 				button.classList.add('wtp--found');
 
-				new Notification('success', `Watch "${ nice_title }"`, 7000, e => element.click(e));
-			} else if(action == 'downloader' || options.remote) {
+				new Notification('success', `Watch "${ nice_title }"`, 7000, e => top.open(element.href, '_self'));
+			} else if(action == 'download' || options.remote) {
 
 				switch(options.remote) {
 					/* Vumoo & GoStream */
@@ -2812,12 +2905,12 @@ let INITIALIZE = (async date => {
 
 						button.classList.remove('wtp--error');
 
-						UpdateButton(button, 'downloader', `Add "${ title }${( year? ` (${year})`: '' )}" | ${ type }`, correction);
+						UpdateButton(button, 'download', `Add "${ title }${( year? ` (${year})`: '' )}" | ${ type }`, correction);
 					});
 				});
 			}
 
-			if((action == 'downloader') && CAUGHT.has({ imdb: options.IMDbID, tmdb: options.TMDbID, tvdb: options.TVDbID })) {
+			if((action == 'download') && CAUGHT.has({ imdb: options.IMDbID, tmdb: options.TMDbID, tvdb: options.TVDbID })) {
 				element.setAttribute(hov, `Modify "${ nice_title }" | ${ty}`);
 
 				button.classList.remove('wtp--found');
@@ -2825,6 +2918,8 @@ let INITIALIZE = (async date => {
 			}
 
 			element.id = options? `${options.IMDbID || 'tt'}-${options.TMDbID | 0}-${options.TVDbID | 0}`: 'tt-0-0';
+
+			updateMinions({ title, href: element.getAttribute('href'), text: element.getAttribute(txt), hover: element.getAttribute(hov), classes: [...button.classList].filter(v => /^wtp--/i.test(v)), event: (e => {for(let v in e)if(/^ON_/.test(v))return e[v]})(element) });
 		}
 	}
 
@@ -2832,6 +2927,21 @@ let INITIALIZE = (async date => {
 	async function FindMediaItems(options = [], button) {
 		if(!(options.length && button))
 			return;
+
+		/* Get rid of repeats */
+		let uuids = [];
+
+		options = options.map((v, i, a) => {
+			let { type, title } = v,
+				uuid = UUID.from({ type, title });
+
+			if(!!~uuids.indexOf(uuid))
+				return options.splice(i, 1), null;
+			uuids.push(uuid);
+
+			return v;
+		})
+		.filter(v => v);
 
 		let results = [],
 			length = options.length,
@@ -2868,8 +2978,13 @@ let INITIALIZE = (async date => {
 			try {
 				await Request_Plex(option)
 					.then(async({ found, key }) => {
+						let { imdb, tmdb, tvdb } = opt,
+							{ type, title, year } = opt,
+							uuid = UUID.from({ type, title });
+
 						if(found) {
 							// ignore found items, we only want new items
+							updateMinion({ imdb, tmdb, tvdb, uuid }, 'found', { ...opt, key })
 						} else {
 							option.field = 'original_title';
 
@@ -2877,13 +2992,18 @@ let INITIALIZE = (async date => {
 								.then(({ found, key }) => {
 									if(found) {
 										// ignore found items, we only want new items
+										updateMinion({ imdb, tmdb, tvdb, uuid }, 'found', { ...opt, key })
+									} else if(CAUGHT.has({ imdb, tmdb, tvdb })) {
+										// ignore items already being watched
+										updateMinion({ imdb, tmdb, tvdb, uuid }, 'queued')
 									} else {
 										let available = (__CONFIG__.usingOmbi || __CONFIG__.usingWatcher || __CONFIG__.usingRadarr || __CONFIG__.usingSonarr || __CONFIG__.usingMedusa || __CONFIG__.usingSickBeard || __CONFIG__.usingCouchPotato),
-											action = (available? 'downloader': 'notfound'),
+											action = (available? 'download': 'notfound'),
 											title = available?
 												'Not on Plex (download available)':
 											'Not on Plex (download not available)';
 
+										updateMinion({ imdb, tmdb, tvdb, uuid }, (available? 'download': 'not-found'));
 										results.push({ ...opt, found: false, status: action });
 									}
 								});
@@ -2896,7 +3016,7 @@ let INITIALIZE = (async date => {
 			}
 		}
 
-		results = results.filter(v => v.status == 'downloader');
+		results = results.filter(v => v.status == 'download');
 
 		let img = furnish('img', { title: 'Add to Plex It!', onmouseup: event => {let frame = document.querySelector('#plexit-bookmarklet-frame'); frame.src = frame.src.replace(/(#plexit:.*)?$/, '#plexit:' + event.target.parentElement.getAttribute('data'))} }),
 			po, pi = furnish('li#plexit.list-item', { data: encode(JSON.stringify(results)) }, img),
@@ -2969,7 +3089,7 @@ let INITIALIZE = (async date => {
 							} catch(e) { /* Don't do anything */ }
 						} else {
 							let available = (__CONFIG__.usingOmbi || __CONFIG__.usingWatcher || __CONFIG__.usingRadarr || __CONFIG__.usingSonarr || __CONFIG__.usingMedusa || __CONFIG__.usingSickBeard || __CONFIG__.usingCouchPotato),
-								action = (available ? 'downloader' : 'notfound'),
+								action = (available ? 'download' : 'notfound'),
 								title = available ?
 									'Not on Plex (download available)':
 								'Not on Plex (download not available)';
@@ -3011,24 +3131,34 @@ let INITIALIZE = (async date => {
 		if(!(__CONFIG__.plexURL && __CONFIG__.plexToken) || __CONFIG__.IGNORE_PLEX)
 			return new Promise((resolve, reject) => resolve({ found: false, key: null }));
 
+		Request_Plex.IN_WORK = Request_Plex.IN_WORK || [];
+		Request_Plex.PROMISED_WORK = Request_Plex.PROMISED_WORK || {};
+
 		return new Promise((resolve, reject) => {
 			// Sanitize the object
 			options = JSON.parse( JSON.stringify(options) );
 
-			UTILS_TERMINAL.LOG('Searching for item on Plex', options);
+			let uuid = UUID.from(options);
+
+			UTILS_TERMINAL.LOG('Searching for item on Plex', { uuid, ...options });
+
+			if(!!~Request_Plex.IN_WORK.indexOf(uuid) || Request_Plex.PROMISED_WORK[uuid])
+				return console.warn('Sending promised work back...', { uuid, options }), Request_Plex.PROMISED_WORK[uuid];
+			Request_Plex.IN_WORK.push(uuid);
 
 			chrome.runtime.sendMessage({
 					type: 'SEARCH_PLEX',
 					options,
 					serverConfig: __CONFIG__.server
 				},
-				response =>
-					(response && response.error)?
-						reject(response.error):
-					(!response)?
-						reject(new Error(`Unknown error: ${ response }`)):
-					resolve(response)
-				);
+				response => {
+					Request_Plex.PROMISED_WORK[uuid] =
+						(response && response.error)?
+							reject(response.error):
+						(!response)?
+							reject(new Error(`Unknown error: ${ response }`)):
+						resolve(response)
+				});
 			});
 	}
 
@@ -3137,7 +3267,7 @@ let INITIALIZE = (async date => {
 
 					UTILS_TERMINAL.LOG(`Download Event [${ options.remote }]:`, options);
 
-					UpdateButton(MASTER_BUTTON, 'downloader', 'Download', options);
+					UpdateButton(MASTER_BUTTON, 'download', 'Download', options);
 					return true;
 
 				case 'NOTIFICATION':
@@ -3170,7 +3300,7 @@ let INITIALIZE = (async date => {
 					return false;
 			}
 		} catch(error) {
-			new Notification('error', `Unable to use downloader: ${ String(error) }`);
+			new Notification('error', `Unable to use download: ${ String(error) }`);
 			throw error
 		}
 	});
@@ -3355,6 +3485,27 @@ function traverse(element, until, siblings = false) {
 	return element;
 }
 
+function pathOf(element) {
+	if(element.path)
+		return element.path;
+	else if(element.composedPath)
+		return element.composedPath();
+
+	let path = [];
+
+	while(element) {
+		path.push(element);
+
+		if(element.parentElement === undefined || element.parentElement === null) {
+			path.push(document, top);
+
+			return path;
+		}
+
+		element = element.parentElement;
+	}
+}
+
 // the custom "on location change" event
 function watchlocationchange(subject) {
 	let locationchangecallbacks = watchlocationchange.locationchangecallbacks;
@@ -3484,137 +3635,202 @@ Object.filter = Object.filter || function filter(object, prejudice) {
  <div>3</div>
  */
 	parent.queryBy = parent.queryBy || function queryBy(selectors, container = document) {
-		// Helpers
-		let copy  = array => [...array],
-			query = (SELECTORS, CONTAINER = container) => CONTAINER.querySelectorAll(SELECTORS);
+		let properties = { writable: false, enumerable: false, configurable: false },
+			media;
 
-		// Get rid of enclosing syntaxes: [...] and (...)
-		let regexp = /(\([^\(\)]+?\)|\[[^\[\]]+?\])/g,
-			pulled = [],
-			media  = [],
-			index, length;
+		if(selectors instanceof Element) {
+			media = selectors;
 
-		// The index shouldn't be longer than the length of the selector's string
-		// Keep this to prevent infinite loops
-		for(index = 0, length = selectors.length; index++ < length && regexp.test(selectors);)
-			selectors = selectors.replace(regexp, ($0, $1, $$, $_) => '\b--' + pulled.push($1) + '\b');
+			for(let key of 'first last child parent empty'.split(' '))
+				if(key in media && media[key] instanceof Function)
+					return media;
 
-		let order	   = selectors.split(','),
-			dummy	   = copy(order),
-			output	  = [],
-			generations = 0,
-			cousins		= 0;
+			Object.defineProperties(media, {
+				first: {
+					value: media,
+					...properties
+				},
+				last: {
+					value: media,
+					...properties
+				},
+				child: {
+					value: index => [...media.children][index - 1],
+					...properties
+				},
+				parent: {
+					value: selector => container.queryBy(/^\d+$/.test(selector + '')?
+							pathOf(media)[+selector]:
+						pathOf(media).filter(element => !!~container.queryBy(selector).indexOf(element))
+					),
+					...properties
+				},
+				empty: {
+					value: !media.length,
+					...properties
+				},
+			});
+		} else if(selectors instanceof Array) {
+			media = selectors.map(object => container.queryBy(object));
 
-		// Replace those syntaxes (they were ignored)
-		for(index = 0, length = dummy.length, order = [], regexp = /[\b]--(\d+)[\b]/g; index < length; index++)
-			order.push(dummy[index].replace(regexp, ($0, $1, $$, $_) => pulled[+$1 - 1]));
+			Object.defineProperties(media, {
+				first: {
+					value: media[0],
+					...properties
+				},
+				last: {
+					value: media[media.length - 1],
+					...properties
+				},
+				child: {
+					value: index => media[index - 1],
+					...properties
+				},
+				parent: {
+					value: selector => container.queryBy(media.map(element => container.queryBy(element).parent(selector))),
+					...properties
+				},
+				empty: {
+					value: !media.length,
+					...properties
+				},
+			});
+		} else {
+			// Helpers
+			let copy  = array => [...array],
+				query = (SELECTORS, CONTAINER = container) => (CONTAINER instanceof Array? CONTAINER.map(C => C.querySelectorAll(SELECTORS)) : CONTAINER.querySelectorAll(SELECTORS));
 
-		// Make sure to put the elements in order
-		// Handle the :parent (pseudo) selector
-		for(index = 0, length = order.length; index < length; generations = 0, cousins = 0, index++) {
-			let selector = order[index], ancestor, cousin;
+			// Get rid of enclosing syntaxes: [...] and (...)
+			let regexp = /(\([^\(\)]+?\)|\[[^\[\]]+?\])/g,
+				pulled = [],
+				index, length;
 
-			selector = selector
-			// siblings
-			.replace(/\:nth-sibling\((\d+)\)/g, ($0, $1, $$, $_) => (cousins += +$1, ''))
-			.replace(/(\:{1,2}(next-|previous-)?sibling)/g, ($0, $1, $2, $$, $_) => (cousins += ($2 == 'next'? 1: -1), ''))
-			// parents
-			.replace(/\:nth-parent\((\d+)\)/g, ($0, $1, $$, $_) => (generations -= +$1, ''))
-			.replace(/(\:{1,2}parent\b|<\s*(\s*(,|$)))/g, ($0, $$, $_) => (--generations, ''))
-			.replace(/<([^<,]+)?/g, ($0, $1, $$, $_) => (ancestor = $1, --generations, ''))
-			// miscellaneous
-			.replace(/^\s+|\s+$/g, '');
+			media = [];
 
-			let elements = [].slice.call(query(selector)),
-				parents = [], parent,
-				siblings = [], sibling;
+			// The index shouldn't be longer than the length of the selector's string
+			// Keep this to prevent infinite loops
+			for(index = 0, length = selectors.length; index++ < length && regexp.test(selectors);)
+				selectors = selectors.replace(regexp, ($0, $1, $$, $_) => '\b--' + pulled.push($1) + '\b');
 
-			// Parents
-			for(; generations < 0; generations++)
-				elements = elements.map(element => {
-					let P = element, Q = (P? P.parentElement: {}), R = (Q? Q.parentElement: {}),
-						E = C => [...query(ancestor, C)],
-						F, G;
+			let order	    = selectors.split(','),
+				dummy	    = copy(order),
+				output	    = [],
+				generations = 0,
+				cousins		= 0;
 
-					for(let I = 0, L = -generations; ancestor && !!R && !!Q && !!P && I < L; I++)
-						parent = !!~E(R).indexOf(Q)? Q: G;
+			// Replace those syntaxes (they were ignored)
+			for(index = 0, length = dummy.length, order = [], regexp = /[\b]--(\d+)[\b]/gi; index < length; index++)
+				order.push(dummy[index].replace(regexp, ($0, $1, $$, $_) => pulled[+$1 - 1]));
 
-					for(let I = 0, L = -generations; !ancestor && !!Q && !!P && I < L; I++)
-						Q = (parent = P = Q).parentElement;
+			// Make sure to put the elements in order
+			// Handle the :parent (pseudo) selector
+			for(index = 0, length = order.length; index < length; generations = 0, cousins = 0, index++) {
+				let selector = order[index], ancestor, cousin;
 
-					if((generations === 0 || /\*$/.test(ancestor)) && !~parents.indexOf(parent))
-						parents.push(parent);
+				selector = selector
+				// siblings
+					.replace(/\:nth-sibling\((\d+)\)/gi, ($0, $1, $$, $_) => (cousins += +$1, ''))
+					.replace(/(\:{1,2}(next-|previous-)?sibling)/gi, ($0, $1, $2, $$, $_) => (cousins += ($2 == 'next'? 1: -1), ''))
+				// parents
+					.replace(/\:nth-parent\((\d+)\)/gi, ($0, $1, $$, $_) => (generations -= +$1, ''))
+					.replace(/(\:{1,2}parent\b|<\s*(\s*(,|$)))/gi, ($0, $$, $_) => (--generations, ''))
+					.replace(/<([^<,]+)?/gi, ($0, $1, $$, $_) => (ancestor = $1, --generations, ''))
+				// miscellaneous
+					.replace(/^\s+|\s+$/gi, '');
 
-					return parent;
-				});
+				let elements = [].slice.call(query(selector)),
+					parents = [], parent,
+					siblings = [], sibling;
 
-			// Siblings
-			if(cousins === 0)
-				/* Do nothing */;
-			else if(cousins < 0)
-				for(; cousins < 0; cousins++)
+				// Parents
+				for(; generations < 0; generations++)
 					elements = elements.map(element => {
-						let P = element, Q = (P? P.previousElementSibling: {}),
+						let P = element, Q = (P? P.parentElement: {}), R = (Q? Q.parentElement: {}),
+							E = C => [...query(ancestor, C)],
 							F, G;
 
-						for(let I = 0, L = -cousins; !!Q && !!P && I < L; I++)
-							Q = (sibling = P = Q).previousElementSibling;
+						for(let I = 0, L = -generations; ancestor && !!R && !!Q && !!P && I < L; I++)
+							parent = !!~E(R).indexOf(Q)? Q: G;
 
-						if(cousins === 0 && !~siblings.indexOf(sibling))
-							siblings.push(sibling);
+						for(let I = 0, L = -generations; !ancestor && !!Q && !!P && I < L; I++)
+							Q = (parent = P = Q).parentElement;
 
-						return sibling;
-					});
-			else
-				for(; cousins > 0; cousins--)
-					elements = elements.map(element => {
-						let P = element, Q = (P? P.nextElementSibling: {}),
-							F, G;
+						if((generations === 0 || /\*$/.test(ancestor)) && !~parents.indexOf(parent))
+							parents.push(parent);
 
-						for(let I = 0, L = -cousins; !!Q && !!P && I > L; I--)
-							Q = (sibling = P = Q).nextElementSibling;
-
-						if(cousins === 0 && !~siblings.indexOf(sibling))
-							siblings.push(sibling);
-
-						return sibling;
+						return parent;
 					});
 
-			media.push(parents.length? parents: elements);
-			media.push(siblings.length? siblings: elements);
-			order.splice(index, 1, selector);
+				// Siblings
+				if(cousins === 0)
+					/* Do nothing */;
+				else if(cousins < 0)
+					for(; cousins < 0; cousins++)
+						elements = elements.map(element => {
+							let P = element, Q = (P? P.previousElementSibling: {}),
+								F, G;
+
+							for(let I = 0, L = -cousins; !!Q && !!P && I < L; I++)
+								Q = (sibling = P = Q).previousElementSibling;
+
+							if(cousins === 0 && !~siblings.indexOf(sibling))
+								siblings.push(sibling);
+
+							return sibling;
+						});
+				else
+					for(; cousins > 0; cousins--)
+						elements = elements.map(element => {
+							let P = element, Q = (P? P.nextElementSibling: {}),
+								F, G;
+
+							for(let I = 0, L = -cousins; !!Q && !!P && I > L; I--)
+								Q = (sibling = P = Q).nextElementSibling;
+
+							if(cousins === 0 && !~siblings.indexOf(sibling))
+								siblings.push(sibling);
+
+							return sibling;
+						});
+
+				media.push(parents.length? parents: elements);
+				media.push(siblings.length? siblings: elements);
+				order.splice(index, 1, selector);
+			}
+
+			// Create a continuous array from the sub-arrays
+			for(index = 1, length = media.length; index < length; index++)
+				media.splice(0, 1, copy(media[0]).concat( copy(media[index]) ));
+			output = [].slice.call(media[0]).filter( value => value );
+
+			// Remove repeats
+			for(index = 0, length = output.length, media = []; index < length; index++)
+				if(!~media.indexOf(output[index]))
+					media.push(output[index]);
+
+			Object.defineProperties(media, {
+				first: {
+					value: media[0],
+					...properties
+				},
+				last: {
+					value: media[media.length - 1],
+					...properties
+				},
+				child: {
+					value: index => media[index - 1],
+					...properties
+				},
+				parent: {
+					value: selector => media.map(element => container.queryBy(element).parent(selector)),
+					...properties
+				},
+				empty: {
+					value: !media.length,
+					...properties
+				},
+			});
 		}
-
-		// Create a continuous array from the sub-arrays
-		for(index = 1, length = media.length; index < length; index++)
-			media.splice(0, 1, copy(media[0]).concat( copy(media[index]) ));
-		output = [].slice.call(media[0]).filter( value => value );
-
-		// Remove repeats
-		for(index = 0, length = output.length, media = []; index < length; index++)
-			if(!~media.indexOf(output[index]))
-			media.push(output[index]);
-
-		let properties = { writable: false, enumerable: false, configurable: false };
-
-		Object.defineProperties(media, {
-			first: {
-				value: media[0],
-				...properties
-			},
-			last: {
-				value: media[media.length - 1],
-				...properties
-			},
-			child: {
-				value: index => media[index - 1],
-				...properties
-			},
-			empty: {
-				value: !media.length,
-				...properties
-			},
-		});
 
 		return media;
 	};

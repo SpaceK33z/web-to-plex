@@ -14,7 +14,7 @@ if(chrome.runtime.lastError)
 
 // FireFox doesn't support sync storage.
 const storage = (chrome.storage.sync || chrome.storage.local),
-		$ = top.$ = (selector, all) => (all? [...document.querySelectorAll(selector)]: document.querySelector(selector)),
+		$ = top.$ = (selector, all = false, container = document) => (all? [...container.querySelectorAll(selector)]: container.querySelector(selector)),
 		$$ = top.$$ = (selector, all) => (all? [...$('display').querySelectorAll(selector)]: $('display').querySelector(selector)),
 		__servers__ = $('[data-option="preferredServer"]'),
 		__sickBeard_qualityProfile__  = $(`[data-option="sickBeardQualityProfileId"]`),
@@ -195,7 +195,11 @@ const storage = (chrome.storage.sync || chrome.storage.local),
 			'plugin_metacritic',
 
 			// Theme Settings
-			...(() => [...$('[data-option^="theme:"i]', true)].map(e => e.dataset.option))()
+			'UseMinions',
+			...(() => [...$('[data-option^="theme:"i]', true)].map(e => e.dataset.option))(),
+
+			// Other Settings
+			'__defaults',
 		];
 
 let PlexServers = [],
@@ -217,7 +221,23 @@ let __caught = {
 	tvdb: [],
 },
 // The theme classes
-	__theme = [];
+	__theme = {};
+
+// Icon Markers
+let MARKERS = [
+	// yes
+	`<svg viewBox="0 0 560 560" stroke-miterlimit="1.414" stroke-linejoin="round" class="icon true"><path d="m78.756 298.564l-40 69.282 242.488 140 240-415.692-69.282-40-200 346.41-173.206-100"></path></svg>`,
+	// no
+	`<svg viewBox="0 0 560 560" stroke-miterlimit="1.414" stroke-linejoin="round" class="icon false"><path d="m280 0c154.536 0 280 125.464 280 280 0 154.536-125.464 280-280 280-154.536 0-280-125.464-280-280 0-154.536 125.464-280 280-280m-40 420c0 22.077 17.923 40 40 40 22.077 0 40-17.923 40-40 0-22.077-17.923-40-40-40-22.077 0-40 17.923-40 40m60-320l-40 0c-11.038 0-20 8.962-20 20l0 200c0 11.038 8.962 20 20 20l40 0c11.038 0 20-8.962 20-20l0-200c0-11.038-8.962-20-20-20"></path></svg>`,
+	// maybe
+	`<svg viewBox="0 0 560 560" stroke-miterlimit="1.414" stroke-linejoin="round" class="icon maybe"><path d="m280 0c154.536 0 280 125.464 280 280 0 154.536-125.464 280-280 280-154.536 0-280-125.464-280-280 0-154.536 125.464-280 280-280m-40 440c0 22.077 17.923 40 40 40 22.077 0 40-17.923 40-40 0-22.077-17.923-40-40-40-22.077 0-40 17.923-40 40m70-80l0-6.84 0-.179c.011-2.265.168-4.528.482-6.772.586-4.188 1.706-8.299 3.324-12.206 1.56-3.765 3.581-7.337 6.005-10.613 1.378-1.861 2.886-3.622 4.506-5.277 12.286-12.48 24.784-24.75 37.148-37.152 1.253-1.265 2.48-2.554 3.674-3.873 2.298-2.538 4.482-5.178 6.544-7.91 5.64-7.475 10.359-15.64 14.021-24.258 2.605-6.129 4.675-12.484 6.18-18.972 1.516-6.534 2.457-13.201 2.81-19.9.584-11.079-.447-22.237-3.053-33.021-1.591-6.586-3.767-13.03-6.492-19.232-2.728-6.21-6.008-12.176-9.788-17.807-2.756-4.106-5.777-8.033-9.039-11.749-1.655-1.886-3.374-3.715-5.147-5.49-1.412-1.415-2.866-2.79-4.352-4.127-3.068-2.761-6.285-5.356-9.632-7.77-8.915-6.432-18.755-11.571-29.126-15.214-7.849-2.757-15.996-4.658-24.254-5.658-3.049-.369-6.113-.616-9.182-.74-1.423-.057-2.848-.086-4.272-.093-.357 0-.713 0-1.07.002-2.253.018-4.505.094-6.754.241-4.7.306-9.381.901-14.008 1.782-6.09 1.159-12.086 2.813-17.909 4.939-5.594 2.042-11.028 4.519-16.238 7.403-5.852 3.239-11.419 6.99-16.618 11.196-2.576 2.084-5.056 4.282-7.446 6.577-.342.331-.682.663-1.021.996-6.867 6.803-13.671 13.669-20.506 20.504l42.426 42.426 19.985-19.984.136-.137c1.966-1.946 4.07-3.749 6.304-5.381 3.924-2.868 8.23-5.21 12.77-6.946 3.392-1.297 6.913-2.256 10.494-2.859 3.453-.58 6.961-.829 10.461-.742 4.493.111 8.971.778 13.302 1.98 4.678 1.298 9.18 3.219 13.354 5.699 2.604 1.547 5.08 3.31 7.393 5.266 1.182 1 2.318 2.051 3.414 3.144.705.713 1.397 1.438 2.065 2.185 1.35 1.51 2.617 3.095 3.792 4.745 3.921 5.506 6.807 11.735 8.475 18.285 1.377 5.408 1.921 11.022 1.61 16.593-.35 6.263-1.783 12.458-4.219 18.239-1.715 4.068-3.921 7.928-6.559 11.468-1.484 1.993-3.105 3.879-4.843 5.655-12.294 12.486-24.797 24.764-37.169 37.173-1.121 1.131-2.22 2.283-3.292 3.46-2.284 2.506-4.452 5.119-6.494 7.825-5.604 7.427-10.259 15.565-13.819 24.161-3.431 8.283-5.844 16.985-7.167 25.852-.467 3.127-.799 6.275-.995 9.431-.098 1.587-.16 3.175-.192 4.764-.008.455-.013.91-.017 1.365-.012 2.515-.002 5.032-.002 7.546l60 0m8.826-198.747l0-.001c-.011-.01.043.043.032.032l-.032-.031"></path></svg>`
+];
+
+MARKERS.yes   = MARKERS[0];
+MARKERS.no    = MARKERS[1];
+MARKERS.maybe = MARKERS[2];
+
+let RESETTING_SETTINGS = false;
 
 // create and/or queue a notification
 // state = "error" - red
@@ -521,6 +541,7 @@ function performPlexLogin({ event }) {
 	s.title = '';
 	__servers__.innerHTML = '';
 	__save__.disabled = true;
+	__save__.innerHTML = 'Save ' + MARKERS.maybe;
 	LoadingAnimation(true);
 
 	tryPlexLogin(u, p)
@@ -537,7 +558,8 @@ function performPlexLogin({ event }) {
 
 				return performPlexTest({});
 			}
-		});
+		})
+		.catch(error => { LoadingAnimation(); new Notification('error', error); __save__.innerHTML = 'Save ' + MARKERS.no; });
 
 }
 
@@ -547,8 +569,9 @@ function performPlexTest({ ServerID, event }) {
 		inusestatus = [...$('[using="plex"]', true)];
 
 	__save__.disabled = true;
+	__save__.innerHTML = 'Save ' + MARKERS.maybe;
 	__servers__.innerHTML = '';
-	teststatus.textContent = '?';
+	teststatus.innerHTML = MARKERS.maybe;
 	inusestatus.map(e => e.setAttribute('in-use', false));
 	LoadingAnimation(true);
 
@@ -556,7 +579,7 @@ function performPlexTest({ ServerID, event }) {
 		LoadingAnimation();
 
 		PlexServers = servers;
-		teststatus.textContent = '!';
+		teststatus.innerHTML = MARKERS[+!servers];
 		inusestatus.map(e => e.setAttribute('in-use', false));
 
 		if(!servers)
@@ -564,6 +587,7 @@ function performPlexTest({ ServerID, event }) {
 		inusestatus.map(e => e.setAttribute('in-use', true));
 
 		__save__.disabled = false;
+		__save__.innerHTML = 'Save ' + MARKERS.yes;
 		teststatus.classList = true;
 
 		(servers = [{ sourceTitle: 'GitHub', clientIdentifier: '', name: 'No Server', notice: 'This will not connect to any Plex servers' }, ...servers]).forEach(server => {
@@ -579,7 +603,8 @@ function performPlexTest({ ServerID, event }) {
 		if(ServerID) {
 			__servers__.value = ServerID;
 		}
-	});
+	})
+	.catch(error => { LoadingAnimation(); new Notification('error', error); teststatus.innerHTML = MARKERS.no; __save__.innerHTML = 'Save ' + MARKERS.no; });
 }
 
 function getPlexConnections(server) {
@@ -611,12 +636,16 @@ function getOptionValues() {
 		}
 	});
 
-	let COM = options.UseLZW;
+	let COM = options.UseLZW,
+		DEF = options.__defaults == 'true';
 
 	for(let key in __caught)
 		__caught[key] = __caught[key].filter(id => id).slice(0, (COM? 200: 100)).sort();
 
-	__theme = __theme.filter(v => v);
+	// if(options.__theme)
+	// 	__theme = JSON.parse(options.__theme);
+	//
+	// __theme = __theme.filter(v => v);
 
 	let _c = JSON.stringify(__caught),
 		_t = JSON.stringify(__theme);
@@ -639,6 +668,7 @@ function performOmbiLogin({ event }) {
 	s.title = '';
 	__servers__.innerHTML = '';
 	__save__.disabled = true;
+	__save__.innerHTML = 'Save ' + MARKERS.maybe;
 	LoadingAnimation(true);
 
 	let APIURL = `${ l }api/v1/`,
@@ -747,12 +777,14 @@ function performOmbiLogin({ event }) {
 				}
 
 				__save__.disabled = false;
+				__save__.innerHTML = 'Save ' + MARKERS.yes;
 			} else {
 				/* Plex either doesn't exist, or is disabled */
 				new Notification('error', 'Error getting Plex details from Ombi');
+			 	__save__.innerHTML = 'Save ' + MARKERS.no;
 			}
 		} )
-		.catch( error => { new Notification('error', error); throw error } );
+		.catch(error => { LoadingAnimation(); new Notification('error', error); __save__.innerHTML = 'Save ' + MARKERS.no; });
 }
 
 function performOmbiTest({ refreshing = false, event }) {
@@ -764,7 +796,7 @@ function performOmbiTest({ refreshing = false, event }) {
 		enabled = refreshing? $('#using-ombi'): $$('#using-ombi'),
 		inusestatus = [...$('[using="ombi"]', true)];
 
-	teststatus.textContent = '?';
+	teststatus.innerHTML = MARKERS.maybe;
 	options.ombiURLRoot = url = path.value = options.ombiURLRoot.replace(/^(\:\d+)/, 'localhost$1').replace(/^(?!^http(s)?:)/, 'http$1://').replace(/\/+$/, '');
 	inusestatus.map(e => e.setAttribute('in-use', false));
 	LoadingAnimation(true);
@@ -778,38 +810,40 @@ function performOmbiTest({ refreshing = false, event }) {
 						__caught.imdb.push(item.imdbId);
 						__caught.tmdb.push(item.theMovieDbId);
 					});
-				});
 
-			fetch(`${ url }/api/v1/Request/tv`)
-				.then(r => r.json())
-				.then(json => {
-					json.map(item => {
-						__caught.imdb.push(item.imdbId);
-						__caught.tvdb.push(item.tvDbId);
-					});
-				});
+					fetch(`${ url }/api/v1/Request/tv`)
+						.then(r => r.json())
+						.then(json => {
+							json.map(item => {
+								__caught.imdb.push(item.imdbId);
+								__caught.tvdb.push(item.tvDbId);
+							});
+						})
+						.catch(error => { LoadingAnimation(); new Notification('error', error); teststatus.innerHTML = MARKERS.no });
 
-			fetch(`${ url }/api/v1/Status`, headers)
-				.then( response => response.text() )
-				.then( status => {
-					LoadingAnimation();
-					if (!status || !status.length) throw new Error('Unable to communicate with Ombi');
+					fetch(`${ url }/api/v1/Status`, headers)
+						.then( response => response.text() )
+						.then( status => {
+							LoadingAnimation();
+							if (!status || !status.length) throw new Error('Unable to communicate with Ombi');
 
-					if ((status = +status) >= 200 && status < 400) {
-						teststatus.textContent = '!';
-						enabled.checked = teststatus.classList = true;
-						enabled.parentElement.removeAttribute('disabled');
-						inusestatus.map(e => e.setAttribute('in-use', true));
-					} else {
-						teststatus.textContent = '!';
-						enabled.checked = teststatus.classList = false;
-						enabled.parentElement.setAttribute('disabled');
-						inusestatus.map(e => e.setAttribute('in-use', false));
+							if ((status = +status) >= 200 && status < 400) {
+								teststatus.innerHTML = MARKERS.yes;
+								enabled.checked = teststatus.classList = true;
+								enabled.parentElement.removeAttribute('disabled');
+								inusestatus.map(e => e.setAttribute('in-use', true));
+							} else {
+								teststatus.innerHTML = MARKERS.no;
+								enabled.checked = teststatus.classList = false;
+								enabled.parentElement.setAttribute('disabled');
+								inusestatus.map(e => e.setAttribute('in-use', false));
 
-						throw new Error(`Ombi error [${ status }]`);
-					}
-				} )
-				.catch( error => { new Notification('error', error) } );
+								throw new Error(`Ombi error [${ status }]`);
+							}
+						})
+						.catch(error => { LoadingAnimation(); new Notification('error', error); teststatus.innerHTML = MARKERS.no });
+				})
+				.catch(error => { LoadingAnimation(); new Notification('error', error); teststatus.innerHTML = MARKERS.no });
 		} catch(error) {
 			LoadingAnimation();
 
@@ -859,7 +893,7 @@ function performWatcherTest({ QualityProfileID = 'Default', refreshing = false, 
 		inusestatus = [...$('[using="watcher"]', true)];
 
 	quality.innerHTML = '';
-	teststatus.textContent = '?';
+	teststatus.innerHTML = MARKERS.maybe;
 	storagepath.value = '[Empty]';
 	options.watcherURLRoot = url = path.value = options.watcherURLRoot.replace(/^(\:\d+)/, 'localhost$1').replace(/^(?!^http(s)?:)/, 'http$1://').replace(/\/+$/, '');
 	inusestatus.map(e => e.setAttribute('in-use', false));
@@ -872,7 +906,8 @@ function performWatcherTest({ QualityProfileID = 'Default', refreshing = false, 
 					__caught.imdb.push(item.movies.imdbid);
 					__caught.tmdb.push(item.movies.tmdbid);
 				});
-			});
+			})
+			.catch(error => { LoadingAnimation(); new Notification('error', error); teststatus.innerHTML = MARKERS.no });
 
 			getWatcher(options, 'getconfig').then(configuration => {
 				LoadingAnimation();
@@ -891,8 +926,7 @@ function performWatcherTest({ QualityProfileID = 'Default', refreshing = false, 
 						name
 					});
 
-				teststatus.textContent = '!';
-				teststatus.classList = enabled.checked = !!profiles.length;
+				teststatus.innerHTML = MARKERS[+!(teststatus.classList = enabled.checked = !!profiles.length)];
 				inusestatus.map(e => e.setAttribute('in-use', enabled.checked));
 
 				if(!profiles.length)
@@ -919,11 +953,11 @@ function performWatcherTest({ QualityProfileID = 'Default', refreshing = false, 
 				storagepath.value = path || '[Default Location]';
 
 				$('[data-option="watcherStoragePaths"i]').value = JSON.stringify(path || { path: '[Default Location]', id: 0 });
-			});
+			})
+			.catch(error => { LoadingAnimation(); new Notification('error', error); teststatus.innerHTML = MARKERS.no });
 		} catch(error) {
 			LoadingAnimation();
-
-			throw error;
+			new Notification('error', error);
 		}
 	}
 
@@ -969,7 +1003,7 @@ function performRadarrTest({ QualityProfileID, StoragePath, refreshing = false, 
 		inusestatus = [...$('[using="radarr"]', true)];
 
 	quality.innerHTML = '';
-	teststatus.textContent = '?';
+	teststatus.innerHTML = MARKERS.maybe;
 	storagepath.textContent = '';
 	options.radarrURLRoot = url = path.value = options.radarrURLRoot.replace(/^(\:\d+)/, 'localhost$1').replace(/^(?!^http(s)?:)/, 'http$1://').replace(/\/+$/, '');
 	inusestatus.map(e => e.setAttribute('in-use', false));
@@ -982,14 +1016,14 @@ function performRadarrTest({ QualityProfileID, StoragePath, refreshing = false, 
 					__caught.imdb.push(movie.imdbId);
 					__caught.tmdb.push(movie.tmdbId);
 				});
-			});
+			})
+			.catch(error => { LoadingAnimation(); new Notification('error', error); teststatus.innerHTML = MARKERS.no });
 
 			getRadarr(options, 'profile').then(profiles => {
 				LoadingAnimation();
 				if(!profiles) return new Notification('error', 'Failed to get Radarr configuration');
 
-				teststatus.textContent = '!';
-				teststatus.classList = enabled.checked = !!profiles.length;
+				teststatus.innerHTML = MARKERS[+!(teststatus.classList = enabled.checked = !!profiles.length)];
 				inusestatus.map(e => e.setAttribute('in-use', enabled.checked));
 
 				if(!profiles.length)
@@ -1012,29 +1046,42 @@ function performRadarrTest({ QualityProfileID, StoragePath, refreshing = false, 
 				// Because the <select> was reset, the original value is lost.
 				if(QualityProfileID)
 					$('[data-option="__radarrQuality"i]').value = quality.value = QualityProfileID;
-			});
+			})
+			.catch(error => { LoadingAnimation(); new Notification('error', error); teststatus.innerHTML = MARKERS.no });
 
 			let StoragePaths = [];
 			getRadarr(options, 'rootfolder').then(storagepaths => {
-				storagepaths.forEach(path => {
-					let option = document.createElement('option');
+			    LoadingAnimation();
+			    if(!storagepaths) return new Notification('error', 'Failed to get Radarr configuration');
 
-					StoragePaths.push((option.value = option.textContent = path.path).replace(/\\/g, '/'));
-					storagepath.appendChild(option);
-				});
+			    teststatus.innerHTML = MARKERS[+!(teststatus.classList = enabled.checked = !!storagepaths.length)];
+			    inusestatus.map(e => e.setAttribute('in-use', enabled.checked));
 
-				$('[data-option="radarrStoragePaths"i]').value = JSON.stringify(storagepaths);
+			    if(!storagepaths.length)
+			        return teststatus.title = 'Failed to communicate with Radarr';
+			    enabled.parentElement.removeAttribute('disabled');
 
-				// Because the <select> was reset, the original value is lost.
-				if(StoragePath) {
-					storagepath.value = StoragePath;
-					$('[data-option="__radarrStoragePath"i]').value = StoragePaths.indexOf(StoragePath.replace(/\\/g, '/')) + 1;
-				}
-			});
+			    let paths = [];
+			    storagepaths.forEach(folder => {
+			        let option = document.createElement('option');
+			        let { id, path } = folder;
+
+			        option.value = id;
+			        option.textContent = path;
+			        paths.push({ id, path });
+			        storagepath.appendChild(option);
+			    });
+
+			    $('[data-option="radarrStoragePaths"i]').value = JSON.stringify(paths);
+
+			    // Because the <select> was reset, the original value is lost.
+			    if(StoragePath)
+			        $('[data-option="__radarrStoragePath"i]').value = storagepath.value = StoragePath;
+			})
+			.catch(error => { LoadingAnimation(); new Notification('error', error); teststatus.innerHTML = MARKERS.no });
 		} catch(error) {
 			LoadingAnimation();
-
-			throw error;
+			new Notification('error', error);
 		}
 	};
 
@@ -1080,7 +1127,7 @@ function performSonarrTest({ QualityProfileID, StoragePath, refreshing = false, 
 		inusestatus = [...$('[using="sonarr"]', true)];
 
 	quality.innerHTML = '';
-	teststatus.textContent = '?';
+	teststatus.innerHTML = MARKERS.maybe;
 	storagepath.textContent = '';
 	options.sonarrURLRoot = url = path.value = options.sonarrURLRoot.replace(/^(\:\d+)/, 'localhost$1').replace(/^(?!^http(s)?:)/, 'http$1://').replace(/\/+$/, '');
 	inusestatus.map(e => e.setAttribute('in-use', false));
@@ -1092,14 +1139,14 @@ function performSonarrTest({ QualityProfileID, StoragePath, refreshing = false, 
 				shows.map(show => {
 					__caught.tvdb.push(show.tvdbId);
 				});
-			});
+			})
+			.catch(error => { LoadingAnimation(); new Notification('error', error); teststatus.innerHTML = MARKERS.no });
 
 			getSonarr(options, 'profile').then(profiles => {
 				LoadingAnimation();
 				if(!profiles) return new Notification('error', 'Failed to get Sonarr configuration');
 
-				teststatus.textContent = '!';
-				teststatus.classList = enabled.checked = !!profiles.length;
+				teststatus.innerHTML = MARKERS[+!(teststatus.classList = enabled.checked = !!profiles.length)];
 				inusestatus.map(e => e.setAttribute('in-use', enabled.checked));
 
 				if(!profiles.length)
@@ -1122,29 +1169,42 @@ function performSonarrTest({ QualityProfileID, StoragePath, refreshing = false, 
 				// Because the <select> was reset, the original value is lost.
 				if(QualityProfileID)
 					$('[data-option="__sonarrQuality"i]').value = quality.value = QualityProfileID;
-			});
+			})
+			.catch(error => { LoadingAnimation(); new Notification('error', error); teststatus.innerHTML = MARKERS.no });
 
 			let StoragePaths = [];
 			getSonarr(options, 'rootfolder').then(storagepaths => {
-				storagepaths.forEach(path => {
-					let option = document.createElement('option');
+				LoadingAnimation();
+				if(!storagepaths) return new Notification('error', 'Failed to get Sonarr configuration');
 
-					StoragePaths.push((option.value = option.textContent = path.path).replace(/\\/g, '/'));
+				teststatus.innerHTML = MARKERS[+!(teststatus.classList = enabled.checked = !!storagepaths.length)];
+				inusestatus.map(e => e.setAttribute('in-use', enabled.checked));
+
+				if(!storagepaths.length)
+					return teststatus.title = 'Failed to communicate with Sonarr';
+				enabled.parentElement.removeAttribute('disabled');
+
+				let paths = [];
+				storagepaths.forEach(folder => {
+					let option = document.createElement('option');
+					let { id, path } = folder;
+
+					option.value = id;
+					option.textContent = path;
+					paths.push({ id, path });
 					storagepath.appendChild(option);
 				});
 
-				$('[data-option="sonarrStoragePaths"i]').value = JSON.stringify(storagepaths);
+				$('[data-option="sonarrStoragePaths"i]').value = JSON.stringify(paths);
 
 				// Because the <select> was reset, the original value is lost.
-				if(StoragePath) {
-					storagepath.value = StoragePath;
-					$('[data-option="__sonarrStoragePath"i]').value = StoragePaths.indexOf(StoragePath.replace(/\\/g, '/')) + 1;
-				}
-			});
+				if(StoragePath)
+					$('[data-option="__sonarrStoragePath"i]').value = storagepath.value = StoragePath;
+			})
+			.catch(error => { LoadingAnimation(); new Notification('error', error); teststatus.innerHTML = MARKERS.no });
 		} catch(error) {
 			LoadingAnimation();
-
-			throw error;
+			new Notification('error', error);
 		}
 	};
 
@@ -1190,7 +1250,7 @@ function performMedusaTest({ QualityProfileID, StoragePath, refreshing = false, 
 		inusestatus = [...$('[using="medusa"]', true)];
 
 	quality.innerHTML = '';
-	teststatus.textContent = '?';
+	teststatus.innerHTML = MARKERS.maybe;
 	storagepath.textContent = '';
 	options.medusaURLRoot = url = path.value = options.medusaURLRoot.replace(/^(\:\d+)/, 'localhost$1').replace(/^(?!^http(s)?:)/, 'http$1://').replace(/\/+$/, '');
 	inusestatus.map(e => e.setAttribute('in-use', false));
@@ -1203,7 +1263,8 @@ function performMedusaTest({ QualityProfileID, StoragePath, refreshing = false, 
 					__caught.imdb.push(show.id.imdb)
 					__caught.tvdb.push(show.id.tvdb);
 				});
-			});
+			})
+			.catch(error => { LoadingAnimation(); new Notification('error', error); teststatus.innerHTML = MARKERS.no });
 
 			getMedusa(options, 'config').then(configuration => {
 				LoadingAnimation();
@@ -1215,8 +1276,7 @@ function performMedusaTest({ QualityProfileID, StoragePath, refreshing = false, 
 
 				profiles = qualities[profiles];
 
-				teststatus.textContent = '!';
-				teststatus.classList = enabled.checked = !!profiles.length;
+				teststatus.innerHTML = MARKERS[+!(teststatus.classList = enabled.checked = !!profiles.length)];
 				inusestatus.map(e => e.setAttribute('in-use', enabled.checked));
 
 				if(!profiles.length)
@@ -1237,7 +1297,8 @@ function performMedusaTest({ QualityProfileID, StoragePath, refreshing = false, 
 				// Because the <select> was reset, the original value is lost.
 				if(QualityProfileID)
 					$('[data-option="__medusaQuality"i]').value = quality.value = QualityProfileID;
-			});
+			})
+			.catch(error => { LoadingAnimation(); new Notification('error', error); teststatus.innerHTML = MARKERS.no });
 
 			let StoragePaths = [];
 			getMedusa(options, 'config').then(configuration => {
@@ -1259,11 +1320,11 @@ function performMedusaTest({ QualityProfileID, StoragePath, refreshing = false, 
 					$('[data-option="__medusaStoragePath"i]').value = StoragePath;
 					storagepath.selectedIndex = StoragePaths.indexOf(StoragePath.replace(/\\/g, '/').replace(/\/+$/, ''));
 				}
-			});
+			})
+			.catch(error => { LoadingAnimation(); new Notification('error', error); teststatus.innerHTML = MARKERS.no });
 		} catch(error) {
 			LoadingAnimation();
-
-			throw error;
+			new Notification('error', error);
 		}
 	};
 
@@ -1309,7 +1370,7 @@ function performSickBeardTest({ QualityProfileID, StoragePath, refreshing = fals
 		inusestatus = [...$('[using="sickbeard"]', true)];
 
 	quality.innerHTML = '';
-	teststatus.textContent = '?';
+	teststatus.innerHTML = MARKERS.maybe;
 	storagepath.textContent = '';
 	options.sickBeardURLRoot = url = path.value = options.sickBeardURLRoot.replace(/^(\:\d+)/, 'localhost$1').replace(/^(?!^http(s)?:)/, 'http$1://').replace(/\/+$/, '');
 	inusestatus.map(e => e.setAttribute('in-use', false));
@@ -1328,7 +1389,8 @@ function performSickBeardTest({ QualityProfileID, StoragePath, refreshing = fals
 				shows.map(show => {
 					__caught.tvdb.push(show.tvdbid);
 				});
-			});
+			})
+			.catch(error => { LoadingAnimation(); new Notification('error', error); teststatus.innerHTML = MARKERS.no });
 
 			getSickBeard(options, 'sb.getdefaults').then(configuration => {
 				LoadingAnimation();
@@ -1340,8 +1402,7 @@ function performSickBeardTest({ QualityProfileID, StoragePath, refreshing = fals
 
 				profiles = qualities[profiles];
 
-				teststatus.textContent = '!';
-				teststatus.classList = enabled.checked = !!profiles.length;
+				teststatus.innerHTML = MARKERS[+!(teststatus.classList = enabled.checked = !!profiles.length)];
 				inusestatus = [...$('[using="sickbeard"]', true)];
 
 				if(!profiles.length)
@@ -1363,7 +1424,8 @@ function performSickBeardTest({ QualityProfileID, StoragePath, refreshing = fals
 				// Because the <select> was reset, the original value is lost.
 				if(QualityProfileID)
 					$('[data-option="__sickBeardQuality"i]').value = quality.value = QualityProfileID;
-			});
+			})
+			.catch(error => { LoadingAnimation(); new Notification('error', error); teststatus.innerHTML = MARKERS.no });
 
 			let StoragePaths = [];
 			getSickBeard(options, 'sb.getrootdirs').then(configuration => {
@@ -1387,11 +1449,11 @@ function performSickBeardTest({ QualityProfileID, StoragePath, refreshing = fals
 					$('[data-option="__sickBeardStoragePath"i]').value =
 					storagepath.selectedIndex = StoragePaths.indexOf(StoragePath.replace(/\\/g, '/').replace(/\/+$/, ''));
 				}
-			});
+			})
+			.catch(error => { LoadingAnimation(); new Notification('error', error); teststatus.innerHTML = MARKERS.no });
 		} catch(error) {
 			LoadingAnimation();
-
-			throw error;
+			new Notification('error', error);
 		}
 	};
 
@@ -1406,10 +1468,8 @@ function performSickBeardTest({ QualityProfileID, StoragePath, refreshing = fals
 }
 
 function enableCouchPotato() {
-	let inusestatus = [...$('[using="couchpotato"]', true)];
-
-	inusestatus.map(e => e.setAttribute('in-use', true));
-	$('#use-couchpotato').parentElement.removeAttribute('disabled');
+	$('#enable-couchpotato', true).forEach(e => e.setAttribute('disabled', ''));
+	$('#using-couchpotato', true).forEach(e => e.parentElement.removeAttribute('disabled'));
 }
 
 function HandleProxySettings(data) {
@@ -1427,7 +1487,42 @@ function HandleProxySettings(data) {
 	};
 }
 
+function HandleProxyHeaders(Headers = "", URL = "") {
+	let headers = {},
+		R = RegExp;
+
+	Headers.replace(/^[ \t]*([^\=\s]+)[ \t]*=[ \t]*((["'`])(?:[^\\\3]*|\\.)\3|[^\f\n\r\v]*)/gm, ($0, $1, $2, $3, $$, $_) => {
+		let string = !!$3;
+
+		if(string) {
+			headers[$1] = $2.replace(RegExp(`^${ $3 }|${ $3 }$`, 'g'), '');
+		} else {
+			$2 = $2.replace(/@([\w\.]+)/g, (_0, _1, _$, __) => {
+				let property = top;
+
+				for(let path of _1.split('.'))
+					if(/^(\w+)\(\s*\)$/.test(path))
+						property = property[R.$1]();
+					else
+						property = property[path];
+
+				headers[$1] = property;
+			})
+			.replace(/@\{b(ase-?)?64-url\}/gi, btoa(URL))
+			.replace(/@\{enc(ode)?-url\}/gi, encodeURIComponent(URL))
+			.replace(/@\{(raw-)?url\}/gi, URL);
+
+			headers[$1] = $2;
+		}
+	});
+
+	return headers;
+}
+
 function saveOptions() {
+	if(RESETTING_SETTINGS)
+		return saveOptionsWhileResetting();
+
 	ServerID = [...__servers__.selectedOptions][0];
 
 	if(!ServerID || !ServerID.value) {
@@ -1501,6 +1596,8 @@ function saveOptions() {
 		ClientID = window.crypto.getRandomValues(new Uint32Array(5))
 			.join('-');
 	}
+	new Notification('update', 'Saving...', 1500);
+	LoadingAnimation(true);
 	storage.set({ ClientID });
 
 	options.plexURL = options.plexURLRoot = (options.plexURL || "https://app.plex.tv/")
@@ -1533,16 +1630,16 @@ function saveOptions() {
 		.replace(/^(?!^http(s)?:\/\/)(.+)/, 'http$1://$2');
 
 	options.radarrStoragePath = options.radarrStoragePath
-		.replace(/([^\\\/])$/, endingSlash);
+		// .replace(/([^\\\/])$/, endingSlash);
 
 	options.sonarrStoragePath = options.sonarrStoragePath
-		.replace(/([^\\\/])$/, endingSlash);
+		// .replace(/([^\\\/])$/, endingSlash);
 
 	options.medusaStoragePath = options.medusaStoragePath
-		.replace(/([^\\\/])$/, endingSlash);
+		// .replace(/([^\\\/])$/, endingSlash);
 
 	options.sickBeardStoragePath = options.sickBeardStoragePath
-		.replace(/([^\\\/])$/, endingSlash);
+		// .replace(/([^\\\/])$/, endingSlash);
 
 	// icons for the popup page
 	for(let index = 0, array = 'plex ombi medusa watcher radarr sonarr couchpotato sickBeard'.split(' '), item = save('URLs', array); index < array.length; index++)
@@ -1564,8 +1661,6 @@ function saveOptions() {
 		// Update status to let the user know the options were saved
 		new Notification('update', 'Saved', 1500);
 	}
-	new Notification('update', 'Saving...', 1500);
-	LoadingAnimation(true);
 
 	let data = {
 		...options,
@@ -1612,6 +1707,9 @@ function saveOptions() {
 }
 
 function saveOptionsWithoutPlex() {
+	if(RESETTING_SETTINGS)
+		return saveOptionsWhileResetting();
+
 	// See #4
 	let options = getOptionValues(),
 		endingSlash = ($0, $1, $$, $_) => ($1 + (/\\/.test($_)? '\\': '/'));
@@ -1654,6 +1752,7 @@ function saveOptionsWithoutPlex() {
 		ClientID = 'web-to-plex:client';
 		storage.set({ ClientID });
 	}
+	new Notification('update', 'Saving...', 1500);
 
 	// Still need to set this
 	options.plexURL = options.plexURLRoot = "https://webtoplex.github.io/web/no.server/";
@@ -1683,16 +1782,16 @@ function saveOptionsWithoutPlex() {
 		.replace(/^(?!^http(s)?:\/\/)(.+)/, 'http$1://$2');
 
 	options.radarrStoragePath = options.radarrStoragePath
-		.replace(/([^\\\/])$/, endingSlash);
+		// .replace(/([^\\\/])$/, endingSlash);
 
 	options.sonarrStoragePath = options.sonarrStoragePath
-		.replace(/([^\\\/])$/, endingSlash);
+		// .replace(/([^\\\/])$/, endingSlash);
 
 	options.medusaStoragePath = options.medusaStoragePath
-		.replace(/([^\\\/])$/, endingSlash);
+		// .replace(/([^\\\/])$/, endingSlash);
 
 	options.sickBeardStoragePath = options.sickBeardStoragePath
-		.replace(/([^\\\/])$/, endingSlash);
+		// .replace(/([^\\\/])$/, endingSlash);
 
 	// icons for the popup page
 	for(let index = 0, array = 'ombi medusa watcher radarr sonarr couchpotato sickBeard'.split(' '), item = save('URLs', array); index < array.length; index++)
@@ -1714,7 +1813,6 @@ function saveOptionsWithoutPlex() {
 		// Update status to let the user know the options were saved
 		new Notification('update', 'Saved', 1500);
 	}
-	new Notification('update', 'Saving...', 1500);
 
 	let data = options;
 
@@ -1730,6 +1828,35 @@ function saveOptionsWithoutPlex() {
 		);
 
 	storage.set(data, () => {
+		LoadingAnimation();
+
+		if(chrome.runtime.lastError) {
+			new Notification('error', 'Error with saving: ' + chrome.runtime.lastError.message);
+			storage.set(data, OptionsSavedMessage);
+		} else {
+			terminal.log('Saved Options: ', options);
+			OptionsSavedMessage();
+		}
+
+		chrome.runtime.sendMessage({
+			type: 'UPDATE_CONFIGURATION',
+			options,
+		}, response => {
+			if(response === undefined) {
+				console.warn(`Update response (UPDATE_CONFIGURATION): Invalid response...`, { response, options });
+			} else {
+				console.log(`Update response (UPDATE_CONFIGURATION):`, { response, options });
+			}
+		});
+	});
+}
+
+function saveOptionsWhileResetting() {
+	LoadingAnimation(true);
+
+	let options = getOptionValues();
+
+	storage.set(options, () => {
 		LoadingAnimation();
 
 		if(chrome.runtime.lastError) {
@@ -1841,6 +1968,7 @@ function restoreOptions(OPTIONS) {
 		})({ ...builtin_sites, ...plugin_sites });
 
 		$('[data-option="__domains"i]').value = __domains;
+		$('[data-option="__defaults"i]').value = 'false';
 	}
 
 	if (OPTIONS && typeof OPTIONS == 'string') {
@@ -1983,7 +2111,7 @@ for(let index = 0, length = builtin_array.length; builtinElement && index < leng
 `
 <h3>${ title }</h3>
 <div class="checkbox">
-	<input id="${ name }" type="checkbox" data-option="${ name }" pid="${ r }" js="${ js }" checked>
+	<input id="${ name }" type="checkbox" data-option="${ name }" pid="${ r }" js="${ js }" checked default="true">
 	<label for="${ name }"></label>
 </div>
 <div>
@@ -2007,7 +2135,7 @@ for(let index = 0, length = builtin_array.length; builtinElement && index < leng
 `
 <h3>${ title }</h3>
 <div class="checkbox">
-	<input id="${ name }" type="checkbox" data-option="${ name }" bid="${ r }" js="${ js }" checked>
+	<input id="${ name }" type="checkbox" data-option="${ name }" bid="${ r }" js="${ js }" checked default="true">
 	<label for="${ name }"></label>
 </div>
 <div>
@@ -2098,7 +2226,7 @@ for(let index = 0, length = plugin_array.length; pluginElement && index < length
 `
 <h3>${ title }</h3>
 <div class="checkbox">
-	<input id="${ name }" type="checkbox" data-option="${ name }" pid="${ r }" js="${ js }">
+	<input id="${ name }" type="checkbox" data-option="${ name }" pid="${ r }" js="${ js }" default>
 	<label for="${ name }"></label>
 </div>
 <div>
@@ -2122,7 +2250,7 @@ for(let index = 0, length = plugin_array.length; pluginElement && index < length
 `
 <h3>${ title }</h3>
 <div class="checkbox">
-	<input id="${ name }" type="checkbox" data-option="${ name }" pid="${ r }" js="${ js }">
+	<input id="${ name }" type="checkbox" data-option="${ name }" pid="${ r }" js="${ js }" default>
 	<label for="${ name }"></label>
 </div>
 <div>
@@ -2236,6 +2364,29 @@ addListener($('#erase_cache'), 'mouseup', event => {
 	saveOptions();
 });
 
+/* Erase ALL Settings */
+addListener($('#reset_settings'), 'mouseup', event => {
+	let options = JSON.stringify(getOptionValues());
+
+	$('[default]', true)
+		.forEach(el => {
+			let de = el.getAttribute('default');
+
+			if(el.type == 'checkbox')
+				el.checked = de === 'true';
+			else if('contenteditable' in el.attributes)
+				el.innerHTML = de || '';
+			else
+				el.value = de || '';
+		});
+
+	Recall.CountEnabledSites();
+
+	new Notification('update', 'All settings have been reset');
+
+	RESETTING_SETTINGS = true;
+});
+
 $('[type="range"]', true)
 	.forEach((element, index, array) => {
 		let sibling = element.nextElementSibling,
@@ -2260,12 +2411,16 @@ $('.checkbox', true)
 			switch(self.id.toLowerCase()) {
 				/* Update the database when the option is toggled */
 				case 'use-lzw':
-					if(!self.checked)
+					let enabled;
+
+					if(enabled = !self.checked)
 						new Notification('update', 'Compressing data...', 3000, () => new Notification('update', 'Compressed', 3000), false);
 					else
 						new Notification('update', 'Decompressing data...', 3000, () => new Notification('update', 'Decompressed', 3000), false);
 
 					let options = getOptionValues();
+
+					Recall.ToggleConfigurationAvailability(enabled);
 
 					for(let name in options)
 						if(/^__/.test(name)) {
@@ -2309,26 +2464,27 @@ $('.test', true)
 
 $('[data-option^="theme:"i], [data-option^="theme:"i] + label', true)
 	.forEach((element, index, array) => {
-		addListener(element, 'mouseup', async event => {
+		let UpdateTheme;
+
+		addListener(element, 'mouseup', UpdateTheme = async event => {
 			let self = traverse(event.target, element => /^theme:/i.test(element.dataset.option), true),
 				R = RegExp;
 
-			let [a, b] = self.getAttribute('theme').split(/\s*:\s*/).filter(v => v),
+			let [a, b] = self.getAttribute('theme').split(/^([^]+):([^]+?)$/).filter(v => v),
 				value = `${self.dataset.option.replace(/^theme:/i, '')}-${b}`;
 
 			if(/^(get|read|for)$/i.test(a))
-				__theme.push(`${ value }=${ self.value }`)
+				__theme[value] = (self.value == 'true'? true: self.value == 'false'? false: self.value);
 			else if(/^(checkbox)$/i.test(self.type) && (self.checked + '') != a)
 			// backwards; fires late
-				__theme.push(value);
-			else if(/^(text|input|button|\B)$/i.test(self.type) && R(self.value + '', 'i').test(a))
-				__theme.push(value);
+				__theme[value] = JSON.parse(a);
+			else if(/^(text|input|button|\B)$/i.test(self.type) && R(a, 'i').test(self.value))
+				__theme[value] = self.value;
 			else
-				__theme = __theme.filter(v => v != value);
-
-			/* Get rid of repeats */
-			// __theme = __theme.join('\u0000').replace(/([\w\-]+\=)([^\u0000]+?)\u0000\1[^\u0000]+?/g, ($0, $1, $2, $$, $_) => $1 + $2);
+				delete __theme[value];
 		});
+
+		setTimeout(() => UpdateTheme({ target: element }), 1000);
 	});
 
 let hold = document.createElement('summary'),
@@ -2471,6 +2627,11 @@ $('[href^="#!/"]', true)
 		};
 	});
 
+$('[id$="_test_status"]', true)
+	.forEach(element => {
+		element.innerHTML = MARKERS.maybe;
+	});
+
 // CORS exception: SecurityError
 // MUST be { window }, never { top }
 let { hash } = window.location;
@@ -2503,7 +2664,7 @@ if(hash.length > 1)
 
 /* Functions that require some time */
 let Recall = {
-	'@auto': {}, // run at 100ms, and be recallable
+	'@auto': {}, // run at 100ms
 	'@0sec': {}, // run at 1ms
 	'@1sec': {}, // run at 1000ms
 };
@@ -2572,13 +2733,123 @@ Recall['@0sec'].SetVersionInfo = async() => {
 	}
 
 	if(DM)
-		await fetch('https://api.github.com/repos/SpaceK33z/web-to-plex/releases')
+		await fetch('https://api.github.com/repos/webtoplex/browser-extension/releases')
 			.then(response => response.json())
 			.then(versions => useVer(versions[0]));
 	else
-		await fetch('https://api.github.com/repos/SpaceK33z/web-to-plex/releases/latest')
+		await fetch('https://api.github.com/repos/webtoplex/browser-extension/releases/latest')
 			.then(response => response.json())
 			.then(version => useVer(version));
+};
+
+/* Get the user's IP address */
+Recall['@auto'].GetIPAddress = async() => {
+	let self = $('#ip-address'),
+		teststatus = $('#proxy_test_status'),
+		options = getOptionValues();
+
+
+	self.innerHTML = 'Loading...';
+	teststatus.innerHTML = MARKERS.maybe;
+
+	let proxy = HandleProxySettings(options);
+
+	if(proxy.enabled) {
+		let { url, headers } = proxy,
+			tor = 'https://check.torproject.org';
+
+		headers = HandleProxyHeaders(headers, tor);
+
+		if(/(^https?:\/\/)(?!localhost|127\.0\.0\.1(?:\/8)?|::1(?:\/128)?|:\d+)\b/i.test(url)) {
+			url = url
+				.replace(/\{b(ase-?)?64-url\}/gi, btoa(tor))
+				.replace(/\{enc(ode)?-url\}/gi, encodeURIComponent(tor))
+				.replace(/\{(raw-)?url\}/gi, tor);
+		} else {
+			self.innerHTML = '';
+			teststatus.innerHTML = MARKERS.no;
+
+			throw new SyntaxError('Unable to proxy: The URL must be a public (HTTPS/HTTP) address');
+		}
+
+		await fetch(url, { mode: 'cors', headers })
+			.then(results => results.text())
+			.then(text => {
+				let DOM = new DOMParser,
+					html = DOM.parseFromString(text, 'text/html'),
+					strong = $('.content strong', false, html),
+					IPAddress;
+
+				if(strong)
+					IPAddress = strong.textContent;
+				else if(/([\d\.]{7,15})/.test(html.body.textContent))
+					IPAddress = RegExp.$1;
+				else
+					IPAddress = '';
+
+				self.innerHTML = IPAddress;
+				teststatus.innerHTML = MARKERS[+!IPAddress];
+			})
+			.catch(error => {
+				self.innerHTML = '';
+				teststatus.innerHTML = MARKERS.no;
+
+				new Notification('error', error);
+			});
+	} else {
+		await fetch('https://check.torproject.org', { mode: 'cors' })
+			.then(results => results.text())
+			.then(text => {
+				let DOM = new DOMParser,
+					html = DOM.parseFromString(text, 'text/html'),
+					strong = $('.content strong', false, html),
+					IPAddress;
+
+				if(strong)
+					IPAddress = strong.textContent;
+				else if(/([\d\.]{7,15})/.test(html.body.textContent))
+					IPAddress = RegExp.$1;
+				else
+					IPAddress = '';
+
+				self.innerHTML = IPAddress;
+				teststatus.innerHTML = MARKERS[+!IPAddress];
+			})
+			.catch(error => {
+				self.innerHTML = '';
+				teststatus.innerHTML = MARKERS.no;
+
+				new Notification('error', error);
+			});
+	}
+
+	self.setAttribute('notice', `Public${proxy.enabled?' (Proxy)':''}`);
+};
+
+let ToggleConfigurationAvailabilityListener = false;
+/* Setting the Configuration Data disabled state */
+Recall['@1sec'].ToggleConfigurationAvailability = (enabled = null) => {
+	if(enabled === null)
+		enabled = $('#use-lzw').checked;
+
+	if(enabled) {
+		let parent = $('#json_data').parentElement;
+
+		parent.setAttribute('disabled', '');
+
+		if(!ToggleConfigurationAvailabilityListener)
+			$('*:not([data-option])', true, parent).forEach(element => {
+			    addListener(element, 'mousedown', event => {
+			        let disabled = traverse(element, () => 'disabled' in element.attributes, false);
+
+			        if(disabled)
+			            return event.preventDefault();
+			    });
+			});
+		ToggleConfigurationAvailabilityListener = true;
+	} else {
+		$('#json_data').parentElement.removeAttribute('disabled');
+	}
 };
 
 for(let func in Recall) {
@@ -2599,15 +2870,21 @@ for(let func in Recall) {
 				for(let fn in Recall[func]) {
 					f = Recall[func][fn];
 
+					Recall[fn] = f;
 					setTimeout(f, 1);
 				}
 				break;
 
-			case '@1sec':
+			default:
+				/^@(\d+)sec$/i.test(func);
+
+				let time = +RegExp.$1;
+
 				for(let fn in Recall[func]) {
 					f = Recall[func][fn];
 
-					setTimeout(f, 1000);
+					Recall[fn] = f;
+					setTimeout(f, time * 1000);
 				}
 				break;
 		}
@@ -2947,3 +3224,5 @@ function restoreSelection({ anchor, focus }, editor, key) {
 
 	selection.setBaseAndExtent(nodes.anchor, index.anchor, nodes.focus, index.focus);
 }
+
+addListener($('#test-proxy-settings'), 'click', Recall.GetIPAddress);

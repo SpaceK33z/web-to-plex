@@ -50,7 +50,7 @@ BUTTON  [style].web-to-plex-button.<floating>.<hide|show>.<open|closed>
 */
 
 /* Button location (Circular) */
-.web-to-plex-button.button-location-right {
+.web-to-plex-button.button-location-right:not(.button-shape-box) {
     left: unset !important;
     right: 5px !important;
 }

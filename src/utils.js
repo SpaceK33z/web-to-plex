@@ -2546,27 +2546,23 @@ let INITIALIZE = (async date => {
 
 		let { __theme } = __CONFIG__;
 
-		let ThemeClasses = JSON.parse(COMPRESS? iBWT(unzip(decompress(__theme))): __theme),
+		__theme = JSON.parse(COMPRESS? iBWT(unzip(decompress(__theme))): __theme);
+
+		let ThemeClasses = [],
 			HeaderClasses = [],
 			ParsedAttributes = {};
 
 		// Theme(s)
+		for(let theme in __theme)
+			if((typeof __theme[theme]) == 'boolean')
+				ThemeClasses.push(theme);
+			else
+				ParsedAttributes[theme] = __theme[theme];
+
 		if(!ThemeClasses.length)
 			ThemeClasses = '';
 		else
 			ThemeClasses = '.' + ThemeClasses.join('.');
-
-		ThemeClasses = ThemeClasses.split('.').filter(v => {
-			let R = RegExp;
-
-			if(/([^=]+?)=([^.]+?)/.test(v)) {
-				ParsedAttributes[R.$1] = R.$2;
-
-				return false;
-			}
-
-			return true;
-		}).join('.');
 
 		// Header(s)
 		for(let header in headers)
@@ -2577,8 +2573,6 @@ let INITIALIZE = (async date => {
 			HeaderClasses = '';
 		else
 			HeaderClasses = '.' + HeaderClasses.join('.');
-
-		console.log({ HeaderClasses, ThemeClasses, ParsedAttributes, __CONFIG__ });
 
 		// <button>
 		let button =

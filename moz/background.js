@@ -17,7 +17,6 @@ let date  = (new Date),
 let BACKGROUND_STORAGE = browser.storage.sync || browser.storage.local;
 let BACKGROUND_CONFIGURATION;
 
-
 // returns the proper CORS mode of the URL
 let cors = url => ((/^(https|sftp)\b/i.test(url) || /\:(443|22)\b/i.test(url)? '': 'no-') + 'cors');
 
@@ -68,7 +67,7 @@ function ChangeStatus({ ITEM_ID, ITEM_TITLE, ITEM_TYPE, ID_PROVIDER, ITEM_YEAR, 
 			// File friendly title
 		SEARCH_TITLE = ITEM_TITLE.replace(/[\-\s]+/g, '-').replace(/\s*&\s*/g, ' and ').replace(/[^\w\-\'\*\#]+/g, ''),
 			// Search friendly title
-		SEARCH_PROVIDER = /\b(tv|show|series)\b/i.test(ITEM_TYPE)? 'GG': /^im/i.test(ID_PROVIDER)? 'VO': /^tm/i.test(ID_PROVIDER)? 'GX': 'GG';
+		SEARCH_PROVIDER = (ITEM_TYPE == 'show')? 'GG': /^im/i.test(ID_PROVIDER)? 'VO': /^tm/i.test(ID_PROVIDER)? 'GX': 'GG';
 
 	ITEM_ID = (ITEM_ID && !/^tt$/i.test(ITEM_ID)? ITEM_ID: '') + '';
 	ITEM_ID = ITEM_ID.replace(/^.*\b(tt\d+)\b.*$/, '$1').replace(/^.*\bid=(\d+)\b.*$/, '$1').replace(/^.*(?:movie|tv|(?:tv-?)?(?:shows?|series|episodes?))\/(\d+).*$/, '$1');
@@ -899,6 +898,11 @@ browser.runtime.onMessage.addListener((request = {}, sender, callback) => {
 		FILE_TYPE = (item.tail || 'mp4'),
 		FILE_PATH = (item.path || ''),
 		ITEM_ID = ((i, I)=>{for(let p in i)if(RegExp('^'+I,'i').test(p))return i[p]})(item, ID_PROVIDER);
+
+	if(/movie|film|cinema|theat[re]{2}/i.test(ITEM_TYPE))
+		ITEM_TYPE = 'movie';
+	else if(/tv|show|series|episode/i.test(ITEM_TYPE))
+		ITEM_TYPE = 'show';
 
 	if(request.type) {
 		try {

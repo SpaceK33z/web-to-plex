@@ -72,4 +72,25 @@ let script = {
 
 		return { type, title, year, image };
 	},
+
+	"minions": () => {
+		// The button text in the "Comments" button takes up too much space, so we hide it
+		// It's very clear that it's about comments event without the text
+		let comments = $('.mid-top-actions .comments-link .txt');
+
+		if(!comments.empty)
+			comments.forEach(comment => comment.remove());
+
+		let actions = $('.mid-top-actions');
+
+		if(actions.empty)
+			return;
+
+		actions.forEach(element => {
+			let minion = furnish('a.web-to-plex-minion.button.comments-link', {}, 'Web to Plex');
+
+			addMinions(minion);
+			element.appendChild(minion);
+		});
+	},
 };

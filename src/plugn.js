@@ -502,6 +502,10 @@ let tabchange = async tabs => {
 		chrome.runtime.getURL(`cloud/plugin/${ js }.js`):
 	`https://webtoplex.github.io/web/${ type }s/${ js }.js`;
 
+	let style = (PLUGN_DEVELOPER)?
+		chrome.runtime.getURL(`sites/${ js }/index.css`):
+	`https://webtoplex.github.io/web/styles/${ js }.css`;
+
 	await fetch(file, { mode: 'cors' })
 		.then(response => response.text())
 		.then(async code => {
@@ -514,6 +518,10 @@ let tabchange = async tabs => {
 		})
 		.then(() => running.push(id, instance))
 		.catch(error => { throw error });
+
+	await fetch(style, { mode: 'cors' })
+		.then(response => response.text())
+		.then(async code => chrome.tabs.insertCSS({ code }));
 };
 
 // listen for message event
@@ -558,6 +566,10 @@ chrome.runtime.onMessage.addListener(processMessage = async(request = {}, sender
 				chrome.runtime.getURL(`cloud/${ script }.js`):
 			chrome.runtime.getURL(`cloud/plugin/${ plugin }.js`):
 		`https://webtoplex.github.io/web/${ _type }s/${ options[_type] }.js`;
+
+		let style = (PLUGN_DEVELOPER)?
+			chrome.runtime.getURL(`sites/${ options[_type] }/index.css`):
+		`https://webtoplex.github.io/web/styles/${ options[_type] }.css`;
 
 		let { authorized, ...A } = await GetAuthorization(options[_type]);
 
@@ -650,6 +662,10 @@ chrome.runtime.onMessage.addListener(processMessage = async(request = {}, sender
 					instance = RandomName();
 					return false;
 			}
+
+			await fetch(style, { mode: 'cors' })
+				.then(response => response.text())
+				.then(async code => browser.tabs.insertCSS({ code }));
 
 			return true;
 		} catch(error) {
