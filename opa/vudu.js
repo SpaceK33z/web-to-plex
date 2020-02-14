@@ -29,4 +29,19 @@ let script = {
 			'show':
 		'movie';
 	},
+
+	"minions": () => {
+		let actions = $('.container .row:nth-child(3) .row > *, .container .row:nth-child(3) ~ * .row > *');
+
+		console.log({ actions })
+
+		if(actions.empty)
+			return;
+
+		let element = actions.child(6),
+			minion = furnish('a.web-to-plex-minion', {}, 'Web to Plex');
+
+		addMinions(minion);
+		element.appendChild(minion);
+	},
 };

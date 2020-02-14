@@ -1,5 +1,5 @@
 let script = {
-	"url": "*://*.letterboxd.com/(film|list)/",
+	"url": "*://*.letterboxd.com/(?:\\w+/)?(film|list)/*",
 
 	"ready": () => (script.getType('list')? true: !$('.js-watch-panel').empty),
 
@@ -10,16 +10,16 @@ let script = {
 
 		switch(type) {
 			case 'movie':
-				title  = $('.headline-1[itemprop="name"]').first.textContent.trim();
-				year   = +$('small[itemprop="datePublished"]').first.textContent.trim();
-				image  = ($('.image').first || {}).src;
+				title  = $('#featured-film-header .headline-1, .headline-1[itemprop="name"]').first.textContent.trim();
+				year   = +$('#featured-film-header [href*="/year/"], small[itemprop="datePublished"]').first.textContent.trim();
+				image  = ($('.film-poster img, .image').first || {}).src;
 				IMDbID = script.getIMDbID(type);
 
 				return { type, title, year, image, IMDbID };
 				break;
 
 			case 'list':
-				let items = $('.poster-list .poster-container'),
+				let items = $('.poster-list .poster-container, .poster-list .film-detail'),
 					options = [];
 
 				items.forEach((element, index, array) => {
@@ -72,5 +72,52 @@ let script = {
 		image = image.src;
 
 		return { type, title, year, image };
+	},
+
+	"minions": () => {
+		let actions = $('.actions-panel ul, .js-watch-panel .services, #watch').first,
+			type = script.getType(),
+			featured = (actions.id == 'watch');
+
+		if(!actions)
+			return;
+
+		let minion, parent;
+
+		if(type == 'list') {
+			parent = furnish('li', {},
+				furnish('span', {},
+					furnish('span.has-icon.icon-16', {},
+						furnish('img.web-to-plex-icon.icon', { style: 'background: none !important', src: IMAGES.icon_16, height: 16, width: 16 }),
+						minion = furnish('a.web-to-plex-minion', {}, 'Web to Plex')
+					)
+				),
+			);
+
+			addMinions(minion);
+			actions.appendChild(parent);
+		} else if(featured) {
+			parent = furnish('div.other', {},
+				furnish('img.web-to-plex-icon', { src: IMAGES.icon_16, height: 16, width: 16 }),
+				minion = furnish('a.web-to-plex-minion.label.more', {}, 'Web to Plex')
+			);
+
+			addMinions(minion);
+			actions.appendChild(parent);
+		} else {
+			parent = furnish('p.service', { style: 'display: flex !important' },
+				minion = furnish('a.web-to-plex-minion.label.tooltip', {},
+					furnish('span.brand', {},
+						furnish('img', { src: IMAGES.icon_32, height: 24, width: 24 })
+					),
+					furnish('span.title', {},
+						furnish('span.name', {}, 'Web to Plex')
+					)
+				)
+			);
+
+			addMinions(minion);
+			actions.appendChild(parent);
+		}
 	},
 };

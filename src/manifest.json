@@ -4,7 +4,7 @@
 	"homepage_url": "https://webtoplex.github.io/",
 
 	"manifest_version": 2,
-	"version": "4.1.1.11",
+	"version": "4.1.2.0",
 
 	"icons": {
 		"16":  "img/16.png",
@@ -185,8 +185,7 @@
 			"css": ["sites/plex/index.css"]
 		},{
 			"matches": ["*://*/*"],
-			"js": ["utils.js", "sites/common.js"],
-			"css": ["sites/common.css", "sites/theme.css"]
+			"js": ["utils.js", "sites/common.js"]
 		}
 	],
 
@@ -219,5 +218,5 @@
 		"contextMenus",
 		"<all_urls>"
 	],
-	"web_accessible_resources": ["img/*", "options/*"]
+	"web_accessible_resources": ["font/*", "img/*", "options/*", "sites/*.css"]
 }

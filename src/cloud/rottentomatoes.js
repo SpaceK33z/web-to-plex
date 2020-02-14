@@ -1,11 +1,7 @@
 let script = {
 	"url": "*://*.rottentomatoes.com/([mt]|browse)/*",
 
-	"ready": () => {
-		let element = $('#reviews').first;
-
-		return !!element;
-	},
+	"ready": () => !$('#reviews').empty,
 
 	"init": (ready) => {
 		let _title, _year, _image, R = RegExp;
@@ -83,4 +79,37 @@ let script = {
 
 		return { type, title, image };
 	},
+
+	"minions": () => {
+			let actions = $('.franchiseLink, #topSection > *'),
+				type = script.getType();
+
+			if(actions.empty || type == 'error')
+				return;
+			let element = actions.first;
+
+			if(type == 'movie') {
+				let minion;
+
+				let parent = furnish('div', { style: 'box-shadow: none' },
+					furnish('div.wts-button__container', {},
+						minion = furnish('button.web-to-plex-minion.button--wts', { style: 'margin-bottom: 25px' },
+							' Web to Plex'
+						)
+					)
+				);
+
+				addMinions(minion);
+				element.appendChild(minion);
+			} else {
+				let minion;
+
+				let parent = furnish('div.poster_button.hidden-xs', {},
+					minion = furnish('a.web-to-plex-minion.fullWidth', {}, 'Web to Plex')
+				);
+
+				addMinions(minion);
+				element.appendChild(parent);
+			}
+		},
 };

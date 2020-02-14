@@ -257,7 +257,15 @@ async function prepare({ code, alias, type, allowed, url }) {
 		Type = type.replace(/^\w/, ($0, $$, $_) => $0.toUpperCase());
 
 	let org = url.origin,
-		ali = TLDHost(url.host);
+		ali = TLDHost(url.host),
+		runOnInit = ['(null)'];
+
+	let funcs = {
+		minions: PLUGN_CONFIGURATION.UseMinions,
+	};
+	for(let func in funcs)
+		runOnInit.push(`(${ funcs[func] } && ${ type }.${ func } instanceof Function? ${ type }.${ func }(): null)`);
+	runOnInit = runOnInit.join(',');
 
 	let { authorized, ...A } = await GetAuthorization(alias);
 
@@ -294,7 +302,7 @@ ${
 ${
 	code
 		.replace(/\/\/+\s*"([^\"\n\f\r\v]+?)"\s*requires?\:?\s*(.+)/i, ($0, $1, $2, $$, $_) =>
-			`;(async() => await Require("${ $2 }", "${ alias }", "${ $1 }", "${ instance }"))();`
+			`;(async() => await Require("cache,${ $2 }", "${ alias }", "${ $1 }", "${ instance }"))();`
 		)
 		.replace(/\b(chrome|browser)\.storage\.(sync|local|managed)\.?/g, ($0, $1, $2, $$, $_) =>
 			`;console.warn("This ${ type } attempted to access <${ $1 }.storage.${ $2 }>; use <async function save>, <async function load>, and <async function kill> instead.");`
@@ -334,11 +342,17 @@ return (
 				/* "ready" is a sync (normal) function */
 				${ type }.ready()
 			)?
-				${ type }.init( ${ Type }ReadyState ):
+				(
+					${ runOnInit },
+					${ type }.init( ${ Type }ReadyState )
+				):
 			/* Injected ${ type } isn't ready */
 			(${ type }.timeout || 1000):
 		/* Injected ${ type } doesn't have the "ready" property */
-		${ type }.init():
+		(
+			${ runOnInit },
+			${ type }.init()
+		):
 	/* Injected ${ type } isn't properly structured */
 	(console.warn("The ${ type } (${ alias }) is incorrectly structured. Could not find required function ${ type }.init"), -1):
 /* URL doesn't match pattern */
@@ -358,8 +372,13 @@ let handle = async(results, tabID, instance, script, type) => {
 
 	results = await results;
 
+	let extURL = url => browser.extension.getURL(url);
+
 	/* Always display a pretty button */
-	browser.tabs.insertCSS(tabID, { file: 'common.css' });
+	browser.tabs.insertCSS(tabID, { cssOrigin: 'user', file: 'common.css' });
+	browser.tabs.insertCSS(tabID, { cssOrigin: 'user', file: 'theme.css' });
+	browser.tabs.insertCSS(tabID, { cssOrigin: 'user', file: 'glyphs.css' });
+	browser.tabs.insertCSS(tabID, { cssOrigin: 'user', file: 'colors.css' });
 
 	if((!results || !results[0] || !instance) && !FOUND[instance])
 		try {
@@ -424,18 +443,9 @@ let handle = async(results, tabID, instance, script, type) => {
 
 		data = { ...data, type, title, year };
 
-		browser.tabs.sendMessage(tabID, { data, instance, [InstanceType.toLowerCase()]: script, instance_type: InstanceType, type: 'POPULATE' })
-			.then(response => {
-				if(browser.runtime.lastError)
-					browser.runtime.lastError.message;
-
-				PLUGN_TERMINAL.warn('Response [plugn]: ' + JSON.stringify(response));
-
-				if(!response)
-					PLUGN_TERMINAL.warn(`Terminated execution, response: ${ JSON.stringify(response) }`);
-			});
+		browser.tabs.sendMessage(tabID, { data, instance, [InstanceType.toLowerCase()]: script, instance_type: InstanceType, type: 'POPULATE' });
 	} catch(error) {
-		throw new Error(`${ InstanceWarning } - ${ String(error) }`);
+		throw new Error(InstanceWarning + ' - ' + String(error));
 	}
 };
 
@@ -477,8 +487,6 @@ let tabchange = async tabs => {
 
 	if(!allowed || !js) return;
 
-	let { authorized, ...A } = await GetAuthorization(js);
-
 	if(code) {
 		browser.tabs.executeScript(id, { file: 'helpers.js' }, () => {
 			// Sorry, but the instance needs to be callable multiple times
@@ -494,18 +502,26 @@ let tabchange = async tabs => {
 		browser.runtime.getURL(`plugin.${ js }.js`):
 	`https://webtoplex.github.io/web/${ type }s/${ js }.js`;
 
+	let style = (PLUGN_DEVELOPER)?
+		browser.runtime.getURL(`${ js }.css`):
+	`https://webtoplex.github.io/web/styles/${ js }.css`;
+
 	await fetch(file, { mode: 'cors' })
 		.then(response => response.text())
 		.then(async code => {
 			await browser.tabs.executeScript(id, { file: 'helpers.js' }, async() => {
 				// Sorry, but the instance needs to be callable multiple times
-				await browser.tabs.executeScript(id, {
+				browser.tabs.executeScript(id, {
 					code: (LAST = cache[ali] = await prepare({ code, alias: js, type, allowed, url })),
-				}, results => handle(results, LAST_ID = id, LAST_INSTANCE = instance, LAST_JS = js, LAST_TYPE = type))
+				}).then(results => handle(results, LAST_ID = id, LAST_INSTANCE = instance, LAST_JS = js, LAST_TYPE = type))
 			})
 		})
 		.then(() => running.push(id, instance))
 		.catch(error => { throw error });
+
+	await fetch(style, { mode: 'cors' })
+		.then(response => response.text())
+		.then(async code => browser.tabs.insertCSS({ code }));
 };
 
 // listen for message event
@@ -551,6 +567,10 @@ browser.runtime.onMessage.addListener(processMessage = async(request = {}, sende
 			browser.runtime.getURL(`plugin.${ plugin }.js`):
 		`https://webtoplex.github.io/web/${ _type }s/${ options[_type] }.js`;
 
+		let style = (PLUGN_DEVELOPER)?
+			browser.runtime.getURL(`${ options[_type] }.css`):
+		`https://webtoplex.github.io/web/styles/${ options[_type] }.css`;
+
 		let { authorized, ...A } = await GetAuthorization(options[_type]);
 
 		try {
@@ -563,9 +583,9 @@ browser.runtime.onMessage.addListener(processMessage = async(request = {}, sende
 						.then(async code => {
 							await browser.tabs.executeScript(id, { file: 'helpers.js' }, async() => {
 								// Sorry, but the instance needs to be callable multiple times
-								await browser.tabs.executeScript(id, {
+								browser.tabs.executeScript(id, {
 									code: (LAST = cache[plugin] = await prepare({ code, alias: plugin, type: 'plugin', allowed, url }))
-								}, results => handle(results, LAST_ID = id, LAST_INSTANCE = instance, LAST_JS = plugin, LAST_TYPE = type))
+								}).then(results => handle(results, LAST_ID = id, LAST_INSTANCE = instance, LAST_JS = plugin, LAST_TYPE = type))
 							})
 						})
 						.then(() => running.push(id, instance))
@@ -580,9 +600,9 @@ browser.runtime.onMessage.addListener(processMessage = async(request = {}, sende
 						.then(async code => {
 							await browser.tabs.executeScript(id, { file: 'helpers.js' }, async() => {
 								// Sorry, but the instance needs to be callable multiple times
-								await browser.tabs.executeScript(id, {
-									code: (LAST = cache[plugin] = await prepare({ code, alias: plugin, type: 'script', allowed, url }))
-								}, results => handle(results, LAST_ID = id, LAST_INSTANCE = instance, LAST_JS = script, LAST_TYPE = type))
+								browser.tabs.executeScript(id, {
+									code: (LAST = cache[script] = await prepare({ code, alias: script, type: 'script', allowed, url }))
+								}).then(results => handle(results, LAST_ID = id, LAST_INSTANCE = instance, LAST_JS = script, LAST_TYPE = type))
 							})
 						})
 						.then(() => running.push(id, instance))
@@ -591,7 +611,7 @@ browser.runtime.onMessage.addListener(processMessage = async(request = {}, sende
 
 				// Soft reset (button reset)
 				case '_INIT_':
-					browser.tabs.executeScript(id, { code: LAST }, results => handle(results, LAST_ID, LAST_INSTANCE, LAST_JS, LAST_TYPE));
+					browser.tabs.executeScript(id, { code: LAST }).then(results => handle(results, LAST_ID, LAST_INSTANCE, LAST_JS, LAST_TYPE));
 					break;
 
 				// Hard reset (program reset)
@@ -609,10 +629,13 @@ browser.runtime.onMessage.addListener(processMessage = async(request = {}, sende
 
 				case 'FOUND':
 					FOUND[request.instance] = request.found;
-					// chrome.tabs.sendMessage(tab.id, { data: {}, instance, found: request.found, instance_type: type.toLowerCase(), type: 'POSTED' });
+					// browser.tabs.sendMessage(tab.id, { data: {}, instance, found: request.found, instance_type: type.toLowerCase(), type: 'POSTED' });
 					break;
 
 				case 'GRANT_PERMISSION':
+					if(!options[_type])
+						return false;
+
 					await Save(`has/${ options[_type] }`, options.allowed);
 					await Save(`get/${ options[_type] }`, options.permissions);
 					break;
@@ -639,6 +662,10 @@ browser.runtime.onMessage.addListener(processMessage = async(request = {}, sende
 					instance = RandomName();
 					return false;
 			}
+
+			// await fetch(style, { mode: 'cors' })
+			// 	.then(response => response.text())
+			// 	.then(async code => browser.tabs.insertCSS({ code }));
 
 			return true;
 		} catch(error) {

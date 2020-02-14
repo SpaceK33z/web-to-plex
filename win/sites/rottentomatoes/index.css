@@ -1,0 +1,43 @@
+.mid-top-actions .share-box {
+	padding-left: 20px!important;
+}
+
+.web-to-plex-minion {
+    border: 1px solid #f3f3f3;
+    border-radius: 22px;
+	color: #fff!important;
+    font: inherit;
+    font-family: 'Franklin Gothic FS Med', Arila, Helvetica, Tahoma, Century, Verdana, sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+    visibility: visible;
+
+    margin-right: 8px;
+
+    height: 44px;
+}
+
+.web-to-plex-minion.wtp--download {
+	background-color: #f45a26!important;
+}
+
+.web-to-plex-minion.wtp--download:hover {
+	background-color: #f67e56!important;
+}
+
+.web-to-plex-minion.wtp--found {
+	background-color: #ca7c1f!important;
+}
+
+.web-to-plex-minion.wtp--found:hover {
+	background-color: #f8c022!important;
+}
+
+#tt--0-0 {
+	background: #666!important;
+}
+
+#tt--0-0:hover {
+    background: #888!important;
+	border-color: #888!important;
+}

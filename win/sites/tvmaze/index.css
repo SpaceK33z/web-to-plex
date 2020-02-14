@@ -1,0 +1,27 @@
+.web-to-plex-minion {
+	background: #727272;
+	color: #fff!important;
+	text-decoration: none!important;
+	text-transform: none!important;
+}
+
+.web-to-plex-minion.wtp--download {
+    background: #f45a26!important;
+}
+
+.web-to-plex-wrapper:hover > .web-to-plex-minion.wtp--download, .web-to-plex-minion.wtp--download:hover {
+	background-color: #f67e56!important;
+    color: #ffffff!important;
+}
+
+.web-to-plex-wrapper:hover > .web-to-plex-minion.wtp--found, .web-to-plex-minion.wtp--found:hover {
+	background-color: #f8c022!important;
+}
+
+#tt--0-0 {
+	background: #666!important;
+}
+
+#tt--0-0:hover {
+    background: #888!important;
+}

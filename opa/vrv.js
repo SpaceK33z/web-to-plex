@@ -1,11 +1,11 @@
 let script = {
-	"url": "*://*.vrv.co/(series|watch)/",
+	"url": "*://*.vrv.co/(series|watch(list)?)\\b",
 
 	"ready": () => {
 		let img = $('.h-thumbnail > img').first,
 			pre = $('#content .content .card').first;
 
-		return script.getType('list')? pre && pre.textContent: img && img.src;
+		return (script.getType('list')? pre && pre.textContent: img && img.src) || $('.erc-spinner').empty;
 	},
 
 	"init": (ready) => {
@@ -29,7 +29,7 @@ let script = {
 				break;
 
 			case 'list':
-				let items = $('#content .content .card');
+				let items = $('#content .content [class$="card"]');
 
 				options = [];
 
@@ -67,14 +67,51 @@ let script = {
 	},
 
 	"process": (element) => {
-		let title = $('.info > *', element).first,
-			image = $('.poster-image img', element).first,
-			type  = $('.info [class*="series"], .info [class*="movie"]', element).first;
+		let title = $('[class*="content-title"]', element).first,
+			image = $('[class*="image-poster"]', element).first,
+			type  = $('[class*="meta-tags"][class*="type"]', element).first;
 
 		title = title.textContent.trim();
 		image = image.src;
-		type  = type.getAttribute('class').replace(/[^]*(movie|series)[^]*/, '$1');
+		type  = type.textContent.trim().replace(/[^]*(movie|series)[^]*/i, '$1').toLowerCase();
 
 		return { type, title, image };
+	},
+
+	"minions": () => {
+		let actions = $('.action-buttons, .watchlist-card .c-watchlist-card__actions-wrapper'),
+			list = script.getType('list');
+
+		if(actions.empty)
+			return;
+
+		let processed;
+
+		if(!list)
+			processed = script.init();
+
+		actions.forEach(element => {
+			if(list)
+				processed = script.process($(element).parent('.watchlist-card')[0]);
+
+			let { type, title } = processed,
+				uuid = UUID.from({ type, title });
+
+			let minion = furnish(`a.web-to-plex-minion.${(list? 'c-watchlist-card__icon': 'action-button.c-button')}`, { uuid },
+				(
+					list?
+						furnish('img', { src: IMAGES.icon_16 }):
+					'Web to Plex'
+				)
+			);
+
+			if(list) {
+				addMinions(minion).stayUnique(true);
+				element.insertBefore(minion, element.firstElementChild);
+			} else {
+				addMinions(minion);
+				setTimeout(() => element.appendChild(minion), 5000);
+			}
+		});
 	},
 };
