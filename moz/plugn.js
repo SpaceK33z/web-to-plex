@@ -165,33 +165,45 @@ function getConfiguration() {
 				};
 
 			if(o.usingOmbi && o.ombiURLRoot && o.ombiToken) {
-				o.ombiURL = o.ombiURLRoot;
+				o.ombiURL = o.ombiURLRoot.replace(/\/+$/, '');
 			} else {
 				delete o.ombiURL; // prevent variable ghosting
 			}
 
 			if(o.usingCouchPotato && o.couchpotatoURLRoot && o.couchpotatoToken) {
-				o.couchpotatoURL = `${ items.couchpotatoURLRoot }/api/${encodeURIComponent(o.couchpotatoToken)}`;
+				o.couchpotatoURL = `${ o.couchpotatoURLRoot.replace(/\/+$/, '') }/api/${encodeURIComponent(o.couchpotatoToken)}`;
 			} else {
 				delete o.couchpotatoURL; // prevent variable ghosting
 			}
 
 			if(o.usingWatcher && o.watcherURLRoot && o.watcherToken) {
-				o.watcherURL = o.watcherURLRoot;
+				o.watcherURL = o.watcherURLRoot.replace(/\/+$/, '');
 			} else {
 				delete o.watcherURL; // prevent variable ghosting
 			}
 
 			if(o.usingRadarr && o.radarrURLRoot && o.radarrToken) {
-				o.radarrURL = o.radarrURLRoot;
+				o.radarrURL = o.radarrURLRoot.replace(/\/+$/, '');
 			} else {
 				delete o.radarrURL; // prevent variable ghosting
 			}
 
 			if(o.usingSonarr && o.sonarrURLRoot && o.sonarrToken) {
-				o.sonarrURL = o.sonarrURLRoot;
+				o.sonarrURL = o.sonarrURLRoot.replace(/\/+$/, '');
 			} else {
 				delete o.sonarrURL; // prevent variable ghosting
+			}
+
+			if(o.usingMedusa && o.medusaURLRoot && o.medusaToken) {
+				o.medusaURL = o.medusaURLRoot.replace(/\/+$/, '');
+			} else {
+				delete o.medusaURL; // prevent variable ghosting
+			}
+
+			if(o.usingSickBeard && o.sickBeardURLRoot && o.sickBeardToken) {
+				o.sickBeardURL = o.sickBeardURLRoot.replace(/\/+$/, '');
+			} else {
+				delete o.sickBeardURL; // prevent variable ghosting
 			}
 
 			resolve(o);
@@ -641,7 +653,8 @@ browser.runtime.onMessage.addListener(processMessage = async(request = {}, sende
 					break;
 
 				case 'SEARCH_PLEX':
-				case 'VIEW_COUCHPOTATO':
+				case 'CHARGE_COUCHPOTATO':
+				case 'QUERY_COUCHPOTATO':
 				case 'PUSH_COUCHPOTATO':
 				case 'PUSH_RADARR':
 				case 'PUSH_SONARR':
