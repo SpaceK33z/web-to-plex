@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 /* global configuration, init, Update, "Helpers" */
 
-var configuration, init, Update, IMAGES, Glyphs = {},
+let configuration, init, Update, IMAGES, Glyphs = {},
 	HELPERS_STORAGE = {
 		get(keys, callback = () => {}) {
 			let results;
@@ -60,7 +60,7 @@ var configuration, init, Update, IMAGES, Glyphs = {},
 		}
 	};
 
-var UUID = UUID || class UUID {
+class UUID {
 	constructor(length = 16, symbol = '-') {
 		let values = [];
 
@@ -99,7 +99,7 @@ var UUID = UUID || class UUID {
 	}
 };
 
-var INITIALIZE = INITIALIZE || (async date => {
+let INITIALIZE = (async date => {
 
 	// default date items
 	let YEAR  = date.getFullYear(),
@@ -375,24 +375,24 @@ var INITIALIZE = INITIALIZE || (async date => {
 				slugs = {
 					movie: (
 						__CONFIG__.usingOmbi?
-							`${ __CONFIG__.ombiURL }`:
+							`${ __CONFIG__.ombiURLRoot }`:
 						__CONFIG__.usingRadarr?
-							`${__CONFIG__.radarrURL}movies/%title%-%TMDbID%`:
+							`${ __CONFIG__.radarrURLRoot }movies/%title%-%TMDbID%`:
 						__CONFIG__.usingWatcher?
-							`${__CONFIG__.watcherURL}library/status#%title%-%TMDbID%`:
+							`${ __CONFIG__.watcherURLRoot }library/status#%title%-%TMDbID%`:
 						__CONFIG__.usingCouchPotato?
-							`${ __CONFIG__.couchpotatoURL }`:
+							`${ __CONFIG__.couchpotatoURLRoot }`:
 						'#'
 					),
 					show: (
 						__CONFIG__.usingOmbi?
-							`${ __CONFIG__.ombiURL }`:
+							`${ __CONFIG__.ombiURLRoot }`:
 						__CONFIG__.usingSonarr?
-							`${__CONFIG__.sonarrURL}series/%title%`:
+							`${ __CONFIG__.sonarrURLRoot }series/%title%`:
 						__CONFIG__.usingSickBeard?
-							`${__CONFIG__.sickBeardURL}home/displayShow?show=%TVDbID%`:
+							`${ __CONFIG__.sickBeardURLRoot }home/displayShow?show=%TVDbID%`:
 						__CONFIG__.usingMedusa?
-							`${__CONFIG__.medusaURL}home/displayShow?indexername=tvdb&seriesid=%TVDbID%`:
+							`${ __CONFIG__.medusaURLRoot }home/displayShow?indexername=tvdb&seriesid=%TVDbID%`:
 						'#'
 					)
 				},
@@ -1035,7 +1035,7 @@ var INITIALIZE = INITIALIZE || (async date => {
 						...options
 					};
 
-					options.plexURL = o.plexURL?
+					options.plexURL = o.plexURL.replace(/\/+$/, '')?
 						`${ o.plexURL }web#!/server/${ o.server.id }/`:
 					`https://app.plex.tv/web/app#!/server/${ o.server.id }/`;
 				} else {
@@ -1080,43 +1080,43 @@ var INITIALIZE = INITIALIZE || (async date => {
 					};
 
 				if(o.usingOmbi && o.ombiURLRoot && o.ombiToken) {
-					o.ombiURL = o.ombiURLRoot;
+					o.ombiURL = o.ombiURLRoot.replace(/\/+$/, '');
 				} else {
 					delete o.ombiURL; // prevent variable ghosting
 				}
 
 				if(o.usingCouchPotato && o.couchpotatoURLRoot && o.couchpotatoToken) {
-					o.couchpotatoURL = `${ items.couchpotatoURLRoot }/api/${encodeURIComponent(o.couchpotatoToken)}`;
+					o.couchpotatoURL = `${ o.couchpotatoURLRoot.replace(/\/+$/, '') }/api/${encodeURIComponent(o.couchpotatoToken)}`;
 				} else {
 					delete o.couchpotatoURL; // prevent variable ghosting
 				}
 
 				if(o.usingWatcher && o.watcherURLRoot && o.watcherToken) {
-					o.watcherURL = o.watcherURLRoot;
+					o.watcherURL = o.watcherURLRoot.replace(/\/+$/, '');
 				} else {
 					delete o.watcherURL; // prevent variable ghosting
 				}
 
 				if(o.usingRadarr && o.radarrURLRoot && o.radarrToken) {
-					o.radarrURL = o.radarrURLRoot;
+					o.radarrURL = o.radarrURLRoot.replace(/\/+$/, '');
 				} else {
 					delete o.radarrURL; // prevent variable ghosting
 				}
 
 				if(o.usingSonarr && o.sonarrURLRoot && o.sonarrToken) {
-					o.sonarrURL = o.sonarrURLRoot;
+					o.sonarrURL = o.sonarrURLRoot.replace(/\/+$/, '');
 				} else {
 					delete o.sonarrURL; // prevent variable ghosting
 				}
 
 				if(o.usingMedusa && o.medusaURLRoot && o.medusaToken) {
-					o.medusaURL = o.medusaURLRoot;
+					o.medusaURL = o.medusaURLRoot.replace(/\/+$/, '');
 				} else {
 					delete o.medusaURL; // prevent variable ghosting
 				}
 
 				if(o.usingSickBeard && o.sickBeardURLRoot && o.sickBeardToken) {
-					o.sickBeardURL = o.sickBeardURLRoot;
+					o.sickBeardURL = o.sickBeardURLRoot.replace(/\/+$/, '');
 				} else {
 					delete o.sickBeardURL; // prevent variable ghosting
 				}
@@ -1161,7 +1161,7 @@ var INITIALIZE = INITIALIZE || (async date => {
 
 					COMPRESS = options.UseLZW;
 
-					if(!(CAUGHT && CAUGHT.All_CAUGHT)) {
+					if(!(CAUGHT && CAUGHT.ALL_CAUGHT)) {
 						CAUGHT = options.__caught;
 						CAUGHT = JSON.parse(COMPRESS? iBWT(unzip(decompress(CAUGHT))): CAUGHT);
 						CAUGHT.NO_CACHE = { ...CAUGHT };
@@ -1215,9 +1215,10 @@ var INITIALIZE = INITIALIZE || (async date => {
 						    /* Movies/TV Shows */
 						    // Charge Ombi
 						    if(options.usingOmbi) {
-						        let url = options.ombiURLRoot;
+						        let url = options.ombiURLRoot,
+									api = `apikey=${ options.ombiToken }`;
 
-						        fetch(`${ url }/api/v1/Request/movie`)
+						        fetch(`${ url }/api/v1/Request/movie?${ api }`)
 						            .then(r => r.json())
 						            .then(json => {
 						                json.map(item => {
@@ -1228,7 +1229,7 @@ var INITIALIZE = INITIALIZE || (async date => {
 						                });
 						            });
 
-						        fetch(`${ url }/api/v1/Request/tv`)
+						        fetch(`${ url }/api/v1/Request/tv?${ api }`)
 						            .then(r => r.json())
 						            .then(json => {
 						                json.map(item => {
@@ -1243,7 +1244,7 @@ var INITIALIZE = INITIALIZE || (async date => {
 						    /* Movies */
 						    // Charge Watcher
 						    if(options.usingWatcher) {
-						        let url = options.watcherURLRoot,
+						        let url = options.watcherURL,
 						            token = options.watcherToken,
 						            quality = options.watcherQualityProfileId || 'Default',
 						            username = options.watcherBasicAuthUsername,
@@ -1270,7 +1271,7 @@ var INITIALIZE = INITIALIZE || (async date => {
 
 						    // Charge Radarr
 						    if(options.usingRadarr) {
-						        let url = options.radarrURLRoot,
+						        let url = options.radarrURL,
 						            token = options.radarrToken,
 						            username = options.radarrBasicAuthUsername,
 						            password = options.radarrBasicAuthPassword;
@@ -1295,10 +1296,37 @@ var INITIALIZE = INITIALIZE || (async date => {
 						            });
 						    }
 
+						    // Charge CouchPotato
+						    if(options.usingCouchPotato) {
+								let url = `${ options.couchpotatoURL }/media.list?type=movie&status=active`,
+									type = 'CHARGE_COUCHPOTATO',
+									basicAuth = options.couchpotatoBasicAuth,
+									parseJSON = json => {
+										if(json.error)
+											return (!json.silent && console.error('Error charging CouchPotato: ' + String(json.error), json));
+
+										json.movies.map(item => {
+						                    CAUGHT.charge({
+												imdb: item.info.imdb,
+						                        tmdb: item.info.tmdb_id,
+						                    });
+						                });
+									};
+
+								try {
+									setTimeout(() => browser.runtime.sendMessage({ type, url, basicAuth }).then(response => parseJSON(response)), 10000);
+								} catch(error) {
+									await fetch(url)
+										.then(response => response.json())
+										.then(json => parseJSON(json))
+										.catch(error => { throw error });
+								}
+						    }
+
 						    /* TV Shows */
 						    // Charge Sonarr
 						    if(options.usingSonarr) {
-						        let url = options.sonarrURLRoot,
+						        let url = options.sonarrURL,
 						            token = options.sonarrToken,
 						            username = options.sonarrBasicAuthUsername,
 						            password = options.sonarrBasicAuthPassword;
@@ -1323,7 +1351,7 @@ var INITIALIZE = INITIALIZE || (async date => {
 
 						    // Charge Medusa
 						    if(options.usingMedusa) {
-						        let url = options.medusaURLRoot,
+						        let url = options.medusaURL,
 						            token = options.medusaToken,
 						            username = options.medusaBasicAuthUsername,
 						            password = options.medusaBasicAuthPassword;
@@ -1349,7 +1377,7 @@ var INITIALIZE = INITIALIZE || (async date => {
 
 						    // Charge SickBeard
 						    if(options.usingSickBeard) {
-						        let url = options.sickBeardURLRoot,
+						        let url = options.sickBeardURL,
 						            token = options.sickBeardToken,
 						            username = options.sickBeardBasicAuthUsername,
 						            password = options.sickBeardBasicAuthPassword;
@@ -1373,7 +1401,7 @@ var INITIALIZE = INITIALIZE || (async date => {
 						    }
 						}
 
-						CAUGHT.All_CAUGHT = true;
+						CAUGHT.ALL_CAUGHT = true;
 					}
 
 					return __CONFIG__ = options;
@@ -1533,8 +1561,8 @@ var INITIALIZE = INITIALIZE || (async date => {
 			doms = configuration.__domains.split(',');
 
 			if(!~doms.indexOf(host))
-				return UTILS_TERMINAL.WARN(`Domain not acknowledged "${ host }"`, doms);
-			UTILS_TERMINAL.LOG(`Domain acknowledged "${ host }"`, doms);
+				return UTILS_TERMINAL.WARN(`Domain not acknowledged "${ host }"`);
+			UTILS_TERMINAL.LOG(`Domain acknowledged "${ host }"`);
 	}
 
 	UTILS_TERMINAL.log('UTILS_DEVELOPER:', UTILS_DEVELOPER, configuration);
@@ -1791,7 +1819,7 @@ var INITIALIZE = INITIALIZE || (async date => {
 						found;
 					// Sick Beard
 					else if(__CONFIG__.usingSickBeard)
-						found = ((t($data.name) == t(title) || $alt) && +year == parseInt($data.first_aired))?
+						found = ((t($data.name) == t(title) || $alt) && parseInt(year) == parseInt($data.first_aired))?
 							$alt || $data:
 						found;
 				}
@@ -2103,48 +2131,6 @@ var INITIALIZE = INITIALIZE || (async date => {
 		return data;
 	}
 
-	function Request_CouchPotato(options) {
-		// TODO: this does not work anymore!
-		if(!options.IMDbID)
-			return new Notification(
-				'warning',
-				'Stopped adding to CouchPotato: No IMDb ID'
-			);
-
-		browser.runtime.sendMessage({
-			type: 'VIEW_COUCHPOTATO',
-			url: `${ __CONFIG__.couchpotatoURL }/media.get`,
-			IMDbID: options.IMDbID,
-			TMDbID: options.TMDbID,
-			TVDbID: options.TVDbID,
-			basicAuth: __CONFIG__.couchpotatoBasicAuth,
-		}).then(response => {
-			let movieExists = response.success;
-			if(response.error) {
-				new Notification(
-					'warning',
-					'CouchPotato request failed (see your console)'
-				);
-				return (!response.silent && UTILS_TERMINAL.warn('Error viewing CouchPotato: ' + String(response.error)));
-			}
-			if(!movieExists) {
-				__Request_CouchPotato__(options);
-				return;
-			}
-			new Notification(
-				'warning',
-				`Movie already exists in CouchPotato (status: ${response.status})`
-			);
-		}, error => {
-			new Notification(
-				'warning',
-				error
-			);
-
-			throw error;
-		});
-	}
-
 	// Movies/TV Shows
 	function Request_Ombi(options) {
 		new Notification('info', `Sending "${ options.title }" to Ombi`, 3000);
@@ -2160,7 +2146,7 @@ var INITIALIZE = INITIALIZE || (async date => {
 
 		browser.runtime.sendMessage({
 			type: 'PUSH_OMBI',
-			url: `${ __CONFIG__.ombiURL }api/v1/Request/${ contentType }`,
+			url: `${ __CONFIG__.ombiURLRoot }api/v1/Request/${ contentType }`,
 			token: __CONFIG__.ombiToken,
 			title: options.title,
 			year: options.year,
@@ -2181,7 +2167,7 @@ var INITIALIZE = INITIALIZE || (async date => {
 				CAUGHT.bump({ IMDbID, TMDbID, TVDbID });
 
 				UTILS_TERMINAL.LOG('Successfully pushed', options);
-				new Notification('update', `Added "${ options.title }" to Ombi`, 7000, () => window.open(__CONFIG__.ombiURL, '_blank'));
+				new Notification('update', `Added "${ options.title }" to Ombi`, 7000, () => window.open(__CONFIG__.ombiURLRoot, '_blank'));
 			} else {
 				new Notification('warning', `Could not add "${ options.title }" to Ombi: Unknown Error`);
 				(!(response && response.silent) && UTILS_TERMINAL.warn('Error adding to Ombi: ' + String(response)));
@@ -2196,16 +2182,16 @@ var INITIALIZE = INITIALIZE || (async date => {
 		});
 	}
 
-	// Movies/TV Shows
+	// Movies
+	// Actaully add the item
 	function __Request_CouchPotato__(options) {
 		new Notification('info', `Sending "${ options.title }" to CouchPotato`, 3000);
 
 		browser.runtime.sendMessage({
 			type: 'PUSH_COUCHPOTATO',
 			url: `${ __CONFIG__.couchpotatoURL }/movie.add`,
-			IMDbID: options.IMDbID,
-			TMDbID: options.TMDbID,
-			TVDbID: options.TVDbID,
+			imdbId: options.IMDbID,
+			tmdbId: options.TMDbID,
 			basicAuth: __CONFIG__.couchpotatoBasicAuth,
 		}).then(response => {
 			UTILS_TERMINAL.log('Pushing to CouchPotato', response);
@@ -2213,17 +2199,17 @@ var INITIALIZE = INITIALIZE || (async date => {
 			if(response.error) {
 				new Notification(
 					'warning',
-					`Could not add "${ options.title }" to CouchPotato (see your console)`
+					`Could not add "${ options.title }" to CouchPotato: ${ String(response.error) }`
 				);
 				return (!response.silent && UTILS_TERMINAL.warn('Error adding to CouchPotato: ' + String(response.error), response.location, response.debug));
 			}
 			if(response.success) {
-				let { IMDbID, TMDbID, TVDbID } = options;
+				let { IMDbID, TMDbID } = options;
 
-				CAUGHT.bump({ IMDbID, TMDbID, TVDbID });
+				CAUGHT.bump({ IMDbID, TMDbID });
 
 				UTILS_TERMINAL.LOG('Successfully pushed', options);
-				new Notification('update', `Added "${ options.title }" to CouchPotato`);
+				new Notification('update', `Added "${ options.title }" to CouchPotato`, 7000, () => window.open(__CONFIG__.couchpotatoURLRoot + 'movies', '_blank'));
 			} else {
 				new Notification('warning', `Could not add "${ options.title }" to CouchPotato`);
 			}
@@ -2234,6 +2220,44 @@ var INITIALIZE = INITIALIZE || (async date => {
 			);
 
 			throw error;
+		});
+	}
+
+	// View the item
+	function Request_CouchPotato(options) {
+		// TODO: this does not work anymore!
+		if(!options.IMDbID || !options.TMDbID)
+			return new Notification(
+				'warning',
+				'Stopped adding to CouchPotato: No ID'
+			);
+
+		browser.runtime.sendMessage({
+			type: 'QUERY_COUCHPOTATO',
+			url: `${ __CONFIG__.couchpotatoURL }/media.get`,
+			imdbId: options.IMDbID,
+			tmdbId: options.TMDbID,
+			basicAuth: __CONFIG__.couchpotatoBasicAuth,
+		}).then(response => {
+			let movieExists = response.success;
+
+			if(response.error) {
+				new Notification(
+					'warning',
+					`CouchPotato request failed: ${ String(response.error) }`
+				);
+				return (!response.silent && UTILS_TERMINAL.error('Error viewing CouchPotato: ' + String(response.error)));
+			}
+
+			if(!movieExists) {
+				__Request_CouchPotato__(options);
+				return;
+			}
+
+			new Notification(
+				'warning',
+				`Movie already exists in CouchPotato (${ response.status })`
+			);
 		});
 	}
 
@@ -2250,7 +2274,7 @@ var INITIALIZE = INITIALIZE || (async date => {
 
 		browser.runtime.sendMessage({
 			type: 'PUSH_WATCHER',
-			url: `${ __CONFIG__.watcherURL }api/`,
+			url: `${ __CONFIG__.watcherURLRoot }api/`,
 			token: __CONFIG__.watcherToken,
 			StoragePath: __CONFIG__.watcherStoragePath,
 			basicAuth: __CONFIG__.watcherBasicAuth,
@@ -2272,7 +2296,7 @@ var INITIALIZE = INITIALIZE || (async date => {
 				CAUGHT.bump({ IMDbID, TMDbID });
 
 				UTILS_TERMINAL.LOG('Successfully pushed', options);
-				new Notification('update', `Added "${ options.title }" to Watcher`, 7000, () => window.open(`${__CONFIG__.watcherURL}library/status${TMDbID? `#${title}-${TMDbID}`: '' }`, '_blank'));
+				new Notification('update', `Added "${ options.title }" to Watcher`, 7000, () => window.open(`${__CONFIG__.watcherURLRoot}library/status${TMDbID? `#${title}-${TMDbID}`: '' }`, '_blank'));
 			} else {
 				new Notification('warning', `Could not add "${ options.title }" to Watcher: Unknown Error`);
 				(!(response && response.silent) && UTILS_TERMINAL.warn('Error adding to Watcher: ' + String(response)));
@@ -2310,7 +2334,7 @@ var INITIALIZE = INITIALIZE || (async date => {
 
 		browser.runtime.sendMessage({
 			type: 'PUSH_RADARR',
-			url: `${ __CONFIG__.radarrURL }api/movie/`,
+			url: `${ __CONFIG__.radarrURLRoot }api/movie/`,
 			token: __CONFIG__.radarrToken,
 			StoragePath: __CONFIG__.radarrStoragePath,
 			QualityID: __CONFIG__.radarrQualityProfileId,
@@ -2334,7 +2358,7 @@ var INITIALIZE = INITIALIZE || (async date => {
 				CAUGHT.bump({ IMDbID, TMDbID });
 
 				UTILS_TERMINAL.LOG('Successfully pushed', options);
-				new Notification('update', `Added "${ options.title }" to Radarr`, 7000, () => window.open(`${__CONFIG__.radarrURL}${TMDbID? `movies/${title}-${TMDbID}`: '' }`, '_blank'));
+				new Notification('update', `Added "${ options.title }" to Radarr`, 7000, () => window.open(`${__CONFIG__.radarrURLRoot}${TMDbID? `movies/${title}-${TMDbID}`: '' }`, '_blank'));
 			} else {
 				new Notification('warning', `Could not add "${ options.title }" to Radarr: Unknown Error [${ String(response) }]`);
 				(!(response && response.silent) && UTILS_TERMINAL.warn('Error adding to Radarr: ' + String(response)));
@@ -2372,7 +2396,7 @@ var INITIALIZE = INITIALIZE || (async date => {
 
 		browser.runtime.sendMessage({
 			type: 'PUSH_SONARR',
-			url: `${ __CONFIG__.sonarrURL }api/series/`,
+			url: `${ __CONFIG__.sonarrURLRoot }api/series/`,
 			token: __CONFIG__.sonarrToken,
 			StoragePath: __CONFIG__.sonarrStoragePath,
 			QualityID: __CONFIG__.sonarrQualityProfileId,
@@ -2394,7 +2418,7 @@ var INITIALIZE = INITIALIZE || (async date => {
 				CAUGHT.bump({ TVDbID });
 
 				UTILS_TERMINAL.LOG('Successfully pushed', options);
-				new Notification('update', `Added "${ options.title }" to Sonarr`, 7000, () => window.open(`${__CONFIG__.sonarrURL}series/${title}`, '_blank'));
+				new Notification('update', `Added "${ options.title }" to Sonarr`, 7000, () => window.open(`${__CONFIG__.sonarrURLRoot}series/${title}`, '_blank'));
 			} else {
 				new Notification('warning', `Could not add "${ options.title }" to Sonarr: Unknown Error`);
 				(!(response && response.silent) && UTILS_TERMINAL.warn('Error adding to Sonarr: ' + String(response)));
@@ -2432,8 +2456,8 @@ var INITIALIZE = INITIALIZE || (async date => {
 
 		browser.runtime.sendMessage({
 			type: 'PUSH_MEDUSA',
-			url: `${ __CONFIG__.medusaURL }api/v2/series`,
-			root: `${ __CONFIG__.medusaURL }api/v2/`,
+			url: `${ __CONFIG__.medusaURLRoot }api/v2/series`,
+			root: `${ __CONFIG__.medusaURLRoot }api/v2/`,
 			token: __CONFIG__.medusaToken,
 			StoragePath: __CONFIG__.medusaStoragePath,
 			QualityID: __CONFIG__.medusaQualityProfileId,
@@ -2455,7 +2479,7 @@ var INITIALIZE = INITIALIZE || (async date => {
 				CAUGHT.bump({ TVDbID });
 
 				UTILS_TERMINAL.LOG('Successfully pushed', options);
-				new Notification('update', `Added "${ options.title }" to Medusa`, 7000, () => window.open(`${__CONFIG__.medusaURL}home/displayShow?indexername=tvdb&seriesid=${options.TVDbID}`, '_blank'));
+				new Notification('update', `Added "${ options.title }" to Medusa`, 7000, () => window.open(`${__CONFIG__.medusaURLRoot}home/displayShow?indexername=tvdb&seriesid=${options.TVDbID}`, '_blank'));
 			} else {
 				new Notification('warning', `Could not add "${ options.title }" to Medusa: Unknown Error`);
 				(!(response && response.silent) && UTILS_TERMINAL.warn('Error adding to Medusa: ' + String(response)));
@@ -2497,7 +2521,7 @@ var INITIALIZE = INITIALIZE || (async date => {
 
 		browser.runtime.sendMessage({
 			type: 'PUSH_SICKBEARD',
-			url: `${ __CONFIG__.sickBeardURL }api/${ __CONFIG__.sickBeardToken }/`,
+			url: `${ __CONFIG__.sickBeardURLRoot }api/${ __CONFIG__.sickBeardToken }/`,
 			token: __CONFIG__.sickBeardToken,
 			StoragePath: __CONFIG__.sickBeardStoragePath,
 			QualityID: __CONFIG__.sickBeardQualityProfileId,
@@ -2520,7 +2544,7 @@ var INITIALIZE = INITIALIZE || (async date => {
 				CAUGHT.bump({ TVDbID });
 
 				UTILS_TERMINAL.LOG('Successfully pushed', options);
-				new Notification('update', `Added "${ options.title }" to Sick Beard`, 7000, () => window.open(`${__CONFIG__.sickBeardURL}home/displayShow?show=${ TVDbID }`, '_blank'));
+				new Notification('update', `Added "${ options.title }" to Sick Beard`, 7000, () => window.open(`${__CONFIG__.sickBeardURLRoot}home/displayShow?show=${ TVDbID }`, '_blank'));
 			} else {
 				new Notification('warning', `Could not add "${ options.title }" to Sick Beard: Unknown Error`);
 				(!(response && response.silent) && UTILS_TERMINAL.warn('Error adding to Sick Beard: ' + String(response)));
@@ -2648,7 +2672,7 @@ var INITIALIZE = INITIALIZE || (async date => {
 								button.onmouseenter = button.onmouseleave = null;
 								button.querySelector('.list-action').setAttribute('tooltip', 'Restarting...');
 								INITIALIZE(new Date);
-								init();
+								init && init();
 							} else {
 								new Notification('warning', "Couldn't reload. Please refresh the page.");
 							}
@@ -2995,7 +3019,7 @@ var INITIALIZE = INITIALIZE || (async date => {
 
 		results = results.filter(v => v.status == 'downloader');
 
-		let img = furnish('img', { title: 'Add to Plex It!', onmouseup: event => {let frame = document.querySelector('#plexit-bookmarklet-frame'); frame.src = frame.src.replace(/(#plexit:.*)?$/, '#plexit:' + event.target.parentElement.getAttribute('data'))} }),
+		let img = furnish('img#plexit-add', { title: 'Add to Plex It!', onmouseup: event => {let frame = document.querySelector('#plexit-bookmarklet-frame'); frame.src = frame.src.replace(/(#plexit:.*)?$/, '#plexit:' + event.target.parentElement.getAttribute('data'))} }),
 			po, pi = furnish('li#plexit.list-item', { data: encode(JSON.stringify(results)) }, img),
 			op  = document.querySelector('#wtp-plexit');
 
@@ -3033,8 +3057,8 @@ var INITIALIZE = INITIALIZE || (async date => {
 		let opt = { name: options.title, year: options.year, image: options.image || IMG_URL.nil, type: options.type, imdb: IMDbID, IMDbID, tmdb: TMDbID, TMDbID, tvdb: TVDbID, TVDbID },
 			op  = document.querySelector('#wtp-plexit'),
 			img = (options.image)?
-				furnish('div', { tooltip: 'Add to Plex It!', style: `background: url(${ IMG_URL.plexit_icon_16 }) top right/60% no-repeat, #0004 url(${ opt.image }) center/contain no-repeat; height: 48px; width: 34px;`, draggable: true, onmouseup: event => {let frame = document.querySelector('#plexit-bookmarklet-frame'); frame.src = frame.src.replace(/(#plexit:.*)?$/, '#plexit:' + event.target.parentElement.getAttribute('data'))} }):
-			furnish('img', { title: 'Add to Plex It!', src: IMG_URL.plexit_icon_48, onmouseup: event => {let frame = document.querySelector('#plexit-bookmarklet-frame'); frame.src = frame.src.replace(/(#plexit:.*)?$/, '#plexit:' + event.target.parentElement.getAttribute('data'))} });
+				furnish('div#plexit-add', { tooltip: 'Add to Plex It!', style: `background: url(${ IMG_URL.plexit_icon_16 }) top right/60% no-repeat, #0004 url(${ opt.image }) center/contain no-repeat; height: 48px; width: 34px;`, draggable: true, onmouseup: event => {let frame = document.querySelector('#plexit-bookmarklet-frame'); frame.src = frame.src.replace(/(#plexit:.*)?$/, '#plexit:' + event.target.parentElement.getAttribute('data'))} }):
+			furnish('img', { src: IMG_URL.plexit_icon_48, onmouseup: event => {let frame = document.querySelector('#plexit-bookmarklet-frame'); frame.src = frame.src.replace(/(#plexit:.*)?$/, '#plexit:' + event.target.parentElement.getAttribute('data'))} });
 
 		FindMediaItem.OPTIONS = options;
 
@@ -3749,7 +3773,7 @@ Object.filter = Object.filter || function filter(object, prejudice) {
 	}
 })(document);
 
-var PRIMITIVE = Symbol.toPrimitive,
+let PRIMITIVE = Symbol.toPrimitive,
 	queryBy = document.queryBy,
 	furnish = document.furnish;
 
