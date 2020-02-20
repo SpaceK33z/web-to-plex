@@ -2146,7 +2146,7 @@ let INITIALIZE = (async date => {
 
 		browser.runtime.sendMessage({
 			type: 'PUSH_OMBI',
-			url: `${ __CONFIG__.ombiURLRoot }api/v1/Request/${ contentType }`,
+			url: `${ __CONFIG__.ombiURLRoot }api/v1/Request/${ contentType }?apikey=${ __CONFIG__.ombiToken }`,
 			token: __CONFIG__.ombiToken,
 			title: options.title,
 			year: options.year,
