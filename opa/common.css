@@ -22,11 +22,11 @@
 }
 
 /* Basic/Global Styling */
-*::-webkit-scrollbar {
+[class*="web-to-plex"] *::-webkit-scrollbar {
     width: 10px;
 }
 
-*::-webkit-scrollbar-thumb {
+[class*="web-to-plex"] *::-webkit-scrollbar-thumb {
     min-height: 50px;
     background: rgba(255, 255, 255, 0.15);
     border: 2px solid rgba(0, 0, 0, 0);
@@ -34,15 +34,15 @@
     background-clip: padding-box;
 }
 
-*::-webkit-scrollbar-track {
+[class*="web-to-plex"] *::-webkit-scrollbar-track {
     /* background: url(noise.png) fixed, #3f4245 !important; */
 }
 
-*::placeholder {
+[class*="web-to-plex"] *::placeholder {
     color: #999 !important;
 }
 
-*::-webkit-input-placeholder {
+[class*="web-to-plex"] *::-webkit-input-placeholder {
     color: #999 !important;
 }
 
@@ -405,7 +405,7 @@
    opacity: 0.1;
 }
 
-*:not(#plexit-bookmarklet-frame) ~ .web-to-plex-button {
+[class*="web-to-plex"] *:not(#plexit-bookmarklet-frame) ~ .web-to-plex-button {
    margin-left: 0px;
 }
 
@@ -413,7 +413,7 @@
    margin-left: 280px !important;
 }
 
-*:not(#plexit-bookmarklet-frame) + .web-to-plex-button #plexit, #plexit-bookmarklet-frame + .web-to-plex-button #wtp-plexit {
+*:not(#plexit-bookmarklet-frame) + .web-to-plex-button [id^="plexit"i], #plexit-bookmarklet-frame + .web-to-plex-button #wtp-plexit {
    display: none !important;
 }
 
@@ -570,6 +570,7 @@
 
 .web-to-plex-button.open li:hover [tooltip]::before, .web-to-plex-button.open [tooltip]:hover::before {
    content: attr(tooltip) !important;
+   display: inline-block;
 
    background: var(--quarter-grey) !important;
    border-radius: 3px !important;

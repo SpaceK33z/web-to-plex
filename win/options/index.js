@@ -87,7 +87,6 @@ const storage = (chrome.storage.sync || chrome.storage.local),
 			'sickBeardQualityProfileId',
 
 			// CouchPotato
-			'enableCouchPotato',
 			'usingCouchPotato',
 			'couchpotatoURLRoot',
 			'couchpotatoToken',
@@ -794,7 +793,7 @@ function performOmbiTest({ refreshing = false, event }) {
 		teststatus = $('#ombi_test_status'),
 		path = $('[data-option="ombiURLRoot"]'),
 		url,
-		headers = { headers: { apikey: options.ombiToken, accept: 'text/html' } },
+		headers = { apikey: options.ombiToken, accept: 'text/html' },
 		enabled = refreshing? $('#using-ombi'): $$('#using-ombi'),
 		inusestatus = [...$('[using="ombi"]', true)];
 
@@ -805,15 +804,44 @@ function performOmbiTest({ refreshing = false, event }) {
 
 	let Get = () => {
 		try {
-			fetch(`${ url }/api/v1/Request/movie`)
-				.then(r => r.json())
-				.then(json => {
-					json.map(item => {
-						__caught.imdb.push(item.imdbId);
-						__caught.tmdb.push(item.theMovieDbId);
-					});
+			fetch(`${ url }/api/v1/Status?apikey=${ headers.apikey }`, { headers })
+				.then(response => response.text())
+				.then(status => {
+					LoadingAnimation();
+					if (!status || !status.length) throw new Error('Unable to communicate with Ombi');
 
-					fetch(`${ url }/api/v1/Request/tv`)
+					if ((status = +status) >= 200 && status < 400) {
+						teststatus.innerHTML = MARKERS.yes;
+						enabled.checked = teststatus.classList = true;
+						enabled.parentElement.removeAttribute('disabled');
+						inusestatus.map(e => e.setAttribute('in-use', true));
+
+						return true;
+					} else {
+						teststatus.innerHTML = MARKERS.no;
+						enabled.checked = teststatus.classList = false;
+						enabled.parentElement.setAttribute('disabled');
+						inusestatus.map(e => e.setAttribute('in-use', false));
+
+						throw new Error(`Ombi error [${ status }]`);
+					}
+				})
+				.then(passed => {
+					if(!passed) return;
+
+					/* Charge Movies */
+					fetch(`${ url }/api/v1/Request/movie?apikey=${ headers.apikey }`)
+						.then(r => r.json())
+						.then(json => {
+							json.map(item => {
+								__caught.imdb.push(item.imdbId);
+								__caught.tmdb.push(item.theMovieDbId);
+							});
+						})
+						.catch(error => { throw error });
+
+					/* Charge TV Shows */
+					fetch(`${ url }/api/v1/Request/tv?apikey=${ headers.apikey }`)
 						.then(r => r.json())
 						.then(json => {
 							json.map(item => {
@@ -821,29 +849,7 @@ function performOmbiTest({ refreshing = false, event }) {
 								__caught.tvdb.push(item.tvDbId);
 							});
 						})
-						.catch(error => { LoadingAnimation(); new Notification('error', error); teststatus.innerHTML = MARKERS.no });
-
-					fetch(`${ url }/api/v1/Status`, headers)
-						.then( response => response.text() )
-						.then( status => {
-							LoadingAnimation();
-							if (!status || !status.length) throw new Error('Unable to communicate with Ombi');
-
-							if ((status = +status) >= 200 && status < 400) {
-								teststatus.innerHTML = MARKERS.yes;
-								enabled.checked = teststatus.classList = true;
-								enabled.parentElement.removeAttribute('disabled');
-								inusestatus.map(e => e.setAttribute('in-use', true));
-							} else {
-								teststatus.innerHTML = MARKERS.no;
-								enabled.checked = teststatus.classList = false;
-								enabled.parentElement.setAttribute('disabled');
-								inusestatus.map(e => e.setAttribute('in-use', false));
-
-								throw new Error(`Ombi error [${ status }]`);
-							}
-						})
-						.catch(error => { LoadingAnimation(); new Notification('error', error); teststatus.innerHTML = MARKERS.no });
+						.catch(error => { throw error });
 				})
 				.catch(error => { LoadingAnimation(); new Notification('error', error); teststatus.innerHTML = MARKERS.no });
 		} catch(error) {
@@ -876,7 +882,7 @@ function getWatcher(options, api = "getconfig") {
 	if(options.watcherBasicAuthUsername)
 		headers.Authorization = `Basic ${ btoa(`${ options.watcherBasicAuthUsername }:${ options.watcherBasicAuthPassword }`) }`;
 
-	return fetch(`${ options.watcherURLRoot }/api/?apikey=${ options.watcherToken }&mode=${ api }&quality=${ options.watcherQualityProfileId || 'Default' }`, { headers })
+	return fetch(`${ options.watcherURLRoot }/api?apikey=${ options.watcherToken }&mode=${ api }&quality=${ options.watcherQualityProfileId || 'Default' }`, { headers })
 		.then(response => response.json())
 		.catch(error => {
 			return new Notification('error', 'Watcher failed to connect with error:' + String(error)),
@@ -903,14 +909,6 @@ function performWatcherTest({ QualityProfileID = 'Default', refreshing = false, 
 
 	let Get = () => {
 		try {
-			getWatcher(options, 'liststatus').then(list => {
-				list.map(item => {
-					__caught.imdb.push(item.movies.imdbid);
-					__caught.tmdb.push(item.movies.tmdbid);
-				});
-			})
-			.catch(error => { LoadingAnimation(); new Notification('error', error); teststatus.innerHTML = MARKERS.no });
-
 			getWatcher(options, 'getconfig').then(configuration => {
 				LoadingAnimation();
 				if(!configuration || !configuration.response) return new Notification('error', 'Failed to get Watcher configuration');
@@ -955,6 +953,20 @@ function performWatcherTest({ QualityProfileID = 'Default', refreshing = false, 
 				storagepath.value = path || '[Default Location]';
 
 				$('[data-option="watcherStoragePaths"i]').value = JSON.stringify(path || { path: '[Default Location]', id: 0 });
+
+				return true;
+			})
+			.then(passed => {
+				if(!passed) return;
+
+				/* Charge TV Shows */
+				getWatcher(options, 'liststatus').then(list => {
+					list.map(item => {
+						__caught.imdb.push(item.movies.imdbid);
+						__caught.tmdb.push(item.movies.tmdbid);
+					});
+				})
+				.catch(error => { throw error });
 			})
 			.catch(error => { LoadingAnimation(); new Notification('error', error); teststatus.innerHTML = MARKERS.no });
 		} catch(error) {
@@ -1013,14 +1025,6 @@ function performRadarrTest({ QualityProfileID, StoragePath, refreshing = false, 
 
 	let Get = () => {
 		try {
-			getRadarr(options, 'movie').then(movies => {
-				movies.map(movie => {
-					__caught.imdb.push(movie.imdbId);
-					__caught.tmdb.push(movie.tmdbId);
-				});
-			})
-			.catch(error => { LoadingAnimation(); new Notification('error', error); teststatus.innerHTML = MARKERS.no });
-
 			getRadarr(options, 'profile').then(profiles => {
 				LoadingAnimation();
 				if(!profiles) return new Notification('error', 'Failed to get Radarr configuration');
@@ -1048,6 +1052,20 @@ function performRadarrTest({ QualityProfileID, StoragePath, refreshing = false, 
 				// Because the <select> was reset, the original value is lost.
 				if(QualityProfileID)
 					$('[data-option="__radarrQuality"i]').value = quality.value = QualityProfileID;
+
+				return true;
+			})
+			.then(passed => {
+				if(!passed) return;
+
+				/* Charge Movies */
+				getRadarr(options, 'movie').then(movies => {
+					movies.map(movie => {
+						__caught.imdb.push(movie.imdbId);
+						__caught.tmdb.push(movie.tmdbId);
+					});
+				})
+				.catch(error => { throw error });
 			})
 			.catch(error => { LoadingAnimation(); new Notification('error', error); teststatus.innerHTML = MARKERS.no });
 
@@ -1137,13 +1155,6 @@ function performSonarrTest({ QualityProfileID, StoragePath, refreshing = false, 
 
 	let Get = () => {
 		try {
-			getSonarr(options, 'series').then(shows => {
-				shows.map(show => {
-					__caught.tvdb.push(show.tvdbId);
-				});
-			})
-			.catch(error => { LoadingAnimation(); new Notification('error', error); teststatus.innerHTML = MARKERS.no });
-
 			getSonarr(options, 'profile').then(profiles => {
 				LoadingAnimation();
 				if(!profiles) return new Notification('error', 'Failed to get Sonarr configuration');
@@ -1171,6 +1182,19 @@ function performSonarrTest({ QualityProfileID, StoragePath, refreshing = false, 
 				// Because the <select> was reset, the original value is lost.
 				if(QualityProfileID)
 					$('[data-option="__sonarrQuality"i]').value = quality.value = QualityProfileID;
+
+				return true;
+			})
+			.then(passed => {
+				if(!passed) return;
+
+				/* Charge TV Shows */
+				getSonarr(options, 'series').then(shows => {
+					shows.map(show => {
+						__caught.tvdb.push(show.tvdbId);
+					});
+				})
+				.catch(error => { throw error });
 			})
 			.catch(error => { LoadingAnimation(); new Notification('error', error); teststatus.innerHTML = MARKERS.no });
 
@@ -1220,7 +1244,7 @@ function performSonarrTest({ QualityProfileID, StoragePath, refreshing = false, 
 		);
 }
 
-function getMedusa(options, api = 'config') {
+function getMedusa(options, api = "config") {
 	if(!options.medusaToken)
 		return new Notification('error', 'Invalid Medusa token');
 
@@ -1260,14 +1284,6 @@ function performMedusaTest({ QualityProfileID, StoragePath, refreshing = false, 
 
 	let Get = () => {
 		try {
-			getMedusa(options, 'series').then(shows => {
-				shows.map(show => {
-					__caught.imdb.push(show.id.imdb)
-					__caught.tvdb.push(show.id.tvdb);
-				});
-			})
-			.catch(error => { LoadingAnimation(); new Notification('error', error); teststatus.innerHTML = MARKERS.no });
-
 			getMedusa(options, 'config').then(configuration => {
 				LoadingAnimation();
 				if(!configuration) return new Notification('error', 'Failed to get Medusa configuration');
@@ -1299,6 +1315,20 @@ function performMedusaTest({ QualityProfileID, StoragePath, refreshing = false, 
 				// Because the <select> was reset, the original value is lost.
 				if(QualityProfileID)
 					$('[data-option="__medusaQuality"i]').value = quality.value = QualityProfileID;
+
+				return true;
+			})
+			.then(passed => {
+				if(!passed) return;
+
+				/* Charge TV Shows */
+				getMedusa(options, 'series').then(shows => {
+					shows.map(show => {
+						__caught.imdb.push(show.id.imdb)
+						__caught.tvdb.push(show.id.tvdb);
+					});
+				})
+				.catch(error => { throw error });
 			})
 			.catch(error => { LoadingAnimation(); new Notification('error', error); teststatus.innerHTML = MARKERS.no });
 
@@ -1340,7 +1370,7 @@ function performMedusaTest({ QualityProfileID, StoragePath, refreshing = false, 
 		);
 }
 
-function getSickBeard(options, api = 'sb') {
+function getSickBeard(options, api = "sb") {
 	if(!options.sickBeardToken)
 		return new Notification('error', 'Invalid Sick Beard token');
 
@@ -1380,20 +1410,6 @@ function performSickBeardTest({ QualityProfileID, StoragePath, refreshing = fals
 
 	let Get = () => {
 		try {
-			getSickBeard(options, 'shows').then(shows => {
-				let _shows = shows.data;
-
-				shows = [];
-
-				for(let _show in _shows)
-					shows.push(_shows[_show]);
-
-				shows.map(show => {
-					__caught.tvdb.push(show.tvdbid);
-				});
-			})
-			.catch(error => { LoadingAnimation(); new Notification('error', error); teststatus.innerHTML = MARKERS.no });
-
 			getSickBeard(options, 'sb.getdefaults').then(configuration => {
 				LoadingAnimation();
 				if(!configuration) return new Notification('error', 'Failed to get Sick Beard configuration');
@@ -1426,6 +1442,26 @@ function performSickBeardTest({ QualityProfileID, StoragePath, refreshing = fals
 				// Because the <select> was reset, the original value is lost.
 				if(QualityProfileID)
 					$('[data-option="__sickBeardQuality"i]').value = quality.value = QualityProfileID;
+
+				return true;
+			})
+			.then(passed => {
+				if(!passed) return;
+
+				/* Charge TV Shows */
+				getSickBeard(options, 'shows').then(shows => {
+					let _shows = shows.data;
+
+					shows = [];
+
+					for(let _show in _shows)
+						shows.push(_shows[_show]);
+
+					shows.map(show => {
+						__caught.tvdb.push(show.tvdbid);
+					});
+				})
+				.catch(error => { throw error });
 			})
 			.catch(error => { LoadingAnimation(); new Notification('error', error); teststatus.innerHTML = MARKERS.no });
 
@@ -1469,9 +1505,82 @@ function performSickBeardTest({ QualityProfileID, StoragePath, refreshing = fals
 		);
 }
 
-function enableCouchPotato() {
-	$('#enable-couchpotato', true).forEach(e => e.setAttribute('disabled', ''));
-	$('#using-couchpotato', true).forEach(e => e.parentElement.removeAttribute('disabled'));
+function getCouchPotato(options, api = "updater.info") {
+	if(!options.couchpotatoToken)
+		return new Notification('error', 'Invalid CouchPotato token');
+
+	let headers = {
+		'Accept': 'application/json',
+		'Content-Type': 'application/json',
+		'X-API-Key': options.couchpotatoToken, // not used, but just in case
+	};
+
+	if(options.couchpotatoBasicAuthUsername)
+		headers.Authorization = `Basic ${ btoa(`${ options.couchpotatoBasicAuthUsername }:${ options.couchpotatoBasicAuthPassword }`) }`;
+
+	return fetch(`${ options.couchpotatoURLRoot }/api/${ options.couchpotatoToken }/${ api }`)
+		.then(response => response.json())
+		.catch(error => {
+			return new Notification('error', 'CouchPotato failed to connect with error:' + String(error)),
+				[];
+		});
+}
+
+function performCouchPotatoTest({ refreshing = false, event }) {
+	let options = getOptionValues(),
+		teststatus = $('#couchpotato_test_status'),
+		path = $('[data-option="couchpotatoURLRoot"]'),
+		url,
+		enabled = refreshing? $('#using-couchpotato'): $$('#using-couchpotato'),
+		inusestatus = [...$('[using="couchpotato"]', true)];
+
+	teststatus.innerHTML = MARKERS.maybe;
+	options.couchpotatoURLRoot = url = path.value = options.couchpotatoURLRoot.replace(/^(\:\d+)/, 'localhost$1').replace(/^(?!^http(s)?:)/, 'http$1://').replace(/\/+$/, '');
+	inusestatus.map(e => e.setAttribute('in-use', false));
+	LoadingAnimation(true);
+
+	let Get = () => {
+		try {
+			getCouchPotato(options, 'updater.info').then(configuration => {
+				LoadingAnimation();
+				if(!configuration) return new Notification('error', 'Failed to get CouchPotato configuration');
+
+				enabled.parentElement.removeAttribute('disabled');
+
+				teststatus.innerHTML = MARKERS[+!(teststatus.classList = enabled.checked = !!configuration)];
+				inusestatus.map(e => e.setAttribute('in-use', enabled.checked));
+
+				return true;
+			})
+			.then(passed => {
+				if(!passed) return;
+
+				/* Charge Movies */
+				getCouchPotato(options, 'media.list?type=movie&status=active').then(movies => {
+					movies = movies.movies;
+
+					movies.map(movie => {
+						__caught.imdb.push(movie.info.imdb);
+						__caught.tmdb.push(movie.info.tmdb_id);
+					});
+				})
+				.catch(error => { throw error });
+			})
+			.catch(error => { LoadingAnimation(); new Notification('error', error); teststatus.innerHTML = MARKERS.no });
+		} catch(error) {
+			LoadingAnimation();
+			new Notification('error', error);
+		}
+	};
+
+	if(refreshing)
+		Get();
+	else if(url && url.length)
+		requestURLPermissions(url + '/*', allowed =>
+			(allowed)?
+				Get():
+			new Notification('error', 'The user refused permission to access Sick Beard')
+		);
 }
 
 function HandleProxySettings(data) {
@@ -1628,6 +1737,10 @@ function saveOptions() {
 		.replace(/^(?!^http(s)?:\/\/)(.+)/, 'http$1://$2');
 
 	options.sickBeardURLRoot = (options.sickBeardURLRoot || "")
+		.replace(/([^\\\/])$/, endingSlash)
+		.replace(/^(?!^http(s)?:\/\/)(.+)/, 'http$1://$2');
+
+	options.couchpotatoURLRoot = (options.couchpotatoURLRoot || "")
 		.replace(/([^\\\/])$/, endingSlash)
 		.replace(/^(?!^http(s)?:\/\/)(.+)/, 'http$1://$2');
 
@@ -1958,7 +2071,7 @@ function restoreOptions(OPTIONS) {
 		if(items.sickBeardURLRoot)
 			performSickBeardTest({ QualityProfileID: items.sickBeardQualityProfileId, StoragePath: items.sickBeardStoragePath, refreshing });
 		if(items.couchpotatoURLRoot)
-			enableCouchPotato();
+			performCouchPotatoTest({ refreshing });
 
 		let __domains = (sites => {
 			let array = [];
@@ -2324,7 +2437,7 @@ $('#sonarr_test', true).forEach(element => addListener(element, 'mouseup', event
 $('#medusa_test', true).forEach(element => addListener(element, 'mouseup', event => performMedusaTest({ event })));
 $('#ombi_test', true).forEach(element => addListener(element, 'mouseup', event => performOmbiTest({ event })));
 $('#sickBeard_test', true).forEach(element => addListener(element, 'mouseup', event => performSickBeardTest({ event })));
-$('#enable-couchpotato', true).forEach(element => addListener(element, 'mouseup', event => enableCouchPotato({ event })));
+$('#couchpotato_test', true).forEach(element => addListener(element, 'mouseup', event => performCouchPotatoTest({ event })));
 
 /* INPUT | Get the JSON data */
 addListener($('#json_get'), 'mouseup', event => {

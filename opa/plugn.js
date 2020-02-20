@@ -165,33 +165,45 @@ function getConfiguration() {
 				};
 
 			if(o.usingOmbi && o.ombiURLRoot && o.ombiToken) {
-				o.ombiURL = o.ombiURLRoot;
+				o.ombiURL = o.ombiURLRoot.replace(/\/+$/, '');
 			} else {
 				delete o.ombiURL; // prevent variable ghosting
 			}
 
 			if(o.usingCouchPotato && o.couchpotatoURLRoot && o.couchpotatoToken) {
-				o.couchpotatoURL = `${ items.couchpotatoURLRoot }/api/${encodeURIComponent(o.couchpotatoToken)}`;
+				o.couchpotatoURL = `${ o.couchpotatoURLRoot.replace(/\/+$/, '') }/api/${encodeURIComponent(o.couchpotatoToken)}`;
 			} else {
 				delete o.couchpotatoURL; // prevent variable ghosting
 			}
 
 			if(o.usingWatcher && o.watcherURLRoot && o.watcherToken) {
-				o.watcherURL = o.watcherURLRoot;
+				o.watcherURL = o.watcherURLRoot.replace(/\/+$/, '');
 			} else {
 				delete o.watcherURL; // prevent variable ghosting
 			}
 
 			if(o.usingRadarr && o.radarrURLRoot && o.radarrToken) {
-				o.radarrURL = o.radarrURLRoot;
+				o.radarrURL = o.radarrURLRoot.replace(/\/+$/, '');
 			} else {
 				delete o.radarrURL; // prevent variable ghosting
 			}
 
 			if(o.usingSonarr && o.sonarrURLRoot && o.sonarrToken) {
-				o.sonarrURL = o.sonarrURLRoot;
+				o.sonarrURL = o.sonarrURLRoot.replace(/\/+$/, '');
 			} else {
 				delete o.sonarrURL; // prevent variable ghosting
+			}
+
+			if(o.usingMedusa && o.medusaURLRoot && o.medusaToken) {
+				o.medusaURL = o.medusaURLRoot.replace(/\/+$/, '');
+			} else {
+				delete o.medusaURL; // prevent variable ghosting
+			}
+
+			if(o.usingSickBeard && o.sickBeardURLRoot && o.sickBeardToken) {
+				o.sickBeardURL = o.sickBeardURLRoot.replace(/\/+$/, '');
+			} else {
+				delete o.sickBeardURL; // prevent variable ghosting
 			}
 
 			resolve(o);
@@ -503,7 +515,7 @@ let tabchange = async tabs => {
 	`https://webtoplex.github.io/web/${ type }s/${ js }.js`;
 
 	let style = (PLUGN_DEVELOPER)?
-		chrome.runtime.getURL(`${ js }.css`):
+		chrome.runtime.getURL(`${ js }/index.css`):
 	`https://webtoplex.github.io/web/styles/${ js }.css`;
 
 	await fetch(file, { mode: 'cors' })
@@ -568,7 +580,7 @@ chrome.runtime.onMessage.addListener(processMessage = async(request = {}, sender
 		`https://webtoplex.github.io/web/${ _type }s/${ options[_type] }.js`;
 
 		let style = (PLUGN_DEVELOPER)?
-			chrome.runtime.getURL(`${ options[_type] }.css`):
+			chrome.runtime.getURL(`${ options[_type] }/index.css`):
 		`https://webtoplex.github.io/web/styles/${ options[_type] }.css`;
 
 		let { authorized, ...A } = await GetAuthorization(options[_type]);
@@ -641,7 +653,8 @@ chrome.runtime.onMessage.addListener(processMessage = async(request = {}, sender
 					break;
 
 				case 'SEARCH_PLEX':
-				case 'VIEW_COUCHPOTATO':
+				case 'CHARGE_COUCHPOTATO':
+				case 'QUERY_COUCHPOTATO':
 				case 'PUSH_COUCHPOTATO':
 				case 'PUSH_RADARR':
 				case 'PUSH_SONARR':

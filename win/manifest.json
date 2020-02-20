@@ -4,7 +4,7 @@
 	"homepage_url": "https://webtoplex.github.io/",
 
 	"manifest_version": 2,
-	"version": "4.1.2.2",
+	"version": "4.1.2.3",
 
 	"icons": {
 		"16":  "img/16.png",

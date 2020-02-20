@@ -16,7 +16,7 @@ Optionally, you can configure NZB Manager (see support table) in the extension's
 | Manager                                         | Movie Support | TV Show Support | Searchable
 | ----------------------------------------------- |:-------------:|:---------------:|:----------:
 | [Watcher 3](https://nosmokingbandit.github.io/) | ✔             | ❌             | ❌
-| [CouchPotato](https://couchpota.to/)            | ✔             | ✔              | ❌
+| [CouchPotato](https://couchpota.to/)            | ✔             | ❌              | ❌
 | [Radarr](https://radarr.video/)                 | ✔             | ❌             | ✔
 | [Sonarr](https://sonarr.tv/)                    | ❌            | ✔              | ✔
 | [Ombi](https://ombi.io/)                        | ❔             | ❔              | ✔

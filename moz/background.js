@@ -181,33 +181,59 @@ UpdateConfiguration();
 // these requests in a background page instead of the content script?
 // This is because Movieo is served over HTTPS, so it won't accept requests to
 // HTTP servers. Unfortunately, many people use CouchPotato over HTTP.
-function Open_CouchPotato(request, sendResponse) {
+function Query_CouchPotato(request, sendResponse) {
 	fetch(`${ request.url }?id=${ request.imdbId }`, {
 		headers: new Headers(request.basicAuth),
 		mode: cors(request.url)
 	})
 	.then(response => response.json())
 	.then(json => {
+		let { success } = json;
+
 		sendResponse({ success, status: (success? json.media.status: null) });
 	})
 	.catch(error => {
-		sendResponse({ error: String(error), location: '@0B: Open_CouchPotato' });
+		sendResponse({ error: String(error), location: '@0B: Query_CouchPotato' });
 	});
 }
 
 function Push_CouchPotato(request, sendResponse) {
-	fetch(`${ request.url }?identifier=${ request.imdbId }`, {
+	let headers = {
+			'Content-Type': 'application/json',
+			'X-Api-Key': request.token,
+			...(new Headers(request.basicAuth))
+		},
+		query = `identifier=${ request.imdbId }`,
+		debug = { headers, query, request };
+
+	fetch(debug.url = `${ request.url }?${ query }`, {
+		method: 'POST',
+		mode: cors(request.url),
+		// body: JSON.stringify(body),
+		headers,
+	})
+		.then(response => response.json())
+		.catch(error => sendResponse({ error: 'Movie not found', location: '@0B: Push_CouchPotato => fetch.then.catch', silent: true }))
+		.then(response => {
+			sendResponse({ success: response.success });
+		})
+		.catch(error => {
+			sendResponse({
+				error: String(error),
+				location: '@0B: Push_CouchPotato => fetch("${ request.url }", { headers }).catch(error => { sendResponse })',
+				debug
+			});
+		});
+}
+
+function Charge_CouchPotato(request, sendResponse) {
+	fetch(request.url, {
 		headers: new Headers(request.basicAuth),
 		mode: cors(request.url)
 	})
 	.then(response => response.json())
-	.catch(error => sendResponse({ error: 'Item not found', location: '@0B: Push_CouchPotato => fetch.then.catch', silent: true }))
-	.then(response => {
-		sendResponse({ success: response.success });
-	})
-	.catch(error => {
-		sendResponse({ error: String(error) , location: '@0B: Push_CouchPotato'});
-	});
+	.then(json => sendResponse(json))
+	.catch(error => sendResponse({ error: String(error), location: '@0B: Charge_CouchPotato' }));
 }
 
 /** Watcher - Movies **/
@@ -303,7 +329,7 @@ function Push_Radarr(request, sendResponse) {
 		.then(body => {
 			return fetch(`${ request.url }?apikey=${ request.token }`, debug.requestHeaders = {
 				method: 'POST',
-				mode: cors(request.url),
+				// mode: cors(request.url),
 				body: JSON.stringify(body),
 				headers
 			});
@@ -383,7 +409,7 @@ function Push_Sonarr(request, sendResponse) {
 		.then(body => {
 			return fetch(`${ request.url }?apikey=${ request.token }`, debug.requestHeaders = {
 				method: 'POST',
-				mode: cors(request.url),
+				// mode: cors(request.url),
 				body: JSON.stringify(body),
 				headers
 			});
@@ -455,7 +481,7 @@ function Push_Medusa(request, sendResponse) {
 		.then(body => {
 			return fetch(`${ request.url }`, debug.requestHeaders = {
 				method: 'POST',
-				mode: cors(request.url),
+				// mode: cors(request.url),
 				body: JSON.stringify({ id: { tvdb: id } }),
 				headers
 			});
@@ -529,7 +555,7 @@ function addMedusa(request, sendResponse) {
 		.then(body => {
 			return fetch(`${ request.url }`, debug.requestHeaders = {
 				method: 'POST',
-				mode: cors(request.url),
+				// mode: cors(request.url),
 				body: JSON.stringify({ id: { tvdb: id } }),
 				headers
 			});
@@ -611,7 +637,7 @@ function Push_SickBeard(request, sendResponse) {
 
 			return fetch(`${ request.url }?cmd=show.${ request.exists? 'addexisting': 'addnew' }&${ body }`, debug.requestHeaders = {
 				method: 'POST',
-				mode: cors(request.url),
+				// mode: cors(request.url),
 				// body: JSON.stringify(body),
 				headers
 			});
@@ -659,8 +685,8 @@ function Push_Ombi(request, sendResponse) {
 		},
 		type = request.contentType,
 		id = (type == 'movie'? request.tmdbId: request.tvdbId),
-		body = ({ [type == 'movie'? 'theMovieDbId': 'theTvDbId']: id }),
-		debug = { headers, request };
+		body = ({ [type == 'movie'? 'theMovieDbId': 'tvDbId']: id, requestAll: true, lastestSeason: true, firstSeason: true }),
+		debug = { headers, body, request };
 			// setup stack trace for debugging
 
 	if(request.contentType == 'movie' && (id || null) === null)
@@ -670,11 +696,11 @@ function Push_Ombi(request, sendResponse) {
 
 	fetch(debug.url = request.url, {
 			method: 'POST',
-			mode: cors(request.url),
+			// mode: cors(request.url),
 			body: JSON.stringify(body),
 			headers
 		})
-		.catch(error => sendResponse({ error: `${ type } not found`, location: '@0B: Push_Ombi => fetch.then.catch', silent: true }))
+		.catch(error => sendResponse({ error: `${ type } not found`, location: '@0B: Push_Ombi => fetch.then.catch', debug, silent: true }))
 		.then(response => response.text())
 		.then(data => {
 			debug.data =
@@ -859,7 +885,7 @@ browser.contextMenus.onClicked.addListener(item => {
 			url = external.SEARCH_PROVIDER == 'VO'?
 				`google.com/search?q=${ p(tl) }+site:vumoo.to`:
 			external.SEARCH_PROVIDER == 'GX'?
-				`gostream.site/?s=${ p(tl) }`:
+				`gostream.site?s=${ p(tl) }`:
 			`google.com/search?q="${ p(tl, ' ') } ${ yr }"+${ pv }db`;
 			break;
 		case 'dl':
@@ -911,8 +937,12 @@ browser.runtime.onMessage.addListener((request = {}, sender, callback) => {
 					Search_Plex(request, callback);
 					break;
 
-				case 'VIEW_COUCHPOTATO':
-					Open_CouchPotato(request, callback);
+				case 'CHARGE_COUCHPOTATO':
+					Charge_CouchPotato(request, callback);
+					break;
+
+				case 'QUERY_COUCHPOTATO':
+					Query_CouchPotato(request, callback);
 					break;
 
 				case 'PUSH_COUCHPOTATO':
