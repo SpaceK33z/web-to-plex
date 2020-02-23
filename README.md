@@ -153,6 +153,10 @@ The sites used as search engines (IMDb, TMDb, and TVDb) will automatically creat
     beta-branch:    83438
 -->
 
+[![Percentage of issues still open](http://isitmaintained.com/badge/open/spacek33z/web-to-plex.svg)](http://isitmaintained.com/project/spacek33z/web-to-plex "Percentage of issues still open")
+
+[![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/spacek33z/web-to-plex.svg)](http://isitmaintained.com/project/spacek33z/web-to-plex "Average time to resolve an issue")
+
 If you have any problem with the extension, please don't hesitate to [submit an issue](https://github.com/SpaceK33z/web-to-plex/issues/new/choose).
 
 All contributions are welcome.
