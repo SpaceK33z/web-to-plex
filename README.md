@@ -16,10 +16,10 @@ Optionally, you can configure NZB Manager (see support table) in the extension's
 | Manager                                         | Movie Support | TV Show Support | Searchable
 | ----------------------------------------------- |:-------------:|:---------------:|:----------:
 | [Watcher 3](https://nosmokingbandit.github.io/) | ✔             | ❌             | ❌
-| [CouchPotato](https://couchpota.to/)            | ✔             | ❌              | ❌
+| [CouchPotato](https://couchpota.to/)            | ✔             | ❌             | ❌
 | [Radarr](https://radarr.video/)                 | ✔             | ❌             | ✔
 | [Sonarr](https://sonarr.tv/)                    | ❌            | ✔              | ✔
-| [Ombi](https://ombi.io/)                        | ❔             | ❔              | ✔
+| [Ombi](https://ombi.io/)                        | ❔             | ❔             | ✔
 | [Medusa](https://pymedusa.com/)                 | ❌            | ✔              | ✔
 | [Sick Beard](https://sickbeard.com/)            | ❌            | ✔              | ❌
 
@@ -146,7 +146,7 @@ The sites used as search engines (IMDb, TMDb, and TVDb) will automatically creat
 
 ## Issues & Contributions
 
-[![DeepScan grade](https://deepscan.io/api/teams/5912/projects/7762/branches/83413/badge/grade.svg)](https://deepscan.io/dashboard#view=project&tid=5912&pid=7762&bid=83413)
+[![DeepScan grade](https://deepscan.io/api/teams/5912/projects/7762/branches/83438/badge/grade.svg)](https://deepscan.io/dashboard#view=project&tid=5912&pid=7762&bid=83438)
 
 <!--
     master:         83413
