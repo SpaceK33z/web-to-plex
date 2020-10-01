@@ -33,15 +33,15 @@ Optionally, you can configure NZB Manager (see support table) in the extension's
 
 ## Features
 ### Easy login
-You can log into Plex using either an access token, your credentials, or Ombi (if setup).
+You can login into Plex using either an access token, your credentials, or Ombi (if setup).
 
 ### Download (![download icon](https://github.com/SpaceK33z/web-to-plex/blob/master/src/img/16.png))
-On certain sites (denoted with the "download" icon), the user can choose to save/engage media directly, instead of waiting for their NZB manager to find the item.
+On certain sites (denoted with the "download" icon), the user can choose to save/engage media directly, instead of waiting for their NZB manager to find the items.
 
 ### Plex It! (![plex it icon](https://github.com/SpaceK33z/web-to-plex/blob/master/src/img/plexit.16.png))
 Click the icon to open **Plex It!** (left sidebar), click it again to add the current item(s) to your list.
 
-It's primary purpose is to provide a watchlist service on sites that don't support watchlists.
+It is primary purpose is to provide a watchlist service on sites that don't support watchlists.
 
 ### Hide Web to Plex (![hide icon](https://github.com/SpaceK33z/web-to-plex/blob/master/src/img/hide.16.png))
 Use this to hide the **Web to Plex** button. It changes the button's opacity to 10% to make it almost invisible so that it isn't as distracting on sites like Netflix.
@@ -53,7 +53,7 @@ Use this to reload **Web to Plex** on the current page. This can sometimes fix l
 This is a *moderately advanced* setting, but is very useful to know. If you know your Plex server's URL (e.g. `https://localhost:32400`), then you can specify this and avoid bandwidth usage, as the extension will communicate with Plex on your device instead of `https://app.plex.tv/`.
 
 ### Find this | Right Click
-If you aren't satisfied with a found item, or it is incorrect, you can right click the page and use the **Web to Plex | Find "XYZ"** feature to search for the item.
+If you are not satisfied with a found item, or it is incorrect, you can right click the page and use the **Web to Plex | Find "XYZ"** feature to search for the item.
 
 The sites used as search engines (IMDb, TMDb, and TVDb) will automatically create a cached version of the information (for "Local Search" results).
 
@@ -160,7 +160,7 @@ The sites used as search engines (IMDb, TMDb, and TVDb) will automatically creat
 If you have any problem with the extension, please don't hesitate to [submit an issue](https://github.com/SpaceK33z/web-to-plex/issues/new/choose).
 
 All contributions are welcome.
-
+Thank You
 ----
 
 *Google Chrome is a trademark of Google Inc. Use of this trademark is subject to Google Permissions.*
